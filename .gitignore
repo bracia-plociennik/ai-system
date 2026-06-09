@@ -1,0 +1,13 @@
+/ai-system-workspace/
+/ai-workflow-workspace/
+/workspace/
+/.DS_Store
+**/.DS_Store
+*.log
+*.tmp
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx

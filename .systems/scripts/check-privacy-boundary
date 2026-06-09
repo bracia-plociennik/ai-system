@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+fail=0
+
+while IFS= read -r -d '' file; do
+  base="$(basename "$file")"
+  case "$base" in
+    .env|.env.*|*.pem|*.key|*.p12|*.pfx)
+      echo "Forbidden sensitive file in system area: ${file#"$repo_root/"}"
+      fail=1
+      ;;
+  esac
+done < <(find "$repo_root/.systems" -type f -print0)
+
+if find "$repo_root/.systems" -path '*/real-client/*' -o -path '*/customer-data/*' | grep -q .; then
+  echo "Forbidden customer-data path under .systems"
+  fail=1
+fi
+
+exit "$fail"

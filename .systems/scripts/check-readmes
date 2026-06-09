@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+fail=0
+
+while IFS= read -r -d '' dir; do
+  if [[ ! -f "$dir/README.md" ]]; then
+    echo "Missing README.md in ${dir#"$repo_root/"}"
+    fail=1
+  fi
+done < <(
+  find "$repo_root" \
+    -path "$repo_root/.git" -prune -o \
+    -path "$repo_root/ai-system-workspace" -prune -o \
+    -path "$repo_root/ai-workflow-workspace" -prune -o \
+    -type d -print0
+)
+
+exit "$fail"
