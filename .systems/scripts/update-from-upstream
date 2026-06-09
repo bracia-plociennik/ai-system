@@ -1,0 +1,199 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+dry_run=0
+skip_validation=0
+remote_arg=""
+branch_arg=""
+
+usage() {
+  cat <<'EOF'
+Usage: .systems/scripts/update-from-upstream [options]
+
+Options:
+  --dry-run              classify paths and print planned update without fetching or merging
+  --remote <name>        remote to fetch from (default: upstream tracking remote or origin)
+  --branch <name>        branch to merge (default: upstream tracking branch or main)
+  --skip-validation      skip post-update validators; unsafe for final PASS
+  -h, --help             show this help
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry-run)
+      dry_run=1
+      shift
+      ;;
+    --remote)
+      remote_arg="${2:-}"
+      [[ -n "$remote_arg" ]] || { echo "Missing value for --remote"; exit 2; }
+      shift 2
+      ;;
+    --branch)
+      branch_arg="${2:-}"
+      [[ -n "$branch_arg" ]] || { echo "Missing value for --branch"; exit 2; }
+      shift 2
+      ;;
+    --skip-validation)
+      skip_validation=1
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1"
+      usage
+      exit 2
+      ;;
+  esac
+done
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+ai_system_home="$(cd "$script_dir/../.." && pwd -P)"
+cd "$ai_system_home"
+
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "STOP: AI_SYSTEM_HOME is not a git worktree: $ai_system_home"
+  exit 1
+fi
+
+repo_root="$(cd "$(git rev-parse --show-toplevel)" && pwd -P)"
+if [[ "$repo_root" != "$ai_system_home" ]]; then
+  echo "STOP: update-from-upstream must run from the ai-system repository root."
+  echo "Expected AI_SYSTEM_HOME: $ai_system_home"
+  echo "Git root: $repo_root"
+  exit 1
+fi
+
+remote="$remote_arg"
+branch="$branch_arg"
+if [[ -z "$remote" || -z "$branch" ]]; then
+  upstream="$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || true)"
+  if [[ -n "$upstream" && "$upstream" == */* ]]; then
+    [[ -n "$remote" ]] || remote="${upstream%%/*}"
+    [[ -n "$branch" ]] || branch="${upstream#*/}"
+  fi
+fi
+remote="${remote:-origin}"
+branch="${branch:-main}"
+target_ref="$remote/$branch"
+
+normalize_path() {
+  local path="$1"
+
+  if [[ "$path" == /* ]]; then
+    echo "$path"
+  else
+    echo "$ai_system_home/$path"
+  fi
+}
+
+workspace_home="${AI_SYSTEM_WORKSPACE_HOME:-}"
+if [[ -z "$workspace_home" ]]; then
+  workspace_home="$ai_system_home/ai-system-workspace"
+else
+  workspace_home="$(normalize_path "$workspace_home")"
+fi
+
+protected_dirty=()
+system_dirty=()
+
+is_protected_path() {
+  local path="${1#./}"
+
+  case "$path" in
+    ai-system-workspace|ai-system-workspace/*)
+      return 0
+      ;;
+    workspace|workspace/*)
+      return 0
+      ;;
+    ai-workflow|ai-workflow/*)
+      return 0
+      ;;
+    ai-workflow-workspace|ai-workflow-workspace/*)
+      return 0
+      ;;
+  esac
+
+  if [[ "$workspace_home" == "$ai_system_home/"* ]]; then
+    local workspace_relative="${workspace_home#$ai_system_home/}"
+    case "$path" in
+      "$workspace_relative"|"$workspace_relative"/*)
+        return 0
+        ;;
+    esac
+  fi
+
+  return 1
+}
+
+classify_status_path() {
+  local status="$1"
+  local path="$2"
+
+  [[ -n "$path" ]] || return 0
+
+  if is_protected_path "$path"; then
+    protected_dirty+=("$status $path")
+  else
+    system_dirty+=("$status $path")
+  fi
+}
+
+if [[ -e "$workspace_home" ]]; then
+  echo "AI_SYSTEM_WORKSPACE_HOME: $workspace_home"
+  echo "Protected runtime workspace will not be touched by this updater."
+else
+  echo "AI_SYSTEM_WORKSPACE_HOME: $workspace_home (not found)"
+  echo "Continuing because update-from-upstream only updates system-owned repository files."
+fi
+
+while IFS= read -r -d '' entry; do
+  status="${entry:0:2}"
+  path="${entry:3}"
+  classify_status_path "$status" "$path"
+
+  if [[ "$status" == R* || "$status" == C* ]]; then
+    IFS= read -r -d '' old_path || true
+    classify_status_path "$status" "$old_path"
+  fi
+done < <(git status --porcelain -z)
+
+if [[ "${#protected_dirty[@]}" -gt 0 ]]; then
+  echo "Protected local paths detected and excluded from update blockers:"
+  printf ' - %s\n' "${protected_dirty[@]}"
+fi
+
+if [[ "${#system_dirty[@]}" -gt 0 ]]; then
+  echo "STOP: system-owned files are dirty. Commit, stash, or discard these before update-from-upstream:"
+  printf ' - %s\n' "${system_dirty[@]}"
+  exit 1
+fi
+
+current_branch="$(git branch --show-current 2>/dev/null || true)"
+current_branch="${current_branch:-HEAD}"
+
+echo "AI_SYSTEM_HOME: $ai_system_home"
+echo "Current branch: $current_branch"
+echo "Update target: $target_ref"
+echo "Protected runtime workspace: $workspace_home"
+
+if [[ "$dry_run" -eq 1 ]]; then
+  echo "Dry run only. No fetch, merge, or validation was performed."
+  exit 0
+fi
+
+git fetch "$remote" "$branch"
+git merge --ff-only FETCH_HEAD
+
+if [[ "$skip_validation" -eq 1 ]]; then
+  echo "WARNING: validation skipped. This update result is not eligible for final PASS."
+else
+  .systems/scripts/validate-ai-system
+fi
+
+echo "update-from-upstream completed."

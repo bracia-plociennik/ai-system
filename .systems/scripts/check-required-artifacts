@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+fail=0
+
+required=(
+  "AGENTS.md"
+  "HUMANS.md"
+  "README.md"
+  ".systems/ai/core/operating-model.md"
+  ".systems/ai/core/privacy.md"
+  ".systems/ai/core/dump-triage.md"
+  ".systems/ai/core/memory.md"
+  ".systems/ai/core/system-insights.md"
+  ".systems/ai/core/guide.md"
+  ".systems/ai/core/command-routing.md"
+  ".systems/ai/core/response-contract.md"
+  ".systems/ai/core/task-intake.md"
+  ".systems/ai/core/context-as-data.md"
+  ".systems/ai/templates/workspace/memory/workspace-memory.template.md"
+  ".systems/ai/templates/workspace/memory/workspace-memory-entry.template.md"
+  ".systems/ai/templates/workspace/workspace-readme.template.md"
+  ".systems/ai/templates/workspace/core/README.md"
+  ".systems/ai/templates/workspace/core/status.template.md"
+  ".systems/ai/templates/workspace/dump/README.md"
+  ".systems/ai/templates/workspace/clients/README.md"
+  ".systems/ai/templates/workspace/clients/client-memory.template.md"
+  ".systems/ai/templates/workspace/clients/client-memory-entry.template.md"
+  ".systems/ai/templates/workspace/projects/README.md"
+  ".systems/ai/templates/workspace/projects/project-memory.template.md"
+  ".systems/ai/templates/workspace/projects/project-memory-entry.template.md"
+  ".systems/ai/templates/workspace/projects/checkpoint.template.md"
+  ".systems/ai/templates/workspace/projects/distillation.template.md"
+  ".systems/ai/templates/workspace/micro-projects/README.md"
+  ".systems/ai/templates/workspace/humans/README.md"
+  ".systems/ai/templates/workspace/memory/README.md"
+  ".systems/ai/templates/workspace/external-memory/README.md"
+  ".systems/ai/templates/workspace/system-insights/README.md"
+  ".systems/ai/templates/workspace/skills/README.md"
+  ".systems/ai/templates/workspace/archive/README.md"
+  ".systems/scripts/init-workspace"
+  ".systems/scripts/update-from-upstream"
+  ".systems/scripts/check-readmes"
+  ".systems/scripts/check-privacy-boundary"
+)
+
+for path in "${required[@]}"; do
+  if [[ ! -f "$repo_root/$path" ]]; then
+    echo "Missing required artifact: $path"
+    fail=1
+  fi
+done
+
+exit "$fail"

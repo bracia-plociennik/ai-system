@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage: .systems/scripts/init-workspace [options]
+
+Options:
+  --workspace <path>     workspace path (default: ./ai-system-workspace)
+  -h, --help             show this help
+EOF
+}
+
+workspace_arg=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --workspace)
+      workspace_arg="${2:-}"
+      [[ -n "$workspace_arg" ]] || { echo "Missing value for --workspace"; exit 2; }
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1"
+      usage
+      exit 2
+      ;;
+  esac
+done
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+ai_system_home="$(cd "$script_dir/../.." && pwd -P)"
+templates="$ai_system_home/.systems/ai/templates/workspace"
+
+if [[ -n "$workspace_arg" ]]; then
+  workspace_home="$workspace_arg"
+elif [[ -n "${AI_SYSTEM_WORKSPACE_HOME:-}" ]]; then
+  workspace_home="$AI_SYSTEM_WORKSPACE_HOME"
+else
+  workspace_home="$ai_system_home/ai-system-workspace"
+fi
+
+mkdir -p "$workspace_home"
+workspace_home="$(cd "$workspace_home" && pwd -P)"
+
+relative_path() {
+  local path="$1"
+
+  if [[ "$path" == "$ai_system_home/"* ]]; then
+    echo "${path#$ai_system_home/}"
+  else
+    echo "$path"
+  fi
+}
+
+ensure_dir() {
+  local destination="$1"
+
+  if [[ -d "$destination" ]]; then
+    echo "kept existing dir: $(relative_path "$destination")"
+    return 0
+  fi
+
+  mkdir -p "$destination"
+  echo "created dir: $(relative_path "$destination")"
+}
+
+copy_template() {
+  local source="$1"
+  local destination="$2"
+
+  if [[ ! -f "$source" ]]; then
+    echo "Missing template: $(relative_path "$source")"
+    exit 1
+  fi
+
+  if [[ -e "$destination" ]]; then
+    echo "kept existing file: $(relative_path "$destination")"
+    return 0
+  fi
+
+  mkdir -p "$(dirname "$destination")"
+  cp "$source" "$destination"
+  echo "created file: $(relative_path "$destination")"
+}
+
+copy_template_with_date() {
+  local source="$1"
+  local destination="$2"
+  local today
+
+  if [[ ! -f "$source" ]]; then
+    echo "Missing template: $(relative_path "$source")"
+    exit 1
+  fi
+
+  if [[ -e "$destination" ]]; then
+    echo "kept existing file: $(relative_path "$destination")"
+    return 0
+  fi
+
+  today="$(date +%F)"
+  mkdir -p "$(dirname "$destination")"
+  sed "s/<YYYY-MM-DD>/$today/g" "$source" > "$destination"
+  echo "created file: $(relative_path "$destination")"
+}
+
+ensure_dir "$workspace_home/core"
+ensure_dir "$workspace_home/dump/incoming"
+ensure_dir "$workspace_home/clients"
+ensure_dir "$workspace_home/projects"
+ensure_dir "$workspace_home/micro-projects"
+ensure_dir "$workspace_home/humans"
+ensure_dir "$workspace_home/memory"
+ensure_dir "$workspace_home/external-memory"
+ensure_dir "$workspace_home/system-insights"
+ensure_dir "$workspace_home/skills"
+ensure_dir "$workspace_home/archive"
+
+copy_template "$templates/workspace-readme.template.md" "$workspace_home/README.md"
+copy_template "$templates/core/README.md" "$workspace_home/core/README.md"
+copy_template_with_date "$templates/core/status.template.md" "$workspace_home/core/status.md"
+copy_template "$templates/dump/README.md" "$workspace_home/dump/README.md"
+copy_template "$templates/clients/README.md" "$workspace_home/clients/README.md"
+copy_template "$templates/projects/README.md" "$workspace_home/projects/README.md"
+copy_template "$templates/micro-projects/README.md" "$workspace_home/micro-projects/README.md"
+copy_template "$templates/humans/README.md" "$workspace_home/humans/README.md"
+copy_template "$templates/memory/README.md" "$workspace_home/memory/README.md"
+copy_template "$templates/memory/workspace-memory.template.md" "$workspace_home/memory/workspace-memory.md"
+copy_template "$templates/external-memory/README.md" "$workspace_home/external-memory/README.md"
+copy_template "$templates/system-insights/README.md" "$workspace_home/system-insights/README.md"
+copy_template "$templates/skills/README.md" "$workspace_home/skills/README.md"
+copy_template "$templates/archive/README.md" "$workspace_home/archive/README.md"
+
+echo
+echo "AI_SYSTEM_HOME: $ai_system_home"
+echo "AI_SYSTEM_WORKSPACE_HOME: $workspace_home"
+echo
+echo "Next prompt:"
+echo "Review ai-system workspace status and recommend the next safe action."
