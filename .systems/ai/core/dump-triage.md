@@ -4,9 +4,17 @@
 
 `dump/` is the owner-controlled inbox for unclassified files.
 
+## Intake Levels
+
+Use `ai-system-workspace/dump/incoming/` when ownership is unknown, mixed, or not yet trusted.
+
+Use `ai-system-workspace/clients/<client>/dump/incoming/` when the owner already knows the file belongs to that client. Client-level dump may assume `likely-client` is that client, but all other classification fields still need review.
+
+Use `ai-system-workspace/owned-assets/<asset>/dump/incoming/` when the owner already knows the file belongs to that owned asset. Owned-asset-level dump may assume `likely-owned-asset` is that asset, but all other classification fields still need review.
+
 ## Flow
 
-1. Owner places files in `ai-system-workspace/dump/incoming/`.
+1. Owner places files in `ai-system-workspace/dump/incoming/`, `ai-system-workspace/clients/<client>/dump/incoming/`, or `ai-system-workspace/owned-assets/<asset>/dump/incoming/`.
 2. AI creates a classification proposal.
 3. AI lists recommended target, confidence, risk, and reason.
 4. Owner approves with `owner-approved`.
@@ -17,11 +25,16 @@
 - source path;
 - detected type;
 - likely client;
+- likely owned asset;
 - likely project;
 - proposed target;
 - confidence;
 - privacy risk;
 - required owner action.
+
+Client-level dump may prefill `likely client` from its path, but must still classify detected type, likely project, proposed target, confidence, privacy risk, and required owner action.
+
+Owned-asset-level dump may prefill `likely owned asset` from its path, but must still classify detected type, likely project, proposed target, confidence, privacy risk, and required owner action.
 
 ## Stop Conditions
 

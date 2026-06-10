@@ -22,7 +22,7 @@ Read the smallest set needed to answer safely:
 4. `.systems/ai/core/response-contract.md`.
 5. `ai-system-workspace/core/status.md` when present.
 6. `ai-system-workspace/dump/` index or classification files when present.
-7. Relevant client/project status files.
+7. Relevant client, owned-asset, or project status files.
 8. Relevant memory routers, checkpoint files, distillations, and open decisions.
 
 If an expected artifact is missing, say it is missing and route to creation or recovery.
@@ -34,6 +34,7 @@ If an expected artifact is missing, say it is missing and route to creation or r
 - Dump inbox: `ai-system-workspace/dump/incoming/`.
 - Dump classifications: `ai-system-workspace/dump/`.
 - Clients: `ai-system-workspace/clients/`.
+- Owned assets: `ai-system-workspace/owned-assets/`.
 - Projects: `ai-system-workspace/projects/`.
 - Workspace memory: `ai-system-workspace/memory/`.
 - External memory for AI System improvements: `ai-system-workspace/external-memory/`.

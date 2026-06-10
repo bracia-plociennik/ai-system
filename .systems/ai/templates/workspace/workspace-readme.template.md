@@ -9,6 +9,7 @@ Private local runtime for AI System.
 - `core/` - workspace status, indexes, and operational notes.
 - `dump/` - incoming unclassified files.
 - `clients/` - client workspaces.
+- `owned-assets/` - owner-controlled companies, brands, and commercial assets.
 - `projects/` - standalone projects.
 - `micro-projects/` - small standalone work.
 - `humans/` - owner-facing summaries.

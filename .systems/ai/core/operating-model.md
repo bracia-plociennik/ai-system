@@ -22,6 +22,7 @@ AI System manages a local Mac workspace for clients, projects, tasks, files, mem
 - `ai-system-workspace/core/`
 - `ai-system-workspace/dump/`
 - `ai-system-workspace/clients/`
+- `ai-system-workspace/owned-assets/`
 - `ai-system-workspace/projects/`
 - `ai-system-workspace/micro-projects/`
 - `ai-system-workspace/humans/`

@@ -12,6 +12,7 @@ Memory helps the owner resume work, preserve decisions, detect stale assumptions
 | --- | --- | --- |
 | Workspace memory | `ai-system-workspace/memory/` | Broad operating preferences, recurring patterns, and workspace-level decisions. |
 | Client memory | `ai-system-workspace/clients/<client>/memory/` | Raw client-specific facts, history, constraints, and relationship context. |
+| Owned-asset memory | `ai-system-workspace/owned-assets/<asset>/memory/` | Raw owner-controlled asset facts, decisions, constraints, and business or brand context. |
 | Project memory | `ai-system-workspace/projects/<project>/memory/` or client project memory | Project-specific facts, decisions, implementation notes, risks, and lessons. |
 | Distillations | project/client distillation files | Compressed summaries of raw memory and materials. |
 | Checkpoints | project/client checkpoint files | Periodic state snapshots for safe resume. |
@@ -30,7 +31,7 @@ Detailed entries should include source, evidence, summary, applies-to, and revie
 
 AI should remind the owner to distill memory when:
 
-- a client or project accumulates many new notes or files;
+- a client, owned asset, or project accumulates many new notes or files;
 - a project phase ends;
 - a recurring pattern appears;
 - a checkpoint is stale;
@@ -44,7 +45,7 @@ Use checkpoints before long pauses, after major decisions, after substantial fil
 A checkpoint should record:
 
 - current status;
-- active client/project;
+- active client, owned asset, or project;
 - recent decisions;
 - open blockers;
 - next safe action;

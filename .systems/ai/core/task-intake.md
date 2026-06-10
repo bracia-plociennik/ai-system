@@ -11,6 +11,7 @@ It is not a phase and does not grant write permission. It decides whether the re
 Use task intake before:
 
 - creating a client or project workspace;
+- creating an owned-asset workspace;
 - triaging a material dump request;
 - planning or implementing new work;
 - accepting a change request;
@@ -48,6 +49,7 @@ Choose one safe route:
 - guide/status recovery;
 - dump triage proposal;
 - client workspace creation;
+- owned-asset workspace creation;
 - project workspace creation;
 - memory capture;
 - distillation;
@@ -60,7 +62,7 @@ Choose one safe route:
 
 Stop before planning or implementation when:
 
-- the owner, client, project, or target path is ambiguous;
+- the owner, client, owned asset, project, or target path is ambiguous;
 - acceptance criteria are missing and cannot be inferred safely;
 - material may contain secrets, legal content, private customer data, or production data;
 - real external effects are possible;

@@ -11,6 +11,7 @@
 | --- | --- |
 | type | |
 | likely-client | |
+| likely-owned-asset | |
 | likely-project | |
 | proposed-target | |
 | confidence | |
