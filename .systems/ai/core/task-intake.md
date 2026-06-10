@@ -11,6 +11,7 @@ It is not a phase and does not grant write permission. It decides whether the re
 Use task intake before:
 
 - creating a client or project workspace;
+- briefing or updating a client workspace;
 - creating an owned-asset workspace;
 - triaging a material dump request;
 - planning or implementing new work;
@@ -47,6 +48,7 @@ Blockers and decisions that prevent safe planning, writing, movement, distillati
 Choose one safe route:
 
 - guide/status recovery;
+- client brief intake;
 - dump triage proposal;
 - client workspace creation;
 - owned-asset workspace creation;

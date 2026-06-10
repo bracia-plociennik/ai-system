@@ -28,7 +28,8 @@ Do not use `ai-workflow/` for ordinary workspace, client, project, owned-asset, 
 | --- | --- | --- |
 | `co teraz`, `co dalej`, `zgubiłem się`, `jak zacząć` | Guide mode | Read status, dump, client/owned-asset/project routers, memory, decisions, and blockers. |
 | `przejrzyj dump` | Dump triage classification | Propose target, confidence, privacy risk, and owner action; do not move files without `owner-approved`. |
-| `utwórz klienta` | Client workspace creation | Use templates; no private data in `.systems/`. |
+| `utwórz klienta` | Client workspace creation | Use templates; if client artifacts should be populated, run client brief intake first. |
+| `dodaj klienta`, `aktualizuj klienta`, `zbriefuj klienta` | Client brief intake | Use `.systems/ai/core/client-brief.md`; completed brief belongs only in the private client workspace. |
 | `utwórz owned asset` | Owned-asset workspace creation | Use owned-assets templates; keep the same base directory structure as client workspaces. |
 | `utwórz projekt klienta` | Client project workspace creation | Create status, README, memory router, and project folders only after approval. |
 | `zapisz memory` | Memory capture | Store in the appropriate workspace, client, owned-asset, or project memory location. |
