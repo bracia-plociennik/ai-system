@@ -6,6 +6,16 @@ This file is the root agent contract for the `ai-system` branch.
 
 AI System manages a local Mac workspace for clients, projects, tasks, files, memory, and anonymized work-quality insights. The system must stay safe for private local materials.
 
+## AI Workflow Boundary
+
+If this repository contains `ai-workflow/` and `ai-workflow-workspace/`, those paths belong only to development of AI System itself.
+
+Normal AI System usage must follow this root `AGENTS.md` and the root `.systems/` contract. This includes workspace use, clients, projects, dump triage, memory, owned assets, system insights, and owner-facing operations.
+
+Use `ai-workflow/AGENTS.md` only when the owner explicitly asks to develop the AI System product itself, such as editing `AGENTS.md`, `HUMANS.md`, root `.systems/**`, templates, validators, workflow runtime artifacts, or other reusable product contracts.
+
+Do not route ordinary workspace/client/project work through `ai-workflow/` just because the directory exists.
+
 ## Source Of Truth
 
 1. Current filesystem state for factual truth.

@@ -12,6 +12,16 @@ Before planning or implementing new work, apply `.systems/ai/core/task-intake.md
 
 If the request is only orientation or status, use guide mode.
 
+## AI Workflow Tool Boundary
+
+If `ai-workflow/` and `ai-workflow-workspace/` exist in this repository, they are development tooling and runtime for improving AI System itself.
+
+Normal AI System usage routes through root `AGENTS.md`, root `.systems/`, and `ai-system-workspace/`.
+
+Use `ai-workflow/AGENTS.md` only for owner-approved product-development work on AI System itself, including root contract changes, root `.systems/**`, templates, validators, and workflow runtime artifacts.
+
+Do not use `ai-workflow/` for ordinary workspace, client, project, owned-asset, dump, memory, or system-insight work.
+
 ## Common Commands
 
 | Prompt | Route | Notes |
