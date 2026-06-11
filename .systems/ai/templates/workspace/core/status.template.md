@@ -2,7 +2,8 @@
 
 | Field | Value |
 | --- | --- |
-| `workspace` | `ai-system-workspace` |
+| `workspace` | `<WORKSPACE_ID>` |
+| `workspace-home` | `<WORKSPACE_HOME>` |
 | `active-client` | `none` |
 | `active-project` | `none` |
 | `dump-status` | `not-reviewed` |

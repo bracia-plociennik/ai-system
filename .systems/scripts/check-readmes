@@ -2,20 +2,50 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+script_dir="$repo_root/.systems/scripts"
+source "$script_dir/lib-workspaces"
 fail=0
+prune_paths=("$repo_root/.git")
+
+add_prune_path() {
+  local path="$1"
+  local normalized
+
+  [[ -n "$path" ]] || return 0
+  normalized="$(ai_system_workspace_normalize_path "$repo_root" "$path")"
+  [[ -n "$normalized" ]] || return 0
+
+  local existing
+  for existing in "${prune_paths[@]}"; do
+    [[ "$existing" == "$normalized" ]] && return 0
+  done
+
+  prune_paths+=("$normalized")
+}
+
+while IFS= read -r known_root; do
+  add_prune_path "$known_root"
+done < <(ai_system_workspace_known_local_roots "$repo_root")
+
+while IFS= read -r registry_root; do
+  add_prune_path "$registry_root"
+done < <(ai_system_workspace_registry_paths "$repo_root")
+
+if [[ -n "${AI_SYSTEM_WORKSPACE_HOME:-}" ]]; then
+  add_prune_path "$AI_SYSTEM_WORKSPACE_HOME"
+fi
+
+find_args=("$repo_root")
+for prune_path in "${prune_paths[@]}"; do
+  find_args+=( -path "$prune_path" -prune -o )
+done
+find_args+=( -type d -print0 )
 
 while IFS= read -r -d '' dir; do
   if [[ ! -f "$dir/README.md" ]]; then
     echo "Missing README.md in ${dir#"$repo_root/"}"
     fail=1
   fi
-done < <(
-  find "$repo_root" \
-    -path "$repo_root/.git" -prune -o \
-    -path "$repo_root/ai-workflow" -prune -o \
-    -path "$repo_root/ai-system-workspace" -prune -o \
-    -path "$repo_root/ai-workflow-workspace" -prune -o \
-    -type d -print0
-)
+done < <(find "${find_args[@]}")
 
 exit "$fail"

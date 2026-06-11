@@ -12,7 +12,7 @@ The current branch is already promoted. Use this file only when repeating or aud
 2. Move contents of staged `ai-system/` to branch root.
 3. Rename `agents.template.md` to `AGENTS.md`.
 4. Rename `humans.template.md` to `HUMANS.md`.
-5. Keep `ai-system-workspace/` ignored.
+5. Keep private workspace runtime ignored. Legacy branch promotion used `ai-system-workspace/`; multi-workspace installations also ignore registered workspace roots.
 6. Run all validators before commit.
 
 Do not perform future branch promotion before final check and owner approval.

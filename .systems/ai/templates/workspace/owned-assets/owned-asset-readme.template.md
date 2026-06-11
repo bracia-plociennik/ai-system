@@ -16,8 +16,8 @@ Treat this as an owner-controlled asset with the same operational rigor as a cli
 ## Boundaries
 
 - Owned-asset materials belong here.
-- Private owner context belongs in `ai-system-workspace/humans/` or workspace memory.
-- External client materials belong in `ai-system-workspace/clients/`.
+- Private owner context belongs in `<workspace>/humans/` or workspace memory.
+- External client materials belong in `<workspace>/clients/`.
 - Cross-client or cross-asset lessons promoted from this workspace must be anonymized before entering `system-insights/`.
 
 ## Core Files

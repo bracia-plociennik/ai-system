@@ -10,6 +10,7 @@ It is not a phase and does not grant write permission. It decides whether the re
 
 Use task intake before:
 
+- selecting a workspace for runtime work when more than one workspace exists;
 - creating a client or project workspace;
 - briefing or updating a client workspace;
 - creating an owned-asset workspace;
@@ -65,6 +66,7 @@ Choose one safe route:
 Stop before planning or implementation when:
 
 - the owner, client, owned asset, project, or target path is ambiguous;
+- the target workspace is ambiguous;
 - acceptance criteria are missing and cannot be inferred safely;
 - material may contain secrets, legal content, private customer data, or production data;
 - real external effects are possible;

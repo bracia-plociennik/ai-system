@@ -17,7 +17,7 @@ Only approve writes after the proposed action and target are explicit. Use the w
 Ask:
 
 ```text
-Co teraz? Sprawdź status workspace, dump, aktywnych klientów, projektów, pamięć i checkpointy. Podaj jedną rekomendację i jedną alternatywę.
+Co teraz? Wybierz właściwy workspace, sprawdź jego status, dump, aktywnych klientów, owned-assets, projekty, pamięć i checkpointy. Podaj jedną rekomendację i jedną alternatywę.
 ```
 
 Expected result:
@@ -33,13 +33,19 @@ Expected result:
 Place unclassified files in:
 
 ```text
-ai-system-workspace/dump/incoming/
+<workspace>/dump/incoming/
+```
+
+Place files that are already known to belong to a client in:
+
+```text
+<workspace>/clients/<client>/dump/incoming/
 ```
 
 Ask:
 
 ```text
-Przejrzyj dump/incoming. Sklasyfikuj pliki, zaproponuj klienta/projekt/docelowe miejsce, ale niczego nie przenoś bez owner-approved.
+Przejrzyj dump/incoming w workspace <workspace-id-or-path>. Sklasyfikuj pliki, zaproponuj klienta/projekt/docelowe miejsce, ale niczego nie przenoś bez owner-approved.
 ```
 
 AI should produce a classification proposal with source path, detected type, likely client, likely project, proposed target, confidence, privacy risk, and required owner action.
@@ -47,7 +53,7 @@ AI should produce a classification proposal with source path, detected type, lik
 Approve movement only with an exact target, for example:
 
 ```text
-owner-approved: przenieś ai-system-workspace/dump/incoming/example.pdf do ai-system-workspace/clients/example-client/projects/example-project/materials/example.pdf
+owner-approved: przenieś <workspace>/dump/incoming/example.pdf do <workspace>/clients/example-client/projects/example-project/materials/example.pdf
 ```
 
 ## Client And Project Workspaces
@@ -55,13 +61,13 @@ owner-approved: przenieś ai-system-workspace/dump/incoming/example.pdf do ai-sy
 Ask:
 
 ```text
-Utwórz klienta <client-slug> z template’u. Nie dodawaj prywatnych danych do .systems.
+Utwórz klienta <client-slug> w workspace <workspace-id-or-path> z template’u. Nie dodawaj prywatnych danych do .systems.
 ```
 
 Ask:
 
 ```text
-Utwórz projekt klienta <client-slug>/<project-slug> z template’u. Dodaj status, memory router i README.
+Utwórz projekt klienta <client-slug>/<project-slug> w workspace <workspace-id-or-path> z template’u. Dodaj status, memory router i README.
 ```
 
 Use slugs instead of real names when possible.
@@ -73,7 +79,7 @@ Use memory for durable context, not as a replacement for reading current files.
 Ask:
 
 ```text
-Zapisz memory entry dla projektu <project-slug> na podstawie tej decyzji. Nie zapisuj sekretów ani prywatnych danych w .systems.
+Zapisz memory entry dla projektu <project-slug> w workspace <workspace-id-or-path> na podstawie tej decyzji. Nie zapisuj sekretów ani prywatnych danych w .systems.
 ```
 
 Distill when a project phase ends, raw memory grows too large, a checkpoint is stale, or a recurring pattern appears.

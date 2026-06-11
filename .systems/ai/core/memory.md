@@ -10,14 +10,14 @@ Memory helps the owner resume work, preserve decisions, detect stale assumptions
 
 | Level | Location | Use |
 | --- | --- | --- |
-| Workspace memory | `ai-system-workspace/memory/` | Broad operating preferences, recurring patterns, and workspace-level decisions. |
-| Client memory | `ai-system-workspace/clients/<client>/memory/` | Raw client-specific facts, history, constraints, and relationship context. |
-| Owned-asset memory | `ai-system-workspace/owned-assets/<asset>/memory/` | Raw owner-controlled asset facts, decisions, constraints, and business or brand context. |
-| Project memory | `ai-system-workspace/projects/<project>/memory/` or client project memory | Project-specific facts, decisions, implementation notes, risks, and lessons. |
+| Workspace memory | `<workspace>/memory/` | Broad operating preferences, recurring patterns, and workspace-level decisions. |
+| Client memory | `<workspace>/clients/<client>/memory/` | Raw client-specific facts, history, constraints, and relationship context. |
+| Owned-asset memory | `<workspace>/owned-assets/<asset>/memory/` | Raw owner-controlled asset facts, decisions, constraints, and business or brand context. |
+| Project memory | `<workspace>/projects/<project>/memory/` or client project memory | Project-specific facts, decisions, implementation notes, risks, and lessons. |
 | Distillations | project/client distillation files | Compressed summaries of raw memory and materials. |
 | Checkpoints | project/client checkpoint files | Periodic state snapshots for safe resume. |
-| System insights | `ai-system-workspace/system-insights/` | Anonymized lessons for owner competence, offer, process, and work quality. |
-| External memory | `ai-system-workspace/external-memory/` | Suggestions for improving AI System itself. |
+| System insights | `<workspace>/system-insights/` | Anonymized lessons for owner competence, offer, process, and work quality. |
+| External memory | `<workspace>/external-memory/` | Suggestions for improving AI System itself. |
 
 ## Router Pattern
 
@@ -72,5 +72,6 @@ If anonymization is uncertain, stop and ask the owner.
 
 - Memory is supporting context, not source of truth.
 - Always check current files before acting on memory.
+- Select the target workspace before reading or writing memory.
 - Do not store secrets, credentials, private documents, or identifiable client facts in `.systems/`.
 - Do not use memory to bypass owner approval, privacy checks, validation, or stop conditions.

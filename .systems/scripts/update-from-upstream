@@ -53,6 +53,7 @@ done
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 ai_system_home="$(cd "$script_dir/../.." && pwd -P)"
+source "$script_dir/lib-workspaces"
 cd "$ai_system_home"
 
 if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -81,52 +82,80 @@ remote="${remote:-origin}"
 branch="${branch:-main}"
 target_ref="$remote/$branch"
 
-normalize_path() {
-  local path="$1"
-
-  if [[ "$path" == /* ]]; then
-    echo "$path"
-  else
-    echo "$ai_system_home/$path"
-  fi
-}
-
 workspace_home="${AI_SYSTEM_WORKSPACE_HOME:-}"
 if [[ -z "$workspace_home" ]]; then
-  workspace_home="$ai_system_home/ai-system-workspace"
+  default_workspaces=()
+  registry_file="$(ai_system_workspace_registry_file "$ai_system_home")"
+  while IFS= read -r default_workspace; do
+    default_workspaces+=("$default_workspace")
+  done < <(ai_system_workspace_registry_default_paths "$ai_system_home")
+  if [[ "${#default_workspaces[@]}" -gt 1 ]]; then
+    echo "STOP: multiple default workspaces in ai-system-workspaces.md"
+    exit 1
+  elif [[ "${#default_workspaces[@]}" -eq 1 ]]; then
+    workspace_home="${default_workspaces[0]}"
+  elif [[ -f "$registry_file" ]]; then
+    echo "STOP: ai-system-workspaces.md exists but no default=yes workspace is defined"
+    exit 1
+  else
+    workspace_home="$ai_system_home/ai-system-workspace"
+  fi
 else
-  workspace_home="$(normalize_path "$workspace_home")"
+  workspace_home="$(ai_system_workspace_normalize_path "$ai_system_home" "$workspace_home")"
 fi
 
 protected_dirty=()
 system_dirty=()
+protected_roots=()
+
+add_protected_root() {
+  local root="$1"
+  local normalized
+
+  [[ -n "$root" ]] || return 0
+  normalized="$(ai_system_workspace_normalize_path "$ai_system_home" "$root")"
+  [[ -n "$normalized" ]] || return 0
+
+  local existing
+  if [[ "${#protected_roots[@]}" -gt 0 ]]; then
+    for existing in "${protected_roots[@]}"; do
+      [[ "$existing" == "$normalized" ]] && return 0
+    done
+  fi
+
+  protected_roots+=("$normalized")
+}
+
+while IFS= read -r known_root; do
+  add_protected_root "$known_root"
+done < <(ai_system_workspace_known_local_roots "$ai_system_home")
+
+while IFS= read -r registry_root; do
+  add_protected_root "$registry_root"
+done < <(ai_system_workspace_registry_paths "$ai_system_home")
+
+add_protected_root "$workspace_home"
 
 is_protected_path() {
   local path="${1#./}"
+  local root
+  local root_relative
 
   case "$path" in
-    ai-system-workspace|ai-system-workspace/*)
-      return 0
-      ;;
-    workspace|workspace/*)
-      return 0
-      ;;
-    ai-workflow|ai-workflow/*)
-      return 0
-      ;;
-    ai-workflow-workspace|ai-workflow-workspace/*)
+    ai-system-workspaces.md)
       return 0
       ;;
   esac
 
-  if [[ "$workspace_home" == "$ai_system_home/"* ]]; then
-    local workspace_relative="${workspace_home#$ai_system_home/}"
+  for root in "${protected_roots[@]}"; do
+    [[ "$root" == "$ai_system_home/"* ]] || continue
+    root_relative="${root#$ai_system_home/}"
     case "$path" in
-      "$workspace_relative"|"$workspace_relative"/*)
+      "$root_relative"|"$root_relative"/*)
         return 0
         ;;
     esac
-  fi
+  done
 
   return 1
 }
@@ -181,6 +210,12 @@ echo "AI_SYSTEM_HOME: $ai_system_home"
 echo "Current branch: $current_branch"
 echo "Update target: $target_ref"
 echo "Protected runtime workspace: $workspace_home"
+if [[ "${#protected_roots[@]}" -gt 0 ]]; then
+  echo "Protected local roots:"
+  for protected_root in "${protected_roots[@]}"; do
+    echo " - $(ai_system_workspace_relative_path "$ai_system_home" "$protected_root")"
+  done
+fi
 
 if [[ "$dry_run" -eq 1 ]]; then
   echo "Dry run only. No fetch, merge, or validation was performed."

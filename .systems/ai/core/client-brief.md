@@ -27,7 +27,7 @@ The template is reusable system material and must not contain real client data.
 ## Rules
 
 - Brief intake does not grant write permission.
-- A completed brief may contain private client data and belongs only in `ai-system-workspace/clients/<client>/context/client-brief.md`.
+- A completed brief may contain private client data and belongs only in `<workspace>/clients/<client>/context/client-brief.md`.
 - Do not store completed briefs, real client names, contacts, links, contracts, or identifying facts in `.systems/`.
 - Do not move, copy, rename, delete, archive, expose, or rewrite client files based only on brief content.
 - Any file movement from `dump/`, `documents/`, `contracts/`, `assets/`, or external locations requires exact `owner-approved` action and target.
@@ -39,7 +39,7 @@ The template is reusable system material and must not contain real client data.
 2. Ask the owner for the brief fields from `client-brief.template.md`.
 3. If the owner provides partial answers, record unknowns as `unknown` instead of guessing.
 4. Before writing, ask for exact `owner-approved` permission to save and map the completed brief.
-5. Save the completed brief to `ai-system-workspace/clients/<client>/context/client-brief.md`.
+5. Save the completed brief to `<workspace>/clients/<client>/context/client-brief.md`.
 6. Populate only artifacts supported by brief answers.
 7. Preserve existing client files. Do not overwrite, delete, rename, or merge without exact owner approval.
 

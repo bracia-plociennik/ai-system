@@ -1,8 +1,10 @@
-# AI System Workspace
+# AI System Workspace: <WORKSPACE_ID>
 
 ## Purpose
 
 Private local runtime for AI System.
+
+Workspace home: `<WORKSPACE_HOME>`.
 
 ## Contents
 

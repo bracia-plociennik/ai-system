@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Templates for `ai-system-workspace/`.
+Templates for private AI System workspace roots.
 
 Generated workspace directories must include README guidance explaining purpose, allowed content, forbidden content, privacy rules, and allowed AI actions.
 

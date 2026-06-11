@@ -7,6 +7,6 @@ This directory defines the AI-facing operating model for the local AI System.
 ## Contents
 
 - `core/` - policies and routing.
-- `templates/` - workspace templates.
+- `templates/` - workspace and registry templates.
 - `examples/` - synthetic examples only.
 - `skills/` - system skills.

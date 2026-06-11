@@ -1,0 +1,147 @@
+#!/usr/bin/env bash
+
+ai_system_workspace_trim() {
+  local value="$1"
+  value="${value#"${value%%[![:space:]]*}"}"
+  value="${value%"${value##*[![:space:]]}"}"
+  printf '%s\n' "$value"
+}
+
+ai_system_workspace_unquote() {
+  local value="$1"
+  value="$(ai_system_workspace_trim "$value")"
+  value="${value#\`}"
+  value="${value%\`}"
+  printf '%s\n' "$value"
+}
+
+ai_system_workspace_normalize_path() {
+  local ai_system_home="$1"
+  local path="$2"
+
+  path="$(ai_system_workspace_unquote "$path")"
+  path="${path%/}"
+
+  if [[ "$path" == /* ]]; then
+    printf '%s\n' "$path"
+  elif [[ -n "$path" ]]; then
+    printf '%s/%s\n' "$ai_system_home" "${path#./}"
+  fi
+}
+
+ai_system_workspace_relative_path() {
+  local ai_system_home="$1"
+  local path="$2"
+
+  if [[ "$path" == "$ai_system_home/"* ]]; then
+    printf '%s\n' "${path#$ai_system_home/}"
+  else
+    printf '%s\n' "$path"
+  fi
+}
+
+ai_system_workspace_registry_file() {
+  local ai_system_home="$1"
+  printf '%s\n' "$ai_system_home/ai-system-workspaces.md"
+}
+
+ai_system_workspace_registry_rows() {
+  local ai_system_home="$1"
+  local registry
+  local line
+  local workspace_id
+  local workspace_path
+  local default_flag
+  local workspace_status
+  local scope
+  local notes
+
+  registry="$(ai_system_workspace_registry_file "$ai_system_home")"
+  [[ -f "$registry" ]] || return 0
+
+  while IFS= read -r line; do
+    [[ "$line" == \|* ]] || continue
+    [[ "$line" == *'---'* ]] && continue
+
+    IFS='|' read -r _ workspace_id workspace_path default_flag workspace_status scope notes _ <<< "$line"
+    workspace_id="$(ai_system_workspace_unquote "${workspace_id:-}")"
+    workspace_path="$(ai_system_workspace_unquote "${workspace_path:-}")"
+    default_flag="$(ai_system_workspace_unquote "${default_flag:-}")"
+    workspace_status="$(ai_system_workspace_unquote "${workspace_status:-}")"
+    scope="$(ai_system_workspace_unquote "${scope:-}")"
+    notes="$(ai_system_workspace_unquote "${notes:-}")"
+
+    case "$workspace_id" in
+      ""|"workspace-id"|"<workspace-id>")
+        continue
+        ;;
+    esac
+
+    [[ -n "$workspace_path" ]] || continue
+    printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$workspace_id" "$workspace_path" "$default_flag" "$workspace_status" "$scope" "$notes"
+  done < "$registry"
+}
+
+ai_system_workspace_registry_paths() {
+  local ai_system_home="$1"
+  local workspace_id
+  local workspace_path
+  local default_flag
+  local workspace_status
+  local scope
+  local notes
+
+  while IFS=$'\t' read -r workspace_id workspace_path default_flag workspace_status scope notes; do
+    ai_system_workspace_normalize_path "$ai_system_home" "$workspace_path"
+  done < <(ai_system_workspace_registry_rows "$ai_system_home")
+}
+
+ai_system_workspace_registry_default_paths() {
+  local ai_system_home="$1"
+  local workspace_id
+  local workspace_path
+  local default_flag
+  local workspace_status
+  local scope
+  local notes
+
+  while IFS=$'\t' read -r workspace_id workspace_path default_flag workspace_status scope notes; do
+    if [[ "$default_flag" == "yes" ]]; then
+      ai_system_workspace_normalize_path "$ai_system_home" "$workspace_path"
+    fi
+  done < <(ai_system_workspace_registry_rows "$ai_system_home")
+}
+
+ai_system_workspace_registry_id_for_path() {
+  local ai_system_home="$1"
+  local target_path="$2"
+  local target_normalized
+  local workspace_id
+  local workspace_path
+  local default_flag
+  local workspace_status
+  local scope
+  local notes
+  local workspace_normalized
+
+  target_normalized="$(ai_system_workspace_normalize_path "$ai_system_home" "$target_path")"
+
+  while IFS=$'\t' read -r workspace_id workspace_path default_flag workspace_status scope notes; do
+    workspace_normalized="$(ai_system_workspace_normalize_path "$ai_system_home" "$workspace_path")"
+    if [[ "$workspace_normalized" == "$target_normalized" ]]; then
+      printf '%s\n' "$workspace_id"
+      return 0
+    fi
+  done < <(ai_system_workspace_registry_rows "$ai_system_home")
+}
+
+ai_system_workspace_known_local_roots() {
+  local ai_system_home="$1"
+
+  printf '%s\n' "$ai_system_home/ai-system-workspace"
+  printf '%s\n' "$ai_system_home/onlinen-workspace"
+  printf '%s\n' "$ai_system_home/kuba-plociennik-workspace"
+  printf '%s\n' "$ai_system_home/workspace"
+  printf '%s\n' "$ai_system_home/ai-workflow"
+  printf '%s\n' "$ai_system_home/ai-workflow-workspace"
+}

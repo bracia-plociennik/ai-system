@@ -2,12 +2,14 @@
 
 ## Purpose
 
-AI System manages a local Mac workspace for clients, projects, tasks, files, memory, and work-quality insights.
+AI System manages one or more local Mac workspaces for clients, projects, tasks, files, memory, and work-quality insights.
 
 ## Modes
 
-- System root: `~/ai-system/`.
-- Private workspace: `~/ai-system/ai-system-workspace/`.
+- `AI_SYSTEM_HOME`: `~/ai-system/`.
+- Registered workspace: private runtime directory listed in local `ai-system-workspaces.md`.
+- Selected workspace: exactly one workspace targeted by the current chat or operation.
+- Legacy private workspace: `~/ai-system/ai-system-workspace/` when no registry exists.
 
 ## System-Owned
 
@@ -19,21 +21,23 @@ AI System manages a local Mac workspace for clients, projects, tasks, files, mem
 
 ## Workspace-Owned
 
-- `ai-system-workspace/core/`
-- `ai-system-workspace/dump/`
-- `ai-system-workspace/clients/`
-- `ai-system-workspace/owned-assets/`
-- `ai-system-workspace/projects/`
-- `ai-system-workspace/micro-projects/`
-- `ai-system-workspace/humans/`
-- `ai-system-workspace/memory/`
-- `ai-system-workspace/external-memory/`
-- `ai-system-workspace/system-insights/`
-- `ai-system-workspace/skills/`
-- `ai-system-workspace/archive/`
+- `<workspace>/core/`
+- `<workspace>/dump/`
+- `<workspace>/clients/`
+- `<workspace>/owned-assets/`
+- `<workspace>/projects/`
+- `<workspace>/micro-projects/`
+- `<workspace>/humans/`
+- `<workspace>/memory/`
+- `<workspace>/external-memory/`
+- `<workspace>/system-insights/`
+- `<workspace>/skills/`
+- `<workspace>/archive/`
 
 ## Default Behavior
 
 AI reads, classifies, summarizes, and recommends first.
 
 AI performs file movement only after explicit `owner-approved` permission.
+
+When multiple workspaces exist, AI selects the workspace before reading runtime status or writing artifacts. If selection is ambiguous, AI stops and asks.

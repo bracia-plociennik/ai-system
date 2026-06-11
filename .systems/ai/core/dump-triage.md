@@ -6,15 +6,15 @@
 
 ## Intake Levels
 
-Use `ai-system-workspace/dump/incoming/` when ownership is unknown, mixed, or not yet trusted.
+Use `<workspace>/dump/incoming/` when ownership is unknown, mixed, or not yet trusted inside the selected workspace.
 
-Use `ai-system-workspace/clients/<client>/dump/incoming/` when the owner already knows the file belongs to that client. Client-level dump may assume `likely-client` is that client, but all other classification fields still need review.
+Use `<workspace>/clients/<client>/dump/incoming/` when the owner already knows the file belongs to that client. Client-level dump may assume `likely-client` is that client, but all other classification fields still need review.
 
-Use `ai-system-workspace/owned-assets/<asset>/dump/incoming/` when the owner already knows the file belongs to that owned asset. Owned-asset-level dump may assume `likely-owned-asset` is that asset, but all other classification fields still need review.
+Use `<workspace>/owned-assets/<asset>/dump/incoming/` when the owner already knows the file belongs to that owned asset. Owned-asset-level dump may assume `likely-owned-asset` is that asset, but all other classification fields still need review.
 
 ## Flow
 
-1. Owner places files in `ai-system-workspace/dump/incoming/`, `ai-system-workspace/clients/<client>/dump/incoming/`, or `ai-system-workspace/owned-assets/<asset>/dump/incoming/`.
+1. Owner places files in `<workspace>/dump/incoming/`, `<workspace>/clients/<client>/dump/incoming/`, or `<workspace>/owned-assets/<asset>/dump/incoming/`.
 2. AI creates a classification proposal.
 3. AI lists recommended target, confidence, risk, and reason.
 4. Owner approves with `owner-approved`.

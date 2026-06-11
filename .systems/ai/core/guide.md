@@ -18,34 +18,39 @@ Read the smallest set needed to answer safely:
 
 1. `AGENTS.md`.
 2. `.systems/ai/core/operating-model.md`.
-3. `.systems/ai/core/command-routing.md`.
-4. `.systems/ai/core/response-contract.md`.
-5. `ai-system-workspace/core/status.md` when present.
-6. `ai-system-workspace/dump/` index or classification files when present.
-7. Relevant client, owned-asset, or project status files.
-8. Relevant memory routers, checkpoint files, distillations, and open decisions.
+3. `.systems/ai/core/workspaces.md`.
+4. `.systems/ai/core/command-routing.md`.
+5. `.systems/ai/core/response-contract.md`.
+6. `ai-system-workspaces.md` when present.
+7. Selected workspace `core/status.md` when present.
+8. Selected workspace `dump/` index or classification files when present.
+9. Relevant client, owned-asset, or project status files in the selected workspace.
+10. Relevant memory routers, checkpoint files, distillations, and open decisions.
 
 If an expected artifact is missing, say it is missing and route to creation or recovery.
 
 ## Artifact Map
 
 - System rules: `.systems/ai/core/`.
-- Workspace status: `ai-system-workspace/core/status.md`.
-- Dump inbox: `ai-system-workspace/dump/incoming/`.
-- Dump classifications: `ai-system-workspace/dump/`.
-- Clients: `ai-system-workspace/clients/`.
-- Owned assets: `ai-system-workspace/owned-assets/`.
-- Projects: `ai-system-workspace/projects/`.
-- Workspace memory: `ai-system-workspace/memory/`.
-- External memory for AI System improvements: `ai-system-workspace/external-memory/`.
-- Anonymized work-quality lessons: `ai-system-workspace/system-insights/`.
-- Owner skills: `ai-system-workspace/skills/`.
+- Workspace registry: `ai-system-workspaces.md` when present.
+- Workspace status: `<workspace>/core/status.md`.
+- Workstreams: `<workspace>/core/workstreams.md`.
+- Dump inbox: `<workspace>/dump/incoming/`.
+- Dump classifications: `<workspace>/dump/`.
+- Clients: `<workspace>/clients/`.
+- Owned assets: `<workspace>/owned-assets/`.
+- Projects: `<workspace>/projects/`.
+- Workspace memory: `<workspace>/memory/`.
+- External memory for AI System improvements: `<workspace>/external-memory/`.
+- Anonymized work-quality lessons: `<workspace>/system-insights/`.
+- Owner skills: `<workspace>/skills/`.
 
 ## Response Shape
 
 Guide responses must include:
 
 - current status;
+- selected workspace and selection source;
 - sources checked;
 - blockers or unknowns;
 - exactly one recommendation with impact;

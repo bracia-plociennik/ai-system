@@ -6,18 +6,25 @@ usage() {
 Usage: .systems/scripts/init-workspace [options]
 
 Options:
-  --workspace <path>     workspace path (default: ./ai-system-workspace)
+  --workspace <path>     workspace path (default: selected workspace or ./ai-system-workspace)
+  --workspace-id <id>    workspace id written to core/status.md (default: registry id or path basename)
   -h, --help             show this help
 EOF
 }
 
 workspace_arg=""
+workspace_id_arg=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --workspace)
       workspace_arg="${2:-}"
       [[ -n "$workspace_arg" ]] || { echo "Missing value for --workspace"; exit 2; }
+      shift 2
+      ;;
+    --workspace-id)
+      workspace_id_arg="${2:-}"
+      [[ -n "$workspace_id_arg" ]] || { echo "Missing value for --workspace-id"; exit 2; }
       shift 2
       ;;
     -h|--help)
@@ -35,17 +42,42 @@ done
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 ai_system_home="$(cd "$script_dir/../.." && pwd -P)"
 templates="$ai_system_home/.systems/ai/templates/workspace"
+source "$script_dir/lib-workspaces"
 
 if [[ -n "$workspace_arg" ]]; then
   workspace_home="$workspace_arg"
 elif [[ -n "${AI_SYSTEM_WORKSPACE_HOME:-}" ]]; then
   workspace_home="$AI_SYSTEM_WORKSPACE_HOME"
 else
-  workspace_home="$ai_system_home/ai-system-workspace"
+  default_workspaces=()
+  registry_file="$(ai_system_workspace_registry_file "$ai_system_home")"
+  while IFS= read -r default_workspace; do
+    default_workspaces+=("$default_workspace")
+  done < <(ai_system_workspace_registry_default_paths "$ai_system_home")
+  if [[ "${#default_workspaces[@]}" -gt 1 ]]; then
+    echo "STOP: multiple default workspaces in ai-system-workspaces.md"
+    exit 1
+  elif [[ "${#default_workspaces[@]}" -eq 1 ]]; then
+    workspace_home="${default_workspaces[0]}"
+  elif [[ -f "$registry_file" ]]; then
+    echo "STOP: ai-system-workspaces.md exists but no default=yes workspace is defined"
+    exit 1
+  else
+    workspace_home="$ai_system_home/ai-system-workspace"
+  fi
 fi
 
 mkdir -p "$workspace_home"
 workspace_home="$(cd "$workspace_home" && pwd -P)"
+workspace_home_relative="$(ai_system_workspace_relative_path "$ai_system_home" "$workspace_home")"
+
+workspace_id="$workspace_id_arg"
+if [[ -z "$workspace_id" ]]; then
+  workspace_id="$(ai_system_workspace_registry_id_for_path "$ai_system_home" "$workspace_home" || true)"
+fi
+if [[ -z "$workspace_id" ]]; then
+  workspace_id="$(basename "$workspace_home")"
+fi
 
 relative_path() {
   local path="$1"
@@ -109,9 +141,39 @@ copy_template_with_date() {
   echo "created file: $(relative_path "$destination")"
 }
 
+copy_template_with_context() {
+  local source="$1"
+  local destination="$2"
+  local today
+  local escaped_workspace_id
+  local escaped_workspace_home
+
+  if [[ ! -f "$source" ]]; then
+    echo "Missing template: $(relative_path "$source")"
+    exit 1
+  fi
+
+  if [[ -e "$destination" ]]; then
+    echo "kept existing file: $(relative_path "$destination")"
+    return 0
+  fi
+
+  today="$(date +%F)"
+  escaped_workspace_id="${workspace_id//&/\\&}"
+  escaped_workspace_home="${workspace_home_relative//&/\\&}"
+  mkdir -p "$(dirname "$destination")"
+  sed \
+    -e "s|<YYYY-MM-DD>|$today|g" \
+    -e "s|<WORKSPACE_ID>|$escaped_workspace_id|g" \
+    -e "s|<WORKSPACE_HOME>|$escaped_workspace_home|g" \
+    "$source" > "$destination"
+  echo "created file: $(relative_path "$destination")"
+}
+
 ensure_dir "$workspace_home/core"
 ensure_dir "$workspace_home/dump/incoming"
 ensure_dir "$workspace_home/clients"
+ensure_dir "$workspace_home/owned-assets"
 ensure_dir "$workspace_home/projects"
 ensure_dir "$workspace_home/micro-projects"
 ensure_dir "$workspace_home/humans"
@@ -121,11 +183,12 @@ ensure_dir "$workspace_home/system-insights"
 ensure_dir "$workspace_home/skills"
 ensure_dir "$workspace_home/archive"
 
-copy_template "$templates/workspace-readme.template.md" "$workspace_home/README.md"
+copy_template_with_context "$templates/workspace-readme.template.md" "$workspace_home/README.md"
 copy_template "$templates/core/README.md" "$workspace_home/core/README.md"
-copy_template_with_date "$templates/core/status.template.md" "$workspace_home/core/status.md"
+copy_template_with_context "$templates/core/status.template.md" "$workspace_home/core/status.md"
 copy_template "$templates/dump/README.md" "$workspace_home/dump/README.md"
 copy_template "$templates/clients/README.md" "$workspace_home/clients/README.md"
+copy_template "$templates/owned-assets/README.md" "$workspace_home/owned-assets/README.md"
 copy_template "$templates/projects/README.md" "$workspace_home/projects/README.md"
 copy_template "$templates/micro-projects/README.md" "$workspace_home/micro-projects/README.md"
 copy_template "$templates/humans/README.md" "$workspace_home/humans/README.md"
@@ -139,6 +202,7 @@ copy_template "$templates/archive/README.md" "$workspace_home/archive/README.md"
 echo
 echo "AI_SYSTEM_HOME: $ai_system_home"
 echo "AI_SYSTEM_WORKSPACE_HOME: $workspace_home"
+echo "AI_SYSTEM_WORKSPACE_ID: $workspace_id"
 echo
 echo "Next prompt:"
-echo "Review ai-system workspace status and recommend the next safe action."
+echo "Review selected AI System workspace status and recommend the next safe action."

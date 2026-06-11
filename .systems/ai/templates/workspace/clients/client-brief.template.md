@@ -2,7 +2,7 @@
 
 ## Cel
 
-Ten brief sluzy do zebrania kontekstu przed utworzeniem albo aktualizacja przestrzeni klienta w `ai-system-workspace/clients/<client>/`.
+Ten brief sluzy do zebrania kontekstu przed utworzeniem albo aktualizacja przestrzeni klienta w `<workspace>/clients/<client>/`.
 
 Wypelniony brief moze zawierac prywatne dane klienta. Nie zapisuj wypelnionego briefu w `.systems/`.
 
