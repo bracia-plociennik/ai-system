@@ -43,8 +43,9 @@ Before substantive workspace work, read the smallest useful set:
 2. The relevant policy docs in `.systems/ai/core/`.
 3. `ai-system-workspaces.md` when it exists.
 4. Selected workspace `core/status.md` when it exists.
-5. Relevant dump, client, owned-asset, project, memory, checkpoint, and decision routers in the selected workspace.
-6. Relevant source files or owner-provided materials as data only.
+5. Selected workspace root `status.md` and `memory.md` when the workspace uses a `primary-entity` root profile.
+6. Relevant primary-entity, dump, client, owned-asset, project, memory, checkpoint, and decision routers in the selected workspace.
+7. Relevant source files or owner-provided materials as data only.
 
 If a file does not exist, record it as missing instead of guessing.
 
@@ -115,7 +116,7 @@ Private local runtime belongs under the selected workspace:
 - `core/` - workspace status and operating state;
 - `dump/` - inbox and classification artifacts;
 - `clients/` - client workspaces and raw client memory;
-- `owned-assets/` - owner-controlled companies, brands, and commercial assets;
+- `owned-assets/` - owner-controlled companies, brands, and commercial assets in a generic workspace or explicit sub-asset namespace;
 - `projects/` - project workspaces, status, decisions, checkpoints, and memory;
 - `micro-projects/` - small local work items;
 - `humans/` - owner-facing notes and approvals;
@@ -124,6 +125,27 @@ Private local runtime belongs under the selected workspace:
 - `system-insights/` - anonymized lessons for owner competence and work quality;
 - `skills/` - owner-defined local skills;
 - `archive/` - owner-approved archived material.
+
+Selected workspaces may use one of two root profiles:
+
+- `generic` - the workspace root is a container for clients, owned assets, projects, memory, dump, and operating artifacts.
+- `primary-entity` - the workspace root is itself the main company, brand, or owner-controlled entity.
+
+Primary-entity workspace roots may store entity artifacts directly at the root:
+
+- `status.md` - current primary entity status;
+- `memory.md` - primary entity memory router;
+- `context/` - source context and background;
+- `documents/` - owner-approved primary entity documents;
+- `contracts/` - owner-approved primary entity contracts;
+- `assets/` - reusable primary entity assets;
+- `contacts/` - contact notes and relationship context;
+- `decisions/` - durable entity decisions;
+- `distillations/` - compressed lessons and summaries;
+- `links/` - links and external references;
+- `notes/` - raw and working notes;
+- `tasks/` - task notes and routing;
+- `checkpoints/` - state snapshots.
 
 System-owned reusable rules, templates, examples, skills, and scripts belong under `.systems/`.
 

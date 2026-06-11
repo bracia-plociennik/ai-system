@@ -11,11 +11,12 @@ Memory helps the owner resume work, preserve decisions, detect stale assumptions
 | Level | Location | Use |
 | --- | --- | --- |
 | Workspace memory | `<workspace>/memory/` | Broad operating preferences, recurring patterns, and workspace-level decisions. |
+| Primary-entity memory | `<workspace>/memory.md` and `<workspace>/memory/` | Raw primary company, brand, or owner-controlled entity facts, decisions, constraints, and reusable context when the entity lives at the workspace root. |
 | Client memory | `<workspace>/clients/<client>/memory/` | Raw client-specific facts, history, constraints, and relationship context. |
-| Owned-asset memory | `<workspace>/owned-assets/<asset>/memory/` | Raw owner-controlled asset facts, decisions, constraints, and business or brand context. |
+| Owned-asset memory | `<workspace>/owned-assets/<asset>/memory/` | Raw owner-controlled asset facts, decisions, constraints, and business or brand context in a generic workspace or explicit sub-asset namespace. |
 | Project memory | `<workspace>/projects/<project>/memory/` or client project memory | Project-specific facts, decisions, implementation notes, risks, and lessons. |
-| Distillations | project/client distillation files | Compressed summaries of raw memory and materials. |
-| Checkpoints | project/client checkpoint files | Periodic state snapshots for safe resume. |
+| Distillations | primary-entity, project, or client distillation files | Compressed summaries of raw memory and materials. |
+| Checkpoints | primary-entity, project, or client checkpoint files | Periodic state snapshots for safe resume. |
 | System insights | `<workspace>/system-insights/` | Anonymized lessons for owner competence, offer, process, and work quality. |
 | External memory | `<workspace>/external-memory/` | Suggestions for improving AI System itself. |
 
@@ -31,7 +32,7 @@ Detailed entries should include source, evidence, summary, applies-to, and revie
 
 AI should remind the owner to distill memory when:
 
-- a client, owned asset, or project accumulates many new notes or files;
+- a primary entity, client, owned asset, or project accumulates many new notes or files;
 - a project phase ends;
 - a recurring pattern appears;
 - a checkpoint is stale;
@@ -45,7 +46,7 @@ Use checkpoints before long pauses, after major decisions, after substantial fil
 A checkpoint should record:
 
 - current status;
-- active client, owned asset, or project;
+- active primary entity, client, owned asset, or project;
 - recent decisions;
 - open blockers;
 - next safe action;

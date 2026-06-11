@@ -24,7 +24,7 @@ AI System manages one or more local Mac workspaces for clients, projects, tasks,
 - `<workspace>/core/`
 - `<workspace>/dump/`
 - `<workspace>/clients/`
-- `<workspace>/owned-assets/`
+- `<workspace>/owned-assets/` for generic workspace owned assets or explicit sub-assets
 - `<workspace>/projects/`
 - `<workspace>/micro-projects/`
 - `<workspace>/humans/`
@@ -33,6 +33,22 @@ AI System manages one or more local Mac workspaces for clients, projects, tasks,
 - `<workspace>/system-insights/`
 - `<workspace>/skills/`
 - `<workspace>/archive/`
+
+Primary-entity workspace roots may also store the primary company, brand, or owner-controlled entity directly at:
+
+- `<workspace>/status.md`
+- `<workspace>/memory.md`
+- `<workspace>/context/`
+- `<workspace>/documents/`
+- `<workspace>/contracts/`
+- `<workspace>/assets/`
+- `<workspace>/contacts/`
+- `<workspace>/decisions/`
+- `<workspace>/distillations/`
+- `<workspace>/links/`
+- `<workspace>/notes/`
+- `<workspace>/tasks/`
+- `<workspace>/checkpoints/`
 
 ## Default Behavior
 

@@ -1,8 +1,8 @@
-# AI System Workspace: <WORKSPACE_ID>
+# AI System Generic Workspace: <WORKSPACE_ID>
 
 ## Purpose
 
-Private local runtime for AI System.
+Private local generic runtime for AI System.
 
 Workspace home: `<WORKSPACE_HOME>`.
 
@@ -11,7 +11,7 @@ Workspace home: `<WORKSPACE_HOME>`.
 - `core/` - workspace status, indexes, and operational notes.
 - `dump/` - incoming unclassified files.
 - `clients/` - client workspaces.
-- `owned-assets/` - owner-controlled companies, brands, and commercial assets.
+- `owned-assets/` - owner-controlled companies, brands, and commercial assets when they are not the primary entity of this workspace.
 - `projects/` - standalone projects.
 - `micro-projects/` - small standalone work.
 - `humans/` - owner-facing summaries.

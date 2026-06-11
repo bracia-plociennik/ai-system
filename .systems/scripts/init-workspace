@@ -8,12 +8,30 @@ Usage: .systems/scripts/init-workspace [options]
 Options:
   --workspace <path>     workspace path (default: selected workspace or ./ai-system-workspace)
   --workspace-id <id>    workspace id written to core/status.md (default: registry id or path basename)
+  --workspace-profile <generic|primary-entity>
+                         workspace structure profile (default: generic)
+  --primary-entity-slug <slug>
+                         primary entity slug for primary-entity profile (default: workspace id)
+  --primary-entity-label <label>
+                         primary entity label for primary-entity profile (default: workspace id)
+  --primary-entity-type <type>
+                         primary entity type for primary-entity profile (default: primary-entity)
+  --primary-entity-owner <owner>
+                         primary entity owner for primary-entity profile (default: unknown)
+  --operating-lens <lens>
+                         operating lens for primary-entity profile (default: not-set)
   -h, --help             show this help
 EOF
 }
 
 workspace_arg=""
 workspace_id_arg=""
+workspace_profile="generic"
+primary_entity_slug_arg=""
+primary_entity_label_arg=""
+primary_entity_type_arg=""
+primary_entity_owner_arg=""
+operating_lens_arg=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -27,6 +45,36 @@ while [[ $# -gt 0 ]]; do
       [[ -n "$workspace_id_arg" ]] || { echo "Missing value for --workspace-id"; exit 2; }
       shift 2
       ;;
+    --workspace-profile)
+      workspace_profile="${2:-}"
+      [[ -n "$workspace_profile" ]] || { echo "Missing value for --workspace-profile"; exit 2; }
+      shift 2
+      ;;
+    --primary-entity-slug)
+      primary_entity_slug_arg="${2:-}"
+      [[ -n "$primary_entity_slug_arg" ]] || { echo "Missing value for --primary-entity-slug"; exit 2; }
+      shift 2
+      ;;
+    --primary-entity-label)
+      primary_entity_label_arg="${2:-}"
+      [[ -n "$primary_entity_label_arg" ]] || { echo "Missing value for --primary-entity-label"; exit 2; }
+      shift 2
+      ;;
+    --primary-entity-type)
+      primary_entity_type_arg="${2:-}"
+      [[ -n "$primary_entity_type_arg" ]] || { echo "Missing value for --primary-entity-type"; exit 2; }
+      shift 2
+      ;;
+    --primary-entity-owner)
+      primary_entity_owner_arg="${2:-}"
+      [[ -n "$primary_entity_owner_arg" ]] || { echo "Missing value for --primary-entity-owner"; exit 2; }
+      shift 2
+      ;;
+    --operating-lens)
+      operating_lens_arg="${2:-}"
+      [[ -n "$operating_lens_arg" ]] || { echo "Missing value for --operating-lens"; exit 2; }
+      shift 2
+      ;;
     -h|--help)
       usage
       exit 0
@@ -38,6 +86,16 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+case "$workspace_profile" in
+  generic|primary-entity)
+    ;;
+  *)
+    echo "Unknown workspace profile: $workspace_profile"
+    usage
+    exit 2
+    ;;
+esac
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 ai_system_home="$(cd "$script_dir/../.." && pwd -P)"
@@ -78,6 +136,12 @@ fi
 if [[ -z "$workspace_id" ]]; then
   workspace_id="$(basename "$workspace_home")"
 fi
+
+primary_entity_slug="${primary_entity_slug_arg:-$workspace_id}"
+primary_entity_label="${primary_entity_label_arg:-$workspace_id}"
+primary_entity_type="${primary_entity_type_arg:-primary-entity}"
+primary_entity_owner="${primary_entity_owner_arg:-unknown}"
+operating_lens="${operating_lens_arg:-not-set}"
 
 relative_path() {
   local path="$1"
@@ -147,6 +211,11 @@ copy_template_with_context() {
   local today
   local escaped_workspace_id
   local escaped_workspace_home
+  local escaped_primary_entity_slug
+  local escaped_primary_entity_label
+  local escaped_primary_entity_type
+  local escaped_primary_entity_owner
+  local escaped_operating_lens
 
   if [[ ! -f "$source" ]]; then
     echo "Missing template: $(relative_path "$source")"
@@ -161,11 +230,73 @@ copy_template_with_context() {
   today="$(date +%F)"
   escaped_workspace_id="${workspace_id//&/\\&}"
   escaped_workspace_home="${workspace_home_relative//&/\\&}"
+  escaped_primary_entity_slug="${primary_entity_slug//&/\\&}"
+  escaped_primary_entity_label="${primary_entity_label//&/\\&}"
+  escaped_primary_entity_type="${primary_entity_type//&/\\&}"
+  escaped_primary_entity_owner="${primary_entity_owner//&/\\&}"
+  escaped_operating_lens="${operating_lens//&/\\&}"
   mkdir -p "$(dirname "$destination")"
   sed \
     -e "s|<YYYY-MM-DD>|$today|g" \
     -e "s|<WORKSPACE_ID>|$escaped_workspace_id|g" \
     -e "s|<WORKSPACE_HOME>|$escaped_workspace_home|g" \
+    -e "s|<PRIMARY_ENTITY_SLUG>|$escaped_primary_entity_slug|g" \
+    -e "s|<PRIMARY_ENTITY_LABEL>|$escaped_primary_entity_label|g" \
+    -e "s|<PRIMARY_ENTITY_TYPE>|$escaped_primary_entity_type|g" \
+    -e "s|<PRIMARY_ENTITY_OWNER>|$escaped_primary_entity_owner|g" \
+    -e "s|<OPERATING_LENS>|$escaped_operating_lens|g" \
+    "$source" > "$destination"
+  echo "created file: $(relative_path "$destination")"
+}
+
+copy_primary_entity_directory_readme() {
+  local destination="$1"
+  local directory_label="$2"
+  local directory_purpose="$3"
+  local source="$templates/primary-entity-directory-readme.template.md"
+  local today
+  local escaped_workspace_id
+  local escaped_workspace_home
+  local escaped_primary_entity_slug
+  local escaped_primary_entity_label
+  local escaped_primary_entity_type
+  local escaped_primary_entity_owner
+  local escaped_operating_lens
+  local escaped_directory_label
+  local escaped_directory_purpose
+
+  if [[ ! -f "$source" ]]; then
+    echo "Missing template: $(relative_path "$source")"
+    exit 1
+  fi
+
+  if [[ -e "$destination" ]]; then
+    echo "kept existing file: $(relative_path "$destination")"
+    return 0
+  fi
+
+  today="$(date +%F)"
+  escaped_workspace_id="${workspace_id//&/\\&}"
+  escaped_workspace_home="${workspace_home_relative//&/\\&}"
+  escaped_primary_entity_slug="${primary_entity_slug//&/\\&}"
+  escaped_primary_entity_label="${primary_entity_label//&/\\&}"
+  escaped_primary_entity_type="${primary_entity_type//&/\\&}"
+  escaped_primary_entity_owner="${primary_entity_owner//&/\\&}"
+  escaped_operating_lens="${operating_lens//&/\\&}"
+  escaped_directory_label="${directory_label//&/\\&}"
+  escaped_directory_purpose="${directory_purpose//&/\\&}"
+  mkdir -p "$(dirname "$destination")"
+  sed \
+    -e "s|<YYYY-MM-DD>|$today|g" \
+    -e "s|<WORKSPACE_ID>|$escaped_workspace_id|g" \
+    -e "s|<WORKSPACE_HOME>|$escaped_workspace_home|g" \
+    -e "s|<PRIMARY_ENTITY_SLUG>|$escaped_primary_entity_slug|g" \
+    -e "s|<PRIMARY_ENTITY_LABEL>|$escaped_primary_entity_label|g" \
+    -e "s|<PRIMARY_ENTITY_TYPE>|$escaped_primary_entity_type|g" \
+    -e "s|<PRIMARY_ENTITY_OWNER>|$escaped_primary_entity_owner|g" \
+    -e "s|<OPERATING_LENS>|$escaped_operating_lens|g" \
+    -e "s|<PRIMARY_ENTITY_DIRECTORY_LABEL>|$escaped_directory_label|g" \
+    -e "s|<PRIMARY_ENTITY_DIRECTORY_PURPOSE>|$escaped_directory_purpose|g" \
     "$source" > "$destination"
   echo "created file: $(relative_path "$destination")"
 }
@@ -173,7 +304,6 @@ copy_template_with_context() {
 ensure_dir "$workspace_home/core"
 ensure_dir "$workspace_home/dump/incoming"
 ensure_dir "$workspace_home/clients"
-ensure_dir "$workspace_home/owned-assets"
 ensure_dir "$workspace_home/projects"
 ensure_dir "$workspace_home/micro-projects"
 ensure_dir "$workspace_home/humans"
@@ -183,12 +313,45 @@ ensure_dir "$workspace_home/system-insights"
 ensure_dir "$workspace_home/skills"
 ensure_dir "$workspace_home/archive"
 
-copy_template_with_context "$templates/workspace-readme.template.md" "$workspace_home/README.md"
+if [[ "$workspace_profile" == "generic" ]]; then
+  ensure_dir "$workspace_home/owned-assets"
+  copy_template_with_context "$templates/workspace-readme.template.md" "$workspace_home/README.md"
+else
+  ensure_dir "$workspace_home/assets"
+  ensure_dir "$workspace_home/checkpoints"
+  ensure_dir "$workspace_home/contacts"
+  ensure_dir "$workspace_home/context"
+  ensure_dir "$workspace_home/contracts"
+  ensure_dir "$workspace_home/decisions"
+  ensure_dir "$workspace_home/distillations"
+  ensure_dir "$workspace_home/documents"
+  ensure_dir "$workspace_home/links"
+  ensure_dir "$workspace_home/notes"
+  ensure_dir "$workspace_home/tasks"
+  copy_template_with_context "$templates/primary-entity-workspace-readme.template.md" "$workspace_home/README.md"
+  copy_template_with_context "$templates/primary-entity-status.template.md" "$workspace_home/status.md"
+  copy_template_with_context "$templates/primary-entity-memory.template.md" "$workspace_home/memory.md"
+  copy_primary_entity_directory_readme "$workspace_home/assets/README.md" "Primary Entity Assets" "Store reusable primary entity assets such as brand, identity, offer, sales, delivery, legal, finance, operations, content, and website materials."
+  copy_primary_entity_directory_readme "$workspace_home/checkpoints/README.md" "Primary Entity Checkpoints" "Store primary entity state snapshots for safe resume after major decisions, migrations, triage, or long pauses."
+  copy_primary_entity_directory_readme "$workspace_home/contacts/README.md" "Primary Entity Contacts" "Store contact notes and relationship context connected to the primary entity."
+  copy_primary_entity_directory_readme "$workspace_home/context/README.md" "Primary Entity Context" "Store source context, background, positioning, business constraints, and owner-approved intake notes for the primary entity."
+  copy_primary_entity_directory_readme "$workspace_home/contracts/README.md" "Primary Entity Contracts" "Store owner-approved contract references and contract materials for the primary entity."
+  copy_primary_entity_directory_readme "$workspace_home/decisions/README.md" "Primary Entity Decisions" "Store durable primary entity decisions, open decisions, and decision evidence."
+  copy_primary_entity_directory_readme "$workspace_home/distillations/README.md" "Primary Entity Distillations" "Store compressed summaries and lessons distilled from primary entity memory, notes, and materials."
+  copy_primary_entity_directory_readme "$workspace_home/documents/README.md" "Primary Entity Documents" "Store owner-approved documents that belong to the primary entity."
+  copy_primary_entity_directory_readme "$workspace_home/dump/incoming/README.md" "Primary Entity Incoming Dump" "Drop unclassified files here when ownership is unknown, mixed, or already known to belong to the primary entity."
+  copy_primary_entity_directory_readme "$workspace_home/links/README.md" "Primary Entity Links" "Store links and external references connected to the primary entity."
+  copy_primary_entity_directory_readme "$workspace_home/notes/README.md" "Primary Entity Notes" "Store raw and working notes for the primary entity before they are promoted into memory, decisions, tasks, or documents."
+  copy_primary_entity_directory_readme "$workspace_home/tasks/README.md" "Primary Entity Tasks" "Store task notes, task routing, and owner-approved next actions for the primary entity."
+fi
+
 copy_template "$templates/core/README.md" "$workspace_home/core/README.md"
 copy_template_with_context "$templates/core/status.template.md" "$workspace_home/core/status.md"
 copy_template "$templates/dump/README.md" "$workspace_home/dump/README.md"
 copy_template "$templates/clients/README.md" "$workspace_home/clients/README.md"
-copy_template "$templates/owned-assets/README.md" "$workspace_home/owned-assets/README.md"
+if [[ "$workspace_profile" == "generic" ]]; then
+  copy_template "$templates/owned-assets/README.md" "$workspace_home/owned-assets/README.md"
+fi
 copy_template "$templates/projects/README.md" "$workspace_home/projects/README.md"
 copy_template "$templates/micro-projects/README.md" "$workspace_home/micro-projects/README.md"
 copy_template "$templates/humans/README.md" "$workspace_home/humans/README.md"
@@ -203,6 +366,10 @@ echo
 echo "AI_SYSTEM_HOME: $ai_system_home"
 echo "AI_SYSTEM_WORKSPACE_HOME: $workspace_home"
 echo "AI_SYSTEM_WORKSPACE_ID: $workspace_id"
+echo "AI_SYSTEM_WORKSPACE_PROFILE: $workspace_profile"
+if [[ "$workspace_profile" == "primary-entity" ]]; then
+  echo "AI_SYSTEM_PRIMARY_ENTITY: $primary_entity_slug"
+fi
 echo
 echo "Next prompt:"
 echo "Review selected AI System workspace status and recommend the next safe action."

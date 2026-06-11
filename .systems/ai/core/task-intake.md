@@ -13,7 +13,7 @@ Use task intake before:
 - selecting a workspace for runtime work when more than one workspace exists;
 - creating a client or project workspace;
 - briefing or updating a client workspace;
-- creating an owned-asset workspace;
+- creating a primary-entity or owned-asset workspace;
 - triaging a material dump request;
 - planning or implementing new work;
 - accepting a change request;
@@ -52,6 +52,7 @@ Choose one safe route:
 - client brief intake;
 - dump triage proposal;
 - client workspace creation;
+- primary-entity workspace creation;
 - owned-asset workspace creation;
 - project workspace creation;
 - memory capture;
@@ -65,7 +66,7 @@ Choose one safe route:
 
 Stop before planning or implementation when:
 
-- the owner, client, owned asset, project, or target path is ambiguous;
+- the owner, primary entity, client, owned asset, project, or target path is ambiguous;
 - the target workspace is ambiguous;
 - acceptance criteria are missing and cannot be inferred safely;
 - material may contain secrets, legal content, private customer data, or production data;

@@ -24,7 +24,7 @@ Read the smallest set needed to answer safely:
 6. `ai-system-workspaces.md` when present.
 7. Selected workspace `core/status.md` when present.
 8. Selected workspace `dump/` index or classification files when present.
-9. Relevant client, owned-asset, or project status files in the selected workspace.
+9. Relevant primary-entity, client, owned-asset, or project status files in the selected workspace.
 10. Relevant memory routers, checkpoint files, distillations, and open decisions.
 
 If an expected artifact is missing, say it is missing and route to creation or recovery.
@@ -38,7 +38,8 @@ If an expected artifact is missing, say it is missing and route to creation or r
 - Dump inbox: `<workspace>/dump/incoming/`.
 - Dump classifications: `<workspace>/dump/`.
 - Clients: `<workspace>/clients/`.
-- Owned assets: `<workspace>/owned-assets/`.
+- Primary entity: `<workspace>/status.md` and `<workspace>/memory.md` when the selected workspace uses a primary-entity root.
+- Owned assets: `<workspace>/owned-assets/` in generic workspaces or explicit sub-asset namespaces.
 - Projects: `<workspace>/projects/`.
 - Workspace memory: `<workspace>/memory/`.
 - External memory for AI System improvements: `<workspace>/external-memory/`.

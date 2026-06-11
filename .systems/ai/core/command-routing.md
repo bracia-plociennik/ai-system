@@ -34,7 +34,8 @@ Do not use `ai-workflow/` for ordinary workspace, client, project, owned-asset, 
 | `przejrzyj dump` | Dump triage classification | Select workspace first; propose target, confidence, privacy risk, and owner action; do not move files without `owner-approved`. |
 | `utwórz klienta` | Client workspace creation | Select workspace first; use templates; if client artifacts should be populated, run client brief intake first. |
 | `dodaj klienta`, `aktualizuj klienta`, `zbriefuj klienta` | Client brief intake | Select workspace first; use `.systems/ai/core/client-brief.md`; completed brief belongs only in the private client workspace. |
-| `utwórz owned asset` | Owned-asset workspace creation | Select workspace first; use owned-assets templates; keep the same base directory structure as client workspaces. |
+| `utwórz owned asset` | Owned-asset workspace creation | Select workspace first; use owned-assets templates for generic workspace sub-assets; keep the same base directory structure as client workspaces. |
+| `utwórz workspace firmy`, `utwórz workspace marki`, `utwórz primary workspace` | Primary-entity workspace creation | Use `init-workspace --workspace-profile primary-entity`; the company, brand, or owner-controlled entity lives directly at the workspace root. |
 | `utwórz projekt klienta` | Client project workspace creation | Select workspace first; create status, README, memory router, and project folders only after approval. |
 | `zapisz memory` | Memory capture | Select workspace first; store in the appropriate workspace, client, owned-asset, or project memory location. |
 | `zrób destylację` | Distillation workflow | Compress raw memory and identify stale facts, decisions, risks, and checkpoint needs. |

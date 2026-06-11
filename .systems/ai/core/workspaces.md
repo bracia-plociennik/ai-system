@@ -6,6 +6,11 @@ AI System can manage multiple private local workspaces under one `AI_SYSTEM_HOME
 
 Use this model when the owner separates company, client, owned-asset, or private personal-brand materials into different runtime directories.
 
+AI System supports two workspace root profiles:
+
+- `generic` - the workspace root is a container for clients, owned assets, projects, memory, dump, and operating artifacts.
+- `primary-entity` - the workspace root is itself the main company, brand, or owner-controlled entity.
+
 ## Terms
 
 - `AI_SYSTEM_HOME` - repository root that contains `AGENTS.md`, `HUMANS.md`, `.systems/`, and system-owned scripts.
@@ -46,10 +51,11 @@ Each workspace owns its own:
 
 - `core/status.md`;
 - `core/workstreams.md`;
+- `status.md` and `memory.md` when using the primary-entity profile;
 - `memory/`;
 - `dump/`;
 - `clients/`;
-- `owned-assets/`;
+- `owned-assets/` when using the generic profile or when explicit sub-assets are needed;
 - `projects/`;
 - `system-insights/`;
 - checkpoints, routers, decisions, and task artifacts.
@@ -63,7 +69,7 @@ Use selected-workspace-relative paths:
 - `<workspace>/core/`;
 - `<workspace>/dump/`;
 - `<workspace>/clients/`;
-- `<workspace>/owned-assets/`;
+- `<workspace>/owned-assets/` for generic workspace owned assets or explicit sub-assets;
 - `<workspace>/projects/`;
 - `<workspace>/micro-projects/`;
 - `<workspace>/humans/`;
@@ -72,6 +78,22 @@ Use selected-workspace-relative paths:
 - `<workspace>/system-insights/`;
 - `<workspace>/skills/`;
 - `<workspace>/archive/`.
+
+Primary-entity workspaces also use root-level entity paths such as:
+
+- `<workspace>/status.md`;
+- `<workspace>/memory.md`;
+- `<workspace>/context/`;
+- `<workspace>/documents/`;
+- `<workspace>/contracts/`;
+- `<workspace>/assets/`;
+- `<workspace>/contacts/`;
+- `<workspace>/decisions/`;
+- `<workspace>/distillations/`;
+- `<workspace>/links/`;
+- `<workspace>/notes/`;
+- `<workspace>/tasks/`;
+- `<workspace>/checkpoints/`.
 
 ## Safety
 
