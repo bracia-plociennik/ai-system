@@ -19,6 +19,7 @@ Use task intake before:
 - accepting a change request;
 - creating a side task or micro-project;
 - capturing memory when scope or privacy is unclear;
+- suggesting or creating prompt composition artifacts;
 - proposing `system-insights`;
 - automating or batching local file work.
 
@@ -57,6 +58,7 @@ Choose one safe route:
 - project workspace creation;
 - memory capture;
 - distillation;
+- prompt composition proposal;
 - system-insights anonymization proposal;
 - change request;
 - side task or micro-project;
@@ -72,6 +74,7 @@ Stop before planning or implementation when:
 - material may contain secrets, legal content, private customer data, or production data;
 - real external effects are possible;
 - requested writes lack `owner-approved`;
+- prompt composition would change scope, risk, permissions, evidence, owner approvals, or client commitments;
 - the request would bypass validation, evidence, privacy, or stop conditions.
 
 ## Artifact Rules

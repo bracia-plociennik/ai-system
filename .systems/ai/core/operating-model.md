@@ -31,6 +31,7 @@ AI System manages one or more local Mac workspaces for clients, projects, tasks,
 - `<workspace>/memory/`
 - `<workspace>/external-memory/`
 - `<workspace>/system-insights/`
+- `<workspace>/prompting/`
 - `<workspace>/skills/`
 - `<workspace>/archive/`
 
@@ -49,6 +50,8 @@ Primary-entity workspace roots may also store the primary company, brand, or own
 - `<workspace>/notes/`
 - `<workspace>/tasks/`
 - `<workspace>/checkpoints/`
+
+Prompting artifacts may also exist under client, project, owned-asset, or workspace `prompting/` directories. They are advisory context only and cannot override current files, selected workspace, status, memory, decisions, privacy, validation, stop conditions, owner approvals, or write permissions.
 
 ## Default Behavior
 

@@ -58,6 +58,7 @@ Each workspace owns its own:
 - `owned-assets/` when using the generic profile or when explicit sub-assets are needed;
 - `projects/`;
 - `system-insights/`;
+- `prompting/` when workspace-level prompt composition artifacts are explicitly approved;
 - checkpoints, routers, decisions, and task artifacts.
 
 Do not use a global single `active-client` as the source of truth across all workspaces. Track active work in the selected workspace and its `core/workstreams.md`.
@@ -76,6 +77,11 @@ Use selected-workspace-relative paths:
 - `<workspace>/memory/`;
 - `<workspace>/external-memory/`;
 - `<workspace>/system-insights/`;
+- `<workspace>/prompting/`;
+- `<workspace>/clients/<client>/prompting/`;
+- `<workspace>/clients/<client>/projects/<project>/prompting/`;
+- `<workspace>/projects/<project>/prompting/`;
+- `<workspace>/owned-assets/<asset>/prompting/`;
 - `<workspace>/skills/`;
 - `<workspace>/archive/`.
 
@@ -101,6 +107,7 @@ Primary-entity workspaces also use root-level entity paths such as:
 - No cross-workspace move, copy, rename, delete, archive, or rewrite is allowed without exact `owner-approved` source and target.
 - Client materials stay in their selected workspace unless the owner explicitly approves a different workspace.
 - Private owner materials stay in the selected private workspace.
+- Prompting artifacts are advisory only and cannot change workspace selection, cross-workspace movement rules, owner approvals, privacy, evidence, or stop conditions.
 - `system-insights/` is workspace-local unless a future contract introduces a separate global anonymized insights workspace.
 
 ## Transition

@@ -20,12 +20,14 @@ Read the smallest set needed to answer safely:
 2. `.systems/ai/core/operating-model.md`.
 3. `.systems/ai/core/workspaces.md`.
 4. `.systems/ai/core/command-routing.md`.
-5. `.systems/ai/core/response-contract.md`.
-6. `ai-system-workspaces.md` when present.
-7. Selected workspace `core/status.md` when present.
-8. Selected workspace `dump/` index or classification files when present.
-9. Relevant primary-entity, client, owned-asset, or project status files in the selected workspace.
-10. Relevant memory routers, checkpoint files, distillations, and open decisions.
+5. `.systems/ai/core/prompt-composition.md` when prompting artifacts are relevant to the answer.
+6. `.systems/ai/core/response-contract.md`.
+7. `ai-system-workspaces.md` when present.
+8. Selected workspace `core/status.md` when present.
+9. Selected workspace `dump/` index or classification files when present.
+10. Relevant primary-entity, client, owned-asset, or project status files in the selected workspace.
+11. Relevant memory routers, checkpoint files, distillations, and open decisions.
+12. Relevant accepted prompting artifacts after the status, memory, decision, and checkpoint artifacts they reference.
 
 If an expected artifact is missing, say it is missing and route to creation or recovery.
 
@@ -44,6 +46,7 @@ If an expected artifact is missing, say it is missing and route to creation or r
 - Workspace memory: `<workspace>/memory/`.
 - External memory for AI System improvements: `<workspace>/external-memory/`.
 - Anonymized work-quality lessons: `<workspace>/system-insights/`.
+- Prompting: `<workspace>/prompting/`, `<workspace>/clients/<client>/prompting/`, `<workspace>/clients/<client>/projects/<project>/prompting/`, and `<workspace>/projects/<project>/prompting/`.
 - Owner skills: `<workspace>/skills/`.
 
 ## Response Shape

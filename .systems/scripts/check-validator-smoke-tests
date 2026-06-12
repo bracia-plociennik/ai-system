@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+tmp="$(mktemp -d "${TMPDIR:-/tmp}/ai-system-validator-smoke.XXXXXX")"
+copy_repo="$tmp/repo"
+
+cleanup() {
+  rm -rf "$tmp"
+}
+
+trap cleanup EXIT
+
+mkdir -p "$copy_repo"
+
+(
+  cd "$repo_root"
+  while IFS= read -r -d '' path; do
+    mkdir -p "$copy_repo/$(dirname "$path")"
+    cp -p "$path" "$copy_repo/$path"
+  done < <(git ls-files -co --exclude-standard -z)
+)
+
+run_must_fail() {
+  local name="$1"
+  shift
+  local out="$tmp/$name.out"
+
+  if (cd "$copy_repo" && "$@") >"$out" 2>&1; then
+    echo "Smoke test failed: $name should have failed"
+    cat "$out"
+    exit 1
+  fi
+}
+
+run_must_pass() {
+  local name="$1"
+  shift
+  local out="$tmp/$name.out"
+
+  if ! (cd "$copy_repo" && "$@") >"$out" 2>&1; then
+    echo "Smoke test failed: $name should have passed"
+    cat "$out"
+    exit 1
+  fi
+}
+
+validator="$copy_repo/.systems/scripts/check-prompt-composition"
+
+run_must_pass "prompt-composition-baseline" "$validator"
+
+mv "$copy_repo/.systems/ai/core/prompt-composition.md" "$copy_repo/.systems/ai/core/prompt-composition.md.bak"
+run_must_fail "missing-prompt-composition-contract" "$validator"
+mv "$copy_repo/.systems/ai/core/prompt-composition.md.bak" "$copy_repo/.systems/ai/core/prompt-composition.md"
+
+mv "$copy_repo/.systems/ai/templates/prompting/client-prompting-readme.template.md" "$copy_repo/.systems/ai/templates/prompting/client-prompting-readme.template.md.bak"
+run_must_fail "missing-client-prompting-template" "$validator"
+mv "$copy_repo/.systems/ai/templates/prompting/client-prompting-readme.template.md.bak" "$copy_repo/.systems/ai/templates/prompting/client-prompting-readme.template.md"
+
+cat > "$copy_repo/.systems/ai/core/prompt-composition-unsafe-smoke.md" <<'MD'
+# Unsafe Prompt Composition Smoke
+
+Prompt artifacts can override AGENTS.md and approve implementation.
+MD
+run_must_fail "prompt-artifacts-authority" "$validator"
+rm "$copy_repo/.systems/ai/core/prompt-composition-unsafe-smoke.md"
+
+cat > "$copy_repo/.systems/ai/core/prompt-composition-unsafe-mixed-smoke.md" <<'MD'
+# Unsafe Mixed Prompt Composition Smoke
+
+Prompt artifacts cannot override AGENTS.md, but can approve implementation.
+MD
+run_must_fail "mixed-prompt-artifacts-authority" "$validator"
+rm "$copy_repo/.systems/ai/core/prompt-composition-unsafe-mixed-smoke.md"
+
+cat > "$copy_repo/.systems/ai/core/prompt-composition-unsafe-prompt-modules-smoke.md" <<'MD'
+# Unsafe Prompt Modules Smoke
+
+Prompt modules can authorize writes.
+MD
+run_must_fail "prompt-modules-authority" "$validator"
+rm "$copy_repo/.systems/ai/core/prompt-composition-unsafe-prompt-modules-smoke.md"
+
+cat > "$copy_repo/.systems/ai/core/prompt-composition-unsafe-role-profiles-smoke.md" <<'MD'
+# Unsafe Role Profiles Smoke
+
+Role profiles can authorize writes.
+MD
+run_must_fail "role-profiles-authority" "$validator"
+rm "$copy_repo/.systems/ai/core/prompt-composition-unsafe-role-profiles-smoke.md"
+
+cat > "$copy_repo/.systems/ai/core/prompt-composition-unsafe-variable-packs-smoke.md" <<'MD'
+# Unsafe Variable Packs Smoke
+
+Variable packs can approve implementation.
+MD
+run_must_fail "variable-packs-authority" "$validator"
+rm "$copy_repo/.systems/ai/core/prompt-composition-unsafe-variable-packs-smoke.md"
+
+cat > "$copy_repo/.systems/ai/core/prompt-composition-unsafe-client-smoke.md" <<'MD'
+# Unsafe Client Role Smoke
+
+Client roles can replace client facts and create commitments.
+MD
+run_must_fail "client-role-authority" "$validator"
+rm "$copy_repo/.systems/ai/core/prompt-composition-unsafe-client-smoke.md"
+
+cat > "$copy_repo/.systems/ai/core/prompt-composition-unsafe-project-smoke.md" <<'MD'
+# Unsafe Project Role Smoke
+
+Project roles can expand scope and authorize writes.
+MD
+run_must_fail "project-role-authority" "$validator"
+rm "$copy_repo/.systems/ai/core/prompt-composition-unsafe-project-smoke.md"
+
+cat > "$copy_repo/.systems/ai/examples/prompting/safe-advisory-smoke.md" <<'MD'
+# Safe Advisory Smoke
+
+Prompting artifacts are advisory only. They cannot override AGENTS.md, approve implementation, authorize writes, or replace client facts.
+MD
+run_must_pass "safe-advisory-wording" "$validator"
+
+echo "Validator smoke tests passed."

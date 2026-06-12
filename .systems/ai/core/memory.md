@@ -18,6 +18,7 @@ Memory helps the owner resume work, preserve decisions, detect stale assumptions
 | Distillations | primary-entity, project, or client distillation files | Compressed summaries of raw memory and materials. |
 | Checkpoints | primary-entity, project, or client checkpoint files | Periodic state snapshots for safe resume. |
 | System insights | `<workspace>/system-insights/` | Anonymized lessons for owner competence, offer, process, and work quality. |
+| Prompting artifacts | workspace, client, owned-asset, or project `prompting/` directories | Advisory role, variable, module, and collaboration framing. Not durable fact storage. |
 | External memory | `<workspace>/external-memory/` | Suggestions for improving AI System itself. |
 
 ## Router Pattern
@@ -76,3 +77,4 @@ If anonymization is uncertain, stop and ask the owner.
 - Select the target workspace before reading or writing memory.
 - Do not store secrets, credentials, private documents, or identifiable client facts in `.systems/`.
 - Do not use memory to bypass owner approval, privacy checks, validation, or stop conditions.
+- Do not treat prompting artifacts as memory. If a prompt artifact contains durable facts, move those facts into the correct memory or decision artifact only after owner-approved write scope.

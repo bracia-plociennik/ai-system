@@ -6,5 +6,7 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 "$script_dir/check-required-artifacts"
 "$script_dir/check-readmes"
 "$script_dir/check-privacy-boundary"
+"$script_dir/check-prompt-composition"
+"$script_dir/check-validator-smoke-tests"
 
 echo "AI System validation passed."

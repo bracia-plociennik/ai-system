@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+fail=0
+
+require_file() {
+  local path="$1"
+
+  if [[ ! -f "$repo_root/$path" ]]; then
+    echo "Missing prompt composition artifact: $path"
+    fail=1
+  fi
+}
+
+require_ref() {
+  local file="$1"
+  local pattern="$2"
+  local label="$3"
+
+  if [[ ! -f "$repo_root/$file" ]]; then
+    echo "Missing file for prompt composition reference check: $file"
+    fail=1
+    return
+  fi
+
+  if ! rg -q "$pattern" "$repo_root/$file"; then
+    echo "Missing prompt composition reference in $file: $label"
+    fail=1
+  fi
+}
+
+required_files=(
+  ".systems/ai/core/prompt-composition.md"
+  ".systems/ai/templates/prompting/README.md"
+  ".systems/ai/templates/prompting/prompt-module.template.md"
+  ".systems/ai/templates/prompting/role-profile.template.md"
+  ".systems/ai/templates/prompting/variable-pack.template.md"
+  ".systems/ai/templates/prompting/client-prompting-readme.template.md"
+  ".systems/ai/templates/prompting/project-prompting-readme.template.md"
+  ".systems/ai/templates/prompting/workspace-prompting-readme.template.md"
+  ".systems/ai/templates/prompting/client-collaboration-profile.template.md"
+  ".systems/ai/templates/prompting/ai-system-operation-role.template.md"
+  ".systems/ai/templates/prompting/ai-system-maintenance-baseline.template.md"
+  ".systems/ai/examples/prompting/README.md"
+  ".systems/ai/examples/prompting/client-collaboration-profile-example.md"
+  ".systems/ai/examples/prompting/project-domain-role-example.md"
+  ".systems/ai/examples/prompting/variable-pack-example.md"
+  ".systems/ai/examples/prompting/ai-system-operation-role-example.md"
+  ".systems/ai/examples/prompting/workspace-prompting-readme-example.md"
+)
+
+for path in "${required_files[@]}"; do
+  require_file "$path"
+done
+
+require_ref "AGENTS.md" 'prompt-composition\.md' "core prompt composition contract"
+require_ref "HUMANS.md" 'Prompt Composition' "human prompt composition runbook"
+require_ref "README.md" '\.systems/ai/templates/prompting/' "prompting template namespace"
+require_ref ".systems/ai/core/command-routing.md" 'prompt-composition\.md' "command routing reference"
+require_ref ".systems/ai/core/task-intake.md" 'prompt composition' "task intake route"
+require_ref ".systems/ai/core/guide.md" 'prompting' "guide prompting reads"
+require_ref ".systems/ai/core/workspaces.md" '<workspace>/clients/<client>/prompting/' "client prompting namespace"
+require_ref ".systems/ai/core/client-brief.md" 'clients/<client>/prompting/' "client brief prompting mapping"
+require_ref ".systems/ai/core/prompt-composition.md" '<workspace>/clients/<client>/projects/<project>/prompting/' "client project prompting namespace"
+require_ref ".systems/ai/core/prompt-composition.md" 'advisory execution context only' "advisory authority"
+
+scan_roots=(
+  "$repo_root/AGENTS.md"
+  "$repo_root/HUMANS.md"
+  "$repo_root/README.md"
+  "$repo_root/.systems/ai/core"
+  "$repo_root/.systems/ai/templates/prompting"
+  "$repo_root/.systems/ai/examples/prompting"
+)
+
+reject_unsafe_pattern() {
+  local pattern="$1"
+  local message="$2"
+  local matches
+
+  matches="$(rg -n -i --glob '*.md' "$pattern" "${scan_roots[@]}" || true)"
+  if [[ -n "${matches//[[:space:]]/}" ]]; then
+    printf '%s\n' "$matches"
+    echo "$message"
+    fail=1
+  fi
+}
+
+reject_unsafe_pattern \
+  'master[ -]?prompt[^\n]*\b(is|must be|becomes|acts as|serves as)\b[[:space:]]+((the|a|an)[[:space:]]+)?(authoritative|source of truth|execution contract|policy)\b' \
+  "Unsafe prompt composition authority wording found: master prompt is made authoritative"
+
+reject_unsafe_pattern \
+  '\b(prompt composition artifacts|prompt artifacts|prompting artifacts?|prompt modules?|role profiles?|variable packs?|generated artifacts?)\b[^\n]*\b(may|can|are allowed to|should)\b[[:space:]]+(override|bypass|weaken|skip|approve|authorize|replace)\b' \
+  "Unsafe prompt composition authority wording found: advisory artifacts are granted policy or gate authority"
+
+reject_unsafe_pattern \
+  '\b(client roles?|client collaboration profiles?|client-level roles?)\b[^\n]*\b(may|can|are allowed to|should)\b[[:space:]]+(replace facts|replace client facts|create commitments|approve commitments)\b' \
+  "Unsafe client role authority wording found"
+
+reject_unsafe_pattern \
+  '\b(project roles?|project-domain roles?|generated roles?)\b[^\n]*\b(may|can|are allowed to|should)\b[[:space:]]+(lower risk|change acceptance|expand scope|approve implementation|authorize writes)\b' \
+  "Unsafe project role authority wording found"
+
+exit "$fail"

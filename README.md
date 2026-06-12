@@ -30,6 +30,27 @@ Use `.systems/ai/templates/workspace-registry.template.md` to create the registr
 
 Private workspace directories and the registry are ignored local runtime. Do not commit customer data, secrets, contracts, private notes, exports, or working files.
 
+## Prompt Composition
+
+AI System supports advisory prompt composition for roles, variable packs, modules, client collaboration profiles, project prompting, workspace prompting, and AI System operation roles.
+
+Prompting is supporting context only. It cannot override `AGENTS.md`, `.systems/ai/core/**`, current files, workspace selection, privacy, owner approvals, stop conditions, evidence, validation, or write permissions.
+
+Reusable templates live in:
+
+```text
+.systems/ai/templates/prompting/
+```
+
+Accepted private prompting artifacts belong only in ignored runtime paths such as:
+
+```text
+<workspace>/prompting/
+<workspace>/clients/<client>/prompting/
+<workspace>/clients/<client>/projects/<project>/prompting/
+<workspace>/projects/<project>/prompting/
+```
+
 ## Layout
 
 - `AGENTS.md` - execution contract for AI assistants.
