@@ -113,5 +113,5 @@ Review selected workspace dump/incoming and classify files. Do not move, rename,
 - AI classifies before acting.
 - File movement needs owner approval.
 - External integrations are links or manual context in v1.
-- `system-insights` must be anonymized.
+- `system-insights` must be anonymized and stored as router entries plus detailed `insights/` files.
 - `external-memory` is only for improving AI System itself.

@@ -1,0 +1,152 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+script_dir="$repo_root/.systems/scripts"
+source "$script_dir/lib-workspaces"
+fail=0
+
+require_file() {
+  local path="$1"
+  if [[ ! -f "$repo_root/$path" ]]; then
+    echo "Missing System Insights artifact: $path"
+    fail=1
+  fi
+}
+
+require_ref() {
+  local file="$1"
+  local pattern="$2"
+  local label="$3"
+
+  if [[ ! -f "$repo_root/$file" ]]; then
+    echo "Missing file for System Insights reference check: $file"
+    fail=1
+    return 0
+  fi
+
+  if ! rg -q "$pattern" "$repo_root/$file"; then
+    echo "Missing System Insights reference in $file: $label"
+    fail=1
+  fi
+}
+
+selected_workspace_home() {
+  local workspace_home="${AI_SYSTEM_WORKSPACE_HOME:-}"
+  local registry_file
+  local default_workspaces=()
+  local default_workspace
+
+  if [[ -n "$workspace_home" ]]; then
+    ai_system_workspace_normalize_path "$repo_root" "$workspace_home"
+    return 0
+  fi
+
+  registry_file="$(ai_system_workspace_registry_file "$repo_root")"
+  while IFS= read -r default_workspace; do
+    default_workspaces+=("$default_workspace")
+  done < <(ai_system_workspace_registry_default_paths "$repo_root")
+
+  if [[ "${#default_workspaces[@]}" -eq 1 ]]; then
+    printf '%s\n' "${default_workspaces[0]}"
+  elif [[ -f "$registry_file" ]]; then
+    return 0
+  else
+    printf '%s\n' "$repo_root/ai-system-workspace"
+  fi
+}
+
+required_files=(
+  ".systems/ai/core/system-insights.md"
+  ".systems/ai/templates/workspace/system-insights/README.md"
+  ".systems/ai/templates/workspace/system-insights/system-insights-readme.template.md"
+  ".systems/ai/templates/workspace/system-insights/system-insights.template.md"
+  ".systems/ai/templates/workspace/system-insights/insights-readme.template.md"
+  ".systems/ai/templates/workspace/system-insights/system-insight.template.md"
+)
+
+for path in "${required_files[@]}"; do
+  require_file "$path"
+done
+
+require_ref ".systems/ai/templates/root/AGENTS.template.md" 'system-insights\.md' "core System Insights contract"
+require_ref "HUMANS.md" 'System Insights' "human System Insights guidance"
+require_ref "README.md" 'system-insights' "README System Insights guidance"
+require_ref ".systems/ai/core/command-routing.md" 'System Insights|system-insights' "command routing System Insights reference"
+require_ref ".systems/ai/core/memory.md" 'System Insights' "memory model System Insights reference"
+require_ref ".systems/ai/core/external-memory.md" 'system-insights' "external memory scope separation"
+require_ref ".systems/ai/core/system-insights.md" 'AI_SYSTEM_WORKSPACE_HOME/system-insights/' "workspace namespace"
+require_ref ".systems/ai/core/system-insights.md" 'External Memory' "external memory distinction"
+require_ref ".systems/ai/core/system-insights.md" '8\. WALIDACJA OPERACYJNA' "operational validation section"
+require_ref ".systems/ai/templates/workspace/external-memory/README.md" 'system-insights' "external memory excludes system insights"
+
+required_sections=(
+  "## TEMAT"
+  "## 0. SYGNAŁY"
+  "## 1. CO ZOSTAŁO FAKTYCZNIE ZROBIONE"
+  "## 2. PROBLEMY \\(→ KONWERSJA\\)"
+  "## 3. WZORCE"
+  "## 4. DECYZJE"
+  "## 5. ZASADY NA PRZYSZŁOŚĆ"
+  "## 6. OTWARTE LUKI"
+  "## 7. ODRZUCONE JAKO SZUM"
+  "## 8. WALIDACJA OPERACYJNA"
+)
+
+raw_data_pattern='(client[ _-]?name[[:space:]]*[:=]|customer[ _-]?name[[:space:]]*[:=]|\bemail[[:space:]]*[:=]|\bphone[[:space:]]*[:=]|[[:alnum:]._%+-]+@[[:alnum:].-]+\.[[:alpha:]]{2,}|\+[0-9][0-9 .()-]{7,}[0-9]|\([0-9]{2,4}\)[0-9 .-]{5,}[0-9]|[0-9]{3}[ .][0-9]{3}[ .][0-9]{3,4}|\b0x[0-9a-f]{40}\b|\.env\b|api[ _-]?key[[:space:]]*[:=]|private[ _-]?key[[:space:]]*[:=]|wallet[ _-]?private[ _-]?key|production[ _-]?credentials[[:space:]]*[:=]|secret[ _-]?token[[:space:]]*[:=]|\b(sk|pk|ghp|gho|github_pat)_[[:alnum:]_=-]{20,})'
+external_product_pattern='\b(frontend|backend|smart[ -]?contracts?|seo|ads|advertising|paid[ -]?media|offer|client[ -]?work|product)\b[^\n]{0,80}\b(lesson|lessons|insight|insights|practice|practices|rubric|checklist|heuristic|zasada|lekcja|wniosek)\b'
+
+check_insight_entry() {
+  local file="$1"
+
+  for section in "${required_sections[@]}"; do
+    if ! rg -q "^${section}$" "$file"; then
+      echo "System Insight entry missing required section '$section': ${file#"$repo_root/"}"
+      fail=1
+    fi
+  done
+
+  for required in 'Privacy check:' 'Source scope:' 'Skill candidate:' 'Suggested skill target:'; do
+    if ! rg -q "$required" "$file"; then
+      echo "System Insight entry missing required metadata '$required': ${file#"$repo_root/"}"
+      fail=1
+    fi
+  done
+
+  for subsection in '### co zostaje' '### co poprawić / usunąć' '### czego brakuje'; do
+    if ! rg -q "^${subsection}$" "$file"; then
+      echo "System Insight entry missing operational validation subsection '$subsection': ${file#"$repo_root/"}"
+      fail=1
+    fi
+  done
+
+  if ! rg -q 'Privacy check:[[:space:]]*`?<?confirmed no raw client data' "$file"; then
+    echo "System Insight entry privacy check is missing or not confirmed: ${file#"$repo_root/"}"
+    fail=1
+  fi
+
+  if rg -n -i "$raw_data_pattern" "$file"; then
+    echo "System Insight entry appears to contain raw client data or secret markers: ${file#"$repo_root/"}"
+    fail=1
+  fi
+}
+
+check_insight_entry "$repo_root/.systems/ai/templates/workspace/system-insights/system-insight.template.md"
+
+workspace_home="$(selected_workspace_home || true)"
+if [[ -n "$workspace_home" && -d "$workspace_home/system-insights/insights" ]]; then
+  while IFS= read -r -d '' file; do
+    check_insight_entry "$file"
+  done < <(find "$workspace_home/system-insights/insights" -maxdepth 1 -type f -name '*.md' ! -name 'README.md' -print0)
+fi
+
+if [[ -n "$workspace_home" && -d "$workspace_home/external-memory" ]]; then
+  while IFS= read -r -d '' file; do
+    if rg -n -i "$external_product_pattern" "$file"; then
+      echo "External Memory contains product-domain or System Insight lesson; use AI_SYSTEM_WORKSPACE_HOME/system-insights/: ${file#"$repo_root/"}"
+      fail=1
+    fi
+  done < <(find "$workspace_home/external-memory" -maxdepth 2 -type f -name '*.md' ! -name 'README.md' -print0)
+fi
+
+exit "$fail"

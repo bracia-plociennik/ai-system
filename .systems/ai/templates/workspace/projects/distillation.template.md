@@ -28,7 +28,14 @@
 
 ## Candidate System Insights
 
-- `<anonymized insight proposal or none>`
+- Should propose System Insight: `<yes|no>`
+- Candidate category: `<frontend|backend|smart-contracts|seo|ads|offer|process|quality|client-work|product|skills|n/a>`
+- Candidate status: `<proposed|rejected|n/a>`
+- Skill candidate: `<yes|no>`
+- Suggested skill target: `<AI_SYSTEM_WORKSPACE_HOME/skills/<skill-name>|.systems/ai/skills/<skill-name>|n/a>`
+- Suggested insight entry file: `<workspace>/system-insights/insights/<YYYY-MM-DD-short-kebab-title>.md`
+- Privacy check: `<confirmed no raw client data, client names, secrets, repo-specific facts, project-specific details, or production identifiers|blocked>`
+- Candidate summary: `<anonymized insight proposal or none>`
 
 ## Next Checkpoint Trigger
 

@@ -114,15 +114,15 @@ Zrób destylację pamięci klienta/projektu <slug>. Wypisz co zostaje, co jest p
 
 ## System Insights
 
-`system-insights/` is only for anonymized lessons that improve competence, offer, process, and quality of work.
+`system-insights/` is only for anonymized operating lessons and skill candidates that improve competence, offer, process, and quality of work.
 
 Ask:
 
 ```text
-Zaproponuj system-insights z tej destylacji. Usuń lub uogólnij klienta, osoby, domeny, kwoty, kontrakty, sekrety i unikalne identyfikatory.
+Zaproponuj system-insights z tej destylacji w formacie TEMAT -> 8. WALIDACJA OPERACYJNA. Usuń lub uogólnij klienta, osoby, domeny, kwoty, kontrakty, sekrety, repo/project-specific facts i unikalne identyfikatory. Niczego nie zapisuj.
 ```
 
-Do not approve a system insight until it is anonymized.
+Do not approve a system insight until it is anonymized. Durable capture requires an exact target under `<workspace>/system-insights/insights/` and a router update in `<workspace>/system-insights/system-insights.md`.
 
 ## Prompt Composition
 
@@ -189,7 +189,7 @@ The AI should refuse or stop on these.
 Before accepting implementation work, ask for evidence:
 
 ```text
-Uruchom walidację ai-system i pokaż wynik: validate-ai-system, check-readmes, check-privacy-boundary, check-required-artifacts, check-prompt-composition, check-validator-smoke-tests, git diff --check.
+Uruchom walidację ai-system i pokaż wynik: validate-ai-system, check-readmes, check-privacy-boundary, check-required-artifacts, check-system-insights, check-prompt-composition, check-validator-smoke-tests, git diff --check.
 ```
 
 PASS requires evidence. Skipped checks need a reason and impact.

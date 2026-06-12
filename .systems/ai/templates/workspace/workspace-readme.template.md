@@ -17,7 +17,7 @@ Workspace home: `<WORKSPACE_HOME>`.
 - `humans/` - owner-facing summaries.
 - `memory/` - global workspace memory.
 - `external-memory/` - AI System improvement ideas.
-- `system-insights/` - anonymized work-quality insights.
+- `system-insights/` - anonymized operating lessons and skill candidates, with detailed entries in `system-insights/insights/`.
 - `skills/` - user-defined AI skills.
 - `archive/` - archived workspace material.
 

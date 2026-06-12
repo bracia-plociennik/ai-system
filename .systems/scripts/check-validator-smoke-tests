@@ -155,4 +155,153 @@ Prompting artifacts are advisory only. They cannot override AGENTS.md, approve i
 MD
 run_must_pass "safe-advisory-wording" "$validator"
 
+system_insights_validator="$copy_repo/.systems/scripts/check-system-insights"
+system_insights_workspace="$tmp/system-insights-smoke-workspace"
+mkdir -p "$system_insights_workspace/system-insights/insights" "$system_insights_workspace/external-memory"
+
+run_must_pass "system-insights-baseline" "$system_insights_validator"
+
+cat > "$system_insights_workspace/system-insights/insights/2026-06-12-valid-frontend.md" <<'MD'
+# 2026-06-12 - Valid Frontend Insight
+
+- Date: `2026-06-12`
+- Category: `frontend`
+- Status: `accepted`
+- Source scope: `checkpoint`
+- Privacy check: `confirmed no raw client data, client names, secrets, repo-specific facts, project-specific details, or production identifiers`
+- Skill candidate: `yes`
+- Suggested skill target: `AI_SYSTEM_WORKSPACE_HOME/skills/frontend-quality-review`
+
+## TEMAT
+
+- `Frontend - jakość UI`
+
+## 0. SYGNAŁY
+
+- Visual QA catches layout issues that static checks miss.
+
+## 1. CO ZOSTAŁO FAKTYCZNIE ZROBIONE
+
+- Converted repeated UI review observations into an anonymized checklist candidate.
+
+## 2. PROBLEMY (→ KONWERSJA)
+
+| Problem | Przyczyna | Konwersja |
+| --- | --- | --- |
+| Text overflow in compact controls | Responsive constraints were incomplete | Verify longest labels on mobile and desktop |
+
+## 3. WZORCE
+
+- Repeated UI issues cluster around overflow, state coverage, and unstable dimensions.
+
+## 4. DECYZJE
+
+| Treść | Wpływ |
+| --- | --- |
+| Include viewport and state checks in frontend review | Reduces visual regressions that pass static validation |
+
+## 5. ZASADY NA PRZYSZŁOŚĆ
+
+| Zasada | Kiedy stosować |
+| --- | --- |
+| Verify compact components with realistic long content | When UI includes buttons, cards, tabs, counters, or toolbars |
+
+## 6. OTWARTE LUKI
+
+- Need a reusable frontend quality skill.
+
+## 7. ODRZUCONE JAKO SZUM
+
+| Pominięte | Dlaczego |
+| --- | --- |
+| Exact project copy and brand details | Not reusable and could identify the source project |
+
+## 8. WALIDACJA OPERACYJNA
+
+### co zostaje
+
+- Keep viewport and state visual QA as a reusable frontend standard.
+
+### co poprawić / usunąć
+
+- Remove review patterns that rely only on static validation.
+
+### czego brakuje
+
+- A concrete skill checklist with viewport sizes and acceptance rules.
+MD
+run_must_pass "system-insights-valid-entry" env AI_SYSTEM_WORKSPACE_HOME="$system_insights_workspace" "$system_insights_validator"
+
+cat > "$system_insights_workspace/system-insights/insights/2026-06-12-missing-privacy.md" <<'MD'
+# 2026-06-12 - Missing Privacy
+
+- Date: `2026-06-12`
+- Category: `quality`
+- Status: `proposed`
+- Source scope: `QA review`
+- Skill candidate: `no`
+- Suggested skill target: `n/a`
+
+## TEMAT
+## 0. SYGNAŁY
+## 1. CO ZOSTAŁO FAKTYCZNIE ZROBIONE
+## 2. PROBLEMY (→ KONWERSJA)
+## 3. WZORCE
+## 4. DECYZJE
+## 5. ZASADY NA PRZYSZŁOŚĆ
+## 6. OTWARTE LUKI
+## 7. ODRZUCONE JAKO SZUM
+## 8. WALIDACJA OPERACYJNA
+### co zostaje
+### co poprawić / usunąć
+### czego brakuje
+MD
+run_must_fail "system-insights-missing-privacy-check" env AI_SYSTEM_WORKSPACE_HOME="$system_insights_workspace" "$system_insights_validator"
+rm "$system_insights_workspace/system-insights/insights/2026-06-12-missing-privacy.md"
+
+cat > "$system_insights_workspace/system-insights/insights/2026-06-12-missing-operational-validation.md" <<'MD'
+# 2026-06-12 - Missing Operational Validation
+
+- Date: `2026-06-12`
+- Category: `quality`
+- Status: `proposed`
+- Source scope: `QA review`
+- Privacy check: `confirmed no raw client data, client names, secrets, repo-specific facts, project-specific details, or production identifiers`
+- Skill candidate: `no`
+- Suggested skill target: `n/a`
+
+## TEMAT
+## 0. SYGNAŁY
+## 1. CO ZOSTAŁO FAKTYCZNIE ZROBIONE
+## 2. PROBLEMY (→ KONWERSJA)
+## 3. WZORCE
+## 4. DECYZJE
+## 5. ZASADY NA PRZYSZŁOŚĆ
+## 6. OTWARTE LUKI
+## 7. ODRZUCONE JAKO SZUM
+## 8. WALIDACJA OPERACYJNA
+### co zostaje
+### co poprawić / usunąć
+MD
+run_must_fail "system-insights-missing-operational-validation" env AI_SYSTEM_WORKSPACE_HOME="$system_insights_workspace" "$system_insights_validator"
+rm "$system_insights_workspace/system-insights/insights/2026-06-12-missing-operational-validation.md"
+
+cp "$system_insights_workspace/system-insights/insights/2026-06-12-valid-frontend.md" "$system_insights_workspace/system-insights/insights/2026-06-12-raw-client-marker.md"
+echo "client_name: Example Client" >> "$system_insights_workspace/system-insights/insights/2026-06-12-raw-client-marker.md"
+run_must_fail "system-insights-blocks-raw-client-data" env AI_SYSTEM_WORKSPACE_HOME="$system_insights_workspace" "$system_insights_validator"
+rm "$system_insights_workspace/system-insights/insights/2026-06-12-raw-client-marker.md"
+
+cat > "$system_insights_workspace/external-memory/2026-06-12-frontend-lesson.md" <<'MD'
+# Frontend Lesson
+
+Frontend lesson insight about component quality belongs in System Insights.
+MD
+run_must_fail "system-insights-blocks-product-domain-external-memory" env AI_SYSTEM_WORKSPACE_HOME="$system_insights_workspace" "$system_insights_validator"
+rm "$system_insights_workspace/external-memory/2026-06-12-frontend-lesson.md"
+
+init_target="$tmp/init-system-insights-workspace"
+run_must_pass "init-workspace-system-insights" "$copy_repo/.systems/scripts/init-workspace" --workspace "$init_target" --workspace-id smoke
+test -f "$init_target/system-insights/system-insights.md" || { echo "init-workspace did not create system insights router"; exit 1; }
+test -f "$init_target/system-insights/insights/README.md" || { echo "init-workspace did not create system insights entries README"; exit 1; }
+
 echo "Validator smoke tests passed."

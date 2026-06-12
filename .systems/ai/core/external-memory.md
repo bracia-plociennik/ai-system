@@ -12,4 +12,4 @@ Use it for:
 - skill ideas;
 - recurring tool issues.
 
-Do not use it for client facts, project history, or owner competence lessons. Those belong in client/project memory or `system-insights/`.
+Do not use it for client facts, project history, product-domain lessons, client-work lessons, frontend/backend/SEO/ads/smart-contract practices, skill rubrics, or owner competence lessons. Those belong in client/project memory or `system-insights/`.

@@ -75,6 +75,10 @@ required=(
   ".systems/ai/templates/workspace/memory/README.md"
   ".systems/ai/templates/workspace/external-memory/README.md"
   ".systems/ai/templates/workspace/system-insights/README.md"
+  ".systems/ai/templates/workspace/system-insights/system-insights-readme.template.md"
+  ".systems/ai/templates/workspace/system-insights/system-insights.template.md"
+  ".systems/ai/templates/workspace/system-insights/insights-readme.template.md"
+  ".systems/ai/templates/workspace/system-insights/system-insight.template.md"
   ".systems/ai/templates/workspace/skills/README.md"
   ".systems/ai/templates/workspace/archive/README.md"
   ".systems/scripts/init-workspace"
@@ -83,6 +87,7 @@ required=(
   ".systems/scripts/lib-workspaces"
   ".systems/scripts/check-readmes"
   ".systems/scripts/check-privacy-boundary"
+  ".systems/scripts/check-system-insights"
   ".systems/scripts/check-prompt-composition"
   ".systems/scripts/check-validator-smoke-tests"
 )

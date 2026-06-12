@@ -21,7 +21,7 @@ Workspace home: `<WORKSPACE_HOME>`.
 - External client materials belong in `clients/`.
 - Private owner context belongs in `humans/` or `memory/` unless it has a separate private workspace.
 - Product repositories under `projects/` are private runtime data; do not read, rewrite, summarize, or expose their contents without exact owner-approved scope.
-- Cross-client or cross-entity lessons promoted to `system-insights/` must be anonymized.
+- Cross-client or cross-entity lessons promoted to `system-insights/` must follow `.systems/ai/core/system-insights.md` and be anonymized.
 
 ## Structure
 
@@ -46,7 +46,7 @@ Workspace home: `<WORKSPACE_HOME>`.
 - `micro-projects/` - small standalone work.
 - `humans/` - owner-facing summaries.
 - `external-memory/` - AI System improvement ideas.
-- `system-insights/` - anonymized work-quality insights.
+- `system-insights/` - anonymized operating lessons and skill candidates, with detailed entries in `system-insights/insights/`.
 - `skills/` - user-defined AI skills.
 - `archive/` - owner-approved archived material.
 

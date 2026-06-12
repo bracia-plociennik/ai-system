@@ -17,7 +17,7 @@ Memory helps the owner resume work, preserve decisions, detect stale assumptions
 | Project memory | `<workspace>/projects/<project>/memory/` or client project memory | Project-specific facts, decisions, implementation notes, risks, and lessons. |
 | Distillations | primary-entity, project, or client distillation files | Compressed summaries of raw memory and materials. |
 | Checkpoints | primary-entity, project, or client checkpoint files | Periodic state snapshots for safe resume. |
-| System insights | `<workspace>/system-insights/` | Anonymized lessons for owner competence, offer, process, and work quality. |
+| System insights | `<workspace>/system-insights/system-insights.md` and `<workspace>/system-insights/insights/` | Anonymized operating lessons and skill candidates for owner competence, offer, process, and work quality. |
 | Prompting artifacts | workspace, client, owned-asset, or project `prompting/` directories | Advisory role, variable, module, and collaboration framing. Not durable fact storage. |
 | External memory | `<workspace>/external-memory/` | Suggestions for improving AI System itself. |
 
@@ -57,7 +57,7 @@ A checkpoint should record:
 
 Raw client and project memory may contain identifying details.
 
-Before promoting anything to `system-insights/`, anonymize:
+Before promoting anything to `system-insights/`, use `.systems/ai/core/system-insights.md` and anonymize:
 
 - client names;
 - people names;
@@ -69,6 +69,8 @@ Before promoting anything to `system-insights/`, anonymize:
 - facts that could identify the client.
 
 If anonymization is uncertain, stop and ask the owner.
+
+Durable System Insights writes require exact `owner-approved` capture or checkpoint routing. Store long insight content as dated entries under `<workspace>/system-insights/insights/` and keep `<workspace>/system-insights/system-insights.md` as a short router/index.
 
 ## Rules
 

@@ -45,7 +45,7 @@ Do not route ordinary workspace, client, project, owned-asset, dump, memory, pro
 | `utwórz projekt klienta` | Client project workspace creation | Select workspace first; create status, README, memory router, and project folders only after approval. |
 | `zapisz memory` | Memory capture | Select workspace first; store in the appropriate workspace, client, owned-asset, or project memory location. |
 | `zrób destylację` | Distillation workflow | Compress raw memory and identify stale facts, decisions, risks, and checkpoint needs. |
-| `zaproponuj system-insights` | Anonymized insights proposal | Remove client names, people, domains, amounts, contract details, secrets, and unique identifiers. |
+| `zaproponuj system-insights` | System Insights candidate | Select workspace first; use `.systems/ai/core/system-insights.md`; produce an anonymized candidate only, with no durable write unless exact `owner-approved` capture or checkpoint routing permits it. |
 | `zaproponuj prompt`, `zaproponuj rolę`, `wygeneruj variables`, `master prompt`, `prompt composition` | Prompt composition proposal | Select workspace first; use `.systems/ai/core/prompt-composition.md`; suggest roles, modules, or variables as advisory context; do not create durable artifacts without exact `owner-approved`. |
 | `zmień .systems`, `zmień template`, `zmień validator`, `zmień AGENTS.md`, `rozwijaj AI System` | Product development boundary | In management checkouts, STOP before local writes; recommend upstream `ai-system-dev` product work and later `.systems/scripts/update-from-upstream`. |
 | `change request`, `popraw`, `dodaj`, `usuń`, `zmień decyzję` | Change request intake | Classify scope, risk, affected artifacts, and route before implementation. |
