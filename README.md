@@ -83,6 +83,22 @@ Accepted private prompting artifacts belong only in ignored runtime paths such a
 <workspace>/projects/<project>/prompting/
 ```
 
+## Knowledge Capture Gate
+
+Before `AI_SYSTEM_WORK_CLOSURE`, AI System applies `.systems/ai/core/contract-compliance.md`.
+
+This is a required decision point before final task closure, handoff, accepted change, commit-ready or push-ready product-development work, or switching to another work unit. It is not a rule to always write memory.
+
+The agent must decide:
+
+- `Work mode`: `project`, `micro-task`, `micro-project`, `side-task`, `system-maintenance`, or `client-work`;
+- `Work mode compliance`: `pass`, `warning`, or `blocked`;
+- `Knowledge capture`: `required` or `not-required`;
+- `Capture target`: `status/evidence`, memory, distillation, checkpoint, external-memory, system-insights, or `not-applicable`;
+- `Reason`: short evidence-backed reason.
+
+Durable capture still needs the correct workspace target, privacy-safe content, and explicit owner-approved write scope unless an existing checkpoint or final-check route authorizes that exact capture.
+
 ## Layout
 
 - `AGENTS.md` - ignored local execution contract generated from `.systems/ai/templates/root/AGENTS.template.md`.

@@ -112,6 +112,29 @@ Ask:
 Zrób destylację pamięci klienta/projektu <slug>. Wypisz co zostaje, co jest przestarzałe, decyzje, ryzyka i następny checkpoint.
 ```
 
+## Knowledge Capture Gate
+
+Before closing a meaningful unit of work, ask the AI to make an explicit capture decision instead of blindly writing memory.
+
+Use:
+
+```text
+Zastosuj Contract Compliance + Knowledge Capture Gate przed zamknięciem pracy. Jawnie rozstrzygnij: work mode, work mode compliance, czy Knowledge capture jest required/not-required, capture target i reason.
+```
+
+Expected targets:
+
+- `status/evidence` for changed state, validation, blockers, acceptance, or proof;
+- `client-memory` for client-specific preferences, communication, offer, process, relationship, and collaboration facts;
+- `project-memory` for project-specific decisions, facts, risks, implementation notes, and lessons;
+- `distillation` for compressing a completed stage or large memory set;
+- `checkpoint` for safe resume after major decisions, long pauses, stale state, substantial triage, or final closure;
+- `system-insights` for anonymized reusable lessons;
+- `external-memory` for AI System improvement proposals;
+- `not-applicable` when no durable knowledge changed or the fact is already captured.
+
+The gate is advisory-only. It requires a decision, not automatic writes. Durable capture still needs exact `owner-approved` scope and the correct target.
+
 ## System Insights
 
 `system-insights/` is only for anonymized operating lessons and skill candidates that improve competence, offer, process, and quality of work.
@@ -189,7 +212,7 @@ The AI should refuse or stop on these.
 Before accepting implementation work, ask for evidence:
 
 ```text
-Uruchom walidację ai-system i pokaż wynik: validate-ai-system, check-readmes, check-privacy-boundary, check-required-artifacts, check-system-insights, check-prompt-composition, check-validator-smoke-tests, git diff --check.
+Uruchom walidację ai-system i pokaż wynik: validate-ai-system, check-contract-compliance, check-readmes, check-privacy-boundary, check-required-artifacts, check-system-insights, check-prompt-composition, check-validator-smoke-tests, git diff --check.
 ```
 
 PASS requires evidence. Skipped checks need a reason and impact.

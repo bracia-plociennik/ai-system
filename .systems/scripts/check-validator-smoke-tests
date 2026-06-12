@@ -155,6 +155,30 @@ Prompting artifacts are advisory only. They cannot override AGENTS.md, approve i
 MD
 run_must_pass "safe-advisory-wording" "$validator"
 
+contract_compliance_validator="$copy_repo/.systems/scripts/check-contract-compliance"
+contract_compliance_core="$copy_repo/.systems/ai/core/contract-compliance.md"
+
+run_must_pass "contract-compliance-baseline" "$contract_compliance_validator"
+
+mutate_contract_and_expect_fail() {
+  local name="$1"
+  local pattern="$2"
+  local backup="$contract_compliance_core.bak"
+  local filtered="$tmp/$name.contract-compliance.md"
+
+  cp "$contract_compliance_core" "$backup"
+  grep -v "$pattern" "$backup" >"$filtered"
+  mv "$filtered" "$contract_compliance_core"
+  run_must_fail "$name" "$contract_compliance_validator"
+  mv "$backup" "$contract_compliance_core"
+}
+
+mutate_contract_and_expect_fail "contract-compliance-missing-client-work" "client-work"
+mutate_contract_and_expect_fail "contract-compliance-missing-required" "Knowledge capture is .*required"
+mutate_contract_and_expect_fail "contract-compliance-missing-not-required" "not-required"
+mutate_contract_and_expect_fail "contract-compliance-missing-checkpoint-target" "checkpoint"
+mutate_contract_and_expect_fail "contract-compliance-missing-advisory-only" "advisory-only"
+
 system_insights_validator="$copy_repo/.systems/scripts/check-system-insights"
 system_insights_workspace="$tmp/system-insights-smoke-workspace"
 mkdir -p "$system_insights_workspace/system-insights/insights" "$system_insights_workspace/external-memory"

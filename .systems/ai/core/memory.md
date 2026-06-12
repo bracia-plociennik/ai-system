@@ -29,6 +29,28 @@ The router tracks date, topic, type, status, and route. It should not contain lo
 
 Detailed entries should include source, evidence, summary, applies-to, and review trigger.
 
+## Knowledge Capture Gate
+
+Before `AI_SYSTEM_WORK_CLOSURE`, use `.systems/ai/core/contract-compliance.md` to decide whether `Knowledge capture` is required.
+
+The gate must explicitly choose one of:
+
+- `status/evidence`;
+- `workspace-memory`;
+- `primary-entity-memory`;
+- `client-memory`;
+- `owned-asset-memory`;
+- `project-memory`;
+- `distillation`;
+- `checkpoint`;
+- `external-memory`;
+- `system-insights`;
+- `not-applicable`.
+
+This is a routing decision, not write permission. Durable writes still require the correct selected workspace target, privacy-safe content, and exact `owner-approved` scope unless an existing checkpoint or final-check route authorizes that exact capture.
+
+Use `not-applicable` when no status, decision, evidence, reusable lesson, or durable context changed, or when the current artifact already captured the same fact.
+
 ## Distillation Reminders
 
 AI should remind the owner to distill memory when:

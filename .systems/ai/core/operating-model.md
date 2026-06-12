@@ -64,3 +64,24 @@ AI reads, classifies, summarizes, and recommends first.
 AI performs file movement only after explicit `owner-approved` permission.
 
 When multiple workspaces exist, AI selects the workspace before reading runtime status or writing artifacts. If selection is ambiguous, AI stops and asks.
+
+## Work Closure And Knowledge Capture
+
+Before `AI_SYSTEM_WORK_CLOSURE`, apply `.systems/ai/core/contract-compliance.md`.
+
+`AI_SYSTEM_WORK_CLOSURE` is the point before a final substantive response, handoff, accepted change, commit-ready or push-ready product-development state, or switch to another unrelated work unit.
+
+The gate is advisory-only. It requires a clear `Knowledge capture` decision, not automatic memory writes.
+
+Supported work modes are:
+
+- `project`;
+- `micro-task`;
+- `micro-project`;
+- `side-task`;
+- `system-maintenance`;
+- `client-work`.
+
+The capture decision must choose the narrowest correct target: `status/evidence`, `workspace-memory`, `primary-entity-memory`, `client-memory`, `owned-asset-memory`, `project-memory`, `distillation`, `checkpoint`, `external-memory`, `system-insights`, or `not-applicable`.
+
+Use `client-work` for client collaboration, offer, communication, relationship, process, and delivery-quality work. Store client-specific facts in client memory, project facts in project memory, anonymized reusable lessons in system insights, and AI System improvement proposals in external memory.

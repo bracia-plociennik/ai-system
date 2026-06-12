@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+fail=0
+
+require_file() {
+  local path="$1"
+  if [[ ! -f "$repo_root/$path" ]]; then
+    echo "Missing contract compliance artifact: $path"
+    fail=1
+  fi
+}
+
+require_ref() {
+  local file="$1"
+  local pattern="$2"
+  local label="$3"
+
+  if [[ ! -f "$repo_root/$file" ]]; then
+    echo "Missing file for contract compliance check: $file"
+    fail=1
+    return 0
+  fi
+
+  if ! rg -q "$pattern" "$repo_root/$file"; then
+    echo "Missing contract compliance reference in $file: $label"
+    fail=1
+  fi
+}
+
+required_files=(
+  ".systems/ai/core/contract-compliance.md"
+  ".systems/scripts/check-contract-compliance"
+)
+
+for path in "${required_files[@]}"; do
+  require_file "$path"
+done
+
+required_contract_terms=(
+  "advisory-only"
+  "AI_SYSTEM_WORK_CLOSURE"
+  "Work mode compliance"
+  "Knowledge capture"
+  "Knowledge capture is .*required"
+  "not-required"
+  "project"
+  "micro-task"
+  "micro-project"
+  "side-task"
+  "system-maintenance"
+  "client-work"
+  "status/evidence"
+  "workspace-memory"
+  "primary-entity-memory"
+  "client-memory"
+  "owned-asset-memory"
+  "project-memory"
+  "distillation"
+  "checkpoint"
+  "external-memory"
+  "system-insights"
+  "not-applicable"
+)
+
+for term in "${required_contract_terms[@]}"; do
+  require_ref ".systems/ai/core/contract-compliance.md" "$term" "$term"
+done
+
+for file in \
+  ".systems/ai/templates/root/AGENTS.template.md" \
+  ".systems/ai/core/operating-model.md" \
+  ".systems/ai/core/command-routing.md" \
+  ".systems/ai/core/memory.md" \
+  ".systems/ai/core/response-contract.md" \
+  "HUMANS.md" \
+  "README.md"
+do
+  require_ref "$file" 'contract-compliance\.md|Contract Compliance|contract compliance' "contract compliance routing"
+  require_ref "$file" 'Knowledge capture' "Knowledge capture gate"
+done
+
+for template in \
+  ".systems/ai/templates/workspace/projects/checkpoint.template.md" \
+  ".systems/ai/templates/workspace/projects/distillation.template.md"
+do
+  require_ref "$template" '## Contract Compliance' "template contract compliance section"
+  require_ref "$template" '## Knowledge Capture' "template knowledge capture section"
+  require_ref "$template" 'Work mode compliance' "template work mode compliance field"
+  require_ref "$template" 'Knowledge capture' "template knowledge capture field"
+done
+
+require_ref ".systems/scripts/validate-ai-system" 'check-contract-compliance' "validator chain"
+require_ref ".systems/scripts/check-required-artifacts" 'check-contract-compliance' "required artifact list"
+require_ref ".systems/scripts/check-validator-smoke-tests" 'contract-compliance' "smoke coverage"
+
+exit "$fail"

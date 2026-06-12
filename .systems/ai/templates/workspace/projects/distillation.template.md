@@ -18,6 +18,21 @@
 
 - `<decision and source>`
 
+## Contract Compliance
+
+- Work mode: `<project|micro-task|micro-project|side-task|system-maintenance|client-work>`
+- Work mode compliance: `<pass|warning|blocked>`
+- Knowledge capture: `<required|not-required>`
+- Capture target: `<status/evidence|workspace-memory|primary-entity-memory|client-memory|owned-asset-memory|project-memory|distillation|checkpoint|external-memory|system-insights|not-applicable>`
+- Reason: `<short reason>`
+
+## Knowledge Capture
+
+- Memory update needed: `<yes|no; target if yes>`
+- Distillation reason: `<phase end|large memory set|stale checkpoint|recurring pattern|owner-approved capture|other>`
+- Next checkpoint needed: `<yes|no; trigger>`
+- System insight candidate: `<yes|no; target if yes>`
+
 ## Risks And Watch Items
 
 - `<risk or watch item>`

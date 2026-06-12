@@ -19,6 +19,23 @@ Substantive responses include:
 
 Do not place the footer inside strict machine-readable output when the owner explicitly requested JSON-only, patch-only, or exact-template output. Put it in the nearest surrounding human-facing response.
 
+## Work Closure Gate
+
+When a substantive response closes a unit of work, performs a handoff, reports an accepted change, or prepares commit-ready or push-ready product-development work, apply `.systems/ai/core/contract-compliance.md` before the `Co dalej?` footer.
+
+Use this block:
+
+```text
+Contract compliance:
+- Work mode: <project|micro-task|micro-project|side-task|system-maintenance|client-work>
+- Work mode compliance: <pass|warning|blocked>
+- Knowledge capture: <required|not-required>
+- Capture target: <status/evidence|workspace-memory|primary-entity-memory|client-memory|owned-asset-memory|project-memory|distillation|checkpoint|external-memory|system-insights|not-applicable>
+- Reason: <short reason>
+```
+
+This gate is advisory-only. It records the Knowledge capture decision before `AI_SYSTEM_WORK_CLOSURE`; it does not grant write permission or bypass privacy, evidence, validation, stop conditions, or owner approvals.
+
 ## Required Footer
 
 Use this exact shape:
