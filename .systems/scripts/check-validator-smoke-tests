@@ -63,6 +63,23 @@ run_must_fail "tracked-root-agents-forbidden" "$copy_repo/.systems/scripts/check
   rm AGENTS.md
 )
 
+cat > "$copy_repo/AGENTS.md" <<'MD'
+# AGENTS.md
+
+This file is the root AI Workflow entrypoint for this target repository.
+Delegate workflow-governed work to `ai-workflow/AGENTS.md`.
+MD
+run_must_pass "dev-root-agents-skipped" "$validator"
+rm "$copy_repo/AGENTS.md"
+
+cat > "$copy_repo/AGENTS.md" <<'MD'
+# AGENTS.md
+
+This file is the generated local root agent contract for the `ai-system` branch.
+MD
+run_must_fail "generated-root-agents-missing-prompt-composition" "$validator"
+rm "$copy_repo/AGENTS.md"
+
 mv "$copy_repo/.systems/ai/templates/root/AGENTS.template.md" "$copy_repo/.systems/ai/templates/root/AGENTS.template.md.bak"
 run_must_fail "missing-root-agents-template" "$validator"
 mv "$copy_repo/.systems/ai/templates/root/AGENTS.template.md.bak" "$copy_repo/.systems/ai/templates/root/AGENTS.template.md"

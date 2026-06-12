@@ -30,6 +30,14 @@ require_ref() {
   fi
 }
 
+is_management_generated_agents() {
+  local file="$repo_root/AGENTS.md"
+
+  [[ -f "$file" ]] || return 1
+
+  rg -q 'generated local root agent contract|\.systems/ai/templates/root/AGENTS\.template\.md' "$file"
+}
+
 required_files=(
   ".systems/ai/core/prompt-composition.md"
   ".systems/ai/templates/prompting/README.md"
@@ -55,7 +63,7 @@ for path in "${required_files[@]}"; do
 done
 
 require_ref ".systems/ai/templates/root/AGENTS.template.md" 'prompt-composition\.md' "core prompt composition contract"
-if [[ -f "$repo_root/AGENTS.md" ]]; then
+if is_management_generated_agents; then
   require_ref "AGENTS.md" 'prompt-composition\.md' "local generated prompt composition contract"
 fi
 require_ref "HUMANS.md" 'Prompt Composition' "human prompt composition runbook"
@@ -77,7 +85,7 @@ scan_roots=(
   "$repo_root/.systems/ai/examples/prompting"
 )
 
-if [[ -f "$repo_root/AGENTS.md" ]]; then
+if is_management_generated_agents; then
   scan_roots+=("$repo_root/AGENTS.md")
 fi
 

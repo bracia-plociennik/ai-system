@@ -6,6 +6,18 @@ AI System is a local Mac workspace system for managing clients, projects, tasks,
 
 This branch is the dedicated `ai-system` branch. The system-owned files live at the repository root, and private client/workspace data belongs in ignored local workspace directories.
 
+## Product Source And Management Installs
+
+`ai-system-dev` is the product-development checkout for AI System. It is the place to change `.systems/**`, validators, templates, root contract templates, update scripts, validation scripts, `HUMANS.md`, and `README.md`.
+
+Downloaded or installed AI System checkouts are management checkouts. Use them for workspace, client, project, dump, memory, checkpoint, prompt composition, and system-insight operations. Do not develop the AI System product inside a management checkout.
+
+When a management checkout needs a system change, prepare that change in the upstream `ai-system-dev` product project and update the management checkout with:
+
+```text
+.systems/scripts/update-from-upstream
+```
+
 ## Local Paths
 
 Recommended system root:
@@ -47,6 +59,8 @@ Create or refresh the local file with:
 ```
 
 Use `--refresh-agents` only when you explicitly want to overwrite local `AGENTS.md` from the committed template.
+
+In the `ai-system-dev` product checkout, the local root `AGENTS.md` may intentionally be governed by the product-development workflow instead of this management template. Do not refresh it from the management template unless that is the explicit task.
 
 ## Prompt Composition
 

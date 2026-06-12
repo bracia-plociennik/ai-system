@@ -20,15 +20,17 @@ If more than one workspace plausibly matches, stop and ask the owner to choose t
 
 Prompt composition requests route through `.systems/ai/core/prompt-composition.md`. Prompting is advisory context read after authoritative status, memory, decision, checkpoint, and source artifacts. It does not grant write permission or change approval, privacy, evidence, validation, stop-condition, or workspace-selection rules.
 
-## AI Workflow Tool Boundary
+## Product Development Boundary / Upstream Boundary
 
-If `ai-workflow/` and `ai-workflow-workspace/` exist in this repository, they are development tooling and runtime for improving AI System itself.
+AI System management checkouts are for operations, not product development.
 
 Normal AI System usage routes through root `AGENTS.md`, root `.systems/`, and the selected private workspace.
 
-Use `ai-workflow/AGENTS.md` only for owner-approved product-development work on AI System itself, including root contract changes, root `.systems/**`, templates, validators, and workflow runtime artifacts.
+Product development for AI System belongs in the upstream `ai-system-dev` product project. Management checkouts receive system changes through `.systems/scripts/update-from-upstream`.
 
-Do not use `ai-workflow/` for ordinary workspace, client, project, owned-asset, dump, memory, or system-insight work.
+If the owner asks to edit `.systems/**`, validators, templates, the root `AGENTS.md` contract, `HUMANS.md`, `README.md`, update scripts, validation scripts, or another reusable product contract in a management checkout, STOP before writing. Perform read-only analysis or task intake only, then recommend preparing the change upstream and pulling it with `update-from-upstream`.
+
+Do not route ordinary workspace, client, project, owned-asset, dump, memory, prompt composition, or system-insight work into product development.
 
 ## Common Commands
 
@@ -45,6 +47,7 @@ Do not use `ai-workflow/` for ordinary workspace, client, project, owned-asset, 
 | `zrób destylację` | Distillation workflow | Compress raw memory and identify stale facts, decisions, risks, and checkpoint needs. |
 | `zaproponuj system-insights` | Anonymized insights proposal | Remove client names, people, domains, amounts, contract details, secrets, and unique identifiers. |
 | `zaproponuj prompt`, `zaproponuj rolę`, `wygeneruj variables`, `master prompt`, `prompt composition` | Prompt composition proposal | Select workspace first; use `.systems/ai/core/prompt-composition.md`; suggest roles, modules, or variables as advisory context; do not create durable artifacts without exact `owner-approved`. |
+| `zmień .systems`, `zmień template`, `zmień validator`, `zmień AGENTS.md`, `rozwijaj AI System` | Product development boundary | In management checkouts, STOP before local writes; recommend upstream `ai-system-dev` product work and later `.systems/scripts/update-from-upstream`. |
 | `change request`, `popraw`, `dodaj`, `usuń`, `zmień decyzję` | Change request intake | Classify scope, risk, affected artifacts, and route before implementation. |
 | `owner-approved: ...` | Approved write route | Execute only the approved action and target when no stop condition applies. |
 

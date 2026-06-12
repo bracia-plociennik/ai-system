@@ -6,6 +6,18 @@ This is the human runbook for the `ai-system` branch.
 
 AI System helps organize local client and project work without turning private files into public repository content.
 
+## Product Development Boundary
+
+Use `ai-system-dev` for developing AI System itself.
+
+Use downloaded or installed AI System checkouts for management only: workspace operations, clients, projects, dump triage, memory, checkpoints, prompt composition, and system-insights.
+
+Do not edit `.systems/**`, validators, templates, root contract files, update scripts, validation scripts, `HUMANS.md`, or `README.md` inside a management checkout. If a management checkout needs a system change, prepare it upstream in `ai-system-dev`, then update the management checkout with:
+
+```text
+.systems/scripts/update-from-upstream
+```
+
 ## Core Rule
 
 Use AI to read, classify, summarize, and recommend first.
@@ -20,7 +32,9 @@ After a fresh clone or if root `AGENTS.md` is missing, ask:
 owner-approved: uruchom .systems/scripts/init-ai-system, żeby wygenerować lokalny AGENTS.md z template’u.
 ```
 
-Root `AGENTS.md` is local-only. Commit changes to `.systems/ai/templates/root/AGENTS.template.md`, not to root `AGENTS.md`.
+Root `AGENTS.md` is local-only. In management checkouts, commit changes to `.systems/ai/templates/root/AGENTS.template.md` upstream, not to root `AGENTS.md`.
+
+In `ai-system-dev`, local root `AGENTS.md` can intentionally differ from `.systems/ai/templates/root/AGENTS.template.md` because product development may be governed by a separate local workflow. Do not refresh it from the management template unless that is the explicit task.
 
 Ask:
 
@@ -146,6 +160,10 @@ Sprawdź drift: porównaj status, pamięć, checkpointy i pliki projektu. Nie za
 
 ```text
 Przygotuj plan zmiany, ale nie implementuj i nie zapisuj plików.
+```
+
+```text
+Sprawdź, czy ta prośba dotyczy system-owned AI System files. Jeśli tak, zatrzymaj local management checkout i zaproponuj upstream ai-system-dev plus update-from-upstream.
 ```
 
 ```text

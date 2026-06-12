@@ -9,15 +9,17 @@ Do not commit root `AGENTS.md`; update the template and regenerate the local fil
 
 AI System manages one or more local Mac workspaces for clients, projects, tasks, files, memory, and anonymized work-quality insights. The system must stay safe for private local materials.
 
-## AI Workflow Boundary
+## Product Development Boundary / Upstream Boundary
 
-If this repository contains `ai-workflow/` and `ai-workflow-workspace/`, those paths belong only to development of AI System itself.
+This generated root contract is for AI System management checkouts.
 
-Normal AI System usage must follow this root `AGENTS.md` and the root `.systems/` contract. This includes workspace use, clients, projects, dump triage, memory, owned assets, system insights, and owner-facing operations.
+Use this checkout to manage workspaces, clients, projects, dump triage, memory, owned assets, system insights, prompt composition, and owner-facing operations.
 
-Use `ai-workflow/AGENTS.md` only when the owner explicitly asks to develop the AI System product itself, such as editing `.systems/ai/templates/root/AGENTS.template.md`, `HUMANS.md`, root `.systems/**`, templates, validators, workflow runtime artifacts, or other reusable product contracts.
+Do not use a management checkout to develop the AI System product itself. Product development belongs in the upstream `ai-system-dev` product project.
 
-Do not route ordinary workspace/client/project work through `ai-workflow/` just because the directory exists.
+System-owned files are upstream-owned in management checkouts. This includes `.systems/**`, validators, templates, root `AGENTS.md` contract changes, `HUMANS.md`, `README.md`, update scripts, and validation scripts.
+
+If the owner asks to change system-owned files in a management checkout, STOP before local implementation. The safe local action is read-only analysis, task intake, and a recommendation. Route the actual product change to the upstream `ai-system-dev` product project, then update this checkout with `.systems/scripts/update-from-upstream`.
 
 ## Source Of Truth
 

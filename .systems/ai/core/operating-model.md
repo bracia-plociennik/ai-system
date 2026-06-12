@@ -21,6 +21,8 @@ AI System manages one or more local Mac workspaces for clients, projects, tasks,
 
 Root `AGENTS.md` is a local-only generated file. Create it with `.systems/scripts/init-ai-system`; do not commit it.
 
+In management checkouts, system-owned files are upstream-owned. Do not implement local product changes to `.systems/**`, validators, templates, root contract files, update scripts, or validation scripts there. Route those changes to the upstream `ai-system-dev` product project, then update the management checkout with `.systems/scripts/update-from-upstream`.
+
 ## Workspace-Owned
 
 - `<workspace>/core/`
