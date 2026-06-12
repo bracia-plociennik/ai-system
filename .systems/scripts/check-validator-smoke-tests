@@ -16,6 +16,7 @@ mkdir -p "$copy_repo"
 (
   cd "$repo_root"
   while IFS= read -r -d '' path; do
+    [[ -e "$path" ]] || continue
     mkdir -p "$copy_repo/$(dirname "$path")"
     cp -p "$path" "$copy_repo/$path"
   done < <(git ls-files -co --exclude-standard -z)
@@ -48,6 +49,23 @@ run_must_pass() {
 validator="$copy_repo/.systems/scripts/check-prompt-composition"
 
 run_must_pass "prompt-composition-baseline" "$validator"
+
+(
+  cd "$copy_repo"
+  git init -q
+  cp .systems/ai/templates/root/AGENTS.template.md AGENTS.md
+  git add -f AGENTS.md
+)
+run_must_fail "tracked-root-agents-forbidden" "$copy_repo/.systems/scripts/check-required-artifacts"
+(
+  cd "$copy_repo"
+  git rm --cached -q AGENTS.md
+  rm AGENTS.md
+)
+
+mv "$copy_repo/.systems/ai/templates/root/AGENTS.template.md" "$copy_repo/.systems/ai/templates/root/AGENTS.template.md.bak"
+run_must_fail "missing-root-agents-template" "$validator"
+mv "$copy_repo/.systems/ai/templates/root/AGENTS.template.md.bak" "$copy_repo/.systems/ai/templates/root/AGENTS.template.md"
 
 mv "$copy_repo/.systems/ai/core/prompt-composition.md" "$copy_repo/.systems/ai/core/prompt-composition.md.bak"
 run_must_fail "missing-prompt-composition-contract" "$validator"

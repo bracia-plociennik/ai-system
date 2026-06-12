@@ -30,6 +30,24 @@ Use `.systems/ai/templates/workspace-registry.template.md` to create the registr
 
 Private workspace directories and the registry are ignored local runtime. Do not commit customer data, secrets, contracts, private notes, exports, or working files.
 
+## Local Agent Contract
+
+Root `AGENTS.md` is generated local-only runtime and is ignored by git.
+
+Committed source template:
+
+```text
+.systems/ai/templates/root/AGENTS.template.md
+```
+
+Create or refresh the local file with:
+
+```text
+.systems/scripts/init-ai-system
+```
+
+Use `--refresh-agents` only when you explicitly want to overwrite local `AGENTS.md` from the committed template.
+
 ## Prompt Composition
 
 AI System supports advisory prompt composition for roles, variable packs, modules, client collaboration profiles, project prompting, workspace prompting, and AI System operation roles.
@@ -53,12 +71,16 @@ Accepted private prompting artifacts belong only in ignored runtime paths such a
 
 ## Layout
 
-- `AGENTS.md` - execution contract for AI assistants.
+- `AGENTS.md` - ignored local execution contract generated from `.systems/ai/templates/root/AGENTS.template.md`.
 - `HUMANS.md` - human-facing runbook.
 - `.systems/` - system rules, templates, examples, skills, and validators.
-- `.github/` - validation workflow configuration.
+- `.github/` - validation workflow configuration. The root GitHub README is this file.
 
 ## First Commands
+
+```text
+Initialize AI System root AGENTS.md from template.
+```
 
 ```text
 Initialize my local AI System workspace.

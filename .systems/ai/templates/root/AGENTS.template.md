@@ -2,7 +2,10 @@
 
 ## Purpose
 
-This file is the root agent contract for the `ai-system` branch.
+This file is the generated local root agent contract for the `ai-system` branch.
+
+It is generated from `.systems/ai/templates/root/AGENTS.template.md`.
+Do not commit root `AGENTS.md`; update the template and regenerate the local file instead.
 
 AI System manages one or more local Mac workspaces for clients, projects, tasks, files, memory, and anonymized work-quality insights. The system must stay safe for private local materials.
 
@@ -12,14 +15,14 @@ If this repository contains `ai-workflow/` and `ai-workflow-workspace/`, those p
 
 Normal AI System usage must follow this root `AGENTS.md` and the root `.systems/` contract. This includes workspace use, clients, projects, dump triage, memory, owned assets, system insights, and owner-facing operations.
 
-Use `ai-workflow/AGENTS.md` only when the owner explicitly asks to develop the AI System product itself, such as editing `AGENTS.md`, `HUMANS.md`, root `.systems/**`, templates, validators, workflow runtime artifacts, or other reusable product contracts.
+Use `ai-workflow/AGENTS.md` only when the owner explicitly asks to develop the AI System product itself, such as editing `.systems/ai/templates/root/AGENTS.template.md`, `HUMANS.md`, root `.systems/**`, templates, validators, workflow runtime artifacts, or other reusable product contracts.
 
 Do not route ordinary workspace/client/project work through `ai-workflow/` just because the directory exists.
 
 ## Source Of Truth
 
 1. Current filesystem state for factual truth.
-2. This agent contract.
+2. This generated local agent contract.
 3. `.systems/ai/core/operating-model.md`.
 4. `.systems/ai/core/privacy.md`.
 5. `.systems/ai/core/context-as-data.md`.

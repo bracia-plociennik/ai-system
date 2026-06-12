@@ -42,6 +42,10 @@ done
 find_args+=( -type d -print0 )
 
 while IFS= read -r -d '' dir; do
+  if [[ "$dir" == "$repo_root/.github" ]]; then
+    continue
+  fi
+
   if [[ ! -f "$dir/README.md" ]]; then
     echo "Missing README.md in ${dir#"$repo_root/"}"
     fail=1

@@ -14,6 +14,14 @@ Only approve writes after the proposed action and target are explicit. Use the w
 
 ## Daily Start
 
+After a fresh clone or if root `AGENTS.md` is missing, ask:
+
+```text
+owner-approved: uruchom .systems/scripts/init-ai-system, żeby wygenerować lokalny AGENTS.md z template’u.
+```
+
+Root `AGENTS.md` is local-only. Commit changes to `.systems/ai/templates/root/AGENTS.template.md`, not to root `AGENTS.md`.
+
 Ask:
 
 ```text

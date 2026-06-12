@@ -14,10 +14,12 @@ AI System manages one or more local Mac workspaces for clients, projects, tasks,
 ## System-Owned
 
 - `.systems/`
-- `AGENTS.md` after branch promotion
+- `.systems/ai/templates/root/AGENTS.template.md` as the committed source for generated root `AGENTS.md`
 - `HUMANS.md` after branch promotion
 - `README.md`
 - validators and templates
+
+Root `AGENTS.md` is a local-only generated file. Create it with `.systems/scripts/init-ai-system`; do not commit it.
 
 ## Workspace-Owned
 

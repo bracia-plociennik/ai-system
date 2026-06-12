@@ -4,8 +4,15 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 fail=0
 
+if git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  if git -C "$repo_root" ls-files --error-unmatch AGENTS.md >/dev/null 2>&1; then
+    echo "Forbidden tracked artifact: AGENTS.md"
+    echo "Root AGENTS.md is generated local-only. Run: git rm --cached AGENTS.md"
+    fail=1
+  fi
+fi
+
 required=(
-  "AGENTS.md"
   "HUMANS.md"
   "README.md"
   ".systems/ai/core/operating-model.md"
@@ -22,6 +29,8 @@ required=(
   ".systems/ai/core/client-brief.md"
   ".systems/ai/core/prompt-composition.md"
   ".systems/ai/templates/workspace-registry.template.md"
+  ".systems/ai/templates/root/README.md"
+  ".systems/ai/templates/root/AGENTS.template.md"
   ".systems/ai/templates/prompting/README.md"
   ".systems/ai/templates/prompting/prompt-module.template.md"
   ".systems/ai/templates/prompting/role-profile.template.md"
@@ -69,6 +78,7 @@ required=(
   ".systems/ai/templates/workspace/skills/README.md"
   ".systems/ai/templates/workspace/archive/README.md"
   ".systems/scripts/init-workspace"
+  ".systems/scripts/init-ai-system"
   ".systems/scripts/update-from-upstream"
   ".systems/scripts/lib-workspaces"
   ".systems/scripts/check-readmes"

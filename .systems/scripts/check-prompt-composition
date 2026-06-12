@@ -54,7 +54,10 @@ for path in "${required_files[@]}"; do
   require_file "$path"
 done
 
-require_ref "AGENTS.md" 'prompt-composition\.md' "core prompt composition contract"
+require_ref ".systems/ai/templates/root/AGENTS.template.md" 'prompt-composition\.md' "core prompt composition contract"
+if [[ -f "$repo_root/AGENTS.md" ]]; then
+  require_ref "AGENTS.md" 'prompt-composition\.md' "local generated prompt composition contract"
+fi
 require_ref "HUMANS.md" 'Prompt Composition' "human prompt composition runbook"
 require_ref "README.md" '\.systems/ai/templates/prompting/' "prompting template namespace"
 require_ref ".systems/ai/core/command-routing.md" 'prompt-composition\.md' "command routing reference"
@@ -66,13 +69,17 @@ require_ref ".systems/ai/core/prompt-composition.md" '<workspace>/clients/<clien
 require_ref ".systems/ai/core/prompt-composition.md" 'advisory execution context only' "advisory authority"
 
 scan_roots=(
-  "$repo_root/AGENTS.md"
+  "$repo_root/.systems/ai/templates/root/AGENTS.template.md"
   "$repo_root/HUMANS.md"
   "$repo_root/README.md"
   "$repo_root/.systems/ai/core"
   "$repo_root/.systems/ai/templates/prompting"
   "$repo_root/.systems/ai/examples/prompting"
 )
+
+if [[ -f "$repo_root/AGENTS.md" ]]; then
+  scan_roots+=("$repo_root/AGENTS.md")
+fi
 
 reject_unsafe_pattern() {
   local pattern="$1"

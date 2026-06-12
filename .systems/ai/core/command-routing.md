@@ -8,6 +8,8 @@ Command routing chooses the next safe route. It does not grant write permission.
 
 ## Pre-routing
 
+If root `AGENTS.md` is missing, run or recommend `.systems/scripts/init-ai-system` before normal AI System usage. The committed source is `.systems/ai/templates/root/AGENTS.template.md`; root `AGENTS.md` is local-only.
+
 Before planning or implementing new work, apply `.systems/ai/core/task-intake.md`.
 
 If the request is only orientation or status, use guide mode.
