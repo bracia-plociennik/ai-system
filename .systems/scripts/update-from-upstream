@@ -173,6 +173,32 @@ classify_status_path() {
   fi
 }
 
+print_update_workspace_followups() {
+  local registry_rows=0
+  local workspace_id
+  local workspace_path
+  local default_flag
+  local workspace_status
+  local scope
+  local notes
+
+  while IFS=$'\t' read -r workspace_id workspace_path default_flag workspace_status scope notes; do
+    registry_rows=$((registry_rows + 1))
+  done < <(ai_system_workspace_registry_rows "$ai_system_home")
+
+  echo
+  echo "Recommended workspace schema backfill:"
+  echo ".systems/scripts/update-workspace --dry-run"
+  echo ".systems/scripts/update-workspace"
+
+  if [[ "$registry_rows" -gt 1 ]]; then
+    echo
+    echo "Multiple workspace rows detected. To backfill all active/paused existing workspaces:"
+    echo ".systems/scripts/update-workspace --all --dry-run"
+    echo ".systems/scripts/update-workspace --all"
+  fi
+}
+
 if [[ -e "$workspace_home" ]]; then
   echo "AI_SYSTEM_WORKSPACE_HOME: $workspace_home"
   echo "Protected runtime workspace will not be touched by this updater."
@@ -232,3 +258,4 @@ else
 fi
 
 echo "update-from-upstream completed."
+print_update_workspace_followups

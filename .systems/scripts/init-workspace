@@ -348,6 +348,7 @@ fi
 
 copy_template "$templates/core/README.md" "$workspace_home/core/README.md"
 copy_template_with_context "$templates/core/status.template.md" "$workspace_home/core/status.md"
+copy_template_with_context "$templates/core/workstreams.template.md" "$workspace_home/core/workstreams.md"
 copy_template "$templates/dump/README.md" "$workspace_home/dump/README.md"
 copy_template "$templates/clients/README.md" "$workspace_home/clients/README.md"
 if [[ "$workspace_profile" == "generic" ]]; then

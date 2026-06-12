@@ -6,8 +6,12 @@ Validation scripts for AI System live here.
 
 `init-workspace` creates or completes a selected private workspace from workspace templates.
 
+`update-workspace` backfills missing neutral schema files in existing workspaces without overwriting runtime data.
+
 `lib-workspaces` contains shared workspace registry helpers for scripts that need to prune or protect private local runtime paths.
 
 `check-contract-compliance` validates the AI System Contract Compliance and Knowledge Capture Gate policy, docs, templates, and validator wiring.
+
+`check-update-workspace` validates the workspace backfill script, update contract, docs, templates, and smoke coverage.
 
 `check-system-insights` validates System Insights templates, entry structure, privacy checks, and External Memory scope separation.

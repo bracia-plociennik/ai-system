@@ -18,6 +18,24 @@ When a management checkout needs a system change, prepare that change in the ups
 .systems/scripts/update-from-upstream
 ```
 
+`update-from-upstream` updates system-owned repository files only. It does not modify private runtime workspaces.
+
+After a successful system update, backfill missing neutral schema files in existing workspaces with:
+
+```text
+.systems/scripts/update-workspace --dry-run
+.systems/scripts/update-workspace
+```
+
+For multiple registered workspaces:
+
+```text
+.systems/scripts/update-workspace --all --dry-run
+.systems/scripts/update-workspace --all
+```
+
+`update-workspace` never overwrites existing workspace files. It reports planned creates in dry-run mode and ends normal runs with `No existing workspace files were overwritten.`
+
 ## Local Paths
 
 Recommended system root:
@@ -121,6 +139,10 @@ Initialize AI System workspace at <workspace-path> with workspace id <workspace-
 ```
 
 ```text
+Backfill missing neutral schema files in my selected workspace. Run dry-run first.
+```
+
+```text
 Review selected workspace dump/incoming and classify files. Do not move, rename, copy, or delete anything without owner-approved.
 ```
 
@@ -131,3 +153,4 @@ Review selected workspace dump/incoming and classify files. Do not move, rename,
 - External integrations are links or manual context in v1.
 - `system-insights` must be anonymized and stored as router entries plus detailed `insights/` files.
 - `external-memory` is only for improving AI System itself.
+- `update-workspace` only creates missing neutral schema files in existing workspaces; it must not overwrite runtime data or create `prompting/` by default.

@@ -63,6 +63,40 @@ Each workspace owns its own:
 
 Do not use a global single `active-client` as the source of truth across all workspaces. Track active work in the selected workspace and its `core/workstreams.md`.
 
+## Schema Backfill
+
+Use `.systems/scripts/update-workspace` to backfill missing neutral schema files in an existing workspace after AI System templates change.
+
+It is separate from `.systems/scripts/update-from-upstream`:
+
+- `update-from-upstream` updates system-owned repository files only;
+- `update-workspace` creates missing neutral runtime directories, routers, README files, and template files only inside existing workspaces.
+
+`update-workspace` must not overwrite existing workspace files, client data, project data, memory, checkpoints, system-insights entries, external-memory entries, `ai-system-workspaces.md`, root `AGENTS.md`, or `.git/info/exclude`.
+
+Run dry-run first:
+
+```text
+.systems/scripts/update-workspace --dry-run
+```
+
+Then run:
+
+```text
+.systems/scripts/update-workspace
+```
+
+For multiple registered workspaces:
+
+```text
+.systems/scripts/update-workspace --all --dry-run
+.systems/scripts/update-workspace --all
+```
+
+`--all` applies only to existing `active` and `paused` workspaces from `ai-system-workspaces.md`. It reports `planned`, `archived`, and missing paths as skipped. An explicit `--workspace` may target one archived workspace.
+
+Do not create `prompting/` by default. Prompting artifacts require exact owner-approved scope.
+
 ## Runtime Paths
 
 Use selected-workspace-relative paths:

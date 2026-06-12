@@ -1,0 +1,405 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage: .systems/scripts/update-workspace [options]
+
+Options:
+  --workspace <path-or-id>
+                         selected workspace path or registry id
+  --workspace-profile <auto|generic|primary-entity>
+                         schema profile to backfill (default: auto)
+  --all                  backfill active and paused workspaces from ai-system-workspaces.md
+  --dry-run              show planned creates without writing files
+  -h, --help             show this help
+EOF
+}
+
+workspace_arg=""
+workspace_profile="auto"
+all_workspaces=0
+dry_run=0
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --workspace)
+      workspace_arg="${2:-}"
+      [[ -n "$workspace_arg" ]] || { echo "Missing value for --workspace"; exit 2; }
+      shift 2
+      ;;
+    --workspace-profile)
+      workspace_profile="${2:-}"
+      [[ -n "$workspace_profile" ]] || { echo "Missing value for --workspace-profile"; exit 2; }
+      shift 2
+      ;;
+    --all)
+      all_workspaces=1
+      shift
+      ;;
+    --dry-run)
+      dry_run=1
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1"
+      usage
+      exit 2
+      ;;
+  esac
+done
+
+case "$workspace_profile" in
+  auto|generic|primary-entity)
+    ;;
+  *)
+    echo "Unknown workspace profile: $workspace_profile"
+    usage
+    exit 2
+    ;;
+esac
+
+if [[ "$all_workspaces" -eq 1 && -n "$workspace_arg" ]]; then
+  echo "STOP: --all and --workspace cannot be used together."
+  exit 2
+fi
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+ai_system_home="$(cd "$script_dir/../.." && pwd -P)"
+templates="$ai_system_home/.systems/ai/templates/workspace"
+source "$script_dir/lib-workspaces"
+
+relative_path() {
+  local path="$1"
+
+  if [[ "$path" == "$ai_system_home/"* ]]; then
+    printf '%s\n' "${path#$ai_system_home/}"
+  else
+    printf '%s\n' "$path"
+  fi
+}
+
+registry_path_for_id() {
+  local wanted_id="$1"
+  local workspace_id
+  local workspace_path
+  local default_flag
+  local workspace_status
+  local scope
+  local notes
+
+  while IFS=$'\t' read -r workspace_id workspace_path default_flag workspace_status scope notes; do
+    if [[ "$workspace_id" == "$wanted_id" ]]; then
+      ai_system_workspace_normalize_path "$ai_system_home" "$workspace_path"
+      return 0
+    fi
+  done < <(ai_system_workspace_registry_rows "$ai_system_home")
+
+  return 1
+}
+
+registry_row_count() {
+  local count=0
+  local workspace_id
+  local workspace_path
+  local default_flag
+  local workspace_status
+  local scope
+  local notes
+
+  while IFS=$'\t' read -r workspace_id workspace_path default_flag workspace_status scope notes; do
+    count=$((count + 1))
+  done < <(ai_system_workspace_registry_rows "$ai_system_home")
+
+  printf '%s\n' "$count"
+}
+
+resolve_selected_workspace() {
+  local selector_path=""
+  local default_workspaces=()
+  local default_workspace
+  local registry_file
+
+  if [[ -n "$workspace_arg" ]]; then
+    selector_path="$(registry_path_for_id "$workspace_arg" || true)"
+    if [[ -z "$selector_path" ]]; then
+      selector_path="$(ai_system_workspace_normalize_path "$ai_system_home" "$workspace_arg")"
+    fi
+  elif [[ -n "${AI_SYSTEM_WORKSPACE_HOME:-}" ]]; then
+    selector_path="$(ai_system_workspace_normalize_path "$ai_system_home" "$AI_SYSTEM_WORKSPACE_HOME")"
+  else
+    registry_file="$(ai_system_workspace_registry_file "$ai_system_home")"
+    while IFS= read -r default_workspace; do
+      default_workspaces+=("$default_workspace")
+    done < <(ai_system_workspace_registry_default_paths "$ai_system_home")
+
+    if [[ "${#default_workspaces[@]}" -gt 1 ]]; then
+      echo "STOP: multiple default workspaces in ai-system-workspaces.md"
+      exit 1
+    elif [[ "${#default_workspaces[@]}" -eq 1 ]]; then
+      selector_path="${default_workspaces[0]}"
+    elif [[ -f "$registry_file" ]]; then
+      echo "STOP: ai-system-workspaces.md exists but no default=yes workspace is defined"
+      exit 1
+    else
+      selector_path="$ai_system_home/ai-system-workspace"
+    fi
+  fi
+
+  if [[ -z "$selector_path" || ! -d "$selector_path" ]]; then
+    echo "STOP: selected workspace root does not exist: ${selector_path:-unknown}"
+    echo "Run .systems/scripts/init-workspace for a new workspace, then rerun update-workspace."
+    exit 1
+  fi
+
+  (cd "$selector_path" && pwd -P)
+}
+
+detect_workspace_profile() {
+  local workspace_home="$1"
+
+  if [[ "$workspace_profile" != "auto" ]]; then
+    printf '%s\n' "$workspace_profile"
+    return 0
+  fi
+
+  if [[ -f "$workspace_home/status.md" || -f "$workspace_home/memory.md" ]]; then
+    printf '%s\n' "primary-entity"
+    return 0
+  fi
+
+  if [[ -f "$workspace_home/README.md" ]] && rg -q 'primary entity directly at the workspace root|Primary entity materials belong directly' "$workspace_home/README.md"; then
+    printf '%s\n' "primary-entity"
+    return 0
+  fi
+
+  printf '%s\n' "generic"
+}
+
+ensure_dir() {
+  local workspace_home="$1"
+  local destination="$2"
+
+  if [[ -d "$destination" ]]; then
+    echo "kept existing directory: $(relative_path "$destination")"
+    return 0
+  fi
+
+  if [[ -e "$destination" ]]; then
+    echo "STOP: required directory path exists but is not a directory: $(relative_path "$destination")"
+    exit 1
+  fi
+
+  if [[ "$dry_run" -eq 1 ]]; then
+    echo "would create directory: $(relative_path "$destination")"
+  else
+    mkdir -p "$destination"
+    echo "created directory: $(relative_path "$destination")"
+  fi
+}
+
+copy_rendered_template() {
+  local workspace_home="$1"
+  local source="$2"
+  local destination="$3"
+  local directory_label="${4:-}"
+  local directory_purpose="${5:-}"
+  local workspace_home_relative
+  local workspace_id
+  local today
+  local primary_entity_slug
+  local primary_entity_label
+  local primary_entity_type
+  local primary_entity_owner
+  local operating_lens
+  local escaped_workspace_id
+  local escaped_workspace_home
+  local escaped_primary_entity_slug
+  local escaped_primary_entity_label
+  local escaped_primary_entity_type
+  local escaped_primary_entity_owner
+  local escaped_operating_lens
+  local escaped_directory_label
+  local escaped_directory_purpose
+
+  if [[ ! -f "$source" ]]; then
+    echo "Missing template: $(relative_path "$source")"
+    exit 1
+  fi
+
+  if [[ -e "$destination" ]]; then
+    echo "kept existing file: $(relative_path "$destination")"
+    return 0
+  fi
+
+  if [[ "$dry_run" -eq 1 ]]; then
+    echo "would create file: $(relative_path "$destination")"
+    return 0
+  fi
+
+  workspace_home_relative="$(ai_system_workspace_relative_path "$ai_system_home" "$workspace_home")"
+  workspace_id="$(ai_system_workspace_registry_id_for_path "$ai_system_home" "$workspace_home" || true)"
+  workspace_id="${workspace_id:-$(basename "$workspace_home")}"
+  today="$(date +%F)"
+  primary_entity_slug="$workspace_id"
+  primary_entity_label="$workspace_id"
+  primary_entity_type="primary-entity"
+  primary_entity_owner="unknown"
+  operating_lens="not-set"
+
+  escaped_workspace_id="${workspace_id//&/\\&}"
+  escaped_workspace_home="${workspace_home_relative//&/\\&}"
+  escaped_primary_entity_slug="${primary_entity_slug//&/\\&}"
+  escaped_primary_entity_label="${primary_entity_label//&/\\&}"
+  escaped_primary_entity_type="${primary_entity_type//&/\\&}"
+  escaped_primary_entity_owner="${primary_entity_owner//&/\\&}"
+  escaped_operating_lens="${operating_lens//&/\\&}"
+  escaped_directory_label="${directory_label//&/\\&}"
+  escaped_directory_purpose="${directory_purpose//&/\\&}"
+
+  mkdir -p "$(dirname "$destination")"
+  sed \
+    -e "s|<YYYY-MM-DD>|$today|g" \
+    -e "s|<WORKSPACE_ID>|$escaped_workspace_id|g" \
+    -e "s|<WORKSPACE_HOME>|$escaped_workspace_home|g" \
+    -e "s|<PRIMARY_ENTITY_SLUG>|$escaped_primary_entity_slug|g" \
+    -e "s|<PRIMARY_ENTITY_LABEL>|$escaped_primary_entity_label|g" \
+    -e "s|<PRIMARY_ENTITY_TYPE>|$escaped_primary_entity_type|g" \
+    -e "s|<PRIMARY_ENTITY_OWNER>|$escaped_primary_entity_owner|g" \
+    -e "s|<OPERATING_LENS>|$escaped_operating_lens|g" \
+    -e "s|<PRIMARY_ENTITY_DIRECTORY_LABEL>|$escaped_directory_label|g" \
+    -e "s|<PRIMARY_ENTITY_DIRECTORY_PURPOSE>|$escaped_directory_purpose|g" \
+    "$source" > "$destination"
+  echo "created file: $(relative_path "$destination")"
+}
+
+copy_template() {
+  local workspace_home="$1"
+  local source="$2"
+  local destination="$3"
+
+  copy_rendered_template "$workspace_home" "$source" "$destination"
+}
+
+copy_primary_entity_directory_readme() {
+  local workspace_home="$1"
+  local destination="$2"
+  local directory_label="$3"
+  local directory_purpose="$4"
+
+  copy_rendered_template "$workspace_home" "$templates/primary-entity-directory-readme.template.md" "$destination" "$directory_label" "$directory_purpose"
+}
+
+backfill_workspace() {
+  local workspace_home="$1"
+  local profile
+
+  # Do not create prompting/ by default. Prompting artifacts require exact owner-approved scope.
+  workspace_home="$(cd "$workspace_home" && pwd -P)"
+  profile="$(detect_workspace_profile "$workspace_home")"
+
+  echo
+  echo "AI_SYSTEM_WORKSPACE_HOME: $workspace_home"
+  echo "AI_SYSTEM_WORKSPACE_PROFILE: $profile"
+
+  ensure_dir "$workspace_home" "$workspace_home/core"
+  ensure_dir "$workspace_home" "$workspace_home/dump/incoming"
+  ensure_dir "$workspace_home" "$workspace_home/clients"
+  ensure_dir "$workspace_home" "$workspace_home/projects"
+  ensure_dir "$workspace_home" "$workspace_home/micro-projects"
+  ensure_dir "$workspace_home" "$workspace_home/humans"
+  ensure_dir "$workspace_home" "$workspace_home/memory"
+  ensure_dir "$workspace_home" "$workspace_home/external-memory"
+  ensure_dir "$workspace_home" "$workspace_home/system-insights/insights"
+  ensure_dir "$workspace_home" "$workspace_home/skills"
+  ensure_dir "$workspace_home" "$workspace_home/archive"
+
+  if [[ "$profile" == "generic" ]]; then
+    ensure_dir "$workspace_home" "$workspace_home/owned-assets"
+    copy_template "$workspace_home" "$templates/workspace-readme.template.md" "$workspace_home/README.md"
+  else
+    ensure_dir "$workspace_home" "$workspace_home/assets"
+    ensure_dir "$workspace_home" "$workspace_home/checkpoints"
+    ensure_dir "$workspace_home" "$workspace_home/contacts"
+    ensure_dir "$workspace_home" "$workspace_home/context"
+    ensure_dir "$workspace_home" "$workspace_home/contracts"
+    ensure_dir "$workspace_home" "$workspace_home/decisions"
+    ensure_dir "$workspace_home" "$workspace_home/distillations"
+    ensure_dir "$workspace_home" "$workspace_home/documents"
+    ensure_dir "$workspace_home" "$workspace_home/links"
+    ensure_dir "$workspace_home" "$workspace_home/notes"
+    ensure_dir "$workspace_home" "$workspace_home/tasks"
+    copy_template "$workspace_home" "$templates/primary-entity-workspace-readme.template.md" "$workspace_home/README.md"
+    copy_template "$workspace_home" "$templates/primary-entity-status.template.md" "$workspace_home/status.md"
+    copy_template "$workspace_home" "$templates/primary-entity-memory.template.md" "$workspace_home/memory.md"
+    copy_primary_entity_directory_readme "$workspace_home" "$workspace_home/assets/README.md" "Primary Entity Assets" "Store reusable primary entity assets such as brand, identity, offer, sales, delivery, legal, finance, operations, content, and website materials."
+    copy_primary_entity_directory_readme "$workspace_home" "$workspace_home/checkpoints/README.md" "Primary Entity Checkpoints" "Store primary entity state snapshots for safe resume after major decisions, migrations, triage, or long pauses."
+    copy_primary_entity_directory_readme "$workspace_home" "$workspace_home/contacts/README.md" "Primary Entity Contacts" "Store contact notes and relationship context connected to the primary entity."
+    copy_primary_entity_directory_readme "$workspace_home" "$workspace_home/context/README.md" "Primary Entity Context" "Store source context, background, positioning, business constraints, and owner-approved intake notes for the primary entity."
+    copy_primary_entity_directory_readme "$workspace_home" "$workspace_home/contracts/README.md" "Primary Entity Contracts" "Store owner-approved contract references and contract materials for the primary entity."
+    copy_primary_entity_directory_readme "$workspace_home" "$workspace_home/decisions/README.md" "Primary Entity Decisions" "Store durable primary entity decisions, open decisions, and decision evidence."
+    copy_primary_entity_directory_readme "$workspace_home" "$workspace_home/distillations/README.md" "Primary Entity Distillations" "Store compressed summaries and lessons distilled from primary entity memory, notes, and materials."
+    copy_primary_entity_directory_readme "$workspace_home" "$workspace_home/documents/README.md" "Primary Entity Documents" "Store owner-approved documents that belong to the primary entity."
+    copy_primary_entity_directory_readme "$workspace_home" "$workspace_home/links/README.md" "Primary Entity Links" "Store links and external references connected to the primary entity."
+    copy_primary_entity_directory_readme "$workspace_home" "$workspace_home/notes/README.md" "Primary Entity Notes" "Store raw and working notes for the primary entity before they are promoted into memory, decisions, tasks, or documents."
+    copy_primary_entity_directory_readme "$workspace_home" "$workspace_home/tasks/README.md" "Primary Entity Tasks" "Store task notes, task routing, and owner-approved next actions for the primary entity."
+  fi
+
+  copy_template "$workspace_home" "$templates/core/README.md" "$workspace_home/core/README.md"
+  copy_template "$workspace_home" "$templates/core/status.template.md" "$workspace_home/core/status.md"
+  copy_template "$workspace_home" "$templates/core/workstreams.template.md" "$workspace_home/core/workstreams.md"
+  copy_template "$workspace_home" "$templates/dump/README.md" "$workspace_home/dump/README.md"
+  copy_template "$workspace_home" "$templates/clients/README.md" "$workspace_home/clients/README.md"
+  if [[ "$profile" == "generic" ]]; then
+    copy_template "$workspace_home" "$templates/owned-assets/README.md" "$workspace_home/owned-assets/README.md"
+  fi
+  copy_template "$workspace_home" "$templates/projects/README.md" "$workspace_home/projects/README.md"
+  copy_template "$workspace_home" "$templates/micro-projects/README.md" "$workspace_home/micro-projects/README.md"
+  copy_template "$workspace_home" "$templates/humans/README.md" "$workspace_home/humans/README.md"
+  copy_template "$workspace_home" "$templates/memory/README.md" "$workspace_home/memory/README.md"
+  copy_template "$workspace_home" "$templates/memory/workspace-memory.template.md" "$workspace_home/memory/workspace-memory.md"
+  copy_template "$workspace_home" "$templates/external-memory/README.md" "$workspace_home/external-memory/README.md"
+  copy_template "$workspace_home" "$templates/system-insights/system-insights-readme.template.md" "$workspace_home/system-insights/README.md"
+  copy_template "$workspace_home" "$templates/system-insights/system-insights.template.md" "$workspace_home/system-insights/system-insights.md"
+  copy_template "$workspace_home" "$templates/system-insights/insights-readme.template.md" "$workspace_home/system-insights/insights/README.md"
+  copy_template "$workspace_home" "$templates/skills/README.md" "$workspace_home/skills/README.md"
+  copy_template "$workspace_home" "$templates/archive/README.md" "$workspace_home/archive/README.md"
+}
+
+if [[ "$all_workspaces" -eq 1 ]]; then
+  if [[ "$(registry_row_count)" -eq 0 ]]; then
+    echo "STOP: --all requires ai-system-workspaces.md with at least one workspace row."
+    exit 1
+  fi
+
+  while IFS=$'\t' read -r workspace_id workspace_path default_flag workspace_status scope notes; do
+    workspace_home="$(ai_system_workspace_normalize_path "$ai_system_home" "$workspace_path")"
+    case "$workspace_status" in
+      active|paused)
+        if [[ -d "$workspace_home" ]]; then
+          backfill_workspace "$workspace_home"
+        else
+          echo "skipped missing workspace: $workspace_id ($workspace_home)"
+        fi
+        ;;
+      planned|archived)
+        echo "skipped workspace: $workspace_id status=$workspace_status"
+        ;;
+      *)
+        echo "skipped workspace: $workspace_id status=${workspace_status:-unknown}"
+        ;;
+    esac
+  done < <(ai_system_workspace_registry_rows "$ai_system_home")
+else
+  backfill_workspace "$(resolve_selected_workspace)"
+fi
+
+echo
+if [[ "$dry_run" -eq 1 ]]; then
+  echo "Dry run only. No workspace files were written."
+fi
+echo "No existing workspace files were overwritten."

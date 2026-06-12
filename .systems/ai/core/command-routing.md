@@ -32,6 +32,8 @@ Normal AI System usage routes through root `AGENTS.md`, root `.systems/`, and th
 
 Product development for AI System belongs in the upstream `ai-system-dev` product project. Management checkouts receive system changes through `.systems/scripts/update-from-upstream`.
 
+After a successful upstream update, use `.systems/scripts/update-workspace --dry-run` and then `.systems/scripts/update-workspace` to backfill missing neutral schema files in an existing selected workspace. Use `--all` only for existing `active` or `paused` workspaces from `ai-system-workspaces.md`. `update-workspace` must not overwrite existing workspace files or create `prompting/` by default.
+
 If the owner asks to edit `.systems/**`, validators, templates, the root `AGENTS.md` contract, `HUMANS.md`, `README.md`, update scripts, validation scripts, or another reusable product contract in a management checkout, STOP before writing. Perform read-only analysis or task intake only, then recommend preparing the change upstream and pulling it with `update-from-upstream`.
 
 Do not route ordinary workspace, client, project, owned-asset, dump, memory, prompt composition, or system-insight work into product development.
@@ -53,6 +55,8 @@ Do not route ordinary workspace, client, project, owned-asset, dump, memory, pro
 | `zaproponuj system-insights` | System Insights candidate | Select workspace first; use `.systems/ai/core/system-insights.md`; produce an anonymized candidate only, with no durable write unless exact `owner-approved` capture or checkpoint routing permits it. |
 | `zaproponuj prompt`, `zaproponuj rolę`, `wygeneruj variables`, `master prompt`, `prompt composition` | Prompt composition proposal | Select workspace first; use `.systems/ai/core/prompt-composition.md`; suggest roles, modules, or variables as advisory context; do not create durable artifacts without exact `owner-approved`. |
 | `zmień .systems`, `zmień template`, `zmień validator`, `zmień AGENTS.md`, `rozwijaj AI System` | Product development boundary | In management checkouts, STOP before local writes; recommend upstream `ai-system-dev` product work and later `.systems/scripts/update-from-upstream`. |
+| `update workspace`, `zaktualizuj workspace`, `uzupełnij schema workspace` | Workspace schema backfill | Use `.systems/scripts/update-workspace --dry-run` first; then run `update-workspace` only for existing selected workspaces. Do not overwrite runtime data. |
+| `update from upstream`, `zaktualizuj system z GitHub` | System update | Use `.systems/ai/core/update-from-upstream.md`; update system-owned repo files first, then recommend `update-workspace` as a separate step. |
 | `change request`, `popraw`, `dodaj`, `usuń`, `zmień decyzję` | Change request intake | Classify scope, risk, affected artifacts, and route before implementation. |
 | `owner-approved: ...` | Approved write route | Execute only the approved action and target when no stop condition applies. |
 

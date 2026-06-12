@@ -179,6 +179,90 @@ mutate_contract_and_expect_fail "contract-compliance-missing-not-required" "not-
 mutate_contract_and_expect_fail "contract-compliance-missing-checkpoint-target" "checkpoint"
 mutate_contract_and_expect_fail "contract-compliance-missing-advisory-only" "advisory-only"
 
+update_workspace_script="$copy_repo/.systems/scripts/update-workspace"
+update_workspace_validator="$copy_repo/.systems/scripts/check-update-workspace"
+
+run_must_pass "update-workspace-validator-baseline" "$update_workspace_validator"
+
+dry_workspace="$tmp/update-workspace-dry"
+mkdir -p "$dry_workspace"
+run_must_pass "update-workspace-dry-run-writes-nothing" "$update_workspace_script" --workspace "$dry_workspace" --dry-run
+test ! -e "$dry_workspace/core" || { echo "update-workspace dry-run created core directory"; exit 1; }
+
+generic_workspace="$tmp/update-workspace-generic"
+mkdir -p \
+  "$generic_workspace/core" \
+  "$generic_workspace/memory" \
+  "$generic_workspace/clients/existing-client" \
+  "$generic_workspace/projects/existing-project" \
+  "$generic_workspace/system-insights/insights" \
+  "$generic_workspace/external-memory"
+printf '%s\n' "existing status" > "$generic_workspace/core/status.md"
+printf '%s\n' "existing memory" > "$generic_workspace/memory/workspace-memory.md"
+printf '%s\n' "client data" > "$generic_workspace/clients/existing-client/private.md"
+printf '%s\n' "project data" > "$generic_workspace/projects/existing-project/private.md"
+printf '%s\n' "insight data" > "$generic_workspace/system-insights/insights/2026-06-12-existing.md"
+printf '%s\n' "external memory data" > "$generic_workspace/external-memory/existing.md"
+exclude_before="$(cat "$copy_repo/.git/info/exclude")"
+
+run_must_pass "update-workspace-generic-backfill" "$update_workspace_script" --workspace "$generic_workspace"
+test -f "$generic_workspace/core/workstreams.md" || { echo "update-workspace did not create core/workstreams.md"; exit 1; }
+test -f "$generic_workspace/owned-assets/README.md" || { echo "update-workspace did not backfill owned-assets README"; exit 1; }
+test -f "$generic_workspace/system-insights/system-insights.md" || { echo "update-workspace did not backfill system insights router"; exit 1; }
+test ! -d "$generic_workspace/prompting" || { echo "update-workspace created prompting by default"; exit 1; }
+grep -q "existing status" "$generic_workspace/core/status.md" || { echo "update-workspace overwrote core/status.md"; exit 1; }
+grep -q "existing memory" "$generic_workspace/memory/workspace-memory.md" || { echo "update-workspace overwrote workspace-memory.md"; exit 1; }
+grep -q "client data" "$generic_workspace/clients/existing-client/private.md" || { echo "update-workspace modified client data"; exit 1; }
+grep -q "project data" "$generic_workspace/projects/existing-project/private.md" || { echo "update-workspace modified project data"; exit 1; }
+grep -q "insight data" "$generic_workspace/system-insights/insights/2026-06-12-existing.md" || { echo "update-workspace modified system insight entry"; exit 1; }
+grep -q "external memory data" "$generic_workspace/external-memory/existing.md" || { echo "update-workspace modified external memory"; exit 1; }
+test "$exclude_before" = "$(cat "$copy_repo/.git/info/exclude")" || { echo "update-workspace modified .git/info/exclude"; exit 1; }
+test ! -e "$copy_repo/AGENTS.md" || { echo "update-workspace created root AGENTS.md"; exit 1; }
+
+primary_detected_workspace="$tmp/update-workspace-primary-detected"
+mkdir -p "$primary_detected_workspace"
+printf '%s\n' "# Existing Primary Status" > "$primary_detected_workspace/status.md"
+run_must_pass "update-workspace-primary-detected" "$update_workspace_script" --workspace "$primary_detected_workspace"
+test -f "$primary_detected_workspace/memory.md" || { echo "update-workspace did not backfill primary memory.md"; exit 1; }
+test -f "$primary_detected_workspace/checkpoints/README.md" || { echo "update-workspace did not backfill primary checkpoints README"; exit 1; }
+test ! -d "$primary_detected_workspace/owned-assets" || { echo "update-workspace treated detected primary workspace as generic"; exit 1; }
+
+primary_explicit_workspace="$tmp/update-workspace-primary-explicit"
+mkdir -p "$primary_explicit_workspace"
+run_must_pass "update-workspace-primary-explicit" "$update_workspace_script" --workspace "$primary_explicit_workspace" --workspace-profile primary-entity
+test -f "$primary_explicit_workspace/status.md" || { echo "update-workspace explicit primary did not create status.md"; exit 1; }
+test -f "$primary_explicit_workspace/assets/README.md" || { echo "update-workspace explicit primary did not create assets README"; exit 1; }
+
+missing_workspace="$tmp/update-workspace-missing"
+run_must_fail "update-workspace-missing-root-stops" "$update_workspace_script" --workspace "$missing_workspace"
+
+all_active_workspace="$tmp/update-workspace-all-active"
+all_paused_workspace="$tmp/update-workspace-all-paused"
+all_planned_workspace="$tmp/update-workspace-all-planned"
+all_archived_workspace="$tmp/update-workspace-all-archived"
+all_missing_workspace="$tmp/update-workspace-all-missing"
+mkdir -p "$all_active_workspace" "$all_paused_workspace" "$all_planned_workspace" "$all_archived_workspace"
+cat > "$copy_repo/ai-system-workspaces.md" <<MD
+# AI System Workspaces
+
+| workspace-id | path | default | status | scope | notes |
+| --- | --- | --- | --- | --- | --- |
+| all-active | $all_active_workspace | yes | active | smoke | active |
+| all-paused | $all_paused_workspace | no | paused | smoke | paused |
+| all-planned | $all_planned_workspace | no | planned | smoke | planned |
+| all-archived | $all_archived_workspace | no | archived | smoke | archived |
+| all-missing | $all_missing_workspace | no | active | smoke | missing |
+MD
+run_must_pass "update-workspace-all" "$update_workspace_script" --all
+test -f "$all_active_workspace/core/workstreams.md" || { echo "update-workspace --all did not update active workspace"; exit 1; }
+test -f "$all_paused_workspace/core/workstreams.md" || { echo "update-workspace --all did not update paused workspace"; exit 1; }
+test ! -e "$all_planned_workspace/core/workstreams.md" || { echo "update-workspace --all updated planned workspace"; exit 1; }
+test ! -e "$all_archived_workspace/core/workstreams.md" || { echo "update-workspace --all updated archived workspace"; exit 1; }
+test ! -e "$all_missing_workspace" || { echo "update-workspace --all created missing workspace root"; exit 1; }
+run_must_pass "update-workspace-explicit-archived" "$update_workspace_script" --workspace "$all_archived_workspace"
+test -f "$all_archived_workspace/core/workstreams.md" || { echo "update-workspace explicit archived workspace was not updated"; exit 1; }
+rm "$copy_repo/ai-system-workspaces.md"
+
 system_insights_validator="$copy_repo/.systems/scripts/check-system-insights"
 system_insights_workspace="$tmp/system-insights-smoke-workspace"
 mkdir -p "$system_insights_workspace/system-insights/insights" "$system_insights_workspace/external-memory"
@@ -327,5 +411,6 @@ init_target="$tmp/init-system-insights-workspace"
 run_must_pass "init-workspace-system-insights" "$copy_repo/.systems/scripts/init-workspace" --workspace "$init_target" --workspace-id smoke
 test -f "$init_target/system-insights/system-insights.md" || { echo "init-workspace did not create system insights router"; exit 1; }
 test -f "$init_target/system-insights/insights/README.md" || { echo "init-workspace did not create system insights entries README"; exit 1; }
+test -f "$init_target/core/workstreams.md" || { echo "init-workspace did not create core/workstreams.md"; exit 1; }
 
 echo "Validator smoke tests passed."

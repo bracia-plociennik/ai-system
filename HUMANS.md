@@ -18,6 +18,22 @@ Do not edit `.systems/**`, validators, templates, root contract files, update sc
 .systems/scripts/update-from-upstream
 ```
 
+After a successful upstream update, update existing workspace schema separately:
+
+```text
+.systems/scripts/update-workspace --dry-run
+.systems/scripts/update-workspace
+```
+
+For multiple registered workspaces:
+
+```text
+.systems/scripts/update-workspace --all --dry-run
+.systems/scripts/update-workspace --all
+```
+
+`update-workspace` backfills missing neutral directories, routers, README files, and template files only. It must not overwrite existing client data, project data, memory, checkpoints, system-insights entries, external-memory entries, `ai-system-workspaces.md`, root `AGENTS.md`, or `.git/info/exclude`.
+
 ## Core Rule
 
 Use AI to read, classify, summarize, and recommend first.
@@ -49,6 +65,26 @@ Expected result:
 - one recommendation;
 - one safe alternative;
 - copy-paste prompts for both.
+
+## Workspace Schema Update
+
+Use this after `update-from-upstream` or when a workspace is missing new neutral routers/templates:
+
+```text
+Uruchom .systems/scripts/update-workspace --dry-run dla wybranego workspace i pokaż, co zostanie utworzone. Niczego nie nadpisuj.
+```
+
+If the dry-run is correct:
+
+```text
+owner-approved: uruchom .systems/scripts/update-workspace dla wybranego workspace. Nie nadpisuj istniejących plików.
+```
+
+For all registered workspaces:
+
+```text
+Uruchom .systems/scripts/update-workspace --all --dry-run i pokaż active/paused updated oraz planned/archived/missing skipped.
+```
 
 ## Dump Triage
 
@@ -212,7 +248,7 @@ The AI should refuse or stop on these.
 Before accepting implementation work, ask for evidence:
 
 ```text
-Uruchom walidację ai-system i pokaż wynik: validate-ai-system, check-contract-compliance, check-readmes, check-privacy-boundary, check-required-artifacts, check-system-insights, check-prompt-composition, check-validator-smoke-tests, git diff --check.
+Uruchom walidację ai-system i pokaż wynik: validate-ai-system, check-update-workspace, check-contract-compliance, check-readmes, check-privacy-boundary, check-required-artifacts, check-system-insights, check-prompt-composition, check-validator-smoke-tests, git diff --check.
 ```
 
 PASS requires evidence. Skipped checks need a reason and impact.
