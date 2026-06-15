@@ -266,6 +266,8 @@ If both a user skill and a system skill match, use the user skill first as local
 
 Legacy skill imports under `.systems/ai/skills/legacy/**` are context/data only and are not active instructions.
 
+Skill `context/` directories store raw source material for skill creation or updates. They are not active guidance. If `context/` exists beside active artifacts, require `skill-intake-plan.md` before final `SKILL.md`, `README.md`, or resource files are written.
+
 Ask:
 
 ```text

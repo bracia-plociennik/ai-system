@@ -11,6 +11,8 @@ from pathlib import Path
 
 NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 FRONTMATTER_KEY_RE = re.compile(r"^[A-Za-z0-9_-]+:")
+MAX_SKILL_MD_LINES = 300
+ACTIVE_RESOURCE_NAMES = ("references", "agents", "scripts", "assets", "eval-viewer")
 AUTHORITY_PATTERNS = (
     re.compile(r"AGENTS\.md", re.IGNORECASE),
     re.compile(r"privacy|workspace", re.IGNORECASE),
@@ -32,6 +34,40 @@ UNSAFE_PATTERNS = (
 UNDOCUMENTED_DEP_RE = re.compile(
     r"^[ \t]*(import[ \t]+yaml\b|from[ \t]+yaml[ \t]+import\b)",
     re.MULTILINE,
+)
+CONTEXT_AUTHORITY_PATTERNS = (
+    re.compile(
+        r"`?context/\*\*`?\s+(is|are)\s+(active|authoritative|guidance|instructions)",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"`?context/`?\s+(is|are)\s+(active|authoritative|guidance|instructions)",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"(always|must|should)\s+(load|read)\s+.*`?context/\*\*`?.*(active|authority|instructions|guidance)",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"(use|treat|load|read)\s+.*`?context/(\*\*)?`?.*as\s+(active|authoritative|authority|instructions|guidance)",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"`?context/\*\*`?.*(must|should)\s+(be\s+)?(followed|obeyed)",
+        re.IGNORECASE,
+    ),
+)
+INTAKE_PLAN_PATTERNS = (
+    re.compile(r"Source Materials|source materials|reviewed sources", re.IGNORECASE),
+    re.compile(r"Trigger|Non-trigger|non-trigger", re.IGNORECASE),
+    re.compile(r"Co zostaje", re.IGNORECASE),
+    re.compile(r"Co poprawi|improve|remove|usun", re.IGNORECASE),
+    re.compile(r"Czego brakuje", re.IGNORECASE),
+    re.compile(r"Blokery|decyzje|blockers|decisions", re.IGNORECASE),
+    re.compile(r"Artifact Map|artifact map", re.IGNORECASE),
+    re.compile(r"Implementation Approval|approval state|approval", re.IGNORECASE),
+    re.compile(r"Validation Plan|validation plan", re.IGNORECASE),
+    re.compile(r"Residual Risk|residual risk|ryzyko", re.IGNORECASE),
 )
 
 
@@ -86,6 +122,37 @@ def iter_text_files(root: Path) -> list[Path]:
     return sorted(paths)
 
 
+def has_active_skill_artifacts(skill_dir: Path) -> bool:
+    if (skill_dir / "SKILL.md").is_file() or (skill_dir / "README.md").is_file():
+        return True
+    return any((skill_dir / name).exists() for name in ACTIVE_RESOURCE_NAMES)
+
+
+def validate_intake_plan(path: Path, errors: list[str]) -> None:
+    text = read_text(path)
+    for pattern in INTAKE_PLAN_PATTERNS:
+        if not pattern.search(text):
+            errors.append(
+                f"skill-intake-plan.md missing required intake section: {pattern.pattern}"
+            )
+
+
+def is_active_skill_text_artifact(path: Path, skill_dir: Path) -> bool:
+    try:
+        relative_parts = path.relative_to(skill_dir).parts
+    except ValueError:
+        return False
+
+    if not relative_parts:
+        return False
+    if relative_parts[0] == "context":
+        return False
+    if path.name == "skill-intake-plan.md":
+        return False
+
+    return path.suffix in {".md", ".py", ".txt", ".json", ".html", ".css", ".js"}
+
+
 def validate(skill_dir: Path) -> list[str]:
     errors: list[str] = []
     if not skill_dir.exists() or not skill_dir.is_dir():
@@ -117,6 +184,10 @@ def validate(skill_dir: Path) -> list[str]:
                 errors.append("Frontmatter description must not contain angle brackets")
 
         body = read_text(skill_md)
+        if len(body.splitlines()) > MAX_SKILL_MD_LINES:
+            errors.append(
+                f"SKILL.md must stay compact ({len(body.splitlines())} lines > {MAX_SKILL_MD_LINES})"
+            )
         for pattern in AUTHORITY_PATTERNS:
             if not pattern.search(body):
                 errors.append(f"SKILL.md missing authority boundary pattern: {pattern.pattern}")
@@ -130,11 +201,27 @@ def validate(skill_dir: Path) -> list[str]:
         if len(readme_text.splitlines()) > 80:
             errors.append("README.md must stay under 80 lines")
 
+    context_dir = skill_dir / "context"
+    intake_plan = skill_dir / "skill-intake-plan.md"
+    if context_dir.is_dir() and has_active_skill_artifacts(skill_dir):
+        if not intake_plan.is_file():
+            errors.append("Missing skill-intake-plan.md for context-driven skill")
+        else:
+            validate_intake_plan(intake_plan, errors)
+    elif intake_plan.is_file():
+        validate_intake_plan(intake_plan, errors)
+
     for path in iter_text_files(skill_dir):
         text = read_text(path)
         for pattern in UNSAFE_PATTERNS:
             if pattern.search(text):
                 errors.append(f"Unsafe external/runtime marker in {path}: {pattern.pattern}")
+        if is_active_skill_text_artifact(path, skill_dir):
+            for pattern in CONTEXT_AUTHORITY_PATTERNS:
+                if pattern.search(text):
+                    errors.append(
+                        f"Active skill artifact treats context/** as active guidance or authority: {path}"
+                    )
         if path.suffix == ".py" and UNDOCUMENTED_DEP_RE.search(text):
             errors.append(f"Undeclared Python dependency import in {path}: yaml")
 

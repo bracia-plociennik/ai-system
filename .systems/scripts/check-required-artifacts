@@ -110,6 +110,7 @@ required=(
   ".systems/ai/templates/workspace/system-insights/insights-readme.template.md"
   ".systems/ai/templates/workspace/system-insights/system-insight.template.md"
   ".systems/ai/templates/workspace/skills/README.md"
+  ".systems/ai/templates/workspace/skills/skill-intake-plan.template.md"
   ".systems/ai/templates/workspace/archive/README.md"
   ".systems/scripts/init-workspace"
   ".systems/scripts/update-workspace"

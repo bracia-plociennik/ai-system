@@ -10,6 +10,8 @@ Use one directory per active skill:
 
 ```text
 .systems/ai/skills/<skill-name>/
+  context/
+  skill-intake-plan.md
   SKILL.md
   README.md
   agents/
@@ -27,12 +29,24 @@ Only `SKILL.md` and `README.md` are required. Optional directories exist only wh
 
 Skill names must use lowercase kebab-case.
 
+## Context Intake
+
+`context/` stores raw source material used while creating or updating a skill. It is data only, excluded from normal skill routing, and has no execution authority.
+
+When `context/` exists beside active skill artifacts, `skill-intake-plan.md` is required before final active artifacts are written. The intake plan records reviewed sources, trigger fit, what stays, what is improved or rejected, missing inputs, blockers, artifact mapping, approval state, validation plan, and residual risk.
+
+Do not promote raw source material into `SKILL.md`, `README.md`, or resource files unless it has been reviewed through the intake plan and adapted to the AI System authority boundary.
+
 ## User Skills
 
 Local user skills belong under:
 
 ```text
 AI_SYSTEM_WORKSPACE_HOME/skills/<skill-name>/
+  context/
+  skill-intake-plan.md
+  SKILL.md
+  README.md
 ```
 
 When a user skill and a system skill both match a task, the user skill has priority as local guidance. The system skill remains fallback context.

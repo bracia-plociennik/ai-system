@@ -54,6 +54,7 @@ required_files=(
   ".systems/ai/skills/skill-creator/scripts/utils.py"
   ".systems/ai/skills/legacy/README.md"
   ".systems/ai/skills/legacy/skill-creator-old/SKILL.md"
+  ".systems/ai/templates/workspace/skills/skill-intake-plan.template.md"
 )
 
 for path in "${required_files[@]}"; do
@@ -75,6 +76,8 @@ done
 
 require_ref ".systems/ai/skills/README.md" 'AI_SYSTEM_WORKSPACE_HOME/skills' "workspace user skill path"
 require_ref ".systems/ai/skills/README.md" 'legacy/.+context/data only|context/data only' "legacy context/data boundary"
+require_ref ".systems/ai/skills/README.md" 'skill-intake-plan\.md' "skill context intake plan"
+require_ref ".systems/ai/templates/workspace/skills/README.md" 'skill-intake-plan\.md' "workspace skill context intake plan"
 require_ref ".systems/ai/templates/root/AGENTS.template.md" 'legacy/.+\*\*.+context/data only|context/data only' "root legacy skill boundary"
 require_ref ".systems/scripts/validate-ai-system" 'check-system-skills' "validator chain"
 require_ref ".systems/scripts/check-required-artifacts" 'check-system-skills' "required artifact list"
@@ -85,6 +88,36 @@ unsafe_runtime_pattern='(claude -p|\.claude/|CLAUDECODE)'
 external_cdn_pattern='fonts\.googleapis|fonts\.gstatic|cdn\.|unpkg\.com|jsdelivr\.net'
 external_asset_resource_pattern='https?://'
 undeclared_dependency_pattern='^[[:space:]]*import[[:space:]]+yaml\b|^[[:space:]]*from[[:space:]]+yaml[[:space:]]+import\b'
+max_skill_md_lines=300
+
+active_resource_names=(
+  "references"
+  "agents"
+  "scripts"
+  "assets"
+  "eval-viewer"
+)
+
+context_authority_patterns=(
+  '`?context/\*\*`?[[:space:]]+(is|are)[[:space:]]+(active|authoritative|guidance|instructions)'
+  '`?context/`?[[:space:]]+(is|are)[[:space:]]+(active|authoritative|guidance|instructions)'
+  '(always|must|should)[[:space:]]+(load|read)[[:space:]].*`?context/\*\*`?.*(active|authority|instructions|guidance)'
+  '(use|treat|load|read)[[:space:]].*`?context/(\*\*)?`?.*as[[:space:]]+(active|authoritative|authority|instructions|guidance)'
+  '`?context/\*\*`?.*(must|should)[[:space:]]+(be[[:space:]]+)?(followed|obeyed)'
+)
+
+intake_plan_patterns=(
+  'Source Materials|source materials|reviewed sources'
+  'Trigger|Non-trigger|non-trigger'
+  'Co zostaje'
+  'Co poprawi|improve|remove|usun'
+  'Czego brakuje'
+  'Blokery|decyzje|blockers|decisions'
+  'Artifact Map|artifact map'
+  'Implementation Approval|approval state|approval'
+  'Validation Plan|validation plan'
+  'Residual Risk|residual risk|ryzyko'
+)
 
 check_frontmatter() {
   local file="$1"
@@ -149,6 +182,106 @@ if "<" in description or ">" in description:
 PY
 }
 
+has_active_skill_artifacts() {
+  local dir="$1"
+
+  if [[ -f "$dir/SKILL.md" || -f "$dir/README.md" ]]; then
+    return 0
+  fi
+
+  local resource
+  for resource in "${active_resource_names[@]}"; do
+    if [[ -e "$dir/$resource" ]]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+check_intake_plan() {
+  local plan="$1"
+  local label="$2"
+  local pattern
+
+  for pattern in "${intake_plan_patterns[@]}"; do
+    if ! rg -qi -- "$pattern" "$plan"; then
+      echo "$label skill-intake-plan.md missing required intake section '$pattern': ${plan#./}"
+      fail=1
+    fi
+  done
+}
+
+is_skill_text_artifact() {
+  case "$1" in
+    *.md|*.py|*.txt|*.json|*.html|*.css|*.js)
+      return 0
+      ;;
+  esac
+
+  return 1
+}
+
+is_active_skill_text_artifact() {
+  local dir="$1"
+  local path="$2"
+
+  case "$path" in
+    "$dir/context"/*|"$dir/skill-intake-plan.md")
+      return 1
+      ;;
+  esac
+
+  is_skill_text_artifact "$path"
+}
+
+check_context_authority_artifacts() {
+  local dir="$1"
+  local label="$2"
+  local path
+  local pattern
+
+  while IFS= read -r -d '' path; do
+    is_active_skill_text_artifact "$dir" "$path" || continue
+
+    for pattern in "${context_authority_patterns[@]}"; do
+      if rg -n -i -- "$pattern" "$path"; then
+        echo "$label active artifact treats context/** as active guidance or authority: ${path#./}"
+        fail=1
+      fi
+    done
+  done < <(find "$dir" -type f -print0)
+}
+
+check_skill_context_contract() {
+  local dir="$1"
+  local label="$2"
+  local skill_md="$dir/SKILL.md"
+  local intake_plan="$dir/skill-intake-plan.md"
+
+  if [[ -f "$skill_md" ]]; then
+    local skill_md_lines
+    skill_md_lines="$(wc -l < "$skill_md" | tr -d ' ')"
+    if [[ "$skill_md_lines" -gt "$max_skill_md_lines" ]]; then
+      echo "$label SKILL.md is too long; keep active contracts compact (${skill_md_lines} lines > ${max_skill_md_lines}): ${skill_md#./}"
+      fail=1
+    fi
+  fi
+
+  check_context_authority_artifacts "$dir" "$label"
+
+  if [[ -d "$dir/context" ]] && has_active_skill_artifacts "$dir"; then
+    if [[ ! -f "$intake_plan" ]]; then
+      echo "$label with context/ and active artifacts must include skill-intake-plan.md: ${dir#./}"
+      fail=1
+    else
+      check_intake_plan "$intake_plan" "$label"
+    fi
+  elif [[ -f "$intake_plan" ]]; then
+    check_intake_plan "$intake_plan" "$label"
+  fi
+}
+
 check_active_skill() {
   local dir="$1"
   local name
@@ -205,6 +338,8 @@ check_active_skill() {
     fi
   fi
 
+  check_skill_context_contract "$dir" "System skill"
+
   if rg -n -- "$unsafe_runtime_pattern" "$dir"; then
     echo "System skill contains external-model/runtime-specific execution markers: ${dir#./}"
     fail=1
@@ -240,6 +375,12 @@ if [[ -d ".systems/ai/skills" ]]; then
     [[ "$base" == "legacy" ]] && continue
     check_active_skill "$dir"
   done < <(find .systems/ai/skills -mindepth 1 -maxdepth 1 -type d -print0)
+fi
+
+if [[ -n "${AI_SYSTEM_WORKSPACE_HOME:-}" && -d "$AI_SYSTEM_WORKSPACE_HOME/skills" ]]; then
+  while IFS= read -r -d '' dir; do
+    check_skill_context_contract "$dir" "Workspace skill"
+  done < <(find "$AI_SYSTEM_WORKSPACE_HOME/skills" -mindepth 1 -maxdepth 1 -type d -print0)
 fi
 
 exit "$fail"

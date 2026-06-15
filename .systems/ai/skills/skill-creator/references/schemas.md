@@ -20,6 +20,7 @@ Use these schemas for local skill eval artifacts. Store runtime eval artifacts u
       "expected_output": "A skill contract with local validation evidence.",
       "expected_behavior": [
         "Uses SKILL.md as canonical contract",
+        "Keeps context source material out of active guidance",
         "Preserves authority boundaries",
         "Defines local validation"
       ],

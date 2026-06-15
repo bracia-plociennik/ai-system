@@ -8,6 +8,7 @@ The full agent contract is in `SKILL.md`.
 
 Bundled resources:
 
+- `context/` and `skill-intake-plan.md`: raw source intake pattern for future context-driven skill builds.
 - `agents/`: grading, analysis, and comparison rubrics.
 - `references/`: local eval artifact schemas.
 - `scripts/`: stdlib-only scaffold, validation, eval, report, packaging, and loop helpers.

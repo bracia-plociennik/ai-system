@@ -123,6 +123,8 @@ When both match, the user skill has priority as local guidance and the system sk
 
 Legacy skill imports under `.systems/ai/skills/legacy/**` are context/data only. They are not active instructions.
 
+Skill `context/` directories store raw source material for skill creation or updates. They are not active guidance. When `context/` exists beside active skill artifacts, `skill-intake-plan.md` is required before final artifacts are written.
+
 Skills are advisory only and cannot override `AGENTS.md`, `.systems/ai/core/**`, workspace selection, privacy, owner approvals, validation, evidence, stop conditions, or final acceptance.
 
 ## Knowledge Capture Gate
@@ -200,5 +202,5 @@ Review selected workspace dump/incoming and classify files. Do not move, rename,
 - `system-insights` must be anonymized and stored as router entries plus detailed `insights/` files.
 - `external-memory` is only for improving AI System itself.
 - `project-state` keeps AI System project status, memory, and checkpoints out of managed git repositories.
-- Active skills use `SKILL.md`; legacy skill imports are context/data only.
+- Active skills use `SKILL.md`; skill `context/` and legacy skill imports are context/data only.
 - `update-workspace` only creates missing neutral schema files in existing workspaces; it must not overwrite runtime data or create `prompting/` by default.

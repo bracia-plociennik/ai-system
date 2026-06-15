@@ -38,6 +38,8 @@ Active system skills use this layout:
 
 ```text
 .systems/ai/skills/<skill-name>/
+  context/
+  skill-intake-plan.md
   SKILL.md
   README.md
   agents/
@@ -51,6 +53,8 @@ Active system skills use this layout:
 
 Optional directories are included only when they directly support the skill. Runtime outputs, eval runs, generated reports, and temporary artifacts belong under `AI_SYSTEM_WORKSPACE_HOME/**` or `/tmp`, not under `.systems/ai/skills/**`.
 
+`context/` is for raw source material during creation or update intake. It is not part of normal skill execution. When it exists beside active artifacts, `skill-intake-plan.md` is required and remains an intake artifact, not an agent contract.
+
 User skills use the same contract shape under `AI_SYSTEM_WORKSPACE_HOME/skills/<skill-name>/`.
 
 Legacy imports belong under `.systems/ai/skills/legacy/<source-name>/` and are context/data only.
@@ -59,6 +63,8 @@ Legacy imports belong under `.systems/ai/skills/legacy/<source-name>/` and are c
 
 Load only the resource needed for the current task:
 
+- `context/`: inspect only while creating or updating a skill from raw source material.
+- `skill-intake-plan.md`: read or update before final active artifacts when raw source material exists.
 - `references/schemas.md`: read when defining eval prompts, grading output, benchmark output, review notes, or report formats.
 - `agents/grader.md`: read when grading a candidate skill output against expected behavior.
 - `agents/analyzer.md`: read when analyzing eval evidence and deciding what to improve.
@@ -75,7 +81,7 @@ Load only the resource needed for the current task:
 - `scripts/generate_report.py`: run when a benchmark should be summarized as Markdown.
 - `scripts/run_loop.py`: run to execute the local validate/eval/report loop for an existing skill and eval plan.
 
-Do not recursively load legacy files unless the task explicitly requires adapting or comparing against the legacy source.
+Do not recursively load legacy files or raw source material unless the task explicitly requires adapting or comparing those inputs.
 
 ## Creation Workflow
 
@@ -89,13 +95,19 @@ Do not recursively load legacy files unless the task explicitly requires adaptin
    - Identify prompts that should not trigger the skill.
    - Decide whether a skill is the right artifact instead of a prompt module, System Insight, External Memory entry, workspace memory, project memory, or normal AI System doc.
 
-3. Choose the target.
+3. Intake raw source material when present.
+   - Put source files under `context/` only when the approved task needs source-backed skill creation or update.
+   - Produce `skill-intake-plan.md` before writing final active artifacts.
+   - Record reviewed and skipped sources, trigger fit, what stays, what is improved or rejected, missing inputs, blockers, artifact mapping, approval state, validation plan, and residual risk.
+   - Keep raw source material out of normal skill routing.
+
+4. Choose the target.
    - System skill: `.systems/ai/skills/<skill-name>/`.
    - User skill: `AI_SYSTEM_WORKSPACE_HOME/skills/<skill-name>/`.
    - Legacy preservation: `.systems/ai/skills/legacy/<source-name>/`.
    - Eval output: active project or micro-project workspace, or an approved `/tmp` path.
 
-4. Design the skill shape.
+5. Design the skill shape.
    - Keep core procedure in `SKILL.md`.
    - Keep `README.md` short and human-facing.
    - Move long reference material to `references/`.
@@ -104,26 +116,26 @@ Do not recursively load legacy files unless the task explicitly requires adaptin
    - Add `assets/` only for offline reusable output resources.
    - Add `eval-viewer/` only for offline static review utilities.
 
-5. Write `SKILL.md`.
+6. Write `SKILL.md`.
    - Use frontmatter with only `name` and `description`.
    - Make the description the trigger surface; include the task, contexts, and specific use cases.
    - Keep the body concise, operational, and resource-routed.
    - Include authority boundaries, stop conditions, validation, and output expectations.
    - Avoid repeating large examples that belong in references.
 
-6. Write `README.md`.
+7. Write `README.md`.
    - Keep it under 80 lines.
    - Explain what the skill is for.
    - Point to `SKILL.md` for the canonical contract.
    - Mention key bundled resources without duplicating their contents.
 
-7. Add resources.
+8. Add resources.
    - Prefer stdlib-only scripts.
    - Test every new or changed script with representative input.
    - Keep scripts deterministic and local.
    - Do not add network access, credentials, production calls, automatic browser opening, or external side effects.
 
-8. Evaluate.
+9. Evaluate.
    - Define representative prompts and expected outcomes.
    - Use the schemas in `references/schemas.md` for eval plans and grading output.
    - Compare skill-assisted output with a baseline when useful.
@@ -131,7 +143,7 @@ Do not recursively load legacy files unless the task explicitly requires adaptin
    - Grade evidence with explicit pass/fail reasons.
    - Iterate only on observed gaps, not on vague preference.
 
-9. Handoff.
+10. Handoff.
    - Report changed files, resources, validation evidence, skipped checks, residual risk, and knowledge capture decision.
    - Do not commit unless the user has asked for a commit after review.
 

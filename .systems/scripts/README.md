@@ -18,6 +18,6 @@ Validation scripts for AI System live here.
 
 `check-system-insights` validates System Insights templates, entry structure, privacy checks, and External Memory scope separation.
 
-`check-system-skills` validates active system skill contracts, legacy boundaries, offline resources, and generated Python runtime artifact exclusions.
+`check-system-skills` validates active system skill contracts, context intake plans, legacy boundaries, offline resources, and generated Python runtime artifact exclusions.
 
 `check-naming` validates strict Markdown filenames while allowing canonical `SKILL.md` contracts and legacy/context source material.

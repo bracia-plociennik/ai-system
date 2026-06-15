@@ -15,7 +15,7 @@ except ImportError:  # pragma: no cover - package-style execution fallback
     from .utils import normalize_skill_name, write_text
 
 
-RESOURCE_NAMES = {"agents", "references", "scripts", "assets", "eval-viewer"}
+RESOURCE_NAMES = {"context", "agents", "references", "scripts", "assets", "eval-viewer"}
 
 
 def skill_md_template(name: str) -> str:
@@ -60,6 +60,61 @@ The full agent contract is in `SKILL.md`.
 """
 
 
+def skill_intake_plan_template(name: str) -> str:
+    title = name.replace("-", " ").title()
+    return f"""# Skill Intake Plan
+
+- Skill: `{name}`
+- Title: `{title}`
+
+## Source Materials
+
+- Reviewed: `<files or chat sources>`
+- Skipped: `<files skipped and why>`
+
+## Trigger Fit
+
+- Should trigger: `<prompts and contexts>`
+- Should not trigger: `<near misses and exclusions>`
+
+## Co zostaje
+
+- `<source material to keep>`
+
+## Co poprawic / usunac
+
+- `<source material to improve or reject>`
+
+## Czego brakuje
+
+- `<missing decisions, data, examples, or criteria>`
+
+## Blokery / decyzje
+
+- `<blocking decisions before implementation>`
+
+## Artifact Map
+
+- `SKILL.md`: `<compact contract/router content>`
+- `references/*.md`: `<domain knowledge split by topic>`
+- `agents/*.md`: `<rubrics, personas, review roles>`
+- `scripts/*`: `<deterministic helpers>`
+- Rejected as noise: `<duplicates, unsafe material, stale notes>`
+
+## Implementation Approval
+
+- Approval state: `<pending|approved>`
+
+## Validation Plan
+
+- `<commands and evidence>`
+
+## Residual Risk
+
+- `<known limits after implementation>`
+"""
+
+
 def create_skill(output_root: Path, name: str, resources: list[str], overwrite: bool) -> Path:
     skill_name = normalize_skill_name(name)
     skill_dir = output_root / skill_name
@@ -73,6 +128,13 @@ def create_skill(output_root: Path, name: str, resources: list[str], overwrite: 
             raise ValueError(f"Unknown resource '{resource}'. Allowed: {', '.join(sorted(RESOURCE_NAMES))}")
         (skill_dir / resource).mkdir(parents=True, exist_ok=True)
 
+    if "context" in resources:
+        write_text(
+            skill_dir / "skill-intake-plan.md",
+            skill_intake_plan_template(skill_name),
+            overwrite=overwrite,
+        )
+
     return skill_dir
 
 
@@ -83,7 +145,7 @@ def main() -> int:
     parser.add_argument(
         "--resources",
         default="",
-        help="Comma-separated optional directories: agents,references,scripts,assets,eval-viewer",
+        help="Comma-separated optional directories: context,agents,references,scripts,assets,eval-viewer",
     )
     parser.add_argument("--overwrite", action="store_true", help="Overwrite generated SKILL.md and README.md")
     args = parser.parse_args()

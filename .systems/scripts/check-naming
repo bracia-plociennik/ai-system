@@ -69,6 +69,9 @@ is_exempt_supporting_path() {
   local path="${1#./}"
 
   case "$path" in
+    .systems/ai/skills/*/context/*)
+      return 0
+      ;;
     .systems/ai/skills/legacy/*)
       return 0
       ;;

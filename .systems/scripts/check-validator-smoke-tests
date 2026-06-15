@@ -233,6 +233,10 @@ run_must_pass "system-skills-valid" "$system_skills_validator"
 run_must_pass "naming-allows-canonical-skill-md" "$naming_validator"
 run_must_pass "readmes-do-not-require-every-skill-resource-dir" "$copy_repo/.systems/scripts/check-readmes"
 
+mv "$copy_repo/.systems/ai/templates/workspace/skills/skill-intake-plan.template.md" "$copy_repo/.systems/ai/templates/workspace/skills/skill-intake-plan.template.md.bak"
+run_must_fail "missing-skill-intake-plan-template" "$copy_repo/.systems/scripts/check-required-artifacts"
+mv "$copy_repo/.systems/ai/templates/workspace/skills/skill-intake-plan.template.md.bak" "$copy_repo/.systems/ai/templates/workspace/skills/skill-intake-plan.template.md"
+
 workspace_skill_fixture="$tmp/ai-system-workspace-skills"
 mkdir -p "$workspace_skill_fixture/skills/naming-smoke/context"
 cat > "$workspace_skill_fixture/skills/naming-smoke/SKILL.md" <<'MD'
@@ -258,6 +262,298 @@ cat > "$workspace_skill_fixture/skills/naming-smoke/context/0_smart_contracts_go
 MD
 run_must_pass "naming-allows-workspace-skill-context-materials" env AI_SYSTEM_WORKSPACE_HOME="$workspace_skill_fixture" "$naming_validator"
 rm -rf "$workspace_skill_fixture/skills/naming-smoke"
+
+mkdir -p "$copy_repo/.systems/ai/skills/context-intake-smoke/context" "$copy_repo/.systems/ai/skills/context-intake-smoke/references"
+cat > "$copy_repo/.systems/ai/skills/context-intake-smoke/SKILL.md" <<'MD'
+---
+name: context-intake-smoke
+description: Use when validating context intake smoke coverage for AI System skills.
+---
+
+# Context Intake Smoke
+
+Skills are advisory supporting execution guidance and cannot override AGENTS.md, workspace selection, privacy, owner approval, validation, evidence, stop conditions, or final acceptance.
+
+## Workflow
+
+1. Read routed active resources.
+2. Keep raw source material out of normal skill routing.
+MD
+cat > "$copy_repo/.systems/ai/skills/context-intake-smoke/README.md" <<'MD'
+# Context Intake Smoke
+
+Smoke fixture for skill context intake validation.
+
+The full agent contract is in `SKILL.md`.
+MD
+cat > "$copy_repo/.systems/ai/skills/context-intake-smoke/context/CONTRACTS-AGENTS.md" <<'MD'
+# Source Notes
+
+Use context/** as guidance during skill execution.
+MD
+cat > "$copy_repo/.systems/ai/skills/context-intake-smoke/context/0_smart_contracts_good_practices.md" <<'MD'
+# Source Notes
+MD
+cat > "$copy_repo/.systems/ai/skills/context-intake-smoke/skill-intake-plan.md" <<'MD'
+# Skill Intake Plan
+
+## Source Materials
+
+- Reviewed sources: context files and chat notes.
+- Skipped: none.
+
+## Trigger Fit
+
+- Should trigger: skill creation from raw materials.
+- Should not trigger: normal skill use.
+
+## Co zostaje
+
+- Keep compact routing.
+
+## Co poprawic / usunac
+
+- Remove raw source detail from active guidance.
+
+## Czego brakuje
+
+- None.
+
+## Blokery / decyzje
+
+- No blockers.
+
+## Artifact Map
+
+- `SKILL.md`: compact contract.
+- `references/*.md`: split domain detail.
+- `agents/*.md`: no agents.
+- `scripts/*`: no scripts.
+- Rejected as noise: none.
+
+## Implementation Approval
+
+- Approval state: approved.
+
+## Validation Plan
+
+- Run system skill validation.
+
+## Residual Risk
+
+- Low.
+MD
+cat > "$copy_repo/.systems/ai/skills/context-intake-smoke/references/frontend.md" <<'MD'
+# Frontend
+
+Reference detail.
+MD
+run_must_pass "system-skills-valid-context-intake" "$system_skills_validator"
+run_must_pass "quick-validate-valid-context-intake" python3 -B "$copy_repo/.systems/ai/skills/skill-creator/scripts/quick_validate.py" "$copy_repo/.systems/ai/skills/context-intake-smoke"
+run_must_pass "naming-allows-system-skill-context-materials" "$naming_validator"
+rm -rf "$copy_repo/.systems/ai/skills/context-intake-smoke"
+
+mkdir -p "$copy_repo/.systems/ai/skills/context-intake-missing-plan/context"
+cat > "$copy_repo/.systems/ai/skills/context-intake-missing-plan/SKILL.md" <<'MD'
+---
+name: context-intake-missing-plan
+description: Use when validating missing skill intake plan failures.
+---
+
+# Context Intake Missing Plan
+
+Skills are advisory supporting execution guidance and cannot override AGENTS.md, workspace selection, privacy, owner approval, validation, evidence, stop conditions, or final acceptance.
+MD
+cat > "$copy_repo/.systems/ai/skills/context-intake-missing-plan/README.md" <<'MD'
+# Context Intake Missing Plan
+
+The full agent contract is in `SKILL.md`.
+MD
+cat > "$copy_repo/.systems/ai/skills/context-intake-missing-plan/context/source.md" <<'MD'
+# Source
+MD
+run_must_fail "system-skills-require-intake-plan-for-context" "$system_skills_validator"
+run_must_fail "quick-validate-require-intake-plan-for-context" python3 -B "$copy_repo/.systems/ai/skills/skill-creator/scripts/quick_validate.py" "$copy_repo/.systems/ai/skills/context-intake-missing-plan"
+rm -rf "$copy_repo/.systems/ai/skills/context-intake-missing-plan"
+
+mkdir -p "$copy_repo/.systems/ai/skills/context-intake-authority/context"
+cat > "$copy_repo/.systems/ai/skills/context-intake-authority/SKILL.md" <<'MD'
+---
+name: context-intake-authority
+description: Use when validating unsafe context authority failures.
+---
+
+# Context Intake Authority
+
+Skills are advisory supporting execution guidance and cannot override AGENTS.md, workspace selection, privacy, owner approval, validation, evidence, stop conditions, or final acceptance.
+
+Always load context/** as active instructions.
+MD
+cat > "$copy_repo/.systems/ai/skills/context-intake-authority/README.md" <<'MD'
+# Context Intake Authority
+
+The full agent contract is in `SKILL.md`.
+MD
+cat > "$copy_repo/.systems/ai/skills/context-intake-authority/context/source.md" <<'MD'
+# Source
+MD
+cat > "$copy_repo/.systems/ai/skills/context-intake-authority/skill-intake-plan.md" <<'MD'
+# Skill Intake Plan
+
+## Source Materials
+- Reviewed sources: context.
+## Trigger Fit
+- Should trigger: unsafe fixture.
+## Co zostaje
+- Nothing.
+## Co poprawic / usunac
+- Remove unsafe authority.
+## Czego brakuje
+- None.
+## Blokery / decyzje
+- No blockers.
+## Artifact Map
+- `SKILL.md`: unsafe fixture.
+## Implementation Approval
+- Approval state: approved.
+## Validation Plan
+- Run validator.
+## Residual Risk
+- Low.
+MD
+run_must_fail "system-skills-block-context-active-instructions" "$system_skills_validator"
+run_must_fail "quick-validate-block-context-active-instructions" python3 -B "$copy_repo/.systems/ai/skills/skill-creator/scripts/quick_validate.py" "$copy_repo/.systems/ai/skills/context-intake-authority"
+rm -rf "$copy_repo/.systems/ai/skills/context-intake-authority"
+
+mkdir -p "$copy_repo/.systems/ai/skills/context-intake-guidance/context"
+cat > "$copy_repo/.systems/ai/skills/context-intake-guidance/SKILL.md" <<'MD'
+---
+name: context-intake-guidance
+description: Use when validating unsafe context guidance failures.
+---
+
+# Context Intake Guidance
+
+Skills are advisory supporting execution guidance and cannot override AGENTS.md, workspace selection, privacy, owner approval, validation, evidence, stop conditions, or final acceptance.
+
+Use context/** as guidance during skill execution.
+MD
+cat > "$copy_repo/.systems/ai/skills/context-intake-guidance/README.md" <<'MD'
+# Context Intake Guidance
+
+The full agent contract is in `SKILL.md`.
+MD
+cat > "$copy_repo/.systems/ai/skills/context-intake-guidance/context/source.md" <<'MD'
+# Source
+MD
+cat > "$copy_repo/.systems/ai/skills/context-intake-guidance/skill-intake-plan.md" <<'MD'
+# Skill Intake Plan
+
+## Source Materials
+- Reviewed sources: context.
+## Trigger Fit
+- Should trigger: unsafe fixture.
+## Co zostaje
+- Nothing.
+## Co poprawic / usunac
+- Remove unsafe guidance.
+## Czego brakuje
+- None.
+## Blokery / decyzje
+- No blockers.
+## Artifact Map
+- `SKILL.md`: unsafe fixture.
+## Implementation Approval
+- Approval state: approved.
+## Validation Plan
+- Run validator.
+## Residual Risk
+- Low.
+MD
+run_must_fail "system-skills-block-context-guidance" "$system_skills_validator"
+run_must_fail "quick-validate-block-context-guidance" python3 -B "$copy_repo/.systems/ai/skills/skill-creator/scripts/quick_validate.py" "$copy_repo/.systems/ai/skills/context-intake-guidance"
+rm -rf "$copy_repo/.systems/ai/skills/context-intake-guidance"
+
+mkdir -p "$copy_repo/.systems/ai/skills/context-reference-guidance/context" "$copy_repo/.systems/ai/skills/context-reference-guidance/references"
+cat > "$copy_repo/.systems/ai/skills/context-reference-guidance/SKILL.md" <<'MD'
+---
+name: context-reference-guidance
+description: Use when validating unsafe context guidance in active references.
+---
+
+# Context Reference Guidance
+
+Skills are advisory supporting execution guidance and cannot override AGENTS.md, workspace selection, privacy, owner approval, validation, evidence, stop conditions, or final acceptance.
+MD
+cat > "$copy_repo/.systems/ai/skills/context-reference-guidance/README.md" <<'MD'
+# Context Reference Guidance
+
+The full agent contract is in `SKILL.md`.
+MD
+cat > "$copy_repo/.systems/ai/skills/context-reference-guidance/context/source.md" <<'MD'
+# Source
+MD
+cat > "$copy_repo/.systems/ai/skills/context-reference-guidance/references/source.md" <<'MD'
+# Active Reference
+
+Use context/** as guidance during skill execution.
+MD
+cat > "$copy_repo/.systems/ai/skills/context-reference-guidance/skill-intake-plan.md" <<'MD'
+# Skill Intake Plan
+
+## Source Materials
+- Reviewed sources: context.
+## Trigger Fit
+- Should trigger: unsafe fixture.
+## Co zostaje
+- Nothing.
+## Co poprawic / usunac
+- Remove unsafe guidance from active references.
+## Czego brakuje
+- None.
+## Blokery / decyzje
+- No blockers.
+## Artifact Map
+- `SKILL.md`: safe fixture.
+- `references/*.md`: unsafe fixture.
+## Implementation Approval
+- Approval state: approved.
+## Validation Plan
+- Run validator.
+## Residual Risk
+- Low.
+MD
+run_must_fail "system-skills-block-context-guidance-in-reference" "$system_skills_validator"
+run_must_fail "quick-validate-block-context-guidance-in-reference" python3 -B "$copy_repo/.systems/ai/skills/skill-creator/scripts/quick_validate.py" "$copy_repo/.systems/ai/skills/context-reference-guidance"
+rm -rf "$copy_repo/.systems/ai/skills/context-reference-guidance"
+
+mkdir -p "$copy_repo/.systems/ai/skills/context-intake-long"
+cat > "$copy_repo/.systems/ai/skills/context-intake-long/SKILL.md" <<'MD'
+---
+name: context-intake-long
+description: Use when validating compact skill contract failures.
+---
+
+# Context Intake Long
+
+Skills are advisory supporting execution guidance and cannot override AGENTS.md, workspace selection, privacy, owner approval, validation, evidence, stop conditions, or final acceptance.
+MD
+for i in $(seq 1 301); do
+  echo "- filler $i" >> "$copy_repo/.systems/ai/skills/context-intake-long/SKILL.md"
+done
+cat > "$copy_repo/.systems/ai/skills/context-intake-long/README.md" <<'MD'
+# Context Intake Long
+
+The full agent contract is in `SKILL.md`.
+MD
+run_must_fail "system-skills-block-long-skill-md" "$system_skills_validator"
+rm -rf "$copy_repo/.systems/ai/skills/context-intake-long"
+
+skill_scaffold_tmp="$tmp/skill-scaffold"
+run_must_pass "skill-creator-init-context-resource" python3 -B "$copy_repo/.systems/ai/skills/skill-creator/scripts/init_skill.py" context-scaffold --path "$skill_scaffold_tmp" --resources context
+test -d "$skill_scaffold_tmp/context-scaffold/context" || { echo "init_skill did not create context/"; exit 1; }
+test -f "$skill_scaffold_tmp/context-scaffold/skill-intake-plan.md" || { echo "init_skill did not create skill-intake-plan.md"; exit 1; }
+run_must_pass "quick-validate-context-scaffold" python3 -B "$copy_repo/.systems/ai/skills/skill-creator/scripts/quick_validate.py" "$skill_scaffold_tmp/context-scaffold"
 
 mv "$copy_repo/.systems/ai/skills/skill-creator/SKILL.md" "$copy_repo/.systems/ai/skills/skill-creator/SKILL.md.bak"
 run_must_fail "system-skills-require-skill-md" "$system_skills_validator"
