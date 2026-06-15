@@ -32,7 +32,7 @@ For multiple registered workspaces:
 .systems/scripts/update-workspace --all
 ```
 
-`update-workspace` backfills missing neutral directories, routers, README files, and template files only. It must not overwrite existing client data, project data, memory, checkpoints, system-insights entries, external-memory entries, `ai-system-workspaces.md`, root `AGENTS.md`, or `.git/info/exclude`.
+`update-workspace` backfills missing neutral directories, routers, README files, and template files only. It must not overwrite existing client data, project data, project-state entries, memory, checkpoints, system-insights entries, external-memory entries, `ai-system-workspaces.md`, root `AGENTS.md`, or `.git/info/exclude`.
 
 ## Core Rule
 
@@ -125,10 +125,55 @@ Utwórz klienta <client-slug> w workspace <workspace-id-or-path> z template’u.
 Ask:
 
 ```text
-Utwórz projekt klienta <client-slug>/<project-slug> w workspace <workspace-id-or-path> z template’u. Dodaj status, memory router i README.
+Utwórz project-state dla projektu klienta <client-slug>/<project-slug> w workspace <workspace-id-or-path>. Repo/source zostaje osobno, a status, memory router i checkpointy zapisz poza repo.
 ```
 
 Use slugs instead of real names when possible.
+
+## Repo-Safe Project State
+
+When a project folder is a git repository, keep AI System runtime state outside the repository.
+
+Use:
+
+```text
+<workspace>/project-state/<project-slug>/
+```
+
+for standalone projects, or the nearest owner namespace for nested projects:
+
+```text
+<workspace>/clients/<client>/project-state/<project-slug>/
+<workspace>/owned-assets/<asset>/project-state/<project-slug>/
+```
+
+Use `links.md` in project-state to point to the real repo or source folder.
+
+Ask:
+
+```text
+Przygotuj project-state dla projektu <project-slug> w workspace <workspace-id-or-path>. Repo/source zostaje w projects/<project-slug>, a status, memory, checkpoints, distillations, decisions i links.md mają być poza repo.
+```
+
+If the AI proposes writing `status.md`, `memory.md`, `checkpoints/`, `distillations/`, or `decisions/` inside a git worktree, choose explicitly:
+
+```text
+Użyj project-state/<project-slug>/ zamiast zapisywać runtime files w repo.
+```
+
+Only choose colocated state with exact approval and local exclude handling:
+
+```text
+owner-approved: użyj colocated local-only state w <repo-path> i dopisz tylko lokalne .git/info/exclude dla status.md, memory.md, checkpoints/, distillations/ i decisions/.
+```
+
+Do not auto-edit project `.gitignore`.
+
+Cleanup of existing runtime files inside project repos is a separate task. First ask for a plan:
+
+```text
+Przygotuj cleanup plan dla AI System runtime files zapisanych w repo roots. Niczego nie usuwaj ani nie przenoś.
+```
 
 ## Memory
 
@@ -248,7 +293,7 @@ The AI should refuse or stop on these.
 Before accepting implementation work, ask for evidence:
 
 ```text
-Uruchom walidację ai-system i pokaż wynik: validate-ai-system, check-update-workspace, check-contract-compliance, check-readmes, check-privacy-boundary, check-required-artifacts, check-system-insights, check-prompt-composition, check-validator-smoke-tests, git diff --check.
+Uruchom walidację ai-system i pokaż wynik: validate-ai-system, check-update-workspace, check-project-state, check-contract-compliance, check-readmes, check-privacy-boundary, check-required-artifacts, check-system-insights, check-prompt-composition, check-validator-smoke-tests, git diff --check.
 ```
 
 PASS requires evidence. Skipped checks need a reason and impact.

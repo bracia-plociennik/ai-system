@@ -20,14 +20,15 @@ Read the smallest set needed to answer safely:
 2. `.systems/ai/core/operating-model.md`.
 3. `.systems/ai/core/workspaces.md`.
 4. `.systems/ai/core/command-routing.md`.
-5. `.systems/ai/core/prompt-composition.md` when prompting artifacts are relevant to the answer.
-6. `.systems/ai/core/response-contract.md`.
-7. `ai-system-workspaces.md` when present.
-8. Selected workspace `core/status.md` when present.
-9. Selected workspace `dump/` index or classification files when present.
-10. Relevant primary-entity, client, owned-asset, or project status files in the selected workspace.
-11. Relevant memory routers, checkpoint files, distillations, and open decisions.
-12. Relevant accepted prompting artifacts after the status, memory, decision, and checkpoint artifacts they reference.
+5. `.systems/ai/core/project-state.md` when project state or project repositories are relevant.
+6. `.systems/ai/core/prompt-composition.md` when prompting artifacts are relevant to the answer.
+7. `.systems/ai/core/response-contract.md`.
+8. `ai-system-workspaces.md` when present.
+9. Selected workspace `core/status.md` when present.
+10. Selected workspace `dump/` index or classification files when present.
+11. Relevant primary-entity, client, owned-asset, or project-state status files in the selected workspace.
+12. Relevant memory routers, checkpoint files, distillations, and open decisions.
+13. Relevant accepted prompting artifacts after the status, memory, decision, and checkpoint artifacts they reference.
 
 If an expected artifact is missing, say it is missing and route to creation or recovery.
 
@@ -42,7 +43,8 @@ If an expected artifact is missing, say it is missing and route to creation or r
 - Clients: `<workspace>/clients/`.
 - Primary entity: `<workspace>/status.md` and `<workspace>/memory.md` when the selected workspace uses a primary-entity root.
 - Owned assets: `<workspace>/owned-assets/` in generic workspaces or explicit sub-asset namespaces.
-- Projects: `<workspace>/projects/`.
+- Projects and source folders: `<workspace>/projects/`.
+- Project state: `<workspace>/project-state/`.
 - Workspace memory: `<workspace>/memory/`.
 - External memory for AI System improvements: `<workspace>/external-memory/`.
 - Anonymized work-quality lessons: `<workspace>/system-insights/`.

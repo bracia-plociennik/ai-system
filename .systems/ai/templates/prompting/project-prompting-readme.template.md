@@ -4,7 +4,7 @@
 
 `<project>/prompting/README.md` indexes advisory project-level prompt composition artifacts.
 
-These artifacts help frame project work. They do not replace project status, tasks, memory, decisions, checkpoints, accepted scope, current files, or owner approvals.
+These artifacts help frame project work. They do not replace project-state status, tasks, memory, decisions, checkpoints, accepted scope, current files, or owner approvals.
 
 ## Source Snapshot
 
@@ -38,7 +38,7 @@ These artifacts help frame project work. They do not replace project status, tas
 
 ## Generation Rules
 
-- Generate from accepted project context, project status, task routers, decisions, memory, checkpoints, current files, and owner instructions.
+- Generate from accepted project context, project-state status, task routers, decisions, memory, checkpoints, current files, and owner instructions.
 - Mark source labels, confidence, assumption impact, and refresh triggers.
 - Ask the owner before relying on values that affect scope, risk, acceptance, billing, production, security, legal, client commitments, or final approval.
 - Reject artifacts that conflict with current project facts or accepted scope.

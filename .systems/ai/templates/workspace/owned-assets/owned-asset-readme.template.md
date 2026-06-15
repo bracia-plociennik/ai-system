@@ -41,6 +41,7 @@ Treat this as an owner-controlled asset with the same operational rigor as a cli
 - `notes/`
 - `decisions/`
 - `tasks/`
+- `project-state/`
 - `archive/`
 
 ## Privacy
@@ -52,3 +53,5 @@ This workspace may contain private owner-controlled business or brand data. Do n
 Use `dump/incoming/` for files already known to belong to this owned asset.
 
 Files in owned-asset dump still require classification before movement into `documents/`, `assets/`, `projects/`, `contracts/`, `memory/`, or `archive/`.
+
+Use `project-state/<project>/` for AI System owned-asset project status, memory, checkpoints, distillations, decisions, and source links when `projects/<project>/` is a git repo or source-material folder.

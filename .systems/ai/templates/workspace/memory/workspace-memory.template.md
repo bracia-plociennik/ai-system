@@ -17,5 +17,5 @@ Detailed entries live in this directory as dated memory files.
 - Keep this file short; store details in dated entries.
 - Do not store secrets, credentials, private client documents, or identifiable client facts here.
 - Client-specific raw memory belongs in client memory.
-- Project-specific memory belongs in project memory.
+- Project-specific memory belongs in `project-state/<project>/memory/` or the nearest client/owned-asset project-state namespace.
 - Promote only anonymized lessons to `system-insights/`.

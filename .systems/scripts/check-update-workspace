@@ -41,6 +41,8 @@ require_ref() {
 required_files=(
   ".systems/ai/core/update-from-upstream.md"
   ".systems/ai/templates/workspace/core/workstreams.template.md"
+  ".systems/ai/templates/workspace/project-state/project-state-readme.template.md"
+  ".systems/ai/templates/workspace/project-state/project-state.template.md"
   ".systems/scripts/check-update-workspace"
 )
 
@@ -62,6 +64,7 @@ required_script_terms=(
   "active|paused"
   "planned|archived"
   "prompting"
+  "project-state"
 )
 
 for term in "${required_script_terms[@]}"; do

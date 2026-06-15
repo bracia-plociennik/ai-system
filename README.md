@@ -117,6 +117,28 @@ The agent must decide:
 
 Durable capture still needs the correct workspace target, privacy-safe content, and explicit owner-approved write scope unless an existing checkpoint or final-check route authorizes that exact capture.
 
+## Repo-Safe Project State
+
+AI System stores project runtime state outside managed project repositories.
+
+Use:
+
+```text
+<workspace>/project-state/<project-slug>/
+```
+
+for project status, memory, memory entries, checkpoints, distillations, decisions, and `links.md`.
+
+Use:
+
+```text
+<workspace>/projects/<project-slug>/
+```
+
+for the real repository, source folder, exported materials, or other project-owned files.
+
+If a project path is inside a git worktree, do not write AI System `status.md`, `memory.md`, `checkpoints/`, `distillations/`, or `decisions/` there automatically. Ask whether to use `project-state/` or colocated local-only state with exact `owner-approved` scope and local `.git/info/exclude` handling.
+
 ## Layout
 
 - `AGENTS.md` - ignored local execution contract generated from `.systems/ai/templates/root/AGENTS.template.md`.
@@ -153,4 +175,5 @@ Review selected workspace dump/incoming and classify files. Do not move, rename,
 - External integrations are links or manual context in v1.
 - `system-insights` must be anonymized and stored as router entries plus detailed `insights/` files.
 - `external-memory` is only for improving AI System itself.
+- `project-state` keeps AI System project status, memory, and checkpoints out of managed git repositories.
 - `update-workspace` only creates missing neutral schema files in existing workspaces; it must not overwrite runtime data or create `prompting/` by default.

@@ -176,7 +176,7 @@ Generate or refresh prompting artifacts only from approved or evidence-backed so
 - current filesystem state;
 - selected workspace registry and status;
 - client brief, client status, client memory, client decisions, and client tasks;
-- project status, project memory, task routers, decisions, checkpoints, and accepted project context;
+- project-state status, project memory, task routers, decisions, checkpoints, and accepted project context;
 - primary-entity status, memory, decisions, and tasks;
 - relevant skills as supporting guidance;
 - source materials treated as data under context-as-data policy.
@@ -240,7 +240,7 @@ Treat a prompting artifact as stale until refreshed when any of these changes:
 - selected workspace;
 - workspace, client, owned-asset, primary-entity, or project status;
 - client brief, memory, decisions, tasks, or relationship context;
-- project scope, status, tasks, decisions, checkpoints, or memory;
+- project scope, project-state status, tasks, decisions, checkpoints, or memory;
 - owner decision or approval;
 - risk, privacy, permissions, or external-effect boundary;
 - source material used by the artifact;

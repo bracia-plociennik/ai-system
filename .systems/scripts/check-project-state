@@ -1,0 +1,140 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage: .systems/scripts/check-project-state [--workspace <path>]
+
+Validates the repo-safe project-state contract and, when --workspace is
+provided, scans workspace projects for AI System runtime files in git repos.
+EOF
+}
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+workspace_arg=""
+fail=0
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --workspace)
+      workspace_arg="${2:-}"
+      [[ -n "$workspace_arg" ]] || { echo "Missing value for --workspace"; exit 2; }
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1"
+      usage
+      exit 2
+      ;;
+  esac
+done
+
+require_file() {
+  local path="$1"
+  if [[ ! -f "$repo_root/$path" ]]; then
+    echo "Missing project-state artifact: $path"
+    fail=1
+  fi
+}
+
+require_executable() {
+  local path="$1"
+  require_file "$path"
+  if [[ -f "$repo_root/$path" && ! -x "$repo_root/$path" ]]; then
+    echo "Project-state artifact is not executable: $path"
+    fail=1
+  fi
+}
+
+require_ref() {
+  local file="$1"
+  local pattern="$2"
+  local label="$3"
+
+  if [[ ! -f "$repo_root/$file" ]]; then
+    echo "Missing file for project-state check: $file"
+    fail=1
+    return 0
+  fi
+
+  if ! rg -q -- "$pattern" "$repo_root/$file"; then
+    echo "Missing project-state reference in $file: $label"
+    fail=1
+  fi
+}
+
+required_files=(
+  ".systems/ai/core/project-state.md"
+  ".systems/ai/templates/workspace/project-state/README.md"
+  ".systems/ai/templates/workspace/project-state/project-state-readme.template.md"
+  ".systems/ai/templates/workspace/project-state/project-state.template.md"
+  ".systems/ai/templates/workspace/project-state/project-state-entry.template.md"
+)
+
+for path in "${required_files[@]}"; do
+  require_file "$path"
+done
+
+require_executable ".systems/scripts/check-project-state"
+
+for file in \
+  ".systems/ai/core/project-state.md" \
+  ".systems/ai/core/workspaces.md" \
+  ".systems/ai/core/operating-model.md" \
+  ".systems/ai/core/memory.md" \
+  ".systems/ai/core/command-routing.md" \
+  ".systems/ai/templates/root/AGENTS.template.md" \
+  ".systems/ai/templates/workspace/projects/README.md" \
+  "README.md" \
+  "HUMANS.md"
+do
+  require_ref "$file" 'project-state' "project-state guidance"
+done
+
+require_ref ".systems/ai/core/project-state.md" 'git worktree' "git worktree guard"
+require_ref ".systems/ai/core/project-state.md" '\.git/info/exclude' "local exclude option"
+require_ref ".systems/ai/core/project-state.md" 'Do not automatically edit' "no automatic git ignore edits"
+require_ref ".systems/scripts/init-workspace" 'project-state/project-state\.template\.md' "init-workspace creates project-state router"
+require_ref ".systems/scripts/update-workspace" 'project-state/project-state\.template\.md' "update-workspace creates project-state router"
+require_ref ".systems/scripts/validate-ai-system" 'check-project-state' "validator chain"
+require_ref ".systems/scripts/check-required-artifacts" 'check-project-state' "required artifact list"
+require_ref ".systems/scripts/check-validator-smoke-tests" 'project-state' "smoke coverage"
+
+scan_workspace() {
+  local workspace_home="$1"
+  local projects_dir="$workspace_home/projects"
+  local project_path
+  local marker
+
+  if [[ ! -d "$workspace_home" ]]; then
+    echo "STOP: workspace does not exist: $workspace_home"
+    fail=1
+    return 0
+  fi
+
+  [[ -d "$projects_dir" ]] || return 0
+
+  while IFS= read -r -d '' project_path; do
+    if git -C "$project_path" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      for marker in status.md memory.md checkpoints distillations decisions; do
+        if [[ -e "$project_path/$marker" ]]; then
+          echo "Project repo contains AI System runtime artifact: ${project_path#"$workspace_home/"}${marker:+/$marker}"
+          fail=1
+        fi
+      done
+    fi
+  done < <(find "$projects_dir" -mindepth 1 -maxdepth 1 -type d -print0)
+}
+
+if [[ -n "$workspace_arg" ]]; then
+  if [[ "$workspace_arg" != /* ]]; then
+    workspace_arg="$repo_root/${workspace_arg#./}"
+  fi
+  scan_workspace "$workspace_arg"
+fi
+
+exit "$fail"

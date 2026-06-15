@@ -20,7 +20,8 @@ Workspace home: `<WORKSPACE_HOME>`.
 - Primary entity materials belong directly in this workspace.
 - External client materials belong in `clients/`.
 - Private owner context belongs in `humans/` or `memory/` unless it has a separate private workspace.
-- Product repositories under `projects/` are private runtime data; do not read, rewrite, summarize, or expose their contents without exact owner-approved scope.
+- Product repositories under `projects/` are private source data; do not read, rewrite, summarize, or expose their contents without exact owner-approved scope.
+- Project status, memory, checkpoints, distillations, decisions, and source links belong in `project-state/` by default, not inside git repositories under `projects/`.
 - Cross-client or cross-entity lessons promoted to `system-insights/` must follow `.systems/ai/core/system-insights.md` and be anonymized.
 
 ## Structure
@@ -34,7 +35,8 @@ Workspace home: `<WORKSPACE_HOME>`.
 - `checkpoints/` - state snapshots.
 - `distillations/` - compressed lessons and summaries.
 - `contacts/` - contact notes and relationship context.
-- `projects/` - primary entity projects and standalone work.
+- `projects/` - primary entity project repositories or source materials.
+- `project-state/` - AI System runtime state for primary entity projects.
 - `documents/` - owner-approved primary entity documents.
 - `contracts/` - owner-approved primary entity contracts.
 - `assets/` - reusable entity assets.

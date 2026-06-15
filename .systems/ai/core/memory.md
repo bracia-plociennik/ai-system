@@ -14,7 +14,7 @@ Memory helps the owner resume work, preserve decisions, detect stale assumptions
 | Primary-entity memory | `<workspace>/memory.md` and `<workspace>/memory/` | Raw primary company, brand, or owner-controlled entity facts, decisions, constraints, and reusable context when the entity lives at the workspace root. |
 | Client memory | `<workspace>/clients/<client>/memory/` | Raw client-specific facts, history, constraints, and relationship context. |
 | Owned-asset memory | `<workspace>/owned-assets/<asset>/memory/` | Raw owner-controlled asset facts, decisions, constraints, and business or brand context in a generic workspace or explicit sub-asset namespace. |
-| Project memory | `<workspace>/projects/<project>/memory/` or client project memory | Project-specific facts, decisions, implementation notes, risks, and lessons. |
+| Project memory | `<workspace>/project-state/<project>/memory/` or nearest client/owned-asset `project-state/<project>/memory/` | Project-specific facts, decisions, implementation notes, risks, and lessons. |
 | Distillations | primary-entity, project, or client distillation files | Compressed summaries of raw memory and materials. |
 | Checkpoints | primary-entity, project, or client checkpoint files | Periodic state snapshots for safe resume. |
 | System insights | `<workspace>/system-insights/system-insights.md` and `<workspace>/system-insights/insights/` | Anonymized operating lessons and skill candidates for owner competence, offer, process, and work quality. |
@@ -50,6 +50,8 @@ The gate must explicitly choose one of:
 This is a routing decision, not write permission. Durable writes still require the correct selected workspace target, privacy-safe content, and exact `owner-approved` scope unless an existing checkpoint or final-check route authorizes that exact capture.
 
 Use `not-applicable` when no status, decision, evidence, reusable lesson, or durable context changed, or when the current artifact already captured the same fact.
+
+For project memory, status, distillations, decisions, and checkpoints, use `.systems/ai/core/project-state.md`. Do not write AI System runtime files into a project git worktree unless the owner explicitly chooses colocated local-only state.
 
 ## Distillation Reminders
 

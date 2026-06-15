@@ -19,7 +19,7 @@ This contract separates AI System product updates from private workspace schema 
 - `HUMANS.md`;
 - root agent contract template.
 
-It must not modify private runtime workspaces, `ai-system-workspaces.md`, client data, project data, memory, checkpoints, system insights entries, external memory entries, or `.git/info/exclude`.
+It must not modify private runtime workspaces, `ai-system-workspaces.md`, client data, project data, project-state entries, memory, checkpoints, system insights entries, external memory entries, or `.git/info/exclude`.
 
 `update-workspace` may create only missing neutral workspace directories, routers, README files, and template files inside an existing selected workspace. It must not overwrite existing files.
 

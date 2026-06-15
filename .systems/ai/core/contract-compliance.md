@@ -32,7 +32,7 @@ Before work closure, classify the work mode:
 
 | Work mode | Use when | Default evidence and capture boundary |
 | --- | --- | --- |
-| `project` | Work belongs to a selected workspace project, client project, or owned-asset project. | Project status/evidence, project-memory, distillation, checkpoint when needed. |
+| `project` | Work belongs to a selected workspace project, client project, or owned-asset project. | Project-state status/evidence, project-memory, distillation, checkpoint when needed. |
 | `micro-task` | Small low-risk work inside a workspace or project that does not require a full project flow. | Final response evidence, status/evidence if state changed, durable memory only when owner-approved. |
 | `micro-project` | Small local work item tracked under `<workspace>/micro-projects/`. | `status/evidence` recorded in the micro-project artifact; promote if scope or risk grows. |
 | `side-task` | One-off read-only, validation, orientation, or narrow local task with no durable project record. | Final response evidence unless the owner requested durable capture. |
@@ -112,3 +112,5 @@ Do not store client names, people names, domains, secrets, contract details, amo
 | `client-work` | `client-memory` for client facts, `project-memory` for project facts, `system-insights` for anonymized reusable lessons. |
 
 This gate does not allow writing the wrong memory type. If the correct target is ambiguous, stop and ask the owner to choose the target.
+
+For project work, resolve the concrete project-state path through `.systems/ai/core/project-state.md` before durable capture. Do not write AI System runtime state into a project git worktree unless the owner explicitly chooses colocated local-only state.

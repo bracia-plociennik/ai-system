@@ -14,4 +14,6 @@ Validation scripts for AI System live here.
 
 `check-update-workspace` validates the workspace backfill script, update contract, docs, templates, and smoke coverage.
 
+`check-project-state` validates repo-safe project-state contracts, templates, routing, script wiring, and optional workspace pollution scans.
+
 `check-system-insights` validates System Insights templates, entry structure, privacy checks, and External Memory scope separation.

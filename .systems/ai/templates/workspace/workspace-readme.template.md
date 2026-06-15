@@ -12,7 +12,8 @@ Workspace home: `<WORKSPACE_HOME>`.
 - `dump/` - incoming unclassified files.
 - `clients/` - client workspaces.
 - `owned-assets/` - owner-controlled companies, brands, and commercial assets when they are not the primary entity of this workspace.
-- `projects/` - standalone projects.
+- `projects/` - standalone project repositories or source materials.
+- `project-state/` - AI System status, memory, checkpoints, distillations, decisions, and source links for projects.
 - `micro-projects/` - small standalone work.
 - `humans/` - owner-facing summaries.
 - `memory/` - global workspace memory.

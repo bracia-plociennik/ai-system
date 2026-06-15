@@ -179,6 +179,53 @@ mutate_contract_and_expect_fail "contract-compliance-missing-not-required" "not-
 mutate_contract_and_expect_fail "contract-compliance-missing-checkpoint-target" "checkpoint"
 mutate_contract_and_expect_fail "contract-compliance-missing-advisory-only" "advisory-only"
 
+project_state_validator="$copy_repo/.systems/scripts/check-project-state"
+project_state_core="$copy_repo/.systems/ai/core/project-state.md"
+project_state_workspaces_core="$copy_repo/.systems/ai/core/workspaces.md"
+
+run_must_pass "project-state-baseline" "$project_state_validator"
+
+mutate_project_state_and_expect_fail() {
+  local name="$1"
+  local pattern="$2"
+  local backup="$project_state_core.bak"
+  local filtered="$tmp/$name.project-state.md"
+
+  cp "$project_state_core" "$backup"
+  grep -v "$pattern" "$backup" >"$filtered"
+  mv "$filtered" "$project_state_core"
+  run_must_fail "$name" "$project_state_validator"
+  mv "$backup" "$project_state_core"
+}
+
+mutate_project_state_and_expect_fail "project-state-missing-git-worktree-guard" "git worktree"
+
+mutate_project_state_required_ref_and_expect_fail() {
+  local name="$1"
+  local backup="$project_state_workspaces_core.bak"
+  local filtered="$tmp/$name.workspaces.md"
+
+  cp "$project_state_workspaces_core" "$backup"
+  grep -v "project-state" "$backup" >"$filtered"
+  mv "$filtered" "$project_state_workspaces_core"
+  run_must_fail "$name" "$project_state_validator"
+  mv "$backup" "$project_state_workspaces_core"
+}
+
+mutate_project_state_required_ref_and_expect_fail "project-state-missing-workspaces-reference"
+
+project_state_scan_workspace="$tmp/project-state-scan-workspace"
+mkdir -p "$project_state_scan_workspace/projects/clean-repo" "$project_state_scan_workspace/projects/polluted-repo/checkpoints"
+git -C "$project_state_scan_workspace/projects/clean-repo" init -q
+git -C "$project_state_scan_workspace/projects/polluted-repo" init -q
+printf '%s\n' "# Runtime Status" > "$project_state_scan_workspace/projects/polluted-repo/status.md"
+printf '%s\n' "# Runtime Memory" > "$project_state_scan_workspace/projects/polluted-repo/memory.md"
+printf '%s\n' "# Runtime Checkpoints" > "$project_state_scan_workspace/projects/polluted-repo/checkpoints/README.md"
+run_must_fail "project-state-detects-runtime-files-in-project-repo" "$project_state_validator" --workspace "$project_state_scan_workspace"
+rm "$project_state_scan_workspace/projects/polluted-repo/status.md" "$project_state_scan_workspace/projects/polluted-repo/memory.md"
+rm -rf "$project_state_scan_workspace/projects/polluted-repo/checkpoints"
+run_must_pass "project-state-clean-project-repos-pass" "$project_state_validator" --workspace "$project_state_scan_workspace"
+
 update_workspace_script="$copy_repo/.systems/scripts/update-workspace"
 update_workspace_validator="$copy_repo/.systems/scripts/check-update-workspace"
 
@@ -187,7 +234,9 @@ run_must_pass "update-workspace-validator-baseline" "$update_workspace_validator
 dry_workspace="$tmp/update-workspace-dry"
 mkdir -p "$dry_workspace"
 run_must_pass "update-workspace-dry-run-writes-nothing" "$update_workspace_script" --workspace "$dry_workspace" --dry-run
+grep -q "project-state" "$tmp/update-workspace-dry-run-writes-nothing.out" || { echo "update-workspace dry-run did not report project-state creates"; exit 1; }
 test ! -e "$dry_workspace/core" || { echo "update-workspace dry-run created core directory"; exit 1; }
+test ! -e "$dry_workspace/project-state" || { echo "update-workspace dry-run created project-state directory"; exit 1; }
 
 generic_workspace="$tmp/update-workspace-generic"
 mkdir -p \
@@ -208,6 +257,7 @@ exclude_before="$(cat "$copy_repo/.git/info/exclude")"
 run_must_pass "update-workspace-generic-backfill" "$update_workspace_script" --workspace "$generic_workspace"
 test -f "$generic_workspace/core/workstreams.md" || { echo "update-workspace did not create core/workstreams.md"; exit 1; }
 test -f "$generic_workspace/owned-assets/README.md" || { echo "update-workspace did not backfill owned-assets README"; exit 1; }
+test -f "$generic_workspace/project-state/project-state.md" || { echo "update-workspace did not backfill project-state router"; exit 1; }
 test -f "$generic_workspace/system-insights/system-insights.md" || { echo "update-workspace did not backfill system insights router"; exit 1; }
 test ! -d "$generic_workspace/prompting" || { echo "update-workspace created prompting by default"; exit 1; }
 grep -q "existing status" "$generic_workspace/core/status.md" || { echo "update-workspace overwrote core/status.md"; exit 1; }
@@ -412,5 +462,6 @@ run_must_pass "init-workspace-system-insights" "$copy_repo/.systems/scripts/init
 test -f "$init_target/system-insights/system-insights.md" || { echo "init-workspace did not create system insights router"; exit 1; }
 test -f "$init_target/system-insights/insights/README.md" || { echo "init-workspace did not create system insights entries README"; exit 1; }
 test -f "$init_target/core/workstreams.md" || { echo "init-workspace did not create core/workstreams.md"; exit 1; }
+test -f "$init_target/project-state/project-state.md" || { echo "init-workspace did not create project-state router"; exit 1; }
 
 echo "Validator smoke tests passed."

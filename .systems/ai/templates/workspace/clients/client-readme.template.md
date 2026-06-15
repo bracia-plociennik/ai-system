@@ -13,6 +13,7 @@ Client workspace for `<Client>`.
 - `distillations/`
 - `contacts/`
 - `projects/`
+- `project-state/`
 - `documents/`
 - `contracts/`
 - `assets/`
@@ -31,3 +32,5 @@ This workspace may contain client-specific data. Do not promote raw content to `
 Use `dump/incoming/` for files already known to belong to this client.
 
 Files in client dump still require classification before movement into `documents/`, `assets/`, `projects/`, `contracts/`, `memory/`, or `archive/`.
+
+Use `project-state/<project>/` for AI System client-project status, memory, checkpoints, distillations, decisions, and source links when `projects/<project>/` is a git repo or source-material folder.

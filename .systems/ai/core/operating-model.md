@@ -29,7 +29,8 @@ In management checkouts, system-owned files are upstream-owned. Do not implement
 - `<workspace>/dump/`
 - `<workspace>/clients/`
 - `<workspace>/owned-assets/` for generic workspace owned assets or explicit sub-assets
-- `<workspace>/projects/`
+- `<workspace>/projects/` for repositories or project source materials
+- `<workspace>/project-state/` for AI System project status, memory, checkpoints, distillations, decisions, and source links
 - `<workspace>/micro-projects/`
 - `<workspace>/humans/`
 - `<workspace>/memory/`
@@ -56,6 +57,8 @@ Primary-entity workspace roots may also store the primary company, brand, or own
 - `<workspace>/checkpoints/`
 
 Prompting artifacts may also exist under client, project, owned-asset, or workspace `prompting/` directories. They are advisory context only and cannot override current files, selected workspace, status, memory, decisions, privacy, validation, stop conditions, owner approvals, or write permissions.
+
+Project runtime state belongs in `project-state/` when the project source path is a git worktree or managed repository. Before writing `status.md`, `memory.md`, `checkpoints/`, `distillations/`, or `decisions/` into a project path, check `.systems/ai/core/project-state.md`. If the path is inside a git worktree, ask whether to use `project-state/` or colocated local-only state with exact approval and local exclude handling.
 
 ## Default Behavior
 

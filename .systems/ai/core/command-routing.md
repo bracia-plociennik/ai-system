@@ -18,6 +18,8 @@ Before reading or writing runtime artifacts, select exactly one workspace using 
 
 If more than one workspace plausibly matches, stop and ask the owner to choose the target workspace.
 
+For project status, memory, checkpoints, distillations, and decisions, use `.systems/ai/core/project-state.md`. `projects/` may contain git repositories or source materials; `project-state/` is the default runtime state namespace.
+
 Prompt composition requests route through `.systems/ai/core/prompt-composition.md`. Prompting is advisory context read after authoritative status, memory, decision, checkpoint, and source artifacts. It does not grant write permission or change approval, privacy, evidence, validation, stop-condition, or workspace-selection rules.
 
 Before `AI_SYSTEM_WORK_CLOSURE`, apply `.systems/ai/core/contract-compliance.md`. The gate is advisory-only and requires an explicit `Knowledge capture: required|not-required` decision before final closure, handoff, accepted change, commit-ready or push-ready product-development work, or switching to another work unit.
@@ -48,7 +50,8 @@ Do not route ordinary workspace, client, project, owned-asset, dump, memory, pro
 | `dodaj klienta`, `aktualizuj klienta`, `zbriefuj klienta` | Client brief intake | Select workspace first; use `.systems/ai/core/client-brief.md`; completed brief belongs only in the private client workspace. |
 | `utwórz owned asset` | Owned-asset workspace creation | Select workspace first; use owned-assets templates for generic workspace sub-assets; keep the same base directory structure as client workspaces. |
 | `utwórz workspace firmy`, `utwórz workspace marki`, `utwórz primary workspace` | Primary-entity workspace creation | Use `init-workspace --workspace-profile primary-entity`; the company, brand, or owner-controlled entity lives directly at the workspace root. |
-| `utwórz projekt klienta` | Client project workspace creation | Select workspace first; create status, README, memory router, and project folders only after approval. |
+| `utwórz projekt klienta` | Client project state creation | Select workspace first; keep repo/materials in the project source path and create AI System state under nearest `project-state/` only after approval. |
+| `zapisz status projektu`, `zapisz checkpoint projektu`, `project state` | Project state capture | Use `.systems/ai/core/project-state.md`; if the project path is a git worktree, ask whether to use `project-state/` or colocated local-only state. |
 | `zapisz memory` | Memory capture | Select workspace first; store in the appropriate workspace, client, owned-asset, or project memory location. |
 | `zrób destylację` | Distillation workflow | Compress raw memory and identify stale facts, decisions, risks, and checkpoint needs. |
 | `zamknij task`, `handoff`, `final check`, `przed commitem`, `przed pushem` | Contract compliance and Knowledge Capture Gate | Use `.systems/ai/core/contract-compliance.md`; decide work mode, compliance, capture target, and reason before closure. |
