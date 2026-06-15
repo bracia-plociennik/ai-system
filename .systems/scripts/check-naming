@@ -1,0 +1,155 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+script_dir="$repo_root/.systems/scripts"
+source "$script_dir/lib-workspaces"
+fail=0
+prune_paths=("$repo_root/.git")
+
+add_prune_path() {
+  local path="$1"
+  local normalized
+
+  [[ -n "$path" ]] || return 0
+  normalized="$(ai_system_workspace_normalize_path "$repo_root" "$path")"
+  [[ -n "$normalized" ]] || return 0
+
+  local existing
+  for existing in "${prune_paths[@]}"; do
+    [[ "$existing" == "$normalized" ]] && return 0
+  done
+
+  prune_paths+=("$normalized")
+}
+
+while IFS= read -r known_root; do
+  add_prune_path "$known_root"
+done < <(ai_system_workspace_known_local_roots "$repo_root")
+
+while IFS= read -r registry_root; do
+  add_prune_path "$registry_root"
+done < <(ai_system_workspace_registry_paths "$repo_root")
+
+if [[ -n "${AI_SYSTEM_WORKSPACE_HOME:-}" ]]; then
+  add_prune_path "$AI_SYSTEM_WORKSPACE_HOME"
+fi
+
+is_exempt_markdown_path() {
+  local path="${1#./}"
+  local base
+  base="$(basename "$path")"
+
+  [[ "$path" == "AGENTS.md" || "$path" == "HUMANS.md" || "$base" == "README.md" ]] && return 0
+  [[ "$path" == ".systems/ai/templates/root/AGENTS.template.md" ]] && return 0
+  return 1
+}
+
+is_canonical_skill_contract_path() {
+  local path="${1#./}"
+
+  if [[ "$path" =~ ^\.systems/ai/skills/[^/]+/SKILL\.md$ ]]; then
+    return 0
+  fi
+
+  if [[ -n "${AI_SYSTEM_WORKSPACE_HOME:-}" ]]; then
+    local workspace_home
+    workspace_home="$(ai_system_workspace_normalize_path "$repo_root" "$AI_SYSTEM_WORKSPACE_HOME")"
+    local absolute_path="$path"
+    [[ "$absolute_path" = /* ]] || absolute_path="$repo_root/$absolute_path"
+    if [[ "$absolute_path" =~ ^"$workspace_home"/skills/[^/]+/SKILL\.md$ ]]; then
+      return 0
+    fi
+  fi
+
+  return 1
+}
+
+is_exempt_supporting_path() {
+  local path="${1#./}"
+
+  case "$path" in
+    .systems/ai/skills/legacy/*)
+      return 0
+      ;;
+  esac
+
+  if [[ -n "${AI_SYSTEM_WORKSPACE_HOME:-}" ]]; then
+    local workspace_home
+    workspace_home="$(ai_system_workspace_normalize_path "$repo_root" "$AI_SYSTEM_WORKSPACE_HOME")"
+    local absolute_path="$path"
+    [[ "$absolute_path" = /* ]] || absolute_path="$repo_root/$absolute_path"
+    case "$absolute_path" in
+      "$workspace_home"/skills/*/context/*)
+        return 0
+        ;;
+    esac
+  fi
+
+  return 1
+}
+
+check_markdown_path() {
+  local path="$1"
+  local source="$2"
+  local base
+  base="$(basename "$path")"
+
+  [[ "$base" == *.md ]] || return 0
+
+  if is_exempt_markdown_path "$path"; then
+    return 0
+  fi
+
+  if is_canonical_skill_contract_path "$path"; then
+    return 0
+  fi
+
+  if is_exempt_supporting_path "$path"; then
+    return 0
+  fi
+
+  if [[ ! "$base" =~ ^[a-z0-9]+([.-][a-z0-9]+)*\.md$ ]]; then
+    echo "Invalid Markdown filename (${source}): ${path#./}"
+    fail=1
+  fi
+
+  if [[ "$base" == *"_"* ]]; then
+    echo "Markdown filename contains underscore (${source}): ${path#./}"
+    fail=1
+  fi
+}
+
+find_args=("$repo_root")
+for prune_path in "${prune_paths[@]}"; do
+  find_args+=( -path "$prune_path" -prune -o )
+done
+find_args+=( -type f -name '*.md' -print0 )
+
+while IFS= read -r -d '' file; do
+  if [[ "$file" == "$repo_root/"* ]]; then
+    file="${file#"$repo_root/"}"
+  fi
+  check_markdown_path "$file" "filesystem"
+done < <(find "${find_args[@]}")
+
+if [[ -n "${AI_SYSTEM_WORKSPACE_HOME:-}" ]]; then
+  workspace_home="$(ai_system_workspace_normalize_path "$repo_root" "$AI_SYSTEM_WORKSPACE_HOME")"
+  if [[ -d "$workspace_home" ]]; then
+    while IFS= read -r -d '' file; do
+      check_markdown_path "$file" "workspace-filesystem"
+    done < <(find "$workspace_home" -type f -name '*.md' -print0)
+  fi
+fi
+
+if git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  while IFS= read -r -d '' file; do
+    check_markdown_path "$file" "git-index"
+  done < <(git -C "$repo_root" ls-files -z -- '*.md')
+fi
+
+if [[ "$fail" -ne 0 ]]; then
+  echo "Naming check failed. Use lowercase kebab-case for new non-root Markdown files unless the path is an explicit AI System exception."
+fi
+
+exit "$fail"

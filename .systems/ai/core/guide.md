@@ -29,6 +29,7 @@ Read the smallest set needed to answer safely:
 11. Relevant primary-entity, client, owned-asset, or project-state status files in the selected workspace.
 12. Relevant memory routers, checkpoint files, distillations, and open decisions.
 13. Relevant accepted prompting artifacts after the status, memory, decision, and checkpoint artifacts they reference.
+14. Relevant selected-workspace skill `SKILL.md`, then relevant system skill `SKILL.md`, when a matching skill exists.
 
 If an expected artifact is missing, say it is missing and route to creation or recovery.
 
@@ -49,7 +50,8 @@ If an expected artifact is missing, say it is missing and route to creation or r
 - External memory for AI System improvements: `<workspace>/external-memory/`.
 - Anonymized work-quality lessons: `<workspace>/system-insights/`.
 - Prompting: `<workspace>/prompting/`, `<workspace>/clients/<client>/prompting/`, `<workspace>/clients/<client>/projects/<project>/prompting/`, and `<workspace>/projects/<project>/prompting/`.
-- Owner skills: `<workspace>/skills/`.
+- Owner skills: `<workspace>/skills/<skill-name>/SKILL.md`.
+- System skills: `.systems/ai/skills/<skill-name>/SKILL.md`.
 
 ## Response Shape
 

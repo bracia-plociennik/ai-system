@@ -1,0 +1,245 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+fail=0
+
+cd "$repo_root"
+
+require_file() {
+  local path="$1"
+  if [[ ! -f "$path" ]]; then
+    echo "Missing system skill artifact: $path"
+    fail=1
+  fi
+}
+
+require_ref() {
+  local file="$1"
+  local pattern="$2"
+  local label="$3"
+
+  if [[ ! -f "$file" ]]; then
+    echo "Missing file for system skill reference check: $file"
+    fail=1
+    return 0
+  fi
+
+  if ! rg -q -- "$pattern" "$file"; then
+    echo "Missing system skill reference in $file: $label"
+    fail=1
+  fi
+}
+
+required_files=(
+  ".systems/ai/skills/README.md"
+  ".systems/ai/skills/skill-creator/SKILL.md"
+  ".systems/ai/skills/skill-creator/README.md"
+  ".systems/ai/skills/skill-creator/agents/analyzer.md"
+  ".systems/ai/skills/skill-creator/agents/comparator.md"
+  ".systems/ai/skills/skill-creator/agents/grader.md"
+  ".systems/ai/skills/skill-creator/assets/eval_review.html"
+  ".systems/ai/skills/skill-creator/eval-viewer/generate_review.py"
+  ".systems/ai/skills/skill-creator/eval-viewer/viewer.html"
+  ".systems/ai/skills/skill-creator/references/schemas.md"
+  ".systems/ai/skills/skill-creator/scripts/__init__.py"
+  ".systems/ai/skills/skill-creator/scripts/aggregate_benchmark.py"
+  ".systems/ai/skills/skill-creator/scripts/generate_report.py"
+  ".systems/ai/skills/skill-creator/scripts/improve_description.py"
+  ".systems/ai/skills/skill-creator/scripts/init_skill.py"
+  ".systems/ai/skills/skill-creator/scripts/package_skill.py"
+  ".systems/ai/skills/skill-creator/scripts/quick_validate.py"
+  ".systems/ai/skills/skill-creator/scripts/run_eval.py"
+  ".systems/ai/skills/skill-creator/scripts/run_loop.py"
+  ".systems/ai/skills/skill-creator/scripts/utils.py"
+  ".systems/ai/skills/legacy/README.md"
+  ".systems/ai/skills/legacy/skill-creator-old/SKILL.md"
+)
+
+for path in "${required_files[@]}"; do
+  require_file "$path"
+done
+
+for file in \
+  ".systems/ai/core/operating-model.md" \
+  ".systems/ai/core/command-routing.md" \
+  ".systems/ai/core/guide.md" \
+  ".systems/ai/templates/root/AGENTS.template.md" \
+  ".systems/ai/skills/README.md" \
+  ".systems/ai/templates/workspace/skills/README.md" \
+  "README.md" \
+  "HUMANS.md"
+do
+  require_ref "$file" 'SKILL\.md' "canonical skill contract"
+done
+
+require_ref ".systems/ai/skills/README.md" 'AI_SYSTEM_WORKSPACE_HOME/skills' "workspace user skill path"
+require_ref ".systems/ai/skills/README.md" 'legacy/.+context/data only|context/data only' "legacy context/data boundary"
+require_ref ".systems/ai/templates/root/AGENTS.template.md" 'legacy/.+\*\*.+context/data only|context/data only' "root legacy skill boundary"
+require_ref ".systems/scripts/validate-ai-system" 'check-system-skills' "validator chain"
+require_ref ".systems/scripts/check-required-artifacts" 'check-system-skills' "required artifact list"
+require_ref ".systems/scripts/check-validator-smoke-tests" 'system-skills' "smoke coverage"
+
+skill_name_pattern='^[a-z0-9]+(-[a-z0-9]+)*$'
+unsafe_runtime_pattern='(claude -p|\.claude/|CLAUDECODE)'
+external_cdn_pattern='fonts\.googleapis|fonts\.gstatic|cdn\.|unpkg\.com|jsdelivr\.net'
+external_asset_resource_pattern='https?://'
+undeclared_dependency_pattern='^[[:space:]]*import[[:space:]]+yaml\b|^[[:space:]]*from[[:space:]]+yaml[[:space:]]+import\b'
+
+check_frontmatter() {
+  local file="$1"
+
+  python3 - "$file" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+
+if not text.startswith("---\n"):
+    print(f"Missing YAML frontmatter: {path}")
+    sys.exit(1)
+
+end = text.find("\n---", 4)
+if end == -1:
+    print(f"Unclosed YAML frontmatter: {path}")
+    sys.exit(1)
+
+frontmatter = text[4:end].splitlines()
+values = {}
+current_key = None
+for line in frontmatter:
+    if not line.strip() or line.lstrip().startswith("#"):
+        continue
+    if re.match(r"^[A-Za-z0-9_-]+:", line):
+        key, value = line.split(":", 1)
+        current_key = key.strip()
+        values[current_key] = value.strip()
+    elif current_key and line.startswith((" ", "\t")):
+        values[current_key] += " " + line.strip()
+    else:
+        print(f"Invalid frontmatter line in {path}: {line}")
+        sys.exit(1)
+
+extra = sorted(set(values) - {"name", "description"})
+if extra:
+    print(f"Unexpected frontmatter keys in {path}: {', '.join(extra)}")
+    sys.exit(1)
+
+for required in ("name", "description"):
+    if required not in values or not values[required].strip():
+        print(f"Missing required frontmatter key '{required}': {path}")
+        sys.exit(1)
+
+name = values["name"].strip().strip("'\"")
+description = values["description"].strip().strip("'\"")
+
+if not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", name):
+    print(f"Invalid skill name in frontmatter: {path}: {name}")
+    sys.exit(1)
+
+if len(description) > 1024:
+    print(f"Skill description too long: {path}")
+    sys.exit(1)
+
+if "<" in description or ">" in description:
+    print(f"Skill description contains angle brackets: {path}")
+    sys.exit(1)
+PY
+}
+
+check_active_skill() {
+  local dir="$1"
+  local name
+  name="$(basename "$dir")"
+
+  if [[ ! "$name" =~ $skill_name_pattern ]]; then
+    echo "Invalid system skill directory name: ${dir#./}"
+    fail=1
+  fi
+
+  local skill_md="$dir/SKILL.md"
+  local readme="$dir/README.md"
+
+  if [[ ! -f "$skill_md" ]]; then
+    echo "System skill missing canonical SKILL.md: ${dir#./}"
+    fail=1
+  else
+    if ! check_frontmatter "$skill_md"; then
+      fail=1
+    fi
+
+    for pattern in \
+      'supporting execution guidance|advisory' \
+      'cannot override|must not override' \
+      'AGENTS\.md' \
+      'workspace selection|selected workspace' \
+      'privacy' \
+      'owner-approved|owner approval' \
+      'validation' \
+      'evidence' \
+      'stop conditions|final acceptance'
+    do
+      if ! rg -qi -- "$pattern" "$skill_md"; then
+        echo "System skill SKILL.md missing authority boundary text '$pattern': ${skill_md#./}"
+        fail=1
+      fi
+    done
+  fi
+
+  if [[ ! -f "$readme" ]]; then
+    echo "System skill missing README.md: ${dir#./}"
+    fail=1
+  else
+    if ! rg -q 'SKILL\.md' "$readme"; then
+      echo "System skill README.md must point to SKILL.md: ${readme#./}"
+      fail=1
+    fi
+
+    local readme_lines
+    readme_lines="$(wc -l < "$readme" | tr -d ' ')"
+    if [[ "$readme_lines" -gt 80 ]]; then
+      echo "System skill README.md is too long; keep it human-summary only: ${readme#./}"
+      fail=1
+    fi
+  fi
+
+  if rg -n -- "$unsafe_runtime_pattern" "$dir"; then
+    echo "System skill contains external-model/runtime-specific execution markers: ${dir#./}"
+    fail=1
+  fi
+
+  if rg -n -- "$external_cdn_pattern" "$dir"; then
+    echo "System skill contains external CDN/font/script provider references; assets/viewers must be offline by default: ${dir#./}"
+    fail=1
+  fi
+
+  local resource_dir
+  for resource_dir in "$dir/assets" "$dir/eval-viewer"; do
+    if [[ -d "$resource_dir" ]] && rg -n -- "$external_asset_resource_pattern" "$resource_dir"; then
+      echo "System skill assets/viewer contain external resource URLs; assets/viewers must be offline by default: ${resource_dir#./}"
+      fail=1
+    fi
+  done
+
+  if rg -n -- "$undeclared_dependency_pattern" "$dir"; then
+    echo "System skill contains undeclared Python dependency import: ${dir#./}"
+    fail=1
+  fi
+
+  if find "$dir" \( -type d -name '__pycache__' -o -type f \( -name '*.pyc' -o -name '*.pyo' \) \) -print -quit | rg -q .; then
+    echo "System skill contains generated Python runtime artifacts: ${dir#./}"
+    fail=1
+  fi
+}
+
+if [[ -d ".systems/ai/skills" ]]; then
+  while IFS= read -r -d '' dir; do
+    base="$(basename "$dir")"
+    [[ "$base" == "legacy" ]] && continue
+    check_active_skill "$dir"
+  done < <(find .systems/ai/skills -mindepth 1 -maxdepth 1 -type d -print0)
+fi
+
+exit "$fail"

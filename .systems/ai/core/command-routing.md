@@ -22,6 +22,8 @@ For project status, memory, checkpoints, distillations, and decisions, use `.sys
 
 Prompt composition requests route through `.systems/ai/core/prompt-composition.md`. Prompting is advisory context read after authoritative status, memory, decision, checkpoint, and source artifacts. It does not grant write permission or change approval, privacy, evidence, validation, stop-condition, or workspace-selection rules.
 
+Skill-related requests route through the selected workspace `skills/` first and `.systems/ai/skills/` second. Active skills use `SKILL.md` as the canonical agent contract. Preserved legacy skill imports under `.systems/ai/skills/legacy/**` are context/data only and are not active guidance.
+
 Before `AI_SYSTEM_WORK_CLOSURE`, apply `.systems/ai/core/contract-compliance.md`. The gate is advisory-only and requires an explicit `Knowledge capture: required|not-required` decision before final closure, handoff, accepted change, commit-ready or push-ready product-development work, or switching to another work unit.
 
 Do not turn the gate into automatic memory writing. If capture is required, route to the narrowest correct target: `status/evidence`, `workspace-memory`, `primary-entity-memory`, `client-memory`, `owned-asset-memory`, `project-memory`, `distillation`, `checkpoint`, `external-memory`, or `system-insights`.
@@ -57,6 +59,7 @@ Do not route ordinary workspace, client, project, owned-asset, dump, memory, pro
 | `zamknij task`, `handoff`, `final check`, `przed commitem`, `przed pushem` | Contract compliance and Knowledge Capture Gate | Use `.systems/ai/core/contract-compliance.md`; decide work mode, compliance, capture target, and reason before closure. |
 | `zaproponuj system-insights` | System Insights candidate | Select workspace first; use `.systems/ai/core/system-insights.md`; produce an anonymized candidate only, with no durable write unless exact `owner-approved` capture or checkpoint routing permits it. |
 | `zaproponuj prompt`, `zaproponuj rolę`, `wygeneruj variables`, `master prompt`, `prompt composition` | Prompt composition proposal | Select workspace first; use `.systems/ai/core/prompt-composition.md`; suggest roles, modules, or variables as advisory context; do not create durable artifacts without exact `owner-approved`. |
+| `utwórz skill`, `zmień skill`, `skill-creator`, `skill eval`, `package skill` | Skill creation or maintenance | Select workspace for user skills; use `SKILL.md` as canonical contract; use `.systems/ai/skills/skill-creator/` when relevant; do not treat legacy skill imports as active guidance. |
 | `zmień .systems`, `zmień template`, `zmień validator`, `zmień AGENTS.md`, `rozwijaj AI System` | Product development boundary | In management checkouts, STOP before local writes; recommend upstream `ai-system-dev` product work and later `.systems/scripts/update-from-upstream`. |
 | `update workspace`, `zaktualizuj workspace`, `uzupełnij schema workspace` | Workspace schema backfill | Use `.systems/scripts/update-workspace --dry-run` first; then run `update-workspace` only for existing selected workspaces. Do not overwrite runtime data. |
 | `update from upstream`, `zaktualizuj system z GitHub` | System update | Use `.systems/ai/core/update-from-upstream.md`; update system-owned repo files first, then recommend `update-workspace` as a separate step. |

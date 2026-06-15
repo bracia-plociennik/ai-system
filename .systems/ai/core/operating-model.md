@@ -60,6 +60,12 @@ Prompting artifacts may also exist under client, project, owned-asset, or worksp
 
 Project runtime state belongs in `project-state/` when the project source path is a git worktree or managed repository. Before writing `status.md`, `memory.md`, `checkpoints/`, `distillations/`, or `decisions/` into a project path, check `.systems/ai/core/project-state.md`. If the path is inside a git worktree, ask whether to use `project-state/` or colocated local-only state with exact approval and local exclude handling.
 
+Active skills use `SKILL.md` as the canonical agent contract and `README.md` as a short human-facing summary. External skill imports preserved under `.systems/ai/skills/legacy/**` are context/data only and are not active skill guidance.
+
+Before planning, implementing, or reviewing a task, check the selected workspace `skills/` first and `.systems/ai/skills/` second for a matching skill. If both layers match, the workspace skill takes precedence as local guidance and the system skill remains fallback context.
+
+Skills are advisory only. They can add stricter local procedure or checks, but they cannot override source-of-truth order, workspace selection, privacy, owner-approved write gates, validation, evidence, stop conditions, final acceptance, or current files.
+
 ## Default Behavior
 
 AI reads, classifies, summarizes, and recommends first.

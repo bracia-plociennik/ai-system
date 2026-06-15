@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Skill Benchmark Viewer</title>
+  <style>
+    body { font-family: ui-sans-serif, system-ui, sans-serif; margin: 2rem; color: #171717; }
+    main { max-width: 1040px; margin: 0 auto; }
+    .summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.75rem; }
+    .metric { border: 1px solid #d0d0d0; padding: 0.75rem; }
+    .metric strong { display: block; font-size: 1.4rem; }
+    table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+    th, td { border: 1px solid #d0d0d0; padding: 0.5rem; text-align: left; }
+    th { background: #f3f3f3; }
+    textarea { width: 100%; min-height: 4rem; }
+    button { margin-top: 1rem; padding: 0.5rem 0.75rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Skill Benchmark Viewer</h1>
+    <section id="content"></section>
+  </main>
+  <script id="benchmark-data" type="application/json">{}</script>
+  <script>
+    const data = JSON.parse(document.getElementById("benchmark-data").textContent);
+    const content = document.getElementById("content");
+    const metadata = data.metadata || {};
+    const rows = data.rows || data.runs || [];
+
+    const summary = document.createElement("div");
+    summary.className = "summary";
+    for (const [label, value] of [
+      ["Skill", metadata.skill_name || data.skill_name || "unknown"],
+      ["Evals", metadata.eval_count || data.eval_count || 0],
+      ["Configs", (metadata.configurations || []).join(", ") || "n/a"],
+      ["Findings", (data.blocking_findings || []).length]
+    ]) {
+      const metric = document.createElement("div");
+      metric.className = "metric";
+      const span = document.createElement("span");
+      span.textContent = label;
+      const strong = document.createElement("strong");
+      strong.textContent = String(value);
+      metric.appendChild(span);
+      metric.appendChild(strong);
+      summary.appendChild(metric);
+    }
+    content.appendChild(summary);
+
+    const table = document.createElement("table");
+    const thead = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+    for (const label of ["Eval", "Config", "Score", "Pass Rate", "Passed", "Feedback"]) {
+      const th = document.createElement("th");
+      th.textContent = label;
+      headerRow.appendChild(th);
+    }
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+    for (const row of rows) {
+      const tr = document.createElement("tr");
+      const values = [
+        row.eval_id,
+        row.configuration || "",
+        row.score,
+        row.pass_rate || "",
+        row.passed
+      ];
+      for (const value of values) {
+        const td = document.createElement("td");
+        td.textContent = String(value ?? "");
+        tr.appendChild(td);
+      }
+      const feedbackCell = document.createElement("td");
+      const textarea = document.createElement("textarea");
+      textarea.dataset.run = `${row.eval_id}-${row.configuration || "default"}`;
+      feedbackCell.appendChild(textarea);
+      tr.appendChild(feedbackCell);
+      tbody.appendChild(tr);
+    }
+    table.appendChild(tbody);
+    content.appendChild(table);
+
+    const button = document.createElement("button");
+    button.id = "download-feedback";
+    button.textContent = "Download feedback.json";
+    content.appendChild(button);
+
+    document.getElementById("download-feedback").addEventListener("click", () => {
+      const reviews = Array.from(document.querySelectorAll("textarea")).map((field) => ({
+        run_id: field.dataset.run,
+        feedback: field.value,
+        timestamp: new Date().toISOString()
+      }));
+      const blob = new Blob([JSON.stringify({ status: "complete", reviews }, null, 2)], { type: "application/json" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "feedback.json";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    });
+  </script>
+</body>
+</html>

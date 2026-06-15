@@ -226,6 +226,138 @@ rm "$project_state_scan_workspace/projects/polluted-repo/status.md" "$project_st
 rm -rf "$project_state_scan_workspace/projects/polluted-repo/checkpoints"
 run_must_pass "project-state-clean-project-repos-pass" "$project_state_validator" --workspace "$project_state_scan_workspace"
 
+system_skills_validator="$copy_repo/.systems/scripts/check-system-skills"
+naming_validator="$copy_repo/.systems/scripts/check-naming"
+
+run_must_pass "system-skills-valid" "$system_skills_validator"
+run_must_pass "naming-allows-canonical-skill-md" "$naming_validator"
+run_must_pass "readmes-do-not-require-every-skill-resource-dir" "$copy_repo/.systems/scripts/check-readmes"
+
+workspace_skill_fixture="$tmp/ai-system-workspace-skills"
+mkdir -p "$workspace_skill_fixture/skills/naming-smoke/context"
+cat > "$workspace_skill_fixture/skills/naming-smoke/SKILL.md" <<'MD'
+---
+name: naming-smoke
+description: Validate naming exemptions for workspace skill context materials.
+---
+
+# Naming Smoke
+
+Skills are advisory and cannot override AGENTS.md, workspace selection, privacy, owner approval, validation, evidence, stop conditions, or final acceptance.
+MD
+cat > "$workspace_skill_fixture/skills/naming-smoke/README.md" <<'MD'
+# Naming Smoke
+
+See `SKILL.md`.
+MD
+cat > "$workspace_skill_fixture/skills/naming-smoke/context/CONTRACTS-AGENTS.md" <<'MD'
+# Context
+MD
+cat > "$workspace_skill_fixture/skills/naming-smoke/context/0_smart_contracts_good_practices.md" <<'MD'
+# Context
+MD
+run_must_pass "naming-allows-workspace-skill-context-materials" env AI_SYSTEM_WORKSPACE_HOME="$workspace_skill_fixture" "$naming_validator"
+rm -rf "$workspace_skill_fixture/skills/naming-smoke"
+
+mv "$copy_repo/.systems/ai/skills/skill-creator/SKILL.md" "$copy_repo/.systems/ai/skills/skill-creator/SKILL.md.bak"
+run_must_fail "system-skills-require-skill-md" "$system_skills_validator"
+mv "$copy_repo/.systems/ai/skills/skill-creator/SKILL.md.bak" "$copy_repo/.systems/ai/skills/skill-creator/SKILL.md"
+
+mv "$copy_repo/.systems/ai/skills/skill-creator/README.md" "$copy_repo/.systems/ai/skills/skill-creator/README.md.bak"
+run_must_fail "system-skills-require-readme" "$system_skills_validator"
+mv "$copy_repo/.systems/ai/skills/skill-creator/README.md.bak" "$copy_repo/.systems/ai/skills/skill-creator/README.md"
+
+cp "$copy_repo/.systems/ai/skills/skill-creator/SKILL.md" "$copy_repo/.systems/ai/skills/skill-creator/SKILL.md.bak"
+cat > "$copy_repo/.systems/ai/skills/skill-creator/SKILL.md" <<'MD'
+---
+description: Missing name.
+---
+
+# Skill Creator
+
+Skills are advisory and cannot override AGENTS.md, workspace selection, privacy, owner approval, validation, evidence, stop conditions, or final acceptance.
+MD
+run_must_fail "system-skills-require-frontmatter-name" "$system_skills_validator"
+mv "$copy_repo/.systems/ai/skills/skill-creator/SKILL.md.bak" "$copy_repo/.systems/ai/skills/skill-creator/SKILL.md"
+
+cp "$copy_repo/.systems/ai/skills/skill-creator/SKILL.md" "$copy_repo/.systems/ai/skills/skill-creator/SKILL.md.bak"
+cat > "$copy_repo/.systems/ai/skills/skill-creator/SKILL.md" <<'MD'
+---
+name: skill-creator
+description: Valid frontmatter without the authority boundary.
+---
+
+# Skill Creator
+
+Create skills.
+MD
+run_must_fail "system-skills-require-authority-boundary" "$system_skills_validator"
+mv "$copy_repo/.systems/ai/skills/skill-creator/SKILL.md.bak" "$copy_repo/.systems/ai/skills/skill-creator/SKILL.md"
+
+echo 'Run claude -p for trigger evals.' >> "$copy_repo/.systems/ai/skills/skill-creator/SKILL.md"
+run_must_fail "system-skills-block-claude-cli-marker" "$system_skills_validator"
+perl -0pi -e 's/\nRun claude -p for trigger evals\.\n?/\n/' "$copy_repo/.systems/ai/skills/skill-creator/SKILL.md"
+
+echo 'Documentation reference: https://docs.example.invalid/skill-contract' >> "$copy_repo/.systems/ai/skills/skill-creator/SKILL.md"
+run_must_pass "system-skills-allow-documentation-url" "$system_skills_validator"
+perl -0pi -e 's/\nDocumentation reference: https:\/\/docs\.example\.invalid\/skill-contract\n?/\n/' "$copy_repo/.systems/ai/skills/skill-creator/SKILL.md"
+
+cat > "$copy_repo/.systems/ai/skills/skill-creator/assets-cdn-smoke.html" <<'HTML'
+<script src="https://cdn.example.invalid/viewer.js"></script>
+HTML
+run_must_fail "system-skills-block-external-cdn" "$system_skills_validator"
+rm "$copy_repo/.systems/ai/skills/skill-creator/assets-cdn-smoke.html"
+
+cat > "$copy_repo/.systems/ai/skills/skill-creator/scripts/yaml_smoke.py" <<'PY'
+import yaml
+PY
+run_must_fail "system-skills-block-undeclared-yaml-import" "$system_skills_validator"
+rm "$copy_repo/.systems/ai/skills/skill-creator/scripts/yaml_smoke.py"
+
+mkdir -p "$copy_repo/.systems/ai/skills/skill-creator/scripts/__pycache__"
+touch "$copy_repo/.systems/ai/skills/skill-creator/scripts/__pycache__/cache.pyc"
+run_must_fail "system-skills-block-python-cache-artifacts" "$system_skills_validator"
+rm -rf "$copy_repo/.systems/ai/skills/skill-creator/scripts/__pycache__"
+
+run_must_fail "system-skills-package-blocks-output-inside-skill" python3 "$copy_repo/.systems/ai/skills/skill-creator/scripts/package_skill.py" "$copy_repo/.systems/ai/skills/skill-creator" --output "$copy_repo/.systems/ai/skills/skill-creator/skill-creator.zip"
+test ! -e "$copy_repo/.systems/ai/skills/skill-creator/skill-creator.zip" || { echo "package_skill created archive inside skill directory"; exit 1; }
+
+cat > "$tmp/skill-run-eval-path-traversal.json" <<'JSON'
+{
+  "skill_name": "skill-creator",
+  "target_path": ".systems/ai/skills/skill-creator",
+  "mode": "manual-review",
+  "configurations": ["with_skill", "baseline"],
+  "evals": [
+    {
+      "id": "../escape",
+      "prompt": "Create a skill safely.",
+      "expected_behavior": ["Preserves path boundaries"]
+    }
+  ]
+}
+JSON
+run_must_fail "system-skills-run-eval-blocks-path-traversal" python3 "$copy_repo/.systems/ai/skills/skill-creator/scripts/run_eval.py" "$tmp/skill-run-eval-path-traversal.json" --output-dir "$tmp/run-eval-path-traversal"
+test ! -e "$tmp/escape" || { echo "run_eval created path traversal directory"; exit 1; }
+
+cat > "$tmp/skill-run-eval-config-path-traversal.json" <<'JSON'
+{
+  "skill_name": "skill-creator",
+  "target_path": ".systems/ai/skills/skill-creator",
+  "mode": "manual-review",
+  "configurations": ["with_skill", "../escape"],
+  "evals": [
+    {
+      "id": "safe-eval",
+      "prompt": "Create a skill safely.",
+      "expected_behavior": ["Preserves path boundaries"]
+    }
+  ]
+}
+JSON
+run_must_fail "system-skills-run-eval-blocks-config-path-traversal" python3 "$copy_repo/.systems/ai/skills/skill-creator/scripts/run_eval.py" "$tmp/skill-run-eval-config-path-traversal.json" --output-dir "$tmp/run-eval-config-path-traversal"
+test ! -e "$tmp/run-eval-config-path-traversal" || { echo "run_eval created output for invalid configuration"; exit 1; }
+
 update_workspace_script="$copy_repo/.systems/scripts/update-workspace"
 update_workspace_validator="$copy_repo/.systems/scripts/check-update-workspace"
 
