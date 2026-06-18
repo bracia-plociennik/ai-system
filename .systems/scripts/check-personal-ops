@@ -44,6 +44,7 @@ required_files=(
   ".systems/ai/templates/workspace/personal-ops/personal-ops-readme.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-ins-readme.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-ins-index.template.md"
+  ".systems/ai/templates/workspace/personal-ops/manual-daily-check-in.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-in.template.md"
   ".systems/scripts/map-notion-check-ins"
   ".systems/scripts/check-personal-ops"
@@ -61,9 +62,16 @@ for term in \
   'personal-ops/check-ins/YYYY/YYYY-MM-DD.md' \
   'personal-ops/indexes/check-ins.csv' \
   'personal-ops/indexes/check-ins.jsonl' \
+  'personal-ops/indexes/check-ins.metrics.csv' \
+  'personal-ops/check-ins/import-profiles/manual-daily-check-in.md' \
+  'personal-ops/check-ins/YYYY/YYYY-MM-DD.assets' \
   'Markdown wins' \
   'private-sensitive' \
   'source_row_id' \
+  'Manual Check-In Profile' \
+  'Seed kolejnego dnia' \
+  'unmapped_fields' \
+  'attachments' \
   'Duplicate' \
   'Do not promote check-in content into memory'
 do
@@ -79,33 +87,80 @@ for column in \
   'sleep_hours' \
   'if_hours' \
   'training_minutes' \
+  'nsdr_minutes' \
   'habit_count_done' \
   'habit_count_total' \
   'has_plus_one' \
   'has_threat' \
   'has_built' \
-  'has_delivered'
+  'has_delivered' \
+  'has_promoted' \
+  'has_body_action' \
+  'has_spirit_action' \
+  'has_close_people_action' \
+  'has_gratitude' \
+  'has_redundant' \
+  'attachment_count' \
+  'ocr_count' \
+  'screenshot_count' \
+  'note_image_count'
 do
   require_ref ".systems/ai/core/personal-ops.md" "$column" "required index column $column"
   require_ref ".systems/scripts/map-notion-check-ins" "$column" "script index column $column"
 done
 
 for section in \
-  '## +1%' \
-  '## Zbędne' \
-  '## Bliscy' \
-  '## Ciało' \
-  '## Duch' \
-  '## Wdzięczność' \
-  '## Nawyki' \
-  '## Zagrożenie dnia' \
-  '## Dowiozłem' \
-  '## Wypromowałem' \
-  '## Zbudowałem' \
-  '## Dodatkowe informacje' \
-  '## Mantra'
+  '## 1. Plan dnia' \
+  '### Data' \
+  '### Sen od-do' \
+  '### Trening od-do' \
+  '### NSDR od-do' \
+  '### IF od-do' \
+  '### Tryb dnia' \
+  '### Zbudowałem' \
+  '### Dowiozłem' \
+  '### Wypromowałem' \
+  '### Coś dla ciała' \
+  '### Coś dla ducha' \
+  '### Coś dla bliskich' \
+  '## 2. Poranny check-in' \
+  '### Pobudka' \
+  '### Kuchnia' \
+  '### Dwór' \
+  '### Napiłem się' \
+  '### Mantra' \
+  '### Deep Focus' \
+  '### Mama i Oliwia' \
+  '### Insta Story' \
+  '### Stan po rutynie' \
+  '### Energia' \
+  '### Mental' \
+  '### Ciało' \
+  '### Ograniczenia' \
+  '### Jestem wdzięczny' \
+  '### Zagrożenie dnia' \
+  '## 3. Popołudniowy check-in' \
+  '### Czy zrobiłem minimum' \
+  '### Nawyki' \
+  '### Co dało +1%' \
+  '### Co było zbędne' \
+  '## 4. Seed kolejnego dnia' \
+  '## 5. Dodatkowe informacje' \
+  '### Załączniki'
 do
   require_ref ".systems/ai/templates/workspace/personal-ops/check-in.template.md" "$section" "check-in section $section"
+done
+
+for profile_term in \
+  'Manual daily check-in profile' \
+  '## 1. Plan dnia' \
+  '## 2. Poranny check-in' \
+  '## 3. Popołudniowy check-in' \
+  '## 4. Seed kolejnego dnia' \
+  '## 5. Dodatkowe informacje' \
+  'from Data to Coś dla bliskich'
+do
+  require_ref ".systems/ai/templates/workspace/personal-ops/manual-daily-check-in.template.md" "$profile_term" "manual profile term $profile_term"
 done
 
 for file in \

@@ -195,7 +195,13 @@ Zrób destylację pamięci klienta/projektu <slug>. Wypisz co zostaje, co jest p
 
 ## Personal Ops Check-Ins
 
-Use this for daily check-in data exported from Notion.
+Use this for native daily check-ins and daily check-in data exported from Notion.
+
+For a new manual day, use:
+
+```text
+Nowy dzień, zrób check-in według personal-ops/check-ins/import-profiles/manual-daily-check-in.md.
+```
 
 Place the raw CSV export in:
 
@@ -218,11 +224,13 @@ owner-approved: mapuj Notion check-in CSV <input-path> do personal-ops w workspa
 Expected outputs:
 
 - `<workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.md`;
+- `<workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.assets/` for optional attachments;
 - `<workspace>/personal-ops/indexes/check-ins.csv`;
 - `<workspace>/personal-ops/indexes/check-ins.jsonl`;
+- `<workspace>/personal-ops/indexes/check-ins.metrics.csv`;
 - `<workspace>/personal-ops/indexes/check-ins.md`.
 
-Check-ins are private-sensitive by default. They are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
+Check-ins and attachments are private-sensitive by default. They are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
 
 ## External Source Registry
 

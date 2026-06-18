@@ -18,6 +18,7 @@ are the source of truth.
 
 - `check-ins.csv` - spreadsheet-like analytical index.
 - `check-ins.jsonl` - optional richer machine index.
+- `check-ins.metrics.csv` - analytics-grade derived metrics for pattern analysis.
 - `check-ins-fields.md` - field dictionary and source-label audit trail.
 - `check-ins-conflicts.md` - duplicate date/source conflicts, when present.
 

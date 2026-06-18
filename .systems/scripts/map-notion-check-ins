@@ -35,12 +35,57 @@ REQUIRED_INDEX_COLUMNS = [
     "training_start",
     "training_end",
     "training_minutes",
+    "nsdr_start",
+    "nsdr_end",
+    "nsdr_minutes",
     "habit_count_done",
     "habit_count_total",
     "has_plus_one",
     "has_threat",
     "has_built",
     "has_delivered",
+    "has_promoted",
+    "has_body_action",
+    "has_spirit_action",
+    "has_close_people_action",
+    "has_gratitude",
+    "has_redundant",
+    "attachment_count",
+    "ocr_count",
+    "screenshot_count",
+    "note_image_count",
+]
+
+METRICS_INDEX_COLUMNS = [
+    "date",
+    "file_path",
+    "day_mode",
+    "sleep_hours",
+    "if_hours",
+    "training_minutes",
+    "nsdr_minutes",
+    "minimum_day_done",
+    "routine_state_subjective",
+    "energy_subjective",
+    "mental_subjective",
+    "body_subjective",
+    "limitations_subjective",
+    "habit_count_done",
+    "habit_count_total",
+    "has_built",
+    "has_delivered",
+    "has_promoted",
+    "has_body_action",
+    "has_spirit_action",
+    "has_close_people_action",
+    "has_gratitude",
+    "has_threat",
+    "has_plus_one",
+    "has_redundant",
+    "attachment_count",
+    "ocr_count",
+    "screenshot_count",
+    "note_image_count",
 ]
 
 REFLECTION_COLUMNS = {
@@ -64,6 +109,7 @@ HABIT_COLUMNS = [
     "NSDR",
     "Pobudka bez negocjacji (Mel Robbins)",
     "Muzyka Deep Focus (432 Hz, 528 Hz)",
+    "Napiłem się w spokoju kawy (medytacja)",
     "Insta Story - Proste",
     "Mama i Oliwia - Miłego dnia",
     "Kuchnia: elektrolity (woda, sól, np. cytryna, np. imbir), kawaśka, 1 osiągnięcie (Momentum)",
@@ -83,7 +129,23 @@ FIELD_COLUMNS = {
     "Sen": "sleep_range",
     "IF (intermittent-fasting)": "if_range",
     "Trening": "training_range",
+    "NSDR": "nsdr_range",
 }
+
+PLAN_FIELDS = [
+    "Data",
+    "Sen od-do",
+    "Trening od-do",
+    "NSDR od-do",
+    "IF od-do",
+    "Tryb dnia",
+    "Zbudowałem",
+    "Dowiozłem",
+    "Wypromowałem",
+    "Coś dla ciała",
+    "Coś dla ducha",
+    "Coś dla bliskich",
+]
 
 SOURCE_ID_COLUMNS = [
     "source_row_id",
@@ -222,6 +284,76 @@ def markdown_section(title: str, value: str) -> str:
     return f"## {title}\n\n{body}\n" if body else f"## {title}\n"
 
 
+def markdown_subsection(title: str, value: str) -> str:
+    body = value.strip()
+    return f"### {title}\n\n{body}\n" if body else f"### {title}\n"
+
+
+def bool_text(value) -> str:
+    if value is True:
+        return "true"
+    if value is False:
+        return "false"
+    return ""
+
+
+def time_range_text(time_range: TimeRange) -> str:
+    if time_range.start or time_range.end:
+        return f"{time_range.start} -> {time_range.end}".strip()
+    return time_range.raw
+
+
+def attachment_kind(path: Path) -> str:
+    suffix = path.suffix.lower()
+    name = path.name.lower()
+    if suffix == ".md" and ".ocr" in name:
+        return "ocr"
+    if suffix in {".png", ".jpg", ".jpeg", ".webp", ".gif"}:
+        if "screenshot" in name or "screen" in name:
+            return "screenshot"
+        return "note_image"
+    return "other"
+
+
+def collect_attachments(workspace: Path, file_path: str) -> list[dict[str, str]]:
+    markdown_path = workspace / file_path
+    assets_dir = markdown_path.with_suffix(".assets")
+    if not assets_dir.is_dir():
+        return []
+
+    attachments = []
+    for path in sorted(item for item in assets_dir.iterdir() if item.is_file()):
+        attachments.append(
+            {
+                "path": path.relative_to(markdown_path.parent).as_posix(),
+                "kind": attachment_kind(path),
+            }
+        )
+    return attachments
+
+
+def attachment_counts(attachments: list[dict[str, str]]) -> dict[str, str]:
+    return {
+        "attachment_count": str(len(attachments)),
+        "ocr_count": str(sum(1 for item in attachments if item["kind"] == "ocr")),
+        "screenshot_count": str(sum(1 for item in attachments if item["kind"] == "screenshot")),
+        "note_image_count": str(sum(1 for item in attachments if item["kind"] == "note_image")),
+    }
+
+
+def known_source_columns() -> set[str]:
+    return set(FIELD_COLUMNS) | set(REFLECTION_COLUMNS) | set(HABIT_COLUMNS) | set(SOURCE_ID_COLUMNS)
+
+
+def unmapped_fields(row: dict[str, str]) -> dict[str, str]:
+    known = known_source_columns()
+    return {
+        key: value.strip()
+        for key, value in row.items()
+        if key not in known and value.strip()
+    }
+
+
 def build_record(row: dict[str, str], row_number: int, source_database: str, privacy: str) -> dict:
     check_date = parse_check_in_date(row.get("Data", ""))
     date_text = check_date.isoformat()
@@ -231,6 +363,7 @@ def build_record(row: dict[str, str], row_number: int, source_database: str, pri
     sleep_range = parse_time_range(row.get("Sen", ""), check_date)
     if_range = parse_time_range(row.get("IF (intermittent-fasting)", ""), check_date)
     training_range = parse_time_range(row.get("Trening", ""), check_date)
+    nsdr_range = parse_time_range(row.get("NSDR", ""), check_date)
 
     habits = []
     for label in HABIT_COLUMNS:
@@ -277,19 +410,74 @@ def build_record(row: dict[str, str], row_number: int, source_database: str, pri
         "training_start": training_range.start,
         "training_end": training_range.end,
         "training_raw": training_range.raw,
+        "nsdr_start": nsdr_range.start,
+        "nsdr_end": nsdr_range.end,
+        "nsdr_raw": nsdr_range.raw,
+        "day_plan_status": "",
+        "morning_check_in_status": "",
+        "afternoon_check_in_status": "",
+        "next_day_seed_status": "",
     }
 
     file_path = Path("personal-ops") / "check-ins" / check_date.strftime("%Y") / f"{date_text}.md"
+    phases = {
+        "day_plan": {
+            "Data": date_text,
+            "Sen od-do": time_range_text(sleep_range),
+            "Trening od-do": time_range_text(training_range),
+            "NSDR od-do": time_range_text(nsdr_range),
+            "IF od-do": time_range_text(if_range),
+            "Tryb dnia": day_mode_raw,
+            "Zbudowałem": reflections.get("built", ""),
+            "Dowiozłem": reflections.get("delivered", ""),
+            "Wypromowałem": reflections.get("promoted", ""),
+            "Coś dla ciała": reflections.get("body", ""),
+            "Coś dla ducha": reflections.get("spirit", ""),
+            "Coś dla bliskich": reflections.get("close_people", ""),
+        },
+        "morning": {
+            "Pobudka": bool_text(next((habit["value"] for habit in habits if "Pobudka" in habit["label"]), "")),
+            "Kuchnia": bool_text(next((habit["value"] for habit in habits if habit["label"].startswith("Kuchnia:")), "")),
+            "Dwór": bool_text(next((habit["value"] for habit in habits if habit["label"].startswith("Dwór:")), "")),
+            "Napiłem się": bool_text(next((habit["value"] for habit in habits if habit["label"].startswith("Napiłem")), "")),
+            "Mantra": reflections.get("mantra", ""),
+            "Deep Focus": bool_text(next((habit["value"] for habit in habits if habit["label"].startswith("Muzyka Deep Focus")), "")),
+            "Mama i Oliwia": bool_text(next((habit["value"] for habit in habits if habit["label"].startswith("Mama i Oliwia")), "")),
+            "Insta Story": bool_text(next((habit["value"] for habit in habits if habit["label"].startswith("Insta Story")), "")),
+            "Stan po rutynie": frontmatter["routine_state_subjective"],
+            "Energia": frontmatter["energy_subjective"],
+            "Mental": frontmatter["mental_subjective"],
+            "Ciało": frontmatter["body_subjective"],
+            "Ograniczenia": frontmatter["limitations_subjective"],
+            "Jestem wdzięczny": reflections.get("gratitude", ""),
+            "Zagrożenie dnia": reflections.get("threat", ""),
+        },
+        "afternoon": {
+            "Czy zrobiłem minimum": bool_text(frontmatter["minimum_day_done"]),
+            "Nawyki": reflections.get("habits_text", ""),
+            "Co dało +1%": reflections.get("plus_one", ""),
+            "Co było zbędne": reflections.get("redundant", ""),
+        },
+        "next_day_seed": {field: "" for field in PLAN_FIELDS},
+        "additional": {
+            "Dodatkowe informacje": reflections.get("additional", ""),
+            "Załączniki": "",
+        },
+    }
 
     return {
         "date": date_text,
         "file_path": file_path.as_posix(),
         "frontmatter": frontmatter,
+        "phases": phases,
         "habits": habits,
         "reflections": reflections,
         "sleep_range": sleep_range,
         "if_range": if_range,
         "training_range": training_range,
+        "nsdr_range": nsdr_range,
+        "unmapped_fields": unmapped_fields(row),
+        "attachments": [],
     }
 
 
@@ -299,27 +487,50 @@ def render_markdown(record: dict) -> str:
         lines.append(f"{key}: {yaml_value(value)}")
     lines.extend(["---", "", f"# {record['frontmatter']['title']}", ""])
 
-    section_values = {
-        section_title: record["reflections"].get(reflection_key, "")
-        for _column, (reflection_key, section_title) in REFLECTION_COLUMNS.items()
-    }
-    for section_title in [
-        "+1%",
-        "Zbędne",
-        "Bliscy",
-        "Ciało",
-        "Duch",
-        "Wdzięczność",
-        "Nawyki",
-        "Zagrożenie dnia",
-        "Dowiozłem",
-        "Wypromowałem",
-        "Zbudowałem",
-        "Dodatkowe informacje",
-        "Mantra",
-    ]:
-        lines.append(markdown_section(section_title, section_values.get(section_title, "")).rstrip())
+    phase_order = [
+        ("1. Plan dnia", "day_plan", PLAN_FIELDS),
+        (
+            "2. Poranny check-in",
+            "morning",
+            [
+                "Pobudka",
+                "Kuchnia",
+                "Dwór",
+                "Napiłem się",
+                "Mantra",
+                "Deep Focus",
+                "Mama i Oliwia",
+                "Insta Story",
+                "Stan po rutynie",
+                "Energia",
+                "Mental",
+                "Ciało",
+                "Ograniczenia",
+                "Jestem wdzięczny",
+                "Zagrożenie dnia",
+            ],
+        ),
+        (
+            "3. Popołudniowy check-in",
+            "afternoon",
+            ["Czy zrobiłem minimum", "Nawyki", "Co dało +1%", "Co było zbędne"],
+        ),
+        ("4. Seed kolejnego dnia", "next_day_seed", PLAN_FIELDS),
+        ("5. Dodatkowe informacje", "additional", ["Dodatkowe informacje", "Załączniki"]),
+    ]
+
+    for heading, phase_key, fields in phase_order:
+        lines.append(f"## {heading}")
         lines.append("")
+        for field in fields:
+            value = record["phases"].get(phase_key, {}).get(field, "")
+            if phase_key == "additional" and field == "Załączniki":
+                if record.get("attachments"):
+                    value = "\n".join(f"- {item['path']}" for item in record["attachments"])
+                else:
+                    value = "- "
+            lines.append(markdown_subsection(field, value).rstrip())
+            lines.append("")
     return "\n".join(lines).rstrip() + "\n"
 
 
@@ -348,17 +559,32 @@ def csv_row(record: dict) -> dict[str, str]:
         "training_start": frontmatter["training_start"],
         "training_end": frontmatter["training_end"],
         "training_minutes": record["training_range"].minutes,
+        "nsdr_start": frontmatter["nsdr_start"],
+        "nsdr_end": frontmatter["nsdr_end"],
+        "nsdr_minutes": record["nsdr_range"].minutes,
         "habit_count_done": str(habit_done),
         "habit_count_total": str(len(habits)),
         "has_plus_one": str(bool(record["reflections"].get("plus_one"))).lower(),
         "has_threat": str(bool(record["reflections"].get("threat"))).lower(),
         "has_built": str(bool(record["reflections"].get("built"))).lower(),
         "has_delivered": str(bool(record["reflections"].get("delivered"))).lower(),
+        "has_promoted": str(bool(record["reflections"].get("promoted"))).lower(),
+        "has_body_action": str(bool(record["reflections"].get("body"))).lower(),
+        "has_spirit_action": str(bool(record["reflections"].get("spirit"))).lower(),
+        "has_close_people_action": str(bool(record["reflections"].get("close_people"))).lower(),
+        "has_gratitude": str(bool(record["reflections"].get("gratitude"))).lower(),
+        "has_redundant": str(bool(record["reflections"].get("redundant"))).lower(),
+        **attachment_counts(record.get("attachments", [])),
     }
     for habit in habits:
         value = habit["value"]
         row[f"habit_{habit['slug']}"] = str(value).lower() if value != "" else ""
     return row
+
+
+def metrics_row(record: dict) -> dict[str, str]:
+    row = csv_row(record)
+    return {column: row.get(column, "") for column in METRICS_INDEX_COLUMNS}
 
 
 def render_field_dictionary(fieldnames: list[str]) -> str:
@@ -430,11 +656,12 @@ def write_outputs(records: list[dict], fieldnames: list[str], workspace: Path, d
     check_in_dir = workspace / "personal-ops" / "check-ins"
     csv_path = index_dir / "check-ins.csv"
     jsonl_path = index_dir / "check-ins.jsonl"
+    metrics_path = index_dir / "check-ins.metrics.csv"
     router_path = index_dir / "check-ins.md"
     fields_path = index_dir / "check-ins-fields.md"
 
     targets = [workspace / record["file_path"] for record in records]
-    targets.extend([csv_path, jsonl_path, router_path, fields_path])
+    targets.extend([csv_path, jsonl_path, metrics_path, router_path, fields_path])
 
     if dry_run:
         for target in targets:
@@ -445,12 +672,22 @@ def write_outputs(records: list[dict], fieldnames: list[str], workspace: Path, d
     index_dir.mkdir(parents=True, exist_ok=True)
 
     for record in records:
+        record["attachments"] = collect_attachments(workspace, record["file_path"])
+
+    for record in records:
         target = workspace / record["file_path"]
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(render_markdown(record), encoding="utf-8")
 
     csv_rows = [csv_row(record) for record in records]
-    habit_columns = sorted({key for row in csv_rows for key in row.keys() if key.startswith("habit_")})
+    habit_columns = sorted(
+        {
+            key
+            for row in csv_rows
+            for key in row.keys()
+            if key.startswith("habit_") and key not in REQUIRED_INDEX_COLUMNS
+        }
+    )
     fieldnames_out = REQUIRED_INDEX_COLUMNS + habit_columns
     with csv_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames_out, extrasaction="ignore")
@@ -458,14 +695,23 @@ def write_outputs(records: list[dict], fieldnames: list[str], workspace: Path, d
         for row in csv_rows:
             writer.writerow(row)
 
+    with metrics_path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=METRICS_INDEX_COLUMNS, extrasaction="ignore")
+        writer.writeheader()
+        for record in records:
+            writer.writerow(metrics_row(record))
+
     with jsonl_path.open("w", encoding="utf-8") as handle:
         for record in records:
             payload = {
                 "date": record["date"],
                 "file_path": record["file_path"],
                 "frontmatter": record["frontmatter"],
+                "phases": record["phases"],
                 "habits": record["habits"],
                 "reflections": record["reflections"],
+                "attachments": record.get("attachments", []),
+                "unmapped_fields": record.get("unmapped_fields", {}),
             }
             handle.write(json.dumps(payload, ensure_ascii=False, sort_keys=True) + "\n")
 
@@ -478,6 +724,7 @@ def write_outputs(records: list[dict], fieldnames: list[str], workspace: Path, d
             "",
             "- `check-ins.csv`",
             "- `check-ins.jsonl`",
+            "- `check-ins.metrics.csv`",
             "- `check-ins-fields.md`",
         ]
     )

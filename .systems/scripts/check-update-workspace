@@ -47,6 +47,7 @@ required_files=(
   ".systems/ai/templates/workspace/personal-ops/personal-ops-readme.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-ins-readme.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-ins-index.template.md"
+  ".systems/ai/templates/workspace/personal-ops/manual-daily-check-in.template.md"
   ".systems/scripts/check-update-workspace"
 )
 
@@ -92,7 +93,9 @@ require_ref ".systems/scripts/init-workspace" 'core/workstreams\.template\.md' "
 require_ref ".systems/scripts/init-workspace" 'links/README.md' "init-workspace creates links README"
 require_ref ".systems/scripts/update-workspace" 'links/README.md' "update-workspace backfills links README"
 require_ref ".systems/scripts/init-workspace" 'personal-ops/check-ins' "init-workspace creates personal-ops check-ins"
+require_ref ".systems/scripts/init-workspace" 'personal-ops/check-ins/import-profiles' "init-workspace creates personal-ops import profiles"
 require_ref ".systems/scripts/update-workspace" 'personal-ops/check-ins' "update-workspace backfills personal-ops check-ins"
+require_ref ".systems/scripts/update-workspace" 'personal-ops/check-ins/import-profiles' "update-workspace backfills personal-ops import profiles"
 require_ref ".systems/scripts/update-from-upstream" 'update-workspace --dry-run' "post-upstream dry-run recommendation"
 require_ref ".systems/scripts/update-from-upstream" 'update-workspace --all --dry-run' "post-upstream all-workspaces dry-run recommendation"
 require_ref ".systems/scripts/validate-ai-system" 'check-update-workspace' "validator chain"

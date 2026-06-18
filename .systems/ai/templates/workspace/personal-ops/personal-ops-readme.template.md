@@ -16,6 +16,7 @@ This workspace currently supports daily check-ins. TODO databases and broader pe
 ## Structure
 
 - `check-ins/` - canonical daily check-in Markdown files, grouped by year.
+- `check-ins/import-profiles/` - manual and source-specific check-in intake profiles.
 - `indexes/` - generated analytical indexes and routers.
 
 ## Raw Imports
@@ -27,3 +28,13 @@ AI_SYSTEM_WORKSPACE_HOME/dump/incoming/external/notion/check-ins/
 ```
 
 Use `.systems/ai/core/personal-ops.md` for schema mapping and import rules.
+
+## Manual Check-In
+
+Use:
+
+```text
+personal-ops/check-ins/import-profiles/manual-daily-check-in.md
+```
+
+for native AI System daily check-ins.

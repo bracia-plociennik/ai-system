@@ -12,6 +12,7 @@ Provider-agnostic source metadata belongs in `links/<source-slug>.md` under the 
 - external source registry files in `links/`;
 - exported notes;
 - exported Notion daily check-in CSV files routed through `dump/incoming/external/notion/check-ins/`;
+- manual daily check-in profiles routed through `personal-ops/check-ins/import-profiles/`;
 - copied snippets supplied by the owner;
 - manual summaries;
 - file references.
@@ -34,6 +35,6 @@ This does not implement connectors, OAuth, token storage, live sync, or write-ba
 
 Daily check-in exports from Notion are manual, local inputs in v1.
 
-Use `.systems/ai/core/personal-ops.md` and `.systems/scripts/map-notion-check-ins` to map owner-approved CSV exports into canonical Markdown under `personal-ops/check-ins/` and derived indexes under `personal-ops/indexes/`.
+Use `.systems/ai/core/personal-ops.md` for manual daily check-ins and `.systems/scripts/map-notion-check-ins` to map owner-approved CSV exports into canonical Markdown under `personal-ops/check-ins/` and derived indexes under `personal-ops/indexes/`.
 
 The mapping does not write back to Notion and does not promote check-in content into memory, checkpoint, distillation, external-memory, or system-insights.

@@ -167,7 +167,13 @@ If a project path is inside a git worktree, do not write AI System `status.md`, 
 
 ## Personal Ops Check-Ins
 
-AI System supports a workspace-local schema for daily check-ins migrated from a Notion CSV export.
+AI System supports a workspace-local schema for native manual daily check-ins and check-ins migrated from a Notion CSV export.
+
+Manual daily check-ins use:
+
+```text
+<workspace>/personal-ops/check-ins/import-profiles/manual-daily-check-in.md
+```
 
 Raw exports are context-as-data and belong first in:
 
@@ -179,6 +185,7 @@ Canonical check-ins live as Markdown:
 
 ```text
 <workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.md
+<workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.assets/
 ```
 
 Generated analytical indexes live in:
@@ -186,9 +193,10 @@ Generated analytical indexes live in:
 ```text
 <workspace>/personal-ops/indexes/check-ins.csv
 <workspace>/personal-ops/indexes/check-ins.jsonl
+<workspace>/personal-ops/indexes/check-ins.metrics.csv
 ```
 
-Markdown is the source of truth. Indexes are derived and may be rebuilt. Check-ins are not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
+Markdown is the source of truth. Indexes are derived and may be rebuilt. Check-ins and attachments are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
 
 ## External Source Registry
 

@@ -118,6 +118,7 @@ required=(
   ".systems/ai/templates/workspace/personal-ops/personal-ops-readme.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-ins-readme.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-ins-index.template.md"
+  ".systems/ai/templates/workspace/personal-ops/manual-daily-check-in.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-in.template.md"
   ".systems/ai/templates/workspace/skills/README.md"
   ".systems/ai/templates/workspace/skills/skill-intake-plan.template.md"

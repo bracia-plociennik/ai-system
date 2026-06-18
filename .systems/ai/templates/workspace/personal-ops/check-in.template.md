@@ -2,9 +2,9 @@
 type: daily-check-in
 date: <YYYY-MM-DD>
 title: "Daily check-in <YYYY-MM-DD>"
-source: notion-migration
-source_provider: notion
-source_database: daily-check-in
+source: manual
+source_provider: ai-system
+source_database: manual-daily-check-in
 source_row_id:
 privacy: private-sensitive
 minimum_day_done:
@@ -24,32 +24,115 @@ if_raw:
 training_start:
 training_end:
 training_raw:
+nsdr_start:
+nsdr_end:
+nsdr_raw:
+day_plan_status:
+morning_check_in_status:
+afternoon_check_in_status:
+next_day_seed_status:
 ---
 
 # Daily check-in <YYYY-MM-DD>
 
-## +1%
+## 1. Plan dnia
 
-## Zbędne
+### Data
 
-## Bliscy
+### Sen od-do
 
-## Ciało
+### Trening od-do
 
-## Duch
+### NSDR od-do
 
-## Wdzięczność
+### IF od-do
 
-## Nawyki
+### Tryb dnia
 
-## Zagrożenie dnia
+### Zbudowałem
 
-## Dowiozłem
+### Dowiozłem
 
-## Wypromowałem
+### Wypromowałem
 
-## Zbudowałem
+### Coś dla ciała
 
-## Dodatkowe informacje
+### Coś dla ducha
 
-## Mantra
+### Coś dla bliskich
+
+## 2. Poranny check-in
+
+### Pobudka
+
+### Kuchnia
+
+### Dwór
+
+### Napiłem się
+
+### Mantra
+
+### Deep Focus
+
+### Mama i Oliwia
+
+### Insta Story
+
+### Stan po rutynie
+
+### Energia
+
+### Mental
+
+### Ciało
+
+### Ograniczenia
+
+### Jestem wdzięczny
+
+### Zagrożenie dnia
+
+## 3. Popołudniowy check-in
+
+### Czy zrobiłem minimum
+
+### Nawyki
+
+### Co dało +1%
+
+### Co było zbędne
+
+## 4. Seed kolejnego dnia
+
+### Data
+
+### Sen od-do
+
+### Trening od-do
+
+### NSDR od-do
+
+### IF od-do
+
+### Tryb dnia
+
+### Zbudowałem
+
+### Dowiozłem
+
+### Wypromowałem
+
+### Coś dla ciała
+
+### Coś dla ducha
+
+### Coś dla bliskich
+
+## 5. Dodatkowe informacje
+
+### Dodatkowe informacje
+
+### Załączniki
+
+-

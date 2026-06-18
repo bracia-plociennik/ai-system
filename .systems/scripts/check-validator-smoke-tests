@@ -982,25 +982,49 @@ run_must_fail "personal-ops-missing-check-in-template" "$copy_repo/.systems/scri
 mv "$copy_repo/.systems/ai/templates/workspace/personal-ops/check-in.template.md.bak" "$copy_repo/.systems/ai/templates/workspace/personal-ops/check-in.template.md"
 
 cat > "$personal_ops_input" <<'CSV'
-Name,Data,Czy zrobiłem MINIMUM DNIA?,Tryb dnia,Ciało (subiektywnie),Energia (subiektywnie),Mental (subiektywnie),Ograniczenia (subiektywnie),Stan po rutynie (subiektywnie),Sen,IF (intermittent-fasting),Trening,"Dwór: słońce, 10-MIN MORNING NEURO FLOW",NSDR,Co realnie dało +1%?,Co było zbędne?,Coś dla ciała,Jestem wdzięczny za...,Nawyki, których dotrzymałem,Zagrożenie dnia,Dowiozłem ,Zbudowałem ,Dodatkowe informacje,Mantra
-,"May 14, 2026",Yes,WZROST,może być,wysoka,średni,brak,wysoki,May 13 23:10 (GMT+2) → May 14 7:30 (GMT+2),May 14 12:00 (GMT+2) → 20:00,May 14 16:30 (GMT+2) → 17:30,Yes,No,Planując zadanie obieram WYNIK a nie cel,szum,trening w formie stretchingu,"Pyszny ramen",habit text,Brak jasno ustalonego celu,Dowiozłem test,Zbudowałem test,notatka,Test mantra
+Name,Data,Czy zrobiłem MINIMUM DNIA?,Tryb dnia,Ciało (subiektywnie),Energia (subiektywnie),Mental (subiektywnie),Ograniczenia (subiektywnie),Stan po rutynie (subiektywnie),Sen,IF (intermittent-fasting),Trening,"Dwór: słońce, 10-MIN MORNING NEURO FLOW",NSDR,Co realnie dało +1%?,Co było zbędne?,Coś dla ciała,Jestem wdzięczny za...,Nawyki, których dotrzymałem,Zagrożenie dnia,Dowiozłem ,Zbudowałem ,Dodatkowe informacje,Mantra,Custom Field
+,"May 14, 2026",Yes,WZROST,może być,wysoka,średni,brak,wysoki,May 13 23:10 (GMT+2) → May 14 7:30 (GMT+2),May 14 12:00 (GMT+2) → 20:00,May 14 16:30 (GMT+2) → 17:30,Yes,May 14 13:05 (GMT+2) → 13:35,Planując zadanie obieram WYNIK a nie cel,szum,trening w formie stretchingu,"Pyszny ramen",habit text,Brak jasno ustalonego celu,Dowiozłem test,Zbudowałem test,notatka,Test mantra,custom value
 CSV
 
 cp "$personal_ops_input" "$personal_ops_workspace/dump/incoming/external/notion/check-ins/notion-check-ins.csv"
+mkdir -p "$personal_ops_workspace/personal-ops/check-ins/2026/2026-05-14.assets"
+printf '' > "$personal_ops_workspace/personal-ops/check-ins/2026/2026-05-14.assets/screenshot-morning.png"
 run_must_pass "notion-check-in-mapper-valid" "$notion_mapper" --input "$personal_ops_workspace/dump/incoming/external/notion/check-ins/notion-check-ins.csv" --workspace "$personal_ops_workspace"
 
 test -f "$personal_ops_workspace/personal-ops/check-ins/2026/2026-05-14.md" || { echo "notion mapper did not create daily Markdown"; exit 1; }
 test -f "$personal_ops_workspace/personal-ops/indexes/check-ins.csv" || { echo "notion mapper did not create CSV index"; exit 1; }
 test -f "$personal_ops_workspace/personal-ops/indexes/check-ins.jsonl" || { echo "notion mapper did not create JSONL index"; exit 1; }
+test -f "$personal_ops_workspace/personal-ops/indexes/check-ins.metrics.csv" || { echo "notion mapper did not create metrics index"; exit 1; }
 test -f "$personal_ops_workspace/personal-ops/indexes/check-ins-fields.md" || { echo "notion mapper did not create field dictionary"; exit 1; }
 grep -q 'date: "2026-05-14"' "$personal_ops_workspace/personal-ops/check-ins/2026/2026-05-14.md" || { echo "daily Markdown missing date"; exit 1; }
 grep -q 'title: "Daily check-in 2026-05-14"' "$personal_ops_workspace/personal-ops/check-ins/2026/2026-05-14.md" || { echo "daily Markdown missing fallback title"; exit 1; }
 grep -q 'minimum_day_done: true' "$personal_ops_workspace/personal-ops/check-ins/2026/2026-05-14.md" || { echo "daily Markdown missing normalized boolean"; exit 1; }
 grep -q 'sleep_start: "2026-05-13 23:10"' "$personal_ops_workspace/personal-ops/check-ins/2026/2026-05-14.md" || { echo "daily Markdown missing normalized sleep start"; exit 1; }
-grep -q '## +1%' "$personal_ops_workspace/personal-ops/check-ins/2026/2026-05-14.md" || { echo "daily Markdown missing +1 section"; exit 1; }
+grep -q 'nsdr_start: "2026-05-14 13:05"' "$personal_ops_workspace/personal-ops/check-ins/2026/2026-05-14.md" || { echo "daily Markdown missing normalized NSDR start"; exit 1; }
+grep -q '## 1. Plan dnia' "$personal_ops_workspace/personal-ops/check-ins/2026/2026-05-14.md" || { echo "daily Markdown missing plan phase"; exit 1; }
+grep -q '## 4. Seed kolejnego dnia' "$personal_ops_workspace/personal-ops/check-ins/2026/2026-05-14.md" || { echo "daily Markdown missing next day seed phase"; exit 1; }
+grep -q '### Co dało +1%' "$personal_ops_workspace/personal-ops/check-ins/2026/2026-05-14.md" || { echo "daily Markdown missing +1 field"; exit 1; }
+grep -q 'screenshot-morning.png' "$personal_ops_workspace/personal-ops/check-ins/2026/2026-05-14.md" || { echo "daily Markdown missing attachment reference"; exit 1; }
 grep -q 'sleep_hours' "$personal_ops_workspace/personal-ops/indexes/check-ins.csv" || { echo "CSV index missing sleep_hours"; exit 1; }
 grep -q 'training_minutes' "$personal_ops_workspace/personal-ops/indexes/check-ins.csv" || { echo "CSV index missing training_minutes"; exit 1; }
+grep -q 'nsdr_minutes' "$personal_ops_workspace/personal-ops/indexes/check-ins.csv" || { echo "CSV index missing nsdr_minutes"; exit 1; }
+grep -q 'attachment_count' "$personal_ops_workspace/personal-ops/indexes/check-ins.metrics.csv" || { echo "metrics index missing attachment_count"; exit 1; }
+grep -q 'screenshot_count' "$personal_ops_workspace/personal-ops/indexes/check-ins.metrics.csv" || { echo "metrics index missing screenshot_count"; exit 1; }
+awk -F, 'NR == 1 { for (i = 1; i <= NF; i++) count[$i]++; exit !(count["habit_count_done"] == 1 && count["habit_count_total"] == 1) }' "$personal_ops_workspace/personal-ops/indexes/check-ins.csv" || { echo "CSV index duplicated habit count columns"; exit 1; }
 grep -q '"habits"' "$personal_ops_workspace/personal-ops/indexes/check-ins.jsonl" || { echo "JSONL index missing habits"; exit 1; }
+grep -q '"phases"' "$personal_ops_workspace/personal-ops/indexes/check-ins.jsonl" || { echo "JSONL index missing phases"; exit 1; }
+grep -q '"unmapped_fields"' "$personal_ops_workspace/personal-ops/indexes/check-ins.jsonl" || { echo "JSONL index missing unmapped fields"; exit 1; }
+
+personal_ops_unmapped_workspace="$tmp/personal-ops-unmapped-workspace"
+personal_ops_unmapped_input="$tmp/notion-check-ins-unmapped.csv"
+mkdir -p "$personal_ops_unmapped_workspace"
+cat > "$personal_ops_unmapped_input" <<'CSV'
+Name,Data,Custom Field
+,"May 14, 2026",custom value
+CSV
+run_must_pass "notion-check-in-mapper-preserves-unmapped-fields" "$notion_mapper" --input "$personal_ops_unmapped_input" --workspace "$personal_ops_unmapped_workspace"
+grep -q 'Custom Field' "$personal_ops_unmapped_workspace/personal-ops/indexes/check-ins.jsonl" || { echo "JSONL index missing custom unmapped field label"; exit 1; }
+grep -q 'custom value' "$personal_ops_unmapped_workspace/personal-ops/indexes/check-ins.jsonl" || { echo "JSONL index missing custom unmapped field value"; exit 1; }
 
 personal_ops_same_source_workspace="$tmp/personal-ops-same-source-workspace"
 personal_ops_same_source_input="$tmp/notion-check-ins-same-source.csv"
@@ -1034,6 +1058,7 @@ test -f "$init_target/core/workstreams.md" || { echo "init-workspace did not cre
 test -f "$init_target/project-state/project-state.md" || { echo "init-workspace did not create project-state router"; exit 1; }
 test -f "$init_target/links/README.md" || { echo "init-workspace did not create links README"; exit 1; }
 test -f "$init_target/personal-ops/check-ins/README.md" || { echo "init-workspace did not create personal-ops check-ins README"; exit 1; }
+test -f "$init_target/personal-ops/check-ins/import-profiles/manual-daily-check-in.md" || { echo "init-workspace did not create manual daily check-in profile"; exit 1; }
 test -f "$init_target/personal-ops/indexes/check-ins.md" || { echo "init-workspace did not create personal-ops check-ins index"; exit 1; }
 
 echo "Validator smoke tests passed."
