@@ -165,6 +165,31 @@ for the real repository, source folder, exported materials, or other project-own
 
 If a project path is inside a git worktree, do not write AI System `status.md`, `memory.md`, `checkpoints/`, `distillations/`, or `decisions/` there automatically. Ask whether to use `project-state/` or colocated local-only state with exact `owner-approved` scope and local `.git/info/exclude` handling.
 
+## Personal Ops Check-Ins
+
+AI System supports a workspace-local schema for daily check-ins migrated from a Notion CSV export.
+
+Raw exports are context-as-data and belong first in:
+
+```text
+<workspace>/dump/incoming/external/notion/check-ins/
+```
+
+Canonical check-ins live as Markdown:
+
+```text
+<workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.md
+```
+
+Generated analytical indexes live in:
+
+```text
+<workspace>/personal-ops/indexes/check-ins.csv
+<workspace>/personal-ops/indexes/check-ins.jsonl
+```
+
+Markdown is the source of truth. Indexes are derived and may be rebuilt. Check-ins are not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
+
 ## Layout
 
 - `AGENTS.md` - ignored local execution contract generated from `.systems/ai/templates/root/AGENTS.template.md`.
@@ -199,6 +224,7 @@ Review selected workspace dump/incoming and classify files. Do not move, rename,
 - AI classifies before acting.
 - File movement needs owner approval.
 - External integrations are links or manual context in v1.
+- Notion daily check-in exports are manual local inputs; use `personal-ops/` for canonical Markdown and generated indexes.
 - `system-insights` must be anonymized and stored as router entries plus detailed `insights/` files.
 - `external-memory` is only for improving AI System itself.
 - `project-state` keeps AI System project status, memory, and checkpoints out of managed git repositories.

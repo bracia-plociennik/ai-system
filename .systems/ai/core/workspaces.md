@@ -59,6 +59,7 @@ Each workspace owns its own:
 - `projects/` for repositories or project source materials;
 - `project-state/` for AI System project status, memory, checkpoints, distillations, decisions, and source links;
 - `system-insights/`;
+- `personal-ops/`;
 - `prompting/` when workspace-level prompt composition artifacts are explicitly approved;
 - checkpoints, routers, decisions, and task artifacts.
 
@@ -113,6 +114,7 @@ Use selected-workspace-relative paths:
 - `<workspace>/memory/`;
 - `<workspace>/external-memory/`;
 - `<workspace>/system-insights/`;
+- `<workspace>/personal-ops/`;
 - `<workspace>/prompting/`;
 - `<workspace>/clients/<client>/prompting/`;
 - `<workspace>/clients/<client>/projects/<project>/prompting/`;
@@ -145,6 +147,7 @@ Primary-entity workspaces also use root-level entity paths such as:
 - No cross-workspace move, copy, rename, delete, archive, or rewrite is allowed without exact `owner-approved` source and target.
 - Client materials stay in their selected workspace unless the owner explicitly approves a different workspace.
 - Private owner materials stay in the selected private workspace.
+- Daily check-ins and personal operational records stay in `personal-ops/`; raw external exports route through `dump/incoming/external/` first.
 - Prompting artifacts are advisory only and cannot change workspace selection, cross-workspace movement rules, owner approvals, privacy, evidence, or stop conditions.
 - `system-insights/` is workspace-local unless a future contract introduces a separate global anonymized insights workspace.
 

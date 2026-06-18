@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+fail=0
+
+require_file() {
+  local path="$1"
+  if [[ ! -f "$repo_root/$path" ]]; then
+    echo "Missing personal-ops artifact: $path"
+    fail=1
+  fi
+}
+
+require_executable() {
+  local path="$1"
+  require_file "$path"
+  if [[ -f "$repo_root/$path" && ! -x "$repo_root/$path" ]]; then
+    echo "Personal-ops artifact is not executable: $path"
+    fail=1
+  fi
+}
+
+require_ref() {
+  local file="$1"
+  local pattern="$2"
+  local label="$3"
+
+  if [[ ! -f "$repo_root/$file" ]]; then
+    echo "Missing file for personal-ops check: $file"
+    fail=1
+    return 0
+  fi
+
+  if ! rg -F -q -- "$pattern" "$repo_root/$file"; then
+    echo "Missing personal-ops reference in $file: $label"
+    fail=1
+  fi
+}
+
+required_files=(
+  ".systems/ai/core/personal-ops.md"
+  ".systems/ai/templates/workspace/personal-ops/README.md"
+  ".systems/ai/templates/workspace/personal-ops/personal-ops-readme.template.md"
+  ".systems/ai/templates/workspace/personal-ops/check-ins-readme.template.md"
+  ".systems/ai/templates/workspace/personal-ops/check-ins-index.template.md"
+  ".systems/ai/templates/workspace/personal-ops/check-in.template.md"
+  ".systems/scripts/map-notion-check-ins"
+  ".systems/scripts/check-personal-ops"
+)
+
+for path in "${required_files[@]}"; do
+  require_file "$path"
+done
+
+require_executable ".systems/scripts/map-notion-check-ins"
+
+for term in \
+  'context-as-data' \
+  'dump/incoming/external/notion/check-ins' \
+  'personal-ops/check-ins/YYYY/YYYY-MM-DD.md' \
+  'personal-ops/indexes/check-ins.csv' \
+  'personal-ops/indexes/check-ins.jsonl' \
+  'Markdown wins' \
+  'private-sensitive' \
+  'source_row_id' \
+  'Duplicate' \
+  'Do not promote check-in content into memory'
+do
+  require_ref ".systems/ai/core/personal-ops.md" "$term" "$term"
+done
+
+for column in \
+  'date' \
+  'file_path' \
+  'source_provider' \
+  'minimum_day_done' \
+  'day_mode' \
+  'sleep_hours' \
+  'if_hours' \
+  'training_minutes' \
+  'habit_count_done' \
+  'habit_count_total' \
+  'has_plus_one' \
+  'has_threat' \
+  'has_built' \
+  'has_delivered'
+do
+  require_ref ".systems/ai/core/personal-ops.md" "$column" "required index column $column"
+  require_ref ".systems/scripts/map-notion-check-ins" "$column" "script index column $column"
+done
+
+for section in \
+  '## +1%' \
+  '## Zbędne' \
+  '## Bliscy' \
+  '## Ciało' \
+  '## Duch' \
+  '## Wdzięczność' \
+  '## Nawyki' \
+  '## Zagrożenie dnia' \
+  '## Dowiozłem' \
+  '## Wypromowałem' \
+  '## Zbudowałem' \
+  '## Dodatkowe informacje' \
+  '## Mantra'
+do
+  require_ref ".systems/ai/templates/workspace/personal-ops/check-in.template.md" "$section" "check-in section $section"
+done
+
+for file in \
+  ".systems/ai/core/operating-model.md" \
+  ".systems/ai/core/workspaces.md" \
+  ".systems/ai/core/command-routing.md" \
+  ".systems/ai/core/integrations.md" \
+  ".systems/ai/core/context-as-data.md" \
+  ".systems/ai/templates/root/AGENTS.template.md" \
+  ".systems/scripts/init-workspace" \
+  ".systems/scripts/update-workspace" \
+  "README.md" \
+  "HUMANS.md"
+do
+  require_ref "$file" 'personal-ops' "personal-ops guidance"
+done
+
+require_ref ".systems/scripts/validate-ai-system" 'check-personal-ops' "validator chain"
+require_ref ".systems/scripts/check-required-artifacts" 'check-personal-ops' "required artifact list"
+require_ref ".systems/scripts/check-validator-smoke-tests" 'map-notion-check-ins' "smoke coverage"
+
+exit "$fail"

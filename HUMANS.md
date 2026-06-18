@@ -193,6 +193,37 @@ Ask:
 Zrób destylację pamięci klienta/projektu <slug>. Wypisz co zostaje, co jest przestarzałe, decyzje, ryzyka i następny checkpoint.
 ```
 
+## Personal Ops Check-Ins
+
+Use this for daily check-in data exported from Notion.
+
+Place the raw CSV export in:
+
+```text
+<workspace>/dump/incoming/external/notion/check-ins/
+```
+
+Run mapping only after selecting the workspace and confirming the exact input file:
+
+```text
+.systems/scripts/map-notion-check-ins --input <workspace>/dump/incoming/external/notion/check-ins/check-ins.csv --workspace <workspace> --dry-run
+```
+
+If the dry-run is correct:
+
+```text
+owner-approved: mapuj Notion check-in CSV <input-path> do personal-ops w workspace <workspace-path>. Markdown jest canonical, indeksy są derived, nie promuj tego do memory.
+```
+
+Expected outputs:
+
+- `<workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.md`;
+- `<workspace>/personal-ops/indexes/check-ins.csv`;
+- `<workspace>/personal-ops/indexes/check-ins.jsonl`;
+- `<workspace>/personal-ops/indexes/check-ins.md`.
+
+Check-ins are private-sensitive by default. They are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
+
 ## Knowledge Capture Gate
 
 Before closing a meaningful unit of work, ask the AI to make an explicit capture decision instead of blindly writing memory.

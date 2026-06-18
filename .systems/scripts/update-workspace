@@ -316,6 +316,8 @@ backfill_workspace() {
   ensure_dir "$workspace_home" "$workspace_home/memory"
   ensure_dir "$workspace_home" "$workspace_home/external-memory"
   ensure_dir "$workspace_home" "$workspace_home/system-insights/insights"
+  ensure_dir "$workspace_home" "$workspace_home/personal-ops/check-ins"
+  ensure_dir "$workspace_home" "$workspace_home/personal-ops/indexes"
   ensure_dir "$workspace_home" "$workspace_home/skills"
   ensure_dir "$workspace_home" "$workspace_home/archive"
 
@@ -369,6 +371,9 @@ backfill_workspace() {
   copy_template "$workspace_home" "$templates/system-insights/system-insights-readme.template.md" "$workspace_home/system-insights/README.md"
   copy_template "$workspace_home" "$templates/system-insights/system-insights.template.md" "$workspace_home/system-insights/system-insights.md"
   copy_template "$workspace_home" "$templates/system-insights/insights-readme.template.md" "$workspace_home/system-insights/insights/README.md"
+  copy_template "$workspace_home" "$templates/personal-ops/personal-ops-readme.template.md" "$workspace_home/personal-ops/README.md"
+  copy_template "$workspace_home" "$templates/personal-ops/check-ins-readme.template.md" "$workspace_home/personal-ops/check-ins/README.md"
+  copy_template "$workspace_home" "$templates/personal-ops/check-ins-index.template.md" "$workspace_home/personal-ops/indexes/check-ins.md"
   copy_template "$workspace_home" "$templates/skills/README.md" "$workspace_home/skills/README.md"
   copy_template "$workspace_home" "$templates/archive/README.md" "$workspace_home/archive/README.md"
 }

@@ -687,6 +687,8 @@ test -f "$generic_workspace/core/workstreams.md" || { echo "update-workspace did
 test -f "$generic_workspace/owned-assets/README.md" || { echo "update-workspace did not backfill owned-assets README"; exit 1; }
 test -f "$generic_workspace/project-state/project-state.md" || { echo "update-workspace did not backfill project-state router"; exit 1; }
 test -f "$generic_workspace/system-insights/system-insights.md" || { echo "update-workspace did not backfill system insights router"; exit 1; }
+test -f "$generic_workspace/personal-ops/check-ins/README.md" || { echo "update-workspace did not backfill personal-ops check-ins README"; exit 1; }
+test -f "$generic_workspace/personal-ops/indexes/check-ins.md" || { echo "update-workspace did not backfill personal-ops check-ins index"; exit 1; }
 test ! -d "$generic_workspace/prompting" || { echo "update-workspace created prompting by default"; exit 1; }
 grep -q "existing status" "$generic_workspace/core/status.md" || { echo "update-workspace overwrote core/status.md"; exit 1; }
 grep -q "existing memory" "$generic_workspace/memory/workspace-memory.md" || { echo "update-workspace overwrote workspace-memory.md"; exit 1; }
@@ -885,11 +887,74 @@ MD
 run_must_fail "system-insights-blocks-product-domain-external-memory" env AI_SYSTEM_WORKSPACE_HOME="$system_insights_workspace" "$system_insights_validator"
 rm "$system_insights_workspace/external-memory/2026-06-12-frontend-lesson.md"
 
+personal_ops_validator="$copy_repo/.systems/scripts/check-personal-ops"
+notion_mapper="$copy_repo/.systems/scripts/map-notion-check-ins"
+personal_ops_workspace="$tmp/personal-ops-smoke-workspace"
+personal_ops_input="$tmp/notion-check-ins.csv"
+mkdir -p "$personal_ops_workspace/dump/incoming/external/notion/check-ins"
+
+run_must_pass "personal-ops-baseline" "$personal_ops_validator"
+
+mv "$copy_repo/.systems/ai/core/personal-ops.md" "$copy_repo/.systems/ai/core/personal-ops.md.bak"
+run_must_fail "personal-ops-missing-core-contract" "$personal_ops_validator"
+mv "$copy_repo/.systems/ai/core/personal-ops.md.bak" "$copy_repo/.systems/ai/core/personal-ops.md"
+
+mv "$copy_repo/.systems/ai/templates/workspace/personal-ops/check-in.template.md" "$copy_repo/.systems/ai/templates/workspace/personal-ops/check-in.template.md.bak"
+run_must_fail "personal-ops-missing-check-in-template" "$copy_repo/.systems/scripts/check-required-artifacts"
+mv "$copy_repo/.systems/ai/templates/workspace/personal-ops/check-in.template.md.bak" "$copy_repo/.systems/ai/templates/workspace/personal-ops/check-in.template.md"
+
+cat > "$personal_ops_input" <<'CSV'
+Name,Data,Czy zrobiłem MINIMUM DNIA?,Tryb dnia,Ciało (subiektywnie),Energia (subiektywnie),Mental (subiektywnie),Ograniczenia (subiektywnie),Stan po rutynie (subiektywnie),Sen,IF (intermittent-fasting),Trening,"Dwór: słońce, 10-MIN MORNING NEURO FLOW",NSDR,Co realnie dało +1%?,Co było zbędne?,Coś dla ciała,Jestem wdzięczny za...,Nawyki, których dotrzymałem,Zagrożenie dnia,Dowiozłem ,Zbudowałem ,Dodatkowe informacje,Mantra
+,"May 14, 2026",Yes,WZROST,może być,wysoka,średni,brak,wysoki,May 13 23:10 (GMT+2) → May 14 7:30 (GMT+2),May 14 12:00 (GMT+2) → 20:00,May 14 16:30 (GMT+2) → 17:30,Yes,No,Planując zadanie obieram WYNIK a nie cel,szum,trening w formie stretchingu,"Pyszny ramen",habit text,Brak jasno ustalonego celu,Dowiozłem test,Zbudowałem test,notatka,Test mantra
+CSV
+
+cp "$personal_ops_input" "$personal_ops_workspace/dump/incoming/external/notion/check-ins/notion-check-ins.csv"
+run_must_pass "notion-check-in-mapper-valid" "$notion_mapper" --input "$personal_ops_workspace/dump/incoming/external/notion/check-ins/notion-check-ins.csv" --workspace "$personal_ops_workspace"
+
+test -f "$personal_ops_workspace/personal-ops/check-ins/2026/2026-05-14.md" || { echo "notion mapper did not create daily Markdown"; exit 1; }
+test -f "$personal_ops_workspace/personal-ops/indexes/check-ins.csv" || { echo "notion mapper did not create CSV index"; exit 1; }
+test -f "$personal_ops_workspace/personal-ops/indexes/check-ins.jsonl" || { echo "notion mapper did not create JSONL index"; exit 1; }
+test -f "$personal_ops_workspace/personal-ops/indexes/check-ins-fields.md" || { echo "notion mapper did not create field dictionary"; exit 1; }
+grep -q 'date: "2026-05-14"' "$personal_ops_workspace/personal-ops/check-ins/2026/2026-05-14.md" || { echo "daily Markdown missing date"; exit 1; }
+grep -q 'title: "Daily check-in 2026-05-14"' "$personal_ops_workspace/personal-ops/check-ins/2026/2026-05-14.md" || { echo "daily Markdown missing fallback title"; exit 1; }
+grep -q 'minimum_day_done: true' "$personal_ops_workspace/personal-ops/check-ins/2026/2026-05-14.md" || { echo "daily Markdown missing normalized boolean"; exit 1; }
+grep -q 'sleep_start: "2026-05-13 23:10"' "$personal_ops_workspace/personal-ops/check-ins/2026/2026-05-14.md" || { echo "daily Markdown missing normalized sleep start"; exit 1; }
+grep -q '## +1%' "$personal_ops_workspace/personal-ops/check-ins/2026/2026-05-14.md" || { echo "daily Markdown missing +1 section"; exit 1; }
+grep -q 'sleep_hours' "$personal_ops_workspace/personal-ops/indexes/check-ins.csv" || { echo "CSV index missing sleep_hours"; exit 1; }
+grep -q 'training_minutes' "$personal_ops_workspace/personal-ops/indexes/check-ins.csv" || { echo "CSV index missing training_minutes"; exit 1; }
+grep -q '"habits"' "$personal_ops_workspace/personal-ops/indexes/check-ins.jsonl" || { echo "JSONL index missing habits"; exit 1; }
+
+personal_ops_same_source_workspace="$tmp/personal-ops-same-source-workspace"
+personal_ops_same_source_input="$tmp/notion-check-ins-same-source.csv"
+mkdir -p "$personal_ops_same_source_workspace"
+cat > "$personal_ops_same_source_input" <<'CSV'
+Name,Data,source_row_id,Co realnie dało +1%?
+First,"May 14, 2026",source-a,old value
+Second,"May 14, 2026",source-a,new value
+CSV
+run_must_pass "notion-check-in-mapper-same-source-update" "$notion_mapper" --input "$personal_ops_same_source_input" --workspace "$personal_ops_same_source_workspace"
+test "$(wc -l < "$personal_ops_same_source_workspace/personal-ops/indexes/check-ins.csv" | tr -d ' ')" = "2" || { echo "notion mapper did not dedupe same source row"; exit 1; }
+grep -q 'new value' "$personal_ops_same_source_workspace/personal-ops/check-ins/2026/2026-05-14.md" || { echo "notion mapper did not keep latest same-source row"; exit 1; }
+
+personal_ops_conflict_workspace="$tmp/personal-ops-conflict-workspace"
+personal_ops_conflict_input="$tmp/notion-check-ins-conflict.csv"
+mkdir -p "$personal_ops_conflict_workspace"
+cat > "$personal_ops_conflict_input" <<'CSV'
+Name,Data,source_row_id
+First,"May 14, 2026",source-a
+Second,"May 14, 2026",source-b
+CSV
+run_must_fail "notion-check-in-mapper-duplicate-date-conflict" "$notion_mapper" --input "$personal_ops_conflict_input" --workspace "$personal_ops_conflict_workspace"
+test -f "$personal_ops_conflict_workspace/personal-ops/indexes/check-ins-conflicts.md" || { echo "notion mapper did not create conflict report"; exit 1; }
+test ! -f "$personal_ops_conflict_workspace/personal-ops/check-ins/2026/2026-05-14.md" || { echo "notion mapper wrote Markdown despite conflict"; exit 1; }
+
 init_target="$tmp/init-system-insights-workspace"
 run_must_pass "init-workspace-system-insights" "$copy_repo/.systems/scripts/init-workspace" --workspace "$init_target" --workspace-id smoke
 test -f "$init_target/system-insights/system-insights.md" || { echo "init-workspace did not create system insights router"; exit 1; }
 test -f "$init_target/system-insights/insights/README.md" || { echo "init-workspace did not create system insights entries README"; exit 1; }
 test -f "$init_target/core/workstreams.md" || { echo "init-workspace did not create core/workstreams.md"; exit 1; }
 test -f "$init_target/project-state/project-state.md" || { echo "init-workspace did not create project-state router"; exit 1; }
+test -f "$init_target/personal-ops/check-ins/README.md" || { echo "init-workspace did not create personal-ops check-ins README"; exit 1; }
+test -f "$init_target/personal-ops/indexes/check-ins.md" || { echo "init-workspace did not create personal-ops check-ins index"; exit 1; }
 
 echo "Validator smoke tests passed."
