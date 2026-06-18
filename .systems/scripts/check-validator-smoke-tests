@@ -927,6 +927,22 @@ cat > "$external_source_workspace/links/notion-check-ins.md" <<'MD'
 MD
 run_must_pass "external-source-valid-source-record" "$external_source_validator" --workspace "$external_source_workspace"
 
+mkdir -p "$external_source_workspace/clients/demo/links"
+cat > "$external_source_workspace/clients/demo/links/client-links.md" <<'MD'
+# Client Links
+
+- General client intake link note.
+MD
+run_must_pass "external-source-client-links-compatibility" "$external_source_validator" --workspace "$external_source_workspace"
+
+cat > "$external_source_workspace/clients/demo/links/notion-source.md" <<'MD'
+# notion-source
+
+- provider: notion
+MD
+run_must_fail "external-source-client-source-record-still-required" "$external_source_validator" --workspace "$external_source_workspace"
+rm "$external_source_workspace/clients/demo/links/notion-source.md"
+
 cp "$external_source_workspace/links/notion-check-ins.md" "$external_source_workspace/links/missing-privacy.md"
 grep -v 'privacy-class:' "$external_source_workspace/links/missing-privacy.md" > "$tmp/missing-privacy.md"
 mv "$tmp/missing-privacy.md" "$external_source_workspace/links/missing-privacy.md"

@@ -55,7 +55,8 @@ After a completed brief and exact `owner-approved` write permission:
 | Full completed brief | `clients/<client>/context/client-brief.md` |
 | Identity, purpose, status, summary | `clients/<client>/README.md` |
 | Contacts and relationship notes | `clients/<client>/contacts/client-contacts.md` |
-| Links and external references | `clients/<client>/links/client-links.md` |
+| General links and external references | `clients/<client>/links/client-links.md` |
+| Provider-structured external sources such as Notion, Drive, Sheets, or API snapshots | `clients/<client>/links/<source-slug>.md` using `.systems/ai/core/external-source-registry.md` |
 | Tasks, asks, next actions | `clients/<client>/tasks/intake-tasks.md` |
 | Decisions already made by owner or client | `clients/<client>/decisions/intake-decisions.md` |
 | Durable facts, constraints, preferences, risks | `clients/<client>/memory/<YYYY-MM-DD>-client-intake.md` and `clients/<client>/memory.md` |

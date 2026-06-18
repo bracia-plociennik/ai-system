@@ -136,6 +136,19 @@ require_ref ".systems/scripts/validate-ai-system" 'check-external-source-registr
 require_ref ".systems/scripts/check-required-artifacts" 'check-external-source-registry' "required artifact list"
 require_ref ".systems/scripts/check-update-workspace" 'links/README.md' "workspace links backfill"
 require_ref ".systems/scripts/check-validator-smoke-tests" 'check-external-source-registry' "smoke coverage"
+require_ref ".systems/ai/core/client-brief.md" 'client-links.md' "client links compatibility"
+require_ref ".systems/ai/core/external-source-registry.md" 'client-links.md' "client links compatibility"
+
+is_general_links_file() {
+  case "$(basename "$1")" in
+    README.md|client-links.md)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
 
 validate_source_file() {
   local file="$1"
@@ -187,7 +200,9 @@ if [[ -n "$workspace" ]]; then
   fi
 
   while IFS= read -r -d '' source_file; do
-    [[ "$(basename "$source_file")" == "README.md" ]] && continue
+    if is_general_links_file "$source_file"; then
+      continue
+    fi
     rel="${source_file#"$workspace/"}"
     validate_source_file "$source_file" "$rel"
   done < <(find "$workspace" -path '*/links/*.md' -type f -print0)

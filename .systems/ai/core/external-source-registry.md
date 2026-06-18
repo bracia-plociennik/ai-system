@@ -53,6 +53,8 @@ Use the nearest owner namespace. Do not put client-specific source details in wo
 
 `project-state/<project>/links.md` remains the project-state source-path pointer for real project repositories or source folders. It is not the provider-agnostic external source registry.
 
+`clients/<client>/links/client-links.md` remains the general client links and external references note created from client brief intake. It is not a provider-agnostic external source record. Structured client-owned sources must use `clients/<client>/links/<source-slug>.md`.
+
 ## Source File Contract
 
 Each external source file must describe one source.

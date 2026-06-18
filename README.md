@@ -207,6 +207,8 @@ For client-specific or owned-asset-specific sources, use the nearest owner names
 <workspace>/owned-assets/<asset>/links/<source-slug>.md
 ```
 
+`<workspace>/clients/<client>/links/client-links.md` may also exist as a general client links note from client intake. It is not a provider-agnostic source record.
+
 Registry files describe provider, privacy class, source of truth, allowed operation, freshness, raw import route, canonical route, derived index route, promotion targets, and GitHub mirror policy.
 
 V1 supports `manual-export`, `read-only-snapshot`, and `read-only-api-planned`. It does not implement connectors, OAuth, token storage, live sync, write-back, deletion, sharing, permission changes, emailing, or notifications.

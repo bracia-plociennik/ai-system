@@ -241,6 +241,8 @@ For client or owned-asset sources, use the nearest owner namespace:
 <workspace>/owned-assets/<asset>/links/<source-slug>.md
 ```
 
+`<workspace>/clients/<client>/links/client-links.md` may also exist as a general client links note from client intake. It is not a provider-agnostic source record.
+
 Ask:
 
 ```text
