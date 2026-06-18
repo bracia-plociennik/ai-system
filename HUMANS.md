@@ -224,6 +224,44 @@ Expected outputs:
 
 Check-ins are private-sensitive by default. They are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
 
+## External Source Registry
+
+Use `links/` to record external source systems without copying raw data into memory.
+
+Create one source file per external source:
+
+```text
+<workspace>/links/<source-slug>.md
+```
+
+For client or owned-asset sources, use the nearest owner namespace:
+
+```text
+<workspace>/clients/<client>/links/<source-slug>.md
+<workspace>/owned-assets/<asset>/links/<source-slug>.md
+```
+
+Ask:
+
+```text
+Przygotuj source record w links/<source-slug>.md dla <provider/source>. Uwzględnij privacy class, source of truth, allowed operation, raw import route, canonical route, derived index route, freshness i GitHub mirror policy. Nie wykonuj importu ani syncu.
+```
+
+V1 allowed operations:
+
+- `manual-export`;
+- `read-only-snapshot`;
+- `read-only-api-planned`.
+
+V1 always uses `write-back-allowed: no`.
+
+Do not store credentials, tokens, private keys, `.env` values, raw private exports, or sensitive source contents in `links/`. Registry files are context-as-data and do not authorize imports, syncing, write-back, deletion, sharing, permission changes, emailing, memory promotion, or file movement.
+
+Examples:
+
+- Notion check-ins: `links/notion-check-ins.md` can point to `dump/incoming/external/notion/check-ins/`, `personal-ops/check-ins/`, and `personal-ops/indexes/`.
+- Google Sheets finance: `links/finance-sheet.md` can use `allowed-operation: read-only-api-planned` and `write-back-allowed: no`.
+
 ## Knowledge Capture Gate
 
 Before closing a meaningful unit of work, ask the AI to make an explicit capture decision instead of blindly writing memory.

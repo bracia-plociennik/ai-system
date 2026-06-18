@@ -40,7 +40,7 @@ Workspace home: `<WORKSPACE_HOME>`.
 - `documents/` - owner-approved primary entity documents.
 - `contracts/` - owner-approved primary entity contracts.
 - `assets/` - reusable entity assets.
-- `links/` - links and external references.
+- `links/` - provider-agnostic external source registry records and references.
 - `notes/` - raw and working notes.
 - `decisions/` - durable entity decisions.
 - `tasks/` - task notes and routing.

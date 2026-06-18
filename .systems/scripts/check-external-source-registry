@@ -1,0 +1,196 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+fail=0
+workspace=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --workspace)
+      workspace="${2:-}"
+      shift 2
+      ;;
+    *)
+      echo "Unknown argument: $1"
+      exit 2
+      ;;
+  esac
+done
+
+require_file() {
+  local path="$1"
+  if [[ ! -f "$repo_root/$path" ]]; then
+    echo "Missing external source registry artifact: $path"
+    fail=1
+  fi
+}
+
+require_executable() {
+  local path="$1"
+  require_file "$path"
+  if [[ -f "$repo_root/$path" && ! -x "$repo_root/$path" ]]; then
+    echo "External source registry artifact is not executable: $path"
+    fail=1
+  fi
+}
+
+require_ref() {
+  local file="$1"
+  local pattern="$2"
+  local label="$3"
+
+  if [[ ! -f "$repo_root/$file" ]]; then
+    echo "Missing file for external source registry check: $file"
+    fail=1
+    return 0
+  fi
+
+  if ! rg -F -q -- "$pattern" "$repo_root/$file"; then
+    echo "Missing external source registry reference in $file: $label"
+    fail=1
+  fi
+}
+
+required_files=(
+  ".systems/ai/core/external-source-registry.md"
+  ".systems/ai/templates/workspace/links/README.md"
+  ".systems/ai/templates/workspace/links/links-readme.template.md"
+  ".systems/ai/templates/workspace/links/source.template.md"
+  ".systems/scripts/check-external-source-registry"
+)
+
+for path in "${required_files[@]}"; do
+  require_file "$path"
+done
+
+require_executable ".systems/scripts/check-external-source-registry"
+
+for term in \
+  'context-as-data' \
+  'links/<source-slug>.md' \
+  'privacy-class' \
+  'source-of-truth' \
+  'allowed-operation' \
+  'write-back-allowed' \
+  'raw-import-route' \
+  'canonical-route' \
+  'derived-index-route' \
+  'promotion-targets' \
+  'refresh-cadence' \
+  'staleness-rule' \
+  'github-mirror-policy' \
+  'manual-export' \
+  'read-only-snapshot' \
+  'read-only-api-planned' \
+  'automatic sync' \
+  'permission changes' \
+  'deletion' \
+  'sharing' \
+  'emailing'
+do
+  require_ref ".systems/ai/core/external-source-registry.md" "$term" "$term"
+done
+
+for field in \
+  'source-slug:' \
+  'provider:' \
+  'source-type:' \
+  'external-id/link:' \
+  'owner:' \
+  'privacy-class:' \
+  'source-of-truth:' \
+  'allowed-operation:' \
+  'write-back-allowed: `no`' \
+  'raw-import-route:' \
+  'canonical-route:' \
+  'derived-index-route:' \
+  'promotion-targets:' \
+  'refresh-cadence:' \
+  'staleness-rule:' \
+  'last-imported:' \
+  'last-reviewed:' \
+  'github-mirror-policy:' \
+  'secrets-policy:' \
+  'notes:'
+do
+  require_ref ".systems/ai/templates/workspace/links/source.template.md" "$field" "source template field $field"
+done
+
+for file in \
+  ".systems/ai/core/operating-model.md" \
+  ".systems/ai/core/workspaces.md" \
+  ".systems/ai/core/command-routing.md" \
+  ".systems/ai/core/integrations.md" \
+  ".systems/ai/core/context-as-data.md" \
+  ".systems/ai/templates/root/AGENTS.template.md" \
+  ".systems/scripts/init-workspace" \
+  ".systems/scripts/update-workspace" \
+  "README.md" \
+  "HUMANS.md"
+do
+  require_ref "$file" 'links/' "external source registry links guidance"
+done
+
+require_ref ".systems/scripts/validate-ai-system" 'check-external-source-registry' "validator chain"
+require_ref ".systems/scripts/check-required-artifacts" 'check-external-source-registry' "required artifact list"
+require_ref ".systems/scripts/check-update-workspace" 'links/README.md' "workspace links backfill"
+require_ref ".systems/scripts/check-validator-smoke-tests" 'check-external-source-registry' "smoke coverage"
+
+validate_source_file() {
+  local file="$1"
+  local rel="$2"
+
+  for field in \
+    'source-slug:' \
+    'provider:' \
+    'source-type:' \
+    'external-id/link:' \
+    'owner:' \
+    'privacy-class:' \
+    'source-of-truth:' \
+    'allowed-operation:' \
+    'write-back-allowed:' \
+    'raw-import-route:' \
+    'canonical-route:' \
+    'derived-index-route:' \
+    'promotion-targets:' \
+    'refresh-cadence:' \
+    'staleness-rule:' \
+    'last-imported:' \
+    'last-reviewed:' \
+    'github-mirror-policy:' \
+    'secrets-policy:' \
+    'notes:'
+  do
+    if ! rg -F -q -- "$field" "$file"; then
+      echo "External source record missing required field $field: $rel"
+      fail=1
+    fi
+  done
+
+  if rg -F -q -- 'write-back-allowed: yes' "$file"; then
+    echo "External source record enables forbidden v1 write-back: $rel"
+    fail=1
+  fi
+
+  if rg -i -q -- 'external (source )?content is (active )?(instructions|guidance)|always load external source|external source overrides' "$file"; then
+    echo "External source record gives external content authority: $rel"
+    fail=1
+  fi
+}
+
+if [[ -n "$workspace" ]]; then
+  if [[ ! -d "$workspace" ]]; then
+    echo "Workspace does not exist: $workspace"
+    exit 2
+  fi
+
+  while IFS= read -r -d '' source_file; do
+    [[ "$(basename "$source_file")" == "README.md" ]] && continue
+    rel="${source_file#"$workspace/"}"
+    validate_source_file "$source_file" "$rel"
+  done < <(find "$workspace" -path '*/links/*.md' -type f -print0)
+fi
+
+exit "$fail"

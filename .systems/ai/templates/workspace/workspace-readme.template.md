@@ -16,6 +16,7 @@ Workspace home: `<WORKSPACE_HOME>`.
 - `project-state/` - AI System status, memory, checkpoints, distillations, decisions, and source links for projects.
 - `micro-projects/` - small standalone work.
 - `humans/` - owner-facing summaries.
+- `links/` - provider-agnostic external source registry records and references.
 - `memory/` - global workspace memory.
 - `external-memory/` - AI System improvement ideas.
 - `system-insights/` - anonymized operating lessons and skill candidates, with detailed entries in `system-insights/insights/`.

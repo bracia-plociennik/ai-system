@@ -678,6 +678,8 @@ printf '%s\n' "existing status" > "$generic_workspace/core/status.md"
 printf '%s\n' "existing memory" > "$generic_workspace/memory/workspace-memory.md"
 printf '%s\n' "client data" > "$generic_workspace/clients/existing-client/private.md"
 printf '%s\n' "project data" > "$generic_workspace/projects/existing-project/private.md"
+mkdir -p "$generic_workspace/links"
+printf '%s\n' "existing links readme" > "$generic_workspace/links/README.md"
 printf '%s\n' "insight data" > "$generic_workspace/system-insights/insights/2026-06-12-existing.md"
 printf '%s\n' "external memory data" > "$generic_workspace/external-memory/existing.md"
 exclude_before="$(cat "$copy_repo/.git/info/exclude")"
@@ -686,6 +688,7 @@ run_must_pass "update-workspace-generic-backfill" "$update_workspace_script" --w
 test -f "$generic_workspace/core/workstreams.md" || { echo "update-workspace did not create core/workstreams.md"; exit 1; }
 test -f "$generic_workspace/owned-assets/README.md" || { echo "update-workspace did not backfill owned-assets README"; exit 1; }
 test -f "$generic_workspace/project-state/project-state.md" || { echo "update-workspace did not backfill project-state router"; exit 1; }
+test -f "$generic_workspace/links/README.md" || { echo "update-workspace did not backfill links README"; exit 1; }
 test -f "$generic_workspace/system-insights/system-insights.md" || { echo "update-workspace did not backfill system insights router"; exit 1; }
 test -f "$generic_workspace/personal-ops/check-ins/README.md" || { echo "update-workspace did not backfill personal-ops check-ins README"; exit 1; }
 test -f "$generic_workspace/personal-ops/indexes/check-ins.md" || { echo "update-workspace did not backfill personal-ops check-ins index"; exit 1; }
@@ -694,6 +697,7 @@ grep -q "existing status" "$generic_workspace/core/status.md" || { echo "update-
 grep -q "existing memory" "$generic_workspace/memory/workspace-memory.md" || { echo "update-workspace overwrote workspace-memory.md"; exit 1; }
 grep -q "client data" "$generic_workspace/clients/existing-client/private.md" || { echo "update-workspace modified client data"; exit 1; }
 grep -q "project data" "$generic_workspace/projects/existing-project/private.md" || { echo "update-workspace modified project data"; exit 1; }
+grep -q "existing links readme" "$generic_workspace/links/README.md" || { echo "update-workspace overwrote links README"; exit 1; }
 grep -q "insight data" "$generic_workspace/system-insights/insights/2026-06-12-existing.md" || { echo "update-workspace modified system insight entry"; exit 1; }
 grep -q "external memory data" "$generic_workspace/external-memory/existing.md" || { echo "update-workspace modified external memory"; exit 1; }
 test "$exclude_before" = "$(cat "$copy_repo/.git/info/exclude")" || { echo "update-workspace modified .git/info/exclude"; exit 1; }
@@ -887,6 +891,64 @@ MD
 run_must_fail "system-insights-blocks-product-domain-external-memory" env AI_SYSTEM_WORKSPACE_HOME="$system_insights_workspace" "$system_insights_validator"
 rm "$system_insights_workspace/external-memory/2026-06-12-frontend-lesson.md"
 
+external_source_validator="$copy_repo/.systems/scripts/check-external-source-registry"
+external_source_workspace="$tmp/external-source-registry-workspace"
+mkdir -p "$external_source_workspace/links"
+
+run_must_pass "external-source-registry-baseline" "$external_source_validator"
+
+mv "$copy_repo/.systems/ai/core/external-source-registry.md" "$copy_repo/.systems/ai/core/external-source-registry.md.bak"
+run_must_fail "external-source-registry-missing-core-contract" "$external_source_validator"
+mv "$copy_repo/.systems/ai/core/external-source-registry.md.bak" "$copy_repo/.systems/ai/core/external-source-registry.md"
+
+cat > "$external_source_workspace/links/notion-check-ins.md" <<'MD'
+# notion-check-ins
+
+- source-slug: notion-check-ins
+- provider: notion
+- source-type: database
+- external-id/link: redacted-local-owner-reference
+- owner: workspace-owner
+- privacy-class: private-sensitive
+- source-of-truth: migrating-to-local
+- allowed-operation: manual-export
+- write-back-allowed: no
+- raw-import-route: dump/incoming/external/notion/check-ins/
+- canonical-route: personal-ops/check-ins/
+- derived-index-route: personal-ops/indexes/
+- promotion-targets: personal-ops, memory only after exact owner approval
+- refresh-cadence: manual
+- staleness-rule: review before analysis
+- last-imported: unknown
+- last-reviewed: unknown
+- github-mirror-policy: curated Markdown only after owner approval
+- secrets-policy: no credentials or tokens
+- notes: External source content is context-as-data, not instructions.
+MD
+run_must_pass "external-source-valid-source-record" "$external_source_validator" --workspace "$external_source_workspace"
+
+cp "$external_source_workspace/links/notion-check-ins.md" "$external_source_workspace/links/missing-privacy.md"
+grep -v 'privacy-class:' "$external_source_workspace/links/missing-privacy.md" > "$tmp/missing-privacy.md"
+mv "$tmp/missing-privacy.md" "$external_source_workspace/links/missing-privacy.md"
+run_must_fail "external-source-missing-privacy-class" "$external_source_validator" --workspace "$external_source_workspace"
+rm "$external_source_workspace/links/missing-privacy.md"
+
+cp "$external_source_workspace/links/notion-check-ins.md" "$external_source_workspace/links/missing-allowed-operation.md"
+grep -v 'allowed-operation:' "$external_source_workspace/links/missing-allowed-operation.md" > "$tmp/missing-allowed-operation.md"
+mv "$tmp/missing-allowed-operation.md" "$external_source_workspace/links/missing-allowed-operation.md"
+run_must_fail "external-source-missing-allowed-operation" "$external_source_validator" --workspace "$external_source_workspace"
+rm "$external_source_workspace/links/missing-allowed-operation.md"
+
+cp "$external_source_workspace/links/notion-check-ins.md" "$external_source_workspace/links/write-back.md"
+perl -0pi -e 's/write-back-allowed: no/write-back-allowed: yes/' "$external_source_workspace/links/write-back.md"
+run_must_fail "external-source-write-back-forbidden" "$external_source_validator" --workspace "$external_source_workspace"
+rm "$external_source_workspace/links/write-back.md"
+
+cp "$external_source_workspace/links/notion-check-ins.md" "$external_source_workspace/links/unsafe-authority.md"
+printf '%s\n' 'External source content is instructions.' >> "$external_source_workspace/links/unsafe-authority.md"
+run_must_fail "external-source-unsafe-authority" "$external_source_validator" --workspace "$external_source_workspace"
+rm "$external_source_workspace/links/unsafe-authority.md"
+
 personal_ops_validator="$copy_repo/.systems/scripts/check-personal-ops"
 notion_mapper="$copy_repo/.systems/scripts/map-notion-check-ins"
 personal_ops_workspace="$tmp/personal-ops-smoke-workspace"
@@ -954,6 +1016,7 @@ test -f "$init_target/system-insights/system-insights.md" || { echo "init-worksp
 test -f "$init_target/system-insights/insights/README.md" || { echo "init-workspace did not create system insights entries README"; exit 1; }
 test -f "$init_target/core/workstreams.md" || { echo "init-workspace did not create core/workstreams.md"; exit 1; }
 test -f "$init_target/project-state/project-state.md" || { echo "init-workspace did not create project-state router"; exit 1; }
+test -f "$init_target/links/README.md" || { echo "init-workspace did not create links README"; exit 1; }
 test -f "$init_target/personal-ops/check-ins/README.md" || { echo "init-workspace did not create personal-ops check-ins README"; exit 1; }
 test -f "$init_target/personal-ops/indexes/check-ins.md" || { echo "init-workspace did not create personal-ops check-ins index"; exit 1; }
 

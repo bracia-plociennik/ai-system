@@ -41,6 +41,7 @@ require_ref() {
 required_files=(
   ".systems/ai/core/update-from-upstream.md"
   ".systems/ai/templates/workspace/core/workstreams.template.md"
+  ".systems/ai/templates/workspace/links/links-readme.template.md"
   ".systems/ai/templates/workspace/project-state/project-state-readme.template.md"
   ".systems/ai/templates/workspace/project-state/project-state.template.md"
   ".systems/ai/templates/workspace/personal-ops/personal-ops-readme.template.md"
@@ -69,6 +70,7 @@ required_script_terms=(
   "prompting"
   "project-state"
   "personal-ops"
+  "links"
 )
 
 for term in "${required_script_terms[@]}"; do
@@ -87,6 +89,8 @@ do
 done
 
 require_ref ".systems/scripts/init-workspace" 'core/workstreams\.template\.md' "init-workspace creates workstreams"
+require_ref ".systems/scripts/init-workspace" 'links/README.md' "init-workspace creates links README"
+require_ref ".systems/scripts/update-workspace" 'links/README.md' "update-workspace backfills links README"
 require_ref ".systems/scripts/init-workspace" 'personal-ops/check-ins' "init-workspace creates personal-ops check-ins"
 require_ref ".systems/scripts/update-workspace" 'personal-ops/check-ins' "update-workspace backfills personal-ops check-ins"
 require_ref ".systems/scripts/update-from-upstream" 'update-workspace --dry-run' "post-upstream dry-run recommendation"

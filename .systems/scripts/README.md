@@ -16,6 +16,8 @@ Validation scripts for AI System live here.
 
 `check-project-state` validates repo-safe project-state contracts, templates, routing, script wiring, and optional workspace pollution scans.
 
+`check-external-source-registry` validates provider-agnostic external source registry contracts, links templates, routing, docs, and optional workspace source records.
+
 `check-system-insights` validates System Insights templates, entry structure, privacy checks, and External Memory scope separation.
 
 `check-personal-ops` validates the daily check-in schema mapping contract, templates, mapper script, routing, docs, and smoke coverage.

@@ -2,11 +2,14 @@
 
 ## Purpose
 
-AI System v1 does not connect to Mail, Notion, Google Drive, Notes, or other services through APIs.
+AI System v1 does not write to Mail, Notion, Google Drive, Google Sheets, Notes, or other external services.
+
+Provider-agnostic source metadata belongs in `links/<source-slug>.md` under the selected workspace or nearest owner namespace. Use `.systems/ai/core/external-source-registry.md`.
 
 ## Allowed
 
 - links;
+- external source registry files in `links/`;
 - exported notes;
 - exported Notion daily check-in CSV files routed through `dump/incoming/external/notion/check-ins/`;
 - copied snippets supplied by the owner;
@@ -18,7 +21,14 @@ AI System v1 does not connect to Mail, Notion, Google Drive, Notes, or other ser
 - API writes;
 - automatic sync;
 - sending emails or notifications;
-- changing external tasks, pages, documents, or files.
+- deleting, archiving, sharing, or changing permissions;
+- changing external tasks, pages, documents, spreadsheets, or files.
+
+## Read-Only API Planning
+
+Registry entries may use `allowed-operation: read-only-api-planned` to reserve future connector intent.
+
+This does not implement connectors, OAuth, token storage, live sync, or write-back.
 
 ## Check-In Mapping
 
