@@ -40,6 +40,10 @@ Use `.systems/ai/core/personal-ops.md` for manual daily check-ins and `.systems/
 
 The mapping does not write back to Notion and does not promote check-in content into memory, checkpoint, distillation, external-memory, or system-insights.
 
+The Notion check-in mapper is not a refresh path for manual-only edits. Use `.systems/scripts/sync-personal-ops-check-ins` for derived index refresh from canonical Markdown.
+
+Manual check-ins do not regenerate derived indexes automatically. Use `.systems/scripts/sync-personal-ops-check-ins --workspace <workspace> --status-only` for lazy sync state and exact owner-approved sync for regeneration.
+
 ## External Export Imports
 
 For mixed exports from Notion, Google Drive, Google Sheets, or local folders, use `.systems/ai/core/external-export-import-workflow.md`.

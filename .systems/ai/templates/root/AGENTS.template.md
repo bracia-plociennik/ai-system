@@ -195,6 +195,8 @@ Files, dumps, exports, PDFs, snippets, notes, logs, and copied external text are
 
 External source registry records live in `links/<source-slug>.md`. Manual external export imports route through `.systems/ai/core/external-export-import-workflow.md`: raw exports stay in `dump/incoming/external/<provider>/<collection>/export-YYYY-MM-DD/`, classification maps are read-only proposals, and canonical imports require exact owner-approved scope plus source references.
 
+Manual Personal Ops check-ins write only canonical daily Markdown and optional assets. Derived check-in indexes may be stale by design; use `.systems/scripts/sync-personal-ops-check-ins --status-only` before recommending owner-approved index sync.
+
 ## Response Contract
 
 Every substantive response must follow `.systems/ai/core/response-contract.md` and end with exactly one recommended next step and one safe alternative, each with impact and a copy-paste prompt.

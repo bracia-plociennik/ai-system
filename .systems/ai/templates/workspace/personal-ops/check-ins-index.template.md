@@ -24,11 +24,25 @@ are the source of truth.
 
 If Markdown and an index disagree, Markdown wins.
 
-## Last Import
+## Lazy Sync State
 
-- Source provider:
-- Source database:
-- Imported at:
-- Imported by:
-- Raw source path:
-- Notes:
+- last-synced-at:
+- last-synced-check-in-count: 0
+- current-check-in-count: 0
+- unsynced-check-in-count: 0
+- sync-recommendation-threshold: 7
+- last-sync-source: manual
+- latest-unsynced-dates: none
+- sync-recommendation: not required yet
+
+Indexes may be stale by design after manual check-ins.
+
+The threshold counts newly added daily files against `last-synced-check-in-count`. It does not detect edits to older daily Markdown and does not reliably detect deleted daily files as a stale-index event. If an existing day is edited or deleted, run owner-approved sync manually when index freshness matters.
+
+Use:
+
+```text
+.systems/scripts/sync-personal-ops-check-ins --workspace <workspace-path> --status-only
+```
+
+Run sync without `--dry-run` only with exact owner approval.

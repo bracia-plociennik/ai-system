@@ -49,6 +49,8 @@ Optional attachments for a day belong beside that day:
 
 Index files are derived artifacts. If Markdown and an index disagree, Markdown wins.
 
+Derived indexes may be intentionally stale after manual check-ins. Manual check-in writes should create only the canonical daily Markdown artifact and optional `YYYY-MM-DD.assets/`; they must not regenerate the database automatically.
+
 ## Daily Check-In Markdown Contract
 
 Each daily check-in is one Markdown file with frontmatter for structured fields and ordered body phases.
@@ -136,6 +138,16 @@ Use `personal-ops/check-ins/import-profiles/manual-daily-check-in.md` when the o
 The profile is a brief workflow, not memory and not a generated check-in. It defines the question order and the output target.
 
 Seed kolejnego dnia must repeat the same fields as Plan dnia, from `Data` to `Coś dla bliskich`.
+
+After a manual check-in write, check lazy sync state with:
+
+```text
+.systems/scripts/sync-personal-ops-check-ins --workspace <workspace-path> --status-only
+```
+
+If `unsynced-check-in-count` is less than `7`, report that derived indexes are intentionally stale and sync is not required yet. If it is `7` or more, recommend owner-approved sync.
+
+The threshold is count-based. It estimates newly added daily files by comparing current daily file count with `last-synced-check-in-count`. It does not detect edits to older already-counted days, and it does not reliably detect deleted daily files as a stale-index event. If an existing daily Markdown file is edited, corrected, backfilled, or deleted, recommend exact owner-approved sync manually, even below the threshold.
 
 ## Notion Field Mapping
 
@@ -269,3 +281,38 @@ Use:
 ```
 
 Run without `--dry-run` only after the owner approves the exact input and workspace target.
+
+Use the explicit sync tool for owner-approved index refresh from Markdown source of truth:
+
+```text
+.systems/scripts/sync-personal-ops-check-ins --workspace <workspace-path> --dry-run
+```
+
+Run without `--dry-run` only with exact `owner-approved` sync scope.
+
+The sync tool:
+
+- reads only `personal-ops/check-ins/YYYY/YYYY-MM-DD.md`;
+- ignores `README.md`, `import-profiles/`, `*.assets/`, and non-daily Markdown;
+- regenerates only `check-ins.csv`, `check-ins.jsonl`, `check-ins.metrics.csv`, `check-ins-fields.md`, and `check-ins.md`;
+- never rewrites daily Markdown or assets;
+- preserves existing `unmapped_fields` from `check-ins.jsonl` when `date`, `file_path`, and `source_row_id` match;
+- fails before replacing indexes when daily Markdown is malformed.
+
+## Lazy Sync State
+
+`personal-ops/indexes/check-ins.md` is the sync state and evidence router.
+
+Required sync state fields:
+
+- `last-synced-at`;
+- `last-synced-check-in-count`;
+- `current-check-in-count`;
+- `unsynced-check-in-count`;
+- `sync-recommendation-threshold: 7`;
+- `last-sync-source: manual|notion-import|owner-approved-sync`;
+- latest unsynced dates evidence.
+
+Notion imports may regenerate indexes as part of batch import and should set `last-sync-source: notion-import`. The Notion importer is only for owner-approved Notion CSV imports; do not use it to refresh manual-only edits. Manual check-ins should not run database sync automatically. Exact owner-approved sync may run anytime, including below the threshold.
+
+`unsynced-check-in-count` is a lightweight counter for new daily files, not a full change detector. Edits to older check-ins and deletions of existing check-ins require manual owner-approved sync when index freshness matters.

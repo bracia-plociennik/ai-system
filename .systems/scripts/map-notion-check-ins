@@ -726,6 +726,20 @@ def write_outputs(records: list[dict], fieldnames: list[str], workspace: Path, d
             "- `check-ins.jsonl`",
             "- `check-ins.metrics.csv`",
             "- `check-ins-fields.md`",
+            "- `check-ins-conflicts.md`",
+            "",
+            "## Lazy Sync State",
+            "",
+            f"- last-synced-at: {datetime.now().isoformat(timespec='seconds')}",
+            f"- last-synced-check-in-count: {len(records)}",
+            f"- current-check-in-count: {len(records)}",
+            "- unsynced-check-in-count: 0",
+            "- sync-recommendation-threshold: 7",
+            "- last-sync-source: notion-import",
+            "- latest-unsynced-dates: none",
+            "- sync-recommendation: not required yet",
+            "",
+            "Indexes may be stale by design. Run `.systems/scripts/sync-personal-ops-check-ins --workspace <workspace>` only with exact owner approval.",
         ]
     )
     router_path.write_text(router + "\n", encoding="utf-8")

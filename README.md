@@ -198,6 +198,18 @@ Generated analytical indexes live in:
 
 Markdown is the source of truth. Indexes are derived and may be rebuilt. Check-ins and attachments are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
 
+Manual check-ins write only the daily Markdown file and optional assets. Derived indexes may be intentionally stale. Use lazy sync status before recommending a database refresh:
+
+```text
+.systems/scripts/sync-personal-ops-check-ins --workspace <workspace-path> --status-only
+```
+
+If `unsynced-check-in-count` is below `7`, sync is not required yet. If it is `7` or more, recommend exact owner-approved sync. The owner can approve sync earlier.
+
+The threshold counts newly added daily files. It does not detect edits to older check-ins or reliably detect deleted daily files as a stale-index event; after editing or deleting an existing day, run owner-approved sync manually when the indexes need to be fresh.
+
+The Notion check-in importer is only for owner-approved Notion CSV imports. Do not use it to refresh manual-only edits; use lazy sync from canonical Markdown instead.
+
 ## External Source Registry
 
 AI System uses `links/` as the provider-agnostic registry for external sources.

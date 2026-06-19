@@ -47,6 +47,7 @@ required_files=(
   ".systems/ai/templates/workspace/personal-ops/manual-daily-check-in.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-in.template.md"
   ".systems/scripts/map-notion-check-ins"
+  ".systems/scripts/sync-personal-ops-check-ins"
   ".systems/scripts/check-personal-ops"
 )
 
@@ -55,6 +56,7 @@ for path in "${required_files[@]}"; do
 done
 
 require_executable ".systems/scripts/map-notion-check-ins"
+require_executable ".systems/scripts/sync-personal-ops-check-ins"
 
 for term in \
   'context-as-data' \
@@ -73,9 +75,49 @@ for term in \
   'unmapped_fields' \
   'attachments' \
   'Duplicate' \
-  'Do not promote check-in content into memory'
+  'Do not promote check-in content into memory' \
+  'Derived indexes may be intentionally stale' \
+  'unsynced-check-in-count' \
+  'sync-recommendation-threshold: 7' \
+  'last-sync-source: manual|notion-import|owner-approved-sync' \
+  'sync-personal-ops-check-ins --workspace <workspace-path> --status-only' \
+  'deleted daily files' \
+  'do not use it to refresh manual-only edits'
 do
   require_ref ".systems/ai/core/personal-ops.md" "$term" "$term"
+done
+
+for term in \
+  '--status-only' \
+  '--dry-run' \
+  'SYNC_THRESHOLD = 7' \
+  'daily_files' \
+  'personal-ops/check-ins' \
+  'check-ins.csv' \
+  'check-ins.jsonl' \
+  'check-ins.metrics.csv' \
+  'check-ins-fields.md' \
+  'check-ins.md' \
+  'Malformed check-in Markdown' \
+  'unmapped_fields' \
+  'write_indexes' \
+  'never rewrites daily Markdown'
+do
+  require_ref ".systems/scripts/sync-personal-ops-check-ins" "$term" "sync tool term $term"
+done
+
+for sync_field in \
+  'last-synced-at' \
+  'last-synced-check-in-count' \
+  'current-check-in-count' \
+  'unsynced-check-in-count' \
+  'sync-recommendation-threshold: 7' \
+  'last-sync-source' \
+  'latest-unsynced-dates'
+do
+  require_ref ".systems/ai/templates/workspace/personal-ops/check-ins-index.template.md" "$sync_field" "sync state field $sync_field"
+  require_ref ".systems/scripts/map-notion-check-ins" "$sync_field" "notion mapper sync state field $sync_field"
+  require_ref ".systems/scripts/sync-personal-ops-check-ins" "${sync_field%%:*}" "sync script state field $sync_field"
 done
 
 for column in \
@@ -178,8 +220,20 @@ do
   require_ref "$file" 'personal-ops' "personal-ops guidance"
 done
 
+for file in \
+  ".systems/ai/core/operating-model.md" \
+  ".systems/ai/core/command-routing.md" \
+  ".systems/ai/core/integrations.md" \
+  ".systems/ai/templates/root/AGENTS.template.md" \
+  "README.md" \
+  "HUMANS.md"
+do
+  require_ref "$file" 'sync-personal-ops-check-ins' "lazy sync guidance"
+done
+
 require_ref ".systems/scripts/validate-ai-system" 'check-personal-ops' "validator chain"
 require_ref ".systems/scripts/check-required-artifacts" 'check-personal-ops' "required artifact list"
 require_ref ".systems/scripts/check-validator-smoke-tests" 'map-notion-check-ins' "smoke coverage"
+require_ref ".systems/scripts/check-validator-smoke-tests" 'sync-personal-ops-check-ins' "lazy sync smoke coverage"
 
 exit "$fail"

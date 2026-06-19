@@ -1076,6 +1076,9 @@ run_must_pass "notion-check-in-mapper-preserves-unmapped-fields" "$notion_mapper
 grep -q 'Custom Field' "$personal_ops_unmapped_workspace/personal-ops/indexes/check-ins.jsonl" || { echo "JSONL index missing custom unmapped field label"; exit 1; }
 grep -q 'custom value' "$personal_ops_unmapped_workspace/personal-ops/indexes/check-ins.jsonl" || { echo "JSONL index missing custom unmapped field value"; exit 1; }
 
+grep -q 'last-sync-source: notion-import' "$personal_ops_workspace/personal-ops/indexes/check-ins.md" || { echo "notion mapper did not record notion-import sync source"; exit 1; }
+grep -q 'unsynced-check-in-count: 0' "$personal_ops_workspace/personal-ops/indexes/check-ins.md" || { echo "notion mapper did not reset unsynced count"; exit 1; }
+
 personal_ops_same_source_workspace="$tmp/personal-ops-same-source-workspace"
 personal_ops_same_source_input="$tmp/notion-check-ins-same-source.csv"
 mkdir -p "$personal_ops_same_source_workspace"
@@ -1099,6 +1102,262 @@ CSV
 run_must_fail "notion-check-in-mapper-duplicate-date-conflict" "$notion_mapper" --input "$personal_ops_conflict_input" --workspace "$personal_ops_conflict_workspace"
 test -f "$personal_ops_conflict_workspace/personal-ops/indexes/check-ins-conflicts.md" || { echo "notion mapper did not create conflict report"; exit 1; }
 test ! -f "$personal_ops_conflict_workspace/personal-ops/check-ins/2026/2026-05-14.md" || { echo "notion mapper wrote Markdown despite conflict"; exit 1; }
+
+personal_ops_sync="$copy_repo/.systems/scripts/sync-personal-ops-check-ins"
+
+write_manual_checkin() {
+  local workspace="$1"
+  local date_text="$2"
+  local year="${date_text%%-*}"
+  local target="$workspace/personal-ops/check-ins/$year/$date_text.md"
+  mkdir -p "$(dirname "$target")"
+  cat > "$target" <<MD
+---
+type: daily-check-in
+date: "$date_text"
+title: "Daily check-in $date_text"
+source: manual
+source_provider: ai-system
+source_database: manual-daily-check-in
+source_row_id: "manual-$date_text"
+privacy: private-sensitive
+minimum_day_done: true
+day_mode: wzrost
+day_mode_raw: WZROST
+body_subjective: ok
+energy_subjective: wysoka
+mental_subjective: ostry
+routine_state_subjective: wysoki
+limitations_subjective: brak
+sleep_start: "$date_text 00:00"
+sleep_end: "$date_text 08:00"
+sleep_raw:
+if_start:
+if_end:
+if_raw:
+training_start:
+training_end:
+training_raw:
+nsdr_start:
+nsdr_end:
+nsdr_raw:
+day_plan_status:
+morning_check_in_status:
+afternoon_check_in_status:
+next_day_seed_status:
+---
+
+# Daily check-in $date_text
+
+## 1. Plan dnia
+
+### Data
+
+$date_text
+
+### Sen od-do
+
+$date_text 00:00 -> $date_text 08:00
+
+### Trening od-do
+
+### NSDR od-do
+
+### IF od-do
+
+### Tryb dnia
+
+WZROST
+
+### Zbudowałem
+
+Test build
+
+### Dowiozłem
+
+Test delivery
+
+### Wypromowałem
+
+### Coś dla ciała
+
+Stretching
+
+### Coś dla ducha
+
+### Coś dla bliskich
+
+## 2. Poranny check-in
+
+### Pobudka
+
+true
+
+### Kuchnia
+
+true
+
+### Dwór
+
+true
+
+### Napiłem się
+
+false
+
+### Mantra
+
+test
+
+### Deep Focus
+
+true
+
+### Mama i Oliwia
+
+true
+
+### Insta Story
+
+false
+
+### Stan po rutynie
+
+wysoki
+
+### Energia
+
+wysoka
+
+### Mental
+
+ostry
+
+### Ciało
+
+ok
+
+### Ograniczenia
+
+brak
+
+### Jestem wdzięczny
+
+Test gratitude
+
+### Zagrożenie dnia
+
+Test threat
+
+## 3. Popołudniowy check-in
+
+### Czy zrobiłem minimum
+
+true
+
+### Nawyki
+
+Test habits
+
+### Co dało +1%
+
+Test plus one
+
+### Co było zbędne
+
+Test noise
+
+## 4. Seed kolejnego dnia
+
+### Data
+
+### Sen od-do
+
+### Trening od-do
+
+### NSDR od-do
+
+### IF od-do
+
+### Tryb dnia
+
+### Zbudowałem
+
+### Dowiozłem
+
+### Wypromowałem
+
+### Coś dla ciała
+
+### Coś dla ducha
+
+### Coś dla bliskich
+
+## 5. Dodatkowe informacje
+
+### Dodatkowe informacje
+
+### Załączniki
+
+-
+MD
+}
+
+personal_ops_sync_six_workspace="$tmp/personal-ops-sync-six-workspace"
+mkdir -p "$personal_ops_sync_six_workspace/personal-ops/indexes"
+cat > "$personal_ops_sync_six_workspace/personal-ops/indexes/check-ins.md" <<'MD'
+# Daily Check-In Index
+
+- last-synced-check-in-count: 0
+MD
+for day in 01 02 03 04 05 06; do
+  write_manual_checkin "$personal_ops_sync_six_workspace" "2026-06-$day"
+done
+run_must_pass "personal-ops-lazy-sync-six-status" "$personal_ops_sync" --workspace "$personal_ops_sync_six_workspace" --status-only
+"$personal_ops_sync" --workspace "$personal_ops_sync_six_workspace" --status-only > "$tmp/personal-ops-sync-six.out"
+grep -q 'unsynced-check-in-count: 6' "$tmp/personal-ops-sync-six.out" || { echo "sync status did not detect 6 unsynced check-ins"; exit 1; }
+grep -q 'sync-recommendation: not required yet' "$tmp/personal-ops-sync-six.out" || { echo "sync status should not recommend sync below threshold"; exit 1; }
+test ! -f "$personal_ops_sync_six_workspace/personal-ops/indexes/check-ins.csv" || { echo "status-only regenerated indexes"; exit 1; }
+
+personal_ops_sync_seven_workspace="$tmp/personal-ops-sync-seven-workspace"
+mkdir -p "$personal_ops_sync_seven_workspace/personal-ops/indexes"
+cat > "$personal_ops_sync_seven_workspace/personal-ops/indexes/check-ins.md" <<'MD'
+# Daily Check-In Index
+
+- last-synced-check-in-count: 0
+MD
+for day in 01 02 03 04 05 06 07; do
+  write_manual_checkin "$personal_ops_sync_seven_workspace" "2026-07-$day"
+done
+"$personal_ops_sync" --workspace "$personal_ops_sync_seven_workspace" --status-only > "$tmp/personal-ops-sync-seven.out"
+grep -q 'unsynced-check-in-count: 7' "$tmp/personal-ops-sync-seven.out" || { echo "sync status did not detect 7 unsynced check-ins"; exit 1; }
+grep -q 'sync-recommendation: recommend sync' "$tmp/personal-ops-sync-seven.out" || { echo "sync status did not recommend sync at threshold"; exit 1; }
+
+personal_ops_sync_run_workspace="$tmp/personal-ops-sync-run-workspace"
+mkdir -p "$personal_ops_sync_run_workspace/personal-ops/indexes"
+write_manual_checkin "$personal_ops_sync_run_workspace" "2026-08-01"
+mkdir -p "$personal_ops_sync_run_workspace/personal-ops/check-ins/2026/2026-08-01.assets"
+printf '%s\n' "asset" > "$personal_ops_sync_run_workspace/personal-ops/check-ins/2026/2026-08-01.assets/screenshot-morning.png"
+markdown_checksum_before="$(cksum "$personal_ops_sync_run_workspace/personal-ops/check-ins/2026/2026-08-01.md")"
+asset_checksum_before="$(cksum "$personal_ops_sync_run_workspace/personal-ops/check-ins/2026/2026-08-01.assets/screenshot-morning.png")"
+run_must_pass "personal-ops-lazy-sync-owner-approved-sync" "$personal_ops_sync" --workspace "$personal_ops_sync_run_workspace"
+test -f "$personal_ops_sync_run_workspace/personal-ops/indexes/check-ins.csv" || { echo "sync did not create CSV index"; exit 1; }
+test -f "$personal_ops_sync_run_workspace/personal-ops/indexes/check-ins.jsonl" || { echo "sync did not create JSONL index"; exit 1; }
+test -f "$personal_ops_sync_run_workspace/personal-ops/indexes/check-ins.metrics.csv" || { echo "sync did not create metrics index"; exit 1; }
+test -f "$personal_ops_sync_run_workspace/personal-ops/indexes/check-ins-fields.md" || { echo "sync did not create field dictionary"; exit 1; }
+grep -q 'last-sync-source: owner-approved-sync' "$personal_ops_sync_run_workspace/personal-ops/indexes/check-ins.md" || { echo "sync did not record owner-approved-sync source"; exit 1; }
+grep -q 'unsynced-check-in-count: 0' "$personal_ops_sync_run_workspace/personal-ops/indexes/check-ins.md" || { echo "sync did not reset unsynced count"; exit 1; }
+test "$markdown_checksum_before" = "$(cksum "$personal_ops_sync_run_workspace/personal-ops/check-ins/2026/2026-08-01.md")" || { echo "sync modified daily Markdown"; exit 1; }
+test "$asset_checksum_before" = "$(cksum "$personal_ops_sync_run_workspace/personal-ops/check-ins/2026/2026-08-01.assets/screenshot-morning.png")" || { echo "sync modified asset"; exit 1; }
+
+personal_ops_sync_malformed_workspace="$tmp/personal-ops-sync-malformed-workspace"
+mkdir -p "$personal_ops_sync_malformed_workspace/personal-ops/indexes" "$personal_ops_sync_malformed_workspace/personal-ops/check-ins/2026"
+printf '%s\n' 'sentinel csv' > "$personal_ops_sync_malformed_workspace/personal-ops/indexes/check-ins.csv"
+printf '%s\n' 'sentinel jsonl' > "$personal_ops_sync_malformed_workspace/personal-ops/indexes/check-ins.jsonl"
+printf '%s\n' '# bad' > "$personal_ops_sync_malformed_workspace/personal-ops/check-ins/2026/2026-09-01.md"
+run_must_fail "personal-ops-lazy-sync-malformed-markdown" "$personal_ops_sync" --workspace "$personal_ops_sync_malformed_workspace"
+grep -q 'sentinel csv' "$personal_ops_sync_malformed_workspace/personal-ops/indexes/check-ins.csv" || { echo "malformed sync replaced CSV despite failure"; exit 1; }
+grep -q 'sentinel jsonl' "$personal_ops_sync_malformed_workspace/personal-ops/indexes/check-ins.jsonl" || { echo "malformed sync replaced JSONL despite failure"; exit 1; }
 
 init_target="$tmp/init-system-insights-workspace"
 run_must_pass "init-workspace-system-insights" "$copy_repo/.systems/scripts/init-workspace" --workspace "$init_target" --workspace-id smoke

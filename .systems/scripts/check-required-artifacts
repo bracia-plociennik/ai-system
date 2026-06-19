@@ -148,6 +148,7 @@ required=(
   ".systems/scripts/check-prompt-composition"
   ".systems/scripts/check-validator-smoke-tests"
   ".systems/scripts/map-notion-check-ins"
+  ".systems/scripts/sync-personal-ops-check-ins"
 )
 
 for path in "${required[@]}"; do

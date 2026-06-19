@@ -248,6 +248,22 @@ Expected outputs:
 
 Check-ins and attachments are private-sensitive by default. They are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
 
+Manual check-ins do not refresh the derived database automatically. After writing a manual check-in, ask for lazy sync status:
+
+```text
+.systems/scripts/sync-personal-ops-check-ins --workspace <workspace-path> --status-only
+```
+
+If `unsynced-check-in-count` is below `7`, report that indexes are intentionally stale and sync is not required yet. If it is `7` or more, recommend:
+
+```text
+owner-approved: synchronizuj bazę check-inów w workspace <workspace-path>. Odśwież tylko derived indexes, nie zmieniaj daily Markdown ani assets.
+```
+
+The threshold counts newly added daily files. It does not detect edits to older check-ins or reliably detect deleted daily files as a stale-index event; after editing or deleting an existing day, run owner-approved sync manually when the indexes need to be fresh.
+
+The Notion check-in importer is only for owner-approved Notion CSV imports. Do not use it to refresh manual-only edits; use lazy sync from canonical Markdown instead.
+
 ## External Source Registry
 
 Use `links/` to record external source systems without copying raw data into memory.
