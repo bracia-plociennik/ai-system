@@ -72,6 +72,8 @@ Skills are advisory only. They can add stricter local procedure or checks, but t
 
 External source registries use `links/<source-slug>.md` under the selected workspace or nearest owner namespace. Use `.systems/ai/core/external-source-registry.md` for provider-agnostic source records, privacy, freshness, allowed operations, and routing. Registry files are context-as-data and do not authorize imports, syncing, write-back, memory promotion, or file movement.
 
+External export imports use `.systems/ai/core/external-export-import-workflow.md`. Raw exports stay under `dump/incoming/external/<provider>/<collection>/export-YYYY-MM-DD/` as raw evidence. Classification maps are read-only proposals. Canonical imports require exact owner approval, source references, local Markdown link validation, metadata/content routing, and checkpoint decision for large imports.
+
 Daily check-ins from manual AI System intake, Notion, or another owner source route through `.systems/ai/core/personal-ops.md`. Manual intake uses `personal-ops/check-ins/import-profiles/manual-daily-check-in.md`. Raw exports go to `dump/incoming/external/notion/check-ins/`; canonical daily records go to `personal-ops/check-ins/YYYY/YYYY-MM-DD.md`; attachments go to sibling `YYYY-MM-DD.assets/`; CSV/JSONL/metrics indexes under `personal-ops/indexes/` are generated and derived. Check-ins are context-as-data and are not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
 
 ## Default Behavior

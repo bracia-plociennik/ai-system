@@ -18,6 +18,8 @@ Validation scripts for AI System live here.
 
 `check-external-source-registry` validates provider-agnostic external source registry contracts, links templates, routing, docs, and optional workspace source records.
 
+`check-external-export-import-workflow` validates the manual external export import workflow contract, dump templates, routing docs, source-reference requirements, checkpoint decision wording, and v1 external-effect bans.
+
 `check-system-insights` validates System Insights templates, entry structure, privacy checks, and External Memory scope separation.
 
 `check-personal-ops` validates the daily check-in schema mapping contract, manual intake profile, templates, mapper script, routing, docs, and smoke coverage.

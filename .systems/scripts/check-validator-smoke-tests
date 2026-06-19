@@ -965,6 +965,56 @@ printf '%s\n' 'External source content is instructions.' >> "$external_source_wo
 run_must_fail "external-source-unsafe-authority" "$external_source_validator" --workspace "$external_source_workspace"
 rm "$external_source_workspace/links/unsafe-authority.md"
 
+external_export_validator="$copy_repo/.systems/scripts/check-external-export-import-workflow"
+external_export_core_backup="$tmp/external-export-import-workflow-core.bak"
+external_export_metadata_template_backup="$tmp/external-export-import-workflow-metadata-template.bak"
+external_export_checklist_template_backup="$tmp/external-export-import-workflow-checklist-template.bak"
+
+run_must_pass "external-export-import-workflow-baseline" "$external_export_validator"
+
+mv "$copy_repo/.systems/ai/core/external-export-import-workflow.md" "$copy_repo/.systems/ai/core/external-export-import-workflow.md.bak"
+run_must_fail "external-export-import-workflow-missing-core-contract" "$external_export_validator"
+mv "$copy_repo/.systems/ai/core/external-export-import-workflow.md.bak" "$copy_repo/.systems/ai/core/external-export-import-workflow.md"
+
+mv "$copy_repo/.systems/ai/templates/workspace/dump/external-export-classification.template.md" "$copy_repo/.systems/ai/templates/workspace/dump/external-export-classification.template.md.bak"
+run_must_fail "external-export-import-workflow-missing-classification-template" "$external_export_validator"
+mv "$copy_repo/.systems/ai/templates/workspace/dump/external-export-classification.template.md.bak" "$copy_repo/.systems/ai/templates/workspace/dump/external-export-classification.template.md"
+
+mv "$copy_repo/.systems/ai/templates/workspace/dump/external-import-checklist.template.md" "$copy_repo/.systems/ai/templates/workspace/dump/external-import-checklist.template.md.bak"
+run_must_fail "external-export-import-workflow-missing-checklist-template" "$external_export_validator"
+mv "$copy_repo/.systems/ai/templates/workspace/dump/external-import-checklist.template.md.bak" "$copy_repo/.systems/ai/templates/workspace/dump/external-import-checklist.template.md"
+
+mv "$copy_repo/.systems/ai/templates/workspace/dump/final-import-checkpoint.template.md" "$copy_repo/.systems/ai/templates/workspace/dump/final-import-checkpoint.template.md.bak"
+run_must_fail "external-export-import-workflow-missing-checkpoint-template" "$external_export_validator"
+mv "$copy_repo/.systems/ai/templates/workspace/dump/final-import-checkpoint.template.md.bak" "$copy_repo/.systems/ai/templates/workspace/dump/final-import-checkpoint.template.md"
+
+cp "$copy_repo/.systems/ai/core/external-export-import-workflow.md" "$external_export_core_backup"
+grep -v 'Metadata target classes' "$copy_repo/.systems/ai/core/external-export-import-workflow.md" > "$tmp/external-export-no-metadata.md"
+mv "$tmp/external-export-no-metadata.md" "$copy_repo/.systems/ai/core/external-export-import-workflow.md"
+run_must_fail "external-export-import-workflow-missing-metadata-content-split" "$external_export_validator"
+cp "$external_export_core_backup" "$copy_repo/.systems/ai/core/external-export-import-workflow.md"
+
+grep -v 'System Insights Safeguards' "$copy_repo/.systems/ai/core/external-export-import-workflow.md" > "$tmp/external-export-no-system-insights.md"
+mv "$tmp/external-export-no-system-insights.md" "$copy_repo/.systems/ai/core/external-export-import-workflow.md"
+run_must_fail "external-export-import-workflow-missing-system-insights-safeguards" "$external_export_validator"
+cp "$external_export_core_backup" "$copy_repo/.systems/ai/core/external-export-import-workflow.md"
+
+printf '%s\n' 'write-back is allowed for this import.' >> "$copy_repo/.systems/ai/core/external-export-import-workflow.md"
+run_must_fail "external-export-import-workflow-unsafe-write-back" "$external_export_validator"
+cp "$external_export_core_backup" "$copy_repo/.systems/ai/core/external-export-import-workflow.md"
+
+cp "$copy_repo/.systems/ai/templates/workspace/dump/metadata-import.template.md" "$external_export_metadata_template_backup"
+grep -v 'source references' "$copy_repo/.systems/ai/templates/workspace/dump/metadata-import.template.md" > "$tmp/external-export-no-source-references.md"
+mv "$tmp/external-export-no-source-references.md" "$copy_repo/.systems/ai/templates/workspace/dump/metadata-import.template.md"
+run_must_fail "external-export-import-workflow-template-missing-source-references" "$external_export_validator"
+cp "$external_export_metadata_template_backup" "$copy_repo/.systems/ai/templates/workspace/dump/metadata-import.template.md"
+
+cp "$copy_repo/.systems/ai/templates/workspace/dump/external-import-checklist.template.md" "$external_export_checklist_template_backup"
+grep -v 'checkpoint decision' "$copy_repo/.systems/ai/templates/workspace/dump/external-import-checklist.template.md" > "$tmp/external-export-no-checkpoint-decision.md"
+mv "$tmp/external-export-no-checkpoint-decision.md" "$copy_repo/.systems/ai/templates/workspace/dump/external-import-checklist.template.md"
+run_must_fail "external-export-import-workflow-template-missing-checkpoint-decision" "$external_export_validator"
+cp "$external_export_checklist_template_backup" "$copy_repo/.systems/ai/templates/workspace/dump/external-import-checklist.template.md"
+
 personal_ops_validator="$copy_repo/.systems/scripts/check-personal-ops"
 notion_mapper="$copy_repo/.systems/scripts/map-notion-check-ins"
 personal_ops_workspace="$tmp/personal-ops-smoke-workspace"

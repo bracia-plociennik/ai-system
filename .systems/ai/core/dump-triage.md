@@ -22,6 +22,22 @@ Use `<workspace>/owned-assets/<asset>/dump/incoming/` when the owner already kno
 4. Owner approves with `owner-approved`.
 5. Only after approval may AI move, copy, link, rename, or archive files.
 
+## External Export Imports
+
+Manual external exports use `.systems/ai/core/external-export-import-workflow.md`.
+
+Raw exports route to:
+
+```text
+<workspace>/dump/incoming/external/<provider>/<collection>/export-YYYY-MM-DD/
+```
+
+Use an external export classification map before canonical writes. Source registry records in `links/<source-slug>.md` describe the provider and allowed operation; they are not classification maps and do not authorize import.
+
+Metadata routes separately from content. Metadata targets include `links/`, `contacts/`, and `tasks/`. Content targets include `notes/`, `documents/`, `assets/`, `personal-ops/`, `system-insights/`, or another exact owner-approved canonical route.
+
+Every canonical imported file needs source references. Large imports need local Markdown link validation, validation evidence, and checkpoint decision.
+
 ## Required Classification Fields
 
 - source path;

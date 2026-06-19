@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+fail=0
+
+require_file() {
+  local path="$1"
+  if [[ ! -f "$repo_root/$path" ]]; then
+    echo "Missing external export import workflow artifact: $path"
+    fail=1
+  fi
+}
+
+require_executable() {
+  local path="$1"
+  require_file "$path"
+  if [[ -f "$repo_root/$path" && ! -x "$repo_root/$path" ]]; then
+    echo "External export import workflow artifact is not executable: $path"
+    fail=1
+  fi
+}
+
+require_ref() {
+  local file="$1"
+  local pattern="$2"
+  local label="$3"
+
+  if [[ ! -f "$repo_root/$file" ]]; then
+    echo "Missing file for external export import workflow check: $file"
+    fail=1
+    return 0
+  fi
+
+  if ! rg -F -q -- "$pattern" "$repo_root/$file"; then
+    echo "Missing external export import workflow reference in $file: $label"
+    fail=1
+  fi
+}
+
+required_files=(
+  ".systems/ai/core/external-export-import-workflow.md"
+  ".systems/ai/templates/workspace/dump/external-export-classification.template.md"
+  ".systems/ai/templates/workspace/dump/external-import-checklist.template.md"
+  ".systems/ai/templates/workspace/dump/raw-export-readme.template.md"
+  ".systems/ai/templates/workspace/dump/metadata-import.template.md"
+  ".systems/ai/templates/workspace/dump/final-import-checkpoint.template.md"
+  ".systems/scripts/check-external-export-import-workflow"
+)
+
+for path in "${required_files[@]}"; do
+  require_file "$path"
+done
+
+require_executable ".systems/scripts/check-external-export-import-workflow"
+
+for term in \
+  'context-as-data' \
+  'links/<source-slug>.md' \
+  'dump/incoming/external/<provider>/<collection>/export-YYYY-MM-DD/' \
+  'classification map' \
+  'owner-approved' \
+  'Metadata target classes' \
+  'Content target classes' \
+  'source references' \
+  'local Markdown links' \
+  'checkpoint decision' \
+  'raw evidence/noise' \
+  'Attachments move to canonical asset folders' \
+  'System Insights Safeguards' \
+  'anonymize people, clients, companies, domains, projects, repositories, private facts, and production identifiers' \
+  'do not create skills automatically'
+do
+  require_ref ".systems/ai/core/external-export-import-workflow.md" "$term" "$term"
+done
+
+for unsafe in \
+  'write-back' \
+  'automatic sync' \
+  'permission changes' \
+  'deletion' \
+  'sharing' \
+  'emailing'
+do
+  require_ref ".systems/ai/core/external-export-import-workflow.md" "$unsafe" "forbidden v1 external effect: $unsafe"
+done
+
+for template in \
+  ".systems/ai/templates/workspace/dump/external-export-classification.template.md" \
+  ".systems/ai/templates/workspace/dump/external-import-checklist.template.md" \
+  ".systems/ai/templates/workspace/dump/raw-export-readme.template.md" \
+  ".systems/ai/templates/workspace/dump/metadata-import.template.md" \
+  ".systems/ai/templates/workspace/dump/final-import-checkpoint.template.md"
+do
+  require_ref "$template" 'source references' "source references"
+  require_ref "$template" 'local Markdown links' "local Markdown link validation"
+  require_ref "$template" 'checkpoint decision' "checkpoint decision"
+done
+
+for file in \
+  ".systems/ai/core/command-routing.md" \
+  ".systems/ai/core/operating-model.md" \
+  ".systems/ai/core/dump-triage.md" \
+  ".systems/ai/core/external-source-registry.md" \
+  ".systems/ai/core/context-as-data.md" \
+  ".systems/ai/core/integrations.md" \
+  ".systems/ai/templates/root/AGENTS.template.md" \
+  "README.md" \
+  "HUMANS.md"
+do
+  require_ref "$file" 'external-export-import-workflow' "external export import workflow routing"
+done
+
+require_ref ".systems/scripts/validate-ai-system" 'check-external-export-import-workflow' "validator chain"
+require_ref ".systems/scripts/check-required-artifacts" 'check-external-export-import-workflow' "required artifact list"
+require_ref ".systems/scripts/check-validator-smoke-tests" 'check-external-export-import-workflow' "smoke coverage"
+require_ref ".systems/scripts/README.md" 'check-external-export-import-workflow' "scripts README"
+
+if rg -i -q -- 'write-back (is )?allowed|automatic sync (is )?allowed|permission changes (are )?allowed|deletion (is )?allowed|sharing (is )?allowed|emailing (is )?allowed|external API writes (are )?allowed' \
+  "$repo_root/.systems/ai/core/external-export-import-workflow.md" \
+  "$repo_root/.systems/ai/templates/workspace/dump" \
+  "$repo_root/README.md" \
+  "$repo_root/HUMANS.md"; then
+  echo "External export import workflow contains unsafe v1 external-effect permission wording."
+  fail=1
+fi
+
+exit "$fail"

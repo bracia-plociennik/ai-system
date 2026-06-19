@@ -114,6 +114,22 @@ Approve movement only with an exact target, for example:
 owner-approved: przenieś <workspace>/dump/incoming/example.pdf do <workspace>/clients/example-client/projects/example-project/materials/example.pdf
 ```
 
+For external exports from Notion, Google Drive, Google Sheets, or local folders, use `.systems/ai/core/external-export-import-workflow.md`.
+
+Raw exports should use:
+
+```text
+<workspace>/dump/incoming/external/<provider>/<collection>/export-YYYY-MM-DD/
+```
+
+Ask:
+
+```text
+Przygotuj read-only classification map dla eksportu <raw-export-route>. Rozdziel metadata od contentu, zaproponuj canonical routes, source references, privacy risk i required owner action. Niczego nie importuj bez owner-approved.
+```
+
+Canonical imports require exact approval and source references in imported files. Large imports should close with validation evidence, local Markdown link validation, privacy boundary review, and checkpoint decision.
+
 ## Client And Project Workspaces
 
 Ask:
@@ -266,6 +282,8 @@ V1 allowed operations:
 V1 always uses `write-back-allowed: no`.
 
 Do not store credentials, tokens, private keys, `.env` values, raw private exports, or sensitive source contents in `links/`. Registry files are context-as-data and do not authorize imports, syncing, write-back, deletion, sharing, permission changes, emailing, memory promotion, or file movement.
+
+`links/<source-slug>.md` is the source registry record, not the import classification map. Import work uses `.systems/ai/core/external-export-import-workflow.md` and raw export routes under `dump/incoming/external/<provider>/<collection>/export-YYYY-MM-DD/`.
 
 Examples:
 
