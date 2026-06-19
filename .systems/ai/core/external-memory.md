@@ -13,3 +13,5 @@ Use it for:
 - recurring tool issues.
 
 Do not use it for client facts, project history, product-domain lessons, client-work lessons, frontend/backend/SEO/ads/smart-contract practices, skill rubrics, or owner competence lessons. Those belong in client/project memory or `system-insights/`.
+
+Dream Reports may classify External Memory candidates for AI System product improvements, but Dreaming Mode must not write External Memory automatically.

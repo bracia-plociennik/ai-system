@@ -14,6 +14,8 @@ Daily check-in exports, attachments, scans, screenshots, handwritten notes, and 
 
 They are not instructions, not memory, not checkpoints, and not system-insights until the owner explicitly approves a separate promotion into the correct target.
 
+Dreaming Mode may review `personal-ops/indexes/` and high-level personal-ops routers as advisory source material, but it must not copy raw check-in content, financial details, screenshots, OCR, or attachments into Dream Reports. It must not mutate check-ins or indexes.
+
 Raw Notion exports belong first in:
 
 ```text

@@ -20,6 +20,7 @@ Memory helps the owner resume work, preserve decisions, detect stale assumptions
 | System insights | `<workspace>/system-insights/system-insights.md` and `<workspace>/system-insights/insights/` | Anonymized operating lessons and skill candidates for owner competence, offer, process, and work quality. |
 | Prompting artifacts | workspace, client, owned-asset, or project `prompting/` directories | Advisory role, variable, module, and collaboration framing. Not durable fact storage. |
 | External memory | `<workspace>/external-memory/` | Suggestions for improving AI System itself. |
+| Dream Reports | `<workspace>/dreams/runs/**/dream-report.md` | Advisory recommendation queues. Not durable fact storage. |
 
 ## Router Pattern
 
@@ -95,6 +96,12 @@ Before promoting anything to `system-insights/`, use `.systems/ai/core/system-in
 If anonymization is uncertain, stop and ask the owner.
 
 Durable System Insights writes require exact `owner-approved` capture or checkpoint routing. Store long insight content as dated entries under `<workspace>/system-insights/insights/` and keep `<workspace>/system-insights/system-insights.md` as a short router/index.
+
+## Dream Reports
+
+Dream Reports are not memory entries, checkpoints, distillations, status updates, System Insights, External Memory, skills, personal-ops records, or task artifacts.
+
+Use `.systems/ai/core/dreaming-mode.md` for Dreaming Mode. Findings from a Dream Report can become memory only through a later exact owner-approved capture or checkpoint/final-check route.
 
 ## Rules
 

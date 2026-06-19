@@ -30,4 +30,6 @@ Validation scripts for AI System live here.
 
 `sync-personal-ops-check-ins` reports lazy sync status or regenerates Personal Ops derived check-in indexes from canonical Markdown after exact owner approval.
 
+`check-dreaming-mode` validates the advisory-only Dreaming Mode contract, templates, docs, and optional workspace Dream Reports.
+
 `check-naming` validates strict Markdown filenames while allowing canonical `SKILL.md` contracts and legacy/context source material.

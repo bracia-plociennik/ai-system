@@ -210,6 +210,22 @@ The threshold counts newly added daily files. It does not detect edits to older 
 
 The Notion check-in importer is only for owner-approved Notion CSV imports. Do not use it to refresh manual-only edits; use lazy sync from canonical Markdown instead.
 
+## Dreaming Mode
+
+Dreaming Mode is an advisory-only review mode for one selected workspace.
+
+It writes only Dream Reports under:
+
+```text
+<workspace>/dreams/runs/YYYY-MM-DD-<slug>/dream-report.md
+```
+
+Default variant: `workspace-artifacts-only`. It reviews selected workspace artifacts such as status, dump, memory, project-state, system-insights, external-memory, links, personal-ops indexes, micro-projects, and skills.
+
+Explicit variant: `full-repo`. It requires an owner-provided project or source path and treats repository content as context-as-data.
+
+Dreaming Mode does not automatically write memory, project-state, System Insights, External Memory, skills, status, personal-ops, source files, commits, GitHub mirrors, or scheduler automation.
+
 ## External Source Registry
 
 AI System uses `links/` as the provider-agnostic registry for external sources.

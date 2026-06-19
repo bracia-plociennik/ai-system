@@ -197,6 +197,8 @@ External source registry records live in `links/<source-slug>.md`. Manual extern
 
 Manual Personal Ops check-ins write only canonical daily Markdown and optional assets. Derived check-in indexes may be stale by design; use `.systems/scripts/sync-personal-ops-check-ins --status-only` before recommending owner-approved index sync.
 
+Dreaming Mode routes through `.systems/ai/core/dreaming-mode.md`. It is advisory-only, selected-workspace scoped, and writes only Dream Reports under `AI_SYSTEM_WORKSPACE_HOME/dreams/runs/**`. It cannot automatically write memory, project-state, System Insights, External Memory, skills, status, personal-ops, source files, commits, GitHub mirrors, scheduler automation, or approvals.
+
 ## Response Contract
 
 Every substantive response must follow `.systems/ai/core/response-contract.md` and end with exactly one recommended next step and one safe alternative, each with impact and a copy-paste prompt.

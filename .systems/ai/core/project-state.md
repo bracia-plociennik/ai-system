@@ -92,3 +92,9 @@ Prepare a cleanup plan that lists:
 - exact owner-approved move and cleanup commands required later.
 
 Cleanup is separate from contract implementation.
+
+## Dream Reports
+
+Dreaming Mode may recommend project-state, status/evidence, decision, checkpoint, or project-memory updates in a Dream Report.
+
+Those recommendations are advisory only. Do not mutate `project-state/` from Dreaming Mode; use the normal project-state route with exact owner-approved scope.

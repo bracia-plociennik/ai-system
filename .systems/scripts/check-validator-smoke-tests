@@ -1359,6 +1359,164 @@ run_must_fail "personal-ops-lazy-sync-malformed-markdown" "$personal_ops_sync" -
 grep -q 'sentinel csv' "$personal_ops_sync_malformed_workspace/personal-ops/indexes/check-ins.csv" || { echo "malformed sync replaced CSV despite failure"; exit 1; }
 grep -q 'sentinel jsonl' "$personal_ops_sync_malformed_workspace/personal-ops/indexes/check-ins.jsonl" || { echo "malformed sync replaced JSONL despite failure"; exit 1; }
 
+dreaming_validator="$copy_repo/.systems/scripts/check-dreaming-mode"
+dreaming_policy="$copy_repo/.systems/ai/core/dreaming-mode.md"
+dreaming_template="$copy_repo/.systems/ai/templates/dreaming/dream-report.template.md"
+
+run_must_pass "dreaming-mode-baseline" "$dreaming_validator"
+
+mv "$dreaming_policy" "$dreaming_policy.bak"
+run_must_fail "dreaming-mode-missing-policy" "$dreaming_validator"
+mv "$dreaming_policy.bak" "$dreaming_policy"
+
+cp "$dreaming_policy" "$dreaming_policy.bak"
+grep -v 'workspace-artifacts-only' "$dreaming_policy.bak" > "$dreaming_policy"
+run_must_fail "dreaming-mode-missing-workspace-variant" "$dreaming_validator"
+mv "$dreaming_policy.bak" "$dreaming_policy"
+
+cp "$dreaming_template" "$dreaming_template.bak"
+grep -v 'Dream variant:' "$dreaming_template.bak" > "$dreaming_template"
+run_must_fail "dreaming-mode-template-missing-variant" "$dreaming_validator"
+mv "$dreaming_template.bak" "$dreaming_template"
+
+cp "$dreaming_template" "$dreaming_template.bak"
+grep -v 'Privacy/Scope Check' "$dreaming_template.bak" > "$dreaming_template"
+run_must_fail "dreaming-mode-template-missing-privacy-check" "$dreaming_validator"
+mv "$dreaming_template.bak" "$dreaming_template"
+
+cat > "$copy_repo/.systems/ai/core/dreaming-mode-unsafe-smoke.md" <<'MD'
+# Unsafe Dreaming Mode Smoke
+
+Dreaming Mode writes System Insights automatically.
+MD
+run_must_fail "dreaming-mode-unsafe-auto-write-wording" "$dreaming_validator"
+rm "$copy_repo/.systems/ai/core/dreaming-mode-unsafe-smoke.md"
+
+write_dream_report() {
+  local file="$1"
+  local variant="$2"
+  local repo_row="$3"
+  local explicit_path="$4"
+  mkdir -p "$(dirname "$file")"
+  cat > "$file" <<MD
+# Dream Report
+
+## Metadata
+
+- Date: \`2026-06-19\`
+- Dream variant: \`$variant\`
+- Workspace: \`/tmp/workspace\`
+- Project/source path: \`$explicit_path\`
+- Result: \`completed\`
+
+## Source Inventory
+
+| Source path | Source type | Reviewed? | Notes |
+| --- | --- | --- | --- |
+| \`core/status.md\` | \`workspace-artifact\` | \`yes\` | safe |
+
+## Workspace Artifact Findings
+
+| Source path | Finding | Target | Reason | Risk/privacy note | Owner action |
+| --- | --- | --- | --- | --- | --- |
+| \`core/status.md\` | Review stale blocker wording. | \`status/evidence\` | Keeps workspace easier to resume. | \`safe\` | \`review\` |
+
+## Project/Repo Review Findings
+
+| Source path | Finding | Target | Reason | Risk/privacy note | Owner action |
+| --- | --- | --- | --- | --- | --- |
+$repo_row
+
+## Memory Candidates
+
+| Source path | Finding | Target | Reason | Risk/privacy note | Owner action |
+| --- | --- | --- | --- | --- | --- |
+| \`memory/workspace-memory.md\` | No durable capture needed. | \`none\` | Duplicate of existing report. | \`safe\` | \`reject\` |
+
+## Project-State / Status Candidates
+
+| Source path | Finding | Target | Reason | Risk/privacy note | Owner action |
+| --- | --- | --- | --- | --- | --- |
+| \`project-state/project-state.md\` | Review candidate only. | \`project-state\` | Could improve routing later. | \`safe\` | \`defer\` |
+
+## System Insights Candidates
+
+| Source path | Finding | Target | Reason | Risk/privacy note | Owner action |
+| --- | --- | --- | --- | --- | --- |
+| \`system-insights/system-insights.md\` | Candidate requires anonymization. | \`system-insights\` | Reusable workflow lesson. | \`needs anonymization\` | \`defer\` |
+
+## External Memory Candidates
+
+| Source path | Finding | Target | Reason | Risk/privacy note | Owner action |
+| --- | --- | --- | --- | --- | --- |
+| \`external-memory/README.md\` | No product improvement. | \`none\` | Not actionable. | \`safe\` | \`reject\` |
+
+## Skill Candidates
+
+| Source path | Finding | Target | Reason | Risk/privacy note | Owner action |
+| --- | --- | --- | --- | --- | --- |
+| \`skills/README.md\` | No skill candidate. | \`none\` | Too broad. | \`safe\` | \`reject\` |
+
+## Personal Ops Candidates
+
+| Source path | Finding | Target | Reason | Risk/privacy note | Owner action |
+| --- | --- | --- | --- | --- | --- |
+| \`personal-ops/indexes/check-ins.md\` | Review index freshness only. | \`personal-ops\` | Avoid copying private details. | \`private-sensitive\` | \`review\` |
+
+## Things To Improve Or Remove
+
+| Source path | Finding | Target | Reason | Risk/privacy note | Owner action |
+| --- | --- | --- | --- | --- | --- |
+| \`dump/README.md\` | Remove duplicate notes later. | \`review\` | Reduces noise. | \`safe\` | \`defer\` |
+
+## Missing Capabilities
+
+| Source path | Finding | Target | Reason | Risk/privacy note | Owner action |
+| --- | --- | --- | --- | --- | --- |
+| \`core/status.md\` | No missing capability. | \`none\` | No action. | \`safe\` | \`reject\` |
+
+## Rejected As Noise
+
+| Source path | Finding | Reason rejected |
+| --- | --- | --- |
+| \`dump/incoming/example.md\` | Vague note. | \`too vague\` |
+
+## Privacy/Scope Check
+
+- Raw client data copied: \`no\`
+- Secret markers copied: \`no\`
+- Production identifiers copied: \`no\`
+- Personal/private details copied: \`no\`
+- Full-repo explicit project/source path provided: \`$explicit_path\`
+- Full-repo exclusions respected: \`yes\`
+- Context-as-data boundary respected: \`yes\`
+- Durable writes performed: \`no\`
+- Scheduler/automation used: \`no\`
+
+## Owner Decision Queue
+
+| Priority | Source path | Finding | Proposed target | Owner action |
+| --- | --- | --- | --- | --- |
+| \`P2\` | \`core/status.md\` | Review stale blocker wording. | \`status/evidence\` | \`review\` |
+MD
+}
+
+dream_workspace="$tmp/dreaming-workspace"
+workflow_report="$dream_workspace/dreams/runs/2026-06-19-workspace/dream-report.md"
+write_dream_report "$workflow_report" "workspace-artifacts-only" '| `not-applicable` | `not-applicable` | `none` | `not-applicable` | `safe` | `reject` |' "not-applicable"
+run_must_pass "dreaming-mode-valid-workspace-report" "$dreaming_validator" --workspace "$dream_workspace"
+
+full_repo_workspace="$tmp/dreaming-full-repo-workspace"
+full_repo_report="$full_repo_workspace/dreams/runs/2026-06-19-full-repo/dream-report.md"
+write_dream_report "$full_repo_report" "full-repo" '| `projects/example/app.md` | `Review repeated manual step.` | `review` | `Could become a task.` | `safe` | `review` |' "yes"
+run_must_pass "dreaming-mode-valid-full-repo-report" "$dreaming_validator" --workspace "$full_repo_workspace"
+
+bad_dream_workspace="$tmp/dreaming-bad-workspace"
+bad_dream_report="$bad_dream_workspace/dreams/runs/2026-06-19-bad/dream-report.md"
+write_dream_report "$bad_dream_report" "workspace-artifacts-only" '| `not-applicable` | `not-applicable` | `none` | `not-applicable` | `safe` | `reject` |' "not-applicable"
+printf '%s\n' 'api_key: sk_test_12345678901234567890' >> "$bad_dream_report"
+run_must_fail "dreaming-mode-secret-marker-report" "$dreaming_validator" --workspace "$bad_dream_workspace"
+
 init_target="$tmp/init-system-insights-workspace"
 run_must_pass "init-workspace-system-insights" "$copy_repo/.systems/scripts/init-workspace" --workspace "$init_target" --workspace-id smoke
 test -f "$init_target/system-insights/system-insights.md" || { echo "init-workspace did not create system insights router"; exit 1; }
@@ -1369,5 +1527,14 @@ test -f "$init_target/links/README.md" || { echo "init-workspace did not create 
 test -f "$init_target/personal-ops/check-ins/README.md" || { echo "init-workspace did not create personal-ops check-ins README"; exit 1; }
 test -f "$init_target/personal-ops/check-ins/import-profiles/manual-daily-check-in.md" || { echo "init-workspace did not create manual daily check-in profile"; exit 1; }
 test -f "$init_target/personal-ops/indexes/check-ins.md" || { echo "init-workspace did not create personal-ops check-ins index"; exit 1; }
+test -f "$init_target/dreams/README.md" || { echo "init-workspace did not create dreams README"; exit 1; }
+test -d "$init_target/dreams/runs" || { echo "init-workspace did not create dreams/runs"; exit 1; }
+
+dreams_update_workspace="$tmp/dreaming-update-workspace"
+mkdir -p "$dreams_update_workspace/dreams/runs/2026-06-19-existing"
+printf '%s\n' 'existing report sentinel' > "$dreams_update_workspace/dreams/runs/2026-06-19-existing/dream-report.md"
+run_must_pass "update-workspace-dreams-backfill" "$copy_repo/.systems/scripts/update-workspace" --workspace "$dreams_update_workspace"
+test -f "$dreams_update_workspace/dreams/README.md" || { echo "update-workspace did not create dreams README"; exit 1; }
+grep -q 'existing report sentinel' "$dreams_update_workspace/dreams/runs/2026-06-19-existing/dream-report.md" || { echo "update-workspace overwrote existing dream report"; exit 1; }
 
 echo "Validator smoke tests passed."

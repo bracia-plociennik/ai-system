@@ -53,6 +53,8 @@ Use one primary category per insight and optional secondary tags only when neede
 
 Agents may propose a `System Insight Candidate` during distillation, checkpoint review, QA/review, guide mode, task-intake, or owner-approved capture.
 
+Agents may also classify a `System Insights Candidate` in a Dream Report. That classification is advisory only and does not write a durable insight.
+
 Agents must not write durable System Insights ad hoc during active implementation.
 
 Durable writes to `AI_SYSTEM_WORKSPACE_HOME/system-insights/**` are allowed only when one of these is true:
