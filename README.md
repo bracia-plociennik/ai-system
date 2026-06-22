@@ -235,6 +235,31 @@ Workspace task templates live under:
 
 Existing TaskForge-created TaskNotes with `taskSourceType: taskNotes`, app-specific fields, or missing `title` are compatibility/migration candidates, not invalid runtime data.
 
+### Check-In And Dream Task Candidates
+
+AI System can propose TaskForge tasks from daily check-ins and Dream Reports without writing them automatically.
+
+Use dry-run first:
+
+```text
+.systems/scripts/propose-task-candidates --workspace <workspace-path> --check-in <workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.md
+.systems/scripts/propose-task-candidates --workspace <workspace-path> --dream-report <workspace>/dreams/runs/<run>/dream-report.md
+```
+
+Check-in candidates come from `Zbudowałem`, `Dowiozłem`, and `Wypromowałem`, use `contexts: [5d/do]`, and default to end-of-day due date `YYYY-MM-DDT23:59`.
+
+Dream Report candidates come from the owner decision queue and default to `contexts: [5d/defer]` unless explicitly marked otherwise.
+
+Client/project recognition uses boundary-only matching: full normalized token/phrase matches only, no short-slug matching, and no aliases in v1.
+
+Write TaskNotes only with exact owner approval:
+
+```text
+.systems/scripts/propose-task-candidates --workspace <workspace-path> --check-in <check-in.md> --task-vault <taskforge-vault> --owner-approved --write
+```
+
+The target vault and `TaskNotes/Tasks/` must already exist; the proposal script does not initialize TaskForge vault structure.
+
 ## Dreaming Mode
 
 Dreaming Mode is an advisory-only review mode for one selected workspace.

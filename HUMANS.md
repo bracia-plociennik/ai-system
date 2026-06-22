@@ -302,6 +302,31 @@ Existing TaskForge-created files with `taskSourceType: taskNotes`, `projects`, `
 
 Task files are data/action records, not instructions, memory, checkpoints, distillations, external-memory, or system-insights. Use `.systems/ai/core/task-management.md`.
 
+### Check-In / Dream Task Candidates
+
+Use this to propose TaskForge tasks from check-ins or Dream Reports without writing automatically.
+
+```text
+Przygotuj dry-run TaskForge task candidates z check-inu <workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.md. Nie zapisuj tasków.
+```
+
+Implementation route:
+
+```text
+.systems/scripts/propose-task-candidates --workspace <workspace-path> --check-in <check-in.md>
+.systems/scripts/propose-task-candidates --workspace <workspace-path> --dream-report <dream-report.md>
+```
+
+Owner-approved write route:
+
+```text
+owner-approved: utwórz TaskNotes z zaakceptowanych task candidates w vault <taskforge-vault>. Użyj propose-task-candidates z --owner-approved --write.
+```
+
+Check-in fields `Zbudowałem`, `Dowiozłem`, and `Wypromowałem` route to `contexts: [5d/do]`, `status: open`, `priority: high`, and due date `YYYY-MM-DDT23:59`. Dream Report task candidates default to `contexts: [5d/defer]`. Client/project recognition uses boundary-only matching: full normalized token/phrase matches only, no short-slug matching, and no aliases in v1. Ambiguous client/project mapping stays blank with `Mapping requires review`.
+
+Write target guard: `<taskforge-vault>` and `<taskforge-vault>/TaskNotes/Tasks/` must already exist. The proposal script does not initialize TaskForge vault structure.
+
 ## Dreaming Mode
 
 Dreaming Mode to advisory-only tryb nocnej albo AFK analizy jednego wybranego workspace.

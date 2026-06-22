@@ -112,6 +112,7 @@ required=(
   ".systems/ai/templates/workspace/project-state/project-state-entry.template.md"
   ".systems/ai/templates/workspace/tasks/README.md"
   ".systems/ai/templates/workspace/tasks/task-management-readme.template.md"
+  ".systems/ai/templates/workspace/tasks/task-candidate.template.md"
   ".systems/ai/templates/workspace/tasks/tasknote.template.md"
   ".systems/ai/templates/workspace/tasks/taskforge-vault-setup.template.md"
   ".systems/ai/templates/workspace/micro-projects/README.md"
@@ -161,6 +162,7 @@ required=(
   ".systems/scripts/check-validator-smoke-tests"
   ".systems/scripts/map-notion-check-ins"
   ".systems/scripts/sync-personal-ops-check-ins"
+  ".systems/scripts/propose-task-candidates"
 )
 
 for path in "${required[@]}"; do

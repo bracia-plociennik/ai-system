@@ -53,6 +53,8 @@ Index files are derived artifacts. If Markdown and an index disagree, Markdown w
 
 Derived indexes may be intentionally stale after manual check-ins. Manual check-in writes should create only the canonical daily Markdown artifact and optional `YYYY-MM-DD.assets/`; they must not regenerate the database automatically.
 
+Task candidates from daily check-ins are a separate TaskForge workflow. `Zbudowałem`, `Dowiozłem`, and `Wypromowałem` may be converted into proposed TaskNotes with `.systems/scripts/propose-task-candidates`, but creating TaskForge files still requires exact owner approval under `.systems/ai/core/task-management.md`.
+
 ## Daily Check-In Markdown Contract
 
 Each daily check-in is one Markdown file with frontmatter for structured fields and ordered body phases.
@@ -318,3 +320,31 @@ Required sync state fields:
 Notion imports may regenerate indexes as part of batch import and should set `last-sync-source: notion-import`. The Notion importer is only for owner-approved Notion CSV imports; do not use it to refresh manual-only edits. Manual check-ins should not run database sync automatically. Exact owner-approved sync may run anytime, including below the threshold.
 
 `unsynced-check-in-count` is a lightweight counter for new daily files, not a full change detector. Edits to older check-ins and deletions of existing check-ins require manual owner-approved sync when index freshness matters.
+
+## Check-In Task Candidates
+
+Use:
+
+```text
+.systems/scripts/propose-task-candidates --workspace <workspace-path> --check-in <workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.md
+```
+
+The default mode is dry-run and performs no writes.
+
+For each non-empty `Zbudowałem`, `Dowiozłem`, and `Wypromowałem` field in `Plan dnia`, candidates use:
+
+- `contexts: [5d/do]`;
+- `status: open`;
+- `priority: high`;
+- `due: YYYY-MM-DDT23:59`;
+- `source_type: check-in`;
+- `source_check_in_date`;
+- `source_check_in_field`.
+
+Write TaskNotes only after exact owner approval:
+
+```text
+.systems/scripts/propose-task-candidates --workspace <workspace-path> --check-in <check-in.md> --task-vault <taskforge-vault> --owner-approved --write
+```
+
+Client/project recognition must be conservative. Boundary-only v1 matching uses full normalized token/phrase matches only, rejects labels shorter than 3 chars, and uses no aliases. If matching is ambiguous or missing, leave mapping fields blank and record `Mapping requires review`.

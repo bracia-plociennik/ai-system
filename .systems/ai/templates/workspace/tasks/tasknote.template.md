@@ -15,6 +15,8 @@ dueAt:
 scheduled:
 start:
 tags: []
+contexts: []
+projects: []
 workspace: "<workspace-slug>"
 owner_scope: "<workspace|client|owned-asset|project|personal>"
 client:
@@ -22,6 +24,10 @@ owned_asset:
 project:
 project_state:
 source_system: ai-system
+source_type:
+source_check_in_date:
+source_check_in_field:
+source_dream_report:
 ---
 
 # <notification-safe task title>

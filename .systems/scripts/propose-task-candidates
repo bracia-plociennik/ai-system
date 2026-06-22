@@ -1,0 +1,422 @@
+#!/usr/bin/env python3
+"""Propose owner-approved TaskForge TaskNotes from AI System artifacts."""
+
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import json
+import re
+import sys
+import unicodedata
+from pathlib import Path
+
+
+CHECK_IN_FIELDS = {
+    "Zbudowałem": "built",
+    "Dowiozłem": "delivered",
+    "Wypromowałem": "promoted",
+}
+
+POLISH_REPLACEMENTS = {
+    "ą": "a",
+    "ć": "c",
+    "ę": "e",
+    "ł": "l",
+    "ń": "n",
+    "ó": "o",
+    "ś": "s",
+    "ż": "z",
+    "ź": "z",
+}
+
+FIVE_D = {
+    "do": {"context": "5d/do", "status": "open", "priority": "high"},
+    "defer": {"context": "5d/defer", "status": "planned", "priority": "normal"},
+    "delegate": {"context": "5d/delegate", "status": "waiting", "priority": "normal"},
+    "delete": {"context": "5d/delete", "status": "cancelled", "priority": "none"},
+    "dump": {"context": "5d/dump", "status": "open", "priority": "none"},
+}
+
+
+def read_text(path: Path) -> str:
+    try:
+        return path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise SystemExit(f"Cannot read {path}: {exc}") from exc
+
+
+def parse_frontmatter(text: str) -> dict[str, str]:
+    if not text.startswith("---\n"):
+        return {}
+    end = text.find("\n---", 4)
+    if end == -1:
+        return {}
+    values: dict[str, str] = {}
+    for line in text[4:end].splitlines():
+        if ":" not in line or line.startswith(" "):
+            continue
+        key, value = line.split(":", 1)
+        values[key.strip()] = value.strip().strip('"')
+    return values
+
+
+def section_between(text: str, start: str, end_pattern: str) -> str:
+    start_match = re.search(rf"^##\s+{re.escape(start)}\s*$", text, re.MULTILINE)
+    if not start_match:
+        return ""
+    rest = text[start_match.end() :]
+    end_match = re.search(end_pattern, rest, re.MULTILINE)
+    return rest[: end_match.start()] if end_match else rest
+
+
+def subsection_value(section: str, heading: str) -> str:
+    match = re.search(rf"^###\s+{re.escape(heading)}\s*$", section, re.MULTILINE)
+    if not match:
+        return ""
+    rest = section[match.end() :]
+    end = re.search(r"^###\s+", rest, re.MULTILINE)
+    value = rest[: end.start()] if end else rest
+    lines = [line.rstrip() for line in value.strip().splitlines()]
+    while lines and not lines[0].strip():
+        lines.pop(0)
+    while lines and not lines[-1].strip():
+        lines.pop()
+    return "\n".join(lines).strip()
+
+
+def normalize_title(value: str) -> str:
+    collapsed = re.sub(r"\s+", " ", value).strip(" -\t\n")
+    collapsed = re.sub(r"^(zrobić|zrobic|do zrobienia|task)\s*[:\-]\s*", "", collapsed, flags=re.I)
+    if not collapsed:
+        return ""
+    return collapsed[:110].rstrip()
+
+
+def slugify(value: str) -> str:
+    normalized = value.lower()
+    for src, dst in POLISH_REPLACEMENTS.items():
+        normalized = normalized.replace(src, dst)
+    normalized = re.sub(r"[^a-z0-9]+", "-", normalized).strip("-")
+    return normalized[:70] or "task"
+
+
+def quote_yaml(value: str) -> str:
+    escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{escaped}"'
+
+
+def fold_text(value: str) -> str:
+    normalized = value.lower()
+    for src, dst in POLISH_REPLACEMENTS.items():
+        normalized = normalized.replace(src, dst)
+    normalized = unicodedata.normalize("NFKD", normalized)
+    return "".join(ch for ch in normalized if not unicodedata.combining(ch))
+
+
+def match_tokens(value: str) -> list[str]:
+    return re.findall(r"[a-z0-9]+", fold_text(value))
+
+
+def label_matches(text_tokens: list[str], label: str) -> bool:
+    label_tokens = match_tokens(label)
+    if len("".join(label_tokens)) < 3:
+        return False
+    if not label_tokens or len(label_tokens) > len(text_tokens):
+        return False
+    width = len(label_tokens)
+    return any(text_tokens[idx : idx + width] == label_tokens for idx in range(0, len(text_tokens) - width + 1))
+
+
+def frontmatter_text(text: str) -> str:
+    if not text.startswith("---\n"):
+        return ""
+    end = text.find("\n---", 4)
+    return text[4:end] if end != -1 else ""
+
+
+def wikilinks(value: str) -> list[str]:
+    return [match.strip() for match in re.findall(r"\[\[([^\]]+)\]\]", value) if match.strip()]
+
+
+def projects_from_frontmatter(text: str) -> list[str]:
+    fm = frontmatter_text(text)
+    if not fm:
+        return []
+    projects: list[str] = []
+    in_projects = False
+    for line in fm.splitlines():
+        if not in_projects:
+            match = re.match(r"^projects\s*:\s*(.*)$", line)
+            if match:
+                projects.extend(wikilinks(match.group(1)))
+                in_projects = True
+            continue
+        if re.match(r"^[A-Za-z0-9_-]+\s*:", line):
+            break
+        stripped = line.strip()
+        if stripped.startswith("-"):
+            projects.extend(wikilinks(stripped))
+    return sorted(set(projects))
+
+
+def discover_labels(workspace: Path, task_vault: Path | None) -> dict[str, list[tuple[str, str]]]:
+    labels: dict[str, list[tuple[str, str]]] = {"client": [], "owned_asset": [], "project_state": [], "taskforge_project": []}
+    for key, rel in [("client", "clients"), ("owned_asset", "owned-assets"), ("project_state", "project-state")]:
+        root = workspace / rel
+        if root.is_dir():
+            for child in root.iterdir():
+                if child.is_dir() and not child.name.startswith("."):
+                    labels[key].append((child.name, child.name))
+    if task_vault:
+        for path in task_vault.rglob("*.md"):
+            if ".git" in path.parts:
+                continue
+            text = read_text(path)
+            for project in projects_from_frontmatter(text):
+                labels["taskforge_project"].append((project, project))
+    return labels
+
+
+def unique_match(text: str, labels: list[tuple[str, str]]) -> str:
+    text_tokens = match_tokens(text)
+    matches = sorted({value for needle, value in labels if needle and label_matches(text_tokens, needle)})
+    return matches[0] if len(matches) == 1 else ""
+
+
+def apply_mapping(candidate: dict[str, object], labels: dict[str, list[tuple[str, str]]]) -> None:
+    text = f"{candidate.get('title', '')} {candidate.get('raw_value', '')}"
+    client = unique_match(text, labels["client"])
+    owned_asset = unique_match(text, labels["owned_asset"])
+    project_state = unique_match(text, labels["project_state"])
+    taskforge_project = unique_match(text, labels["taskforge_project"])
+    if client:
+        candidate["client"] = client
+        candidate["owner_scope"] = "client"
+    if owned_asset:
+        candidate["owned_asset"] = owned_asset
+        candidate["owner_scope"] = "owned-asset"
+    if project_state:
+        candidate["project_state"] = f"project-state/{project_state}/"
+        candidate["project"] = project_state
+        candidate["owner_scope"] = "project"
+    if taskforge_project:
+        candidate["projects"] = [f"[[{taskforge_project}]]"]
+    if not any(candidate.get(key) for key in ("client", "owned_asset", "project", "project_state", "projects")):
+        candidate["mapping_note"] = "Mapping requires review"
+
+
+def candidates_from_check_in(path: Path, workspace: Path, labels: dict[str, list[tuple[str, str]]]) -> list[dict[str, object]]:
+    text = read_text(path)
+    fm = parse_frontmatter(text)
+    check_date = fm.get("date") or path.stem
+    try:
+        dt.date.fromisoformat(check_date)
+    except ValueError as exc:
+        raise SystemExit(f"Check-in date is missing or invalid for {path}") from exc
+    plan = section_between(text, "1. Plan dnia", r"^##\s+2\.")
+    candidates: list[dict[str, object]] = []
+    for heading, source_key in CHECK_IN_FIELDS.items():
+        value = subsection_value(plan, heading)
+        title = normalize_title(value)
+        if not title:
+            continue
+        candidate: dict[str, object] = {
+            "type": "task",
+            "title": title,
+            "status": FIVE_D["do"]["status"],
+            "priority": FIVE_D["do"]["priority"],
+            "due": f"{check_date}T23:59",
+            "scheduled": check_date,
+            "contexts": [FIVE_D["do"]["context"]],
+            "workspace": workspace.name,
+            "owner_scope": "workspace",
+            "client": "",
+            "owned_asset": "",
+            "project": "",
+            "project_state": "",
+            "source_system": "ai-system",
+            "source_type": "check-in",
+            "source_check_in_date": check_date,
+            "source_check_in_field": heading,
+            "source_path": str(path),
+            "raw_value": value,
+            "candidate_key": source_key,
+        }
+        apply_mapping(candidate, labels)
+        candidates.append(candidate)
+    return candidates
+
+
+def five_d_from_text(text: str) -> str:
+    lowered = text.lower()
+    for key in FIVE_D:
+        if f"5d/{key}" in lowered or re.search(rf"\b{key}\b", lowered):
+            return key
+    return "defer"
+
+
+def candidates_from_dream_report(path: Path, workspace: Path, labels: dict[str, list[tuple[str, str]]]) -> list[dict[str, object]]:
+    text = read_text(path)
+    in_queue = section_between(text, "Owner Decision Queue", r"^##\s+")
+    candidates: list[dict[str, object]] = []
+    for line in in_queue.splitlines():
+        if not line.startswith("|") or "---" in line or "Priority" in line:
+            continue
+        cells = [cell.strip() for cell in line.strip("|").split("|")]
+        if len(cells) < 5:
+            continue
+        priority, source_path, finding, proposed_target, owner_action = cells[:5]
+        row_text = " ".join(cells)
+        if "create-task" not in owner_action and "task" not in proposed_target.lower():
+            continue
+        five_d = five_d_from_text(row_text)
+        title = normalize_title(finding)
+        if not title:
+            continue
+        today = dt.date.today().isoformat()
+        candidate: dict[str, object] = {
+            "type": "task",
+            "title": title,
+            "status": FIVE_D[five_d]["status"],
+            "priority": FIVE_D[five_d]["priority"],
+            "due": "",
+            "scheduled": "",
+            "contexts": [FIVE_D[five_d]["context"]],
+            "workspace": workspace.name,
+            "owner_scope": "workspace",
+            "client": "",
+            "owned_asset": "",
+            "project": "",
+            "project_state": "",
+            "source_system": "ai-system",
+            "source_type": "dream-report",
+            "source_dream_report": str(path),
+            "source_path": source_path,
+            "source_dream_priority": priority,
+            "raw_value": finding,
+            "candidate_key": f"dream-{today}",
+        }
+        apply_mapping(candidate, labels)
+        candidates.append(candidate)
+    return candidates
+
+
+def render_tasknote(candidate: dict[str, object]) -> str:
+    lines = ["---"]
+    scalar_fields = [
+        "type",
+        "title",
+        "status",
+        "priority",
+        "due",
+        "scheduled",
+        "workspace",
+        "owner_scope",
+        "client",
+        "owned_asset",
+        "project",
+        "project_state",
+        "source_system",
+        "source_type",
+        "source_check_in_date",
+        "source_check_in_field",
+        "source_dream_report",
+        "source_dream_priority",
+    ]
+    for key in scalar_fields:
+        if key in candidate:
+            value = str(candidate.get(key) or "")
+            lines.append(f"{key}: {quote_yaml(value) if value else ''}")
+    for key in ("contexts", "projects"):
+        values = candidate.get(key)
+        if isinstance(values, list):
+            lines.append(f"{key}:")
+            for value in values:
+                lines.append(f"  - {quote_yaml(str(value))}")
+    lines.extend(["---", "", f"# {candidate['title']}", "", "## Outcome", "", str(candidate.get("raw_value", "")).strip(), "", "## Context", ""])
+    lines.append(f"- Source type: `{candidate.get('source_type', '')}`")
+    lines.append(f"- Source path: `{candidate.get('source_path', '')}`")
+    if candidate.get("mapping_note"):
+        lines.append(f"- {candidate['mapping_note']}")
+    lines.extend(["", "## Next Action", "", "- [ ] Review and execute this task.", "", "## Evidence", "", "Generated from owner-approved AI System task candidate workflow.", "", "## Notes", ""])
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def write_candidates(candidates: list[dict[str, object]], task_vault: Path) -> list[Path]:
+    task_dir = task_vault / "TaskNotes" / "Tasks"
+    if not task_vault.is_dir():
+        raise SystemExit(f"--task-vault does not exist or is not a directory: {task_vault}")
+    if not task_dir.is_dir():
+        raise SystemExit(f"--task-vault must already contain TaskNotes/Tasks/: {task_vault}")
+    written: list[Path] = []
+    for candidate in candidates:
+        base = f"{dt.date.today().isoformat()}-{slugify(str(candidate['title']))}"
+        path = task_dir / f"{base}.md"
+        counter = 2
+        while path.exists():
+            path = task_dir / f"{base}-{counter}.md"
+            counter += 1
+        path.write_text(render_tasknote(candidate), encoding="utf-8")
+        written.append(path)
+    return written
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--check-in", type=Path, help="Canonical daily check-in Markdown file")
+    source.add_argument("--dream-report", type=Path, help="Dream Report Markdown file")
+    parser.add_argument("--workspace", type=Path, required=True, help="AI System workspace path")
+    parser.add_argument("--task-vault", type=Path, help="TaskForge vault path")
+    parser.add_argument("--write", action="store_true", help="Write TaskNotes instead of printing candidates")
+    parser.add_argument("--owner-approved", action="store_true", help="Required for --write")
+    parser.add_argument("--json", action="store_true", help="Print JSON instead of Markdown")
+    args = parser.parse_args()
+
+    workspace = args.workspace.resolve()
+    task_vault = args.task_vault.resolve() if args.task_vault else None
+    if args.write and not args.owner_approved:
+        raise SystemExit("--write requires --owner-approved")
+    if args.write and not task_vault:
+        raise SystemExit("--write requires --task-vault")
+
+    labels = discover_labels(workspace, task_vault)
+    if args.check_in:
+        candidates = candidates_from_check_in(args.check_in.resolve(), workspace, labels)
+    else:
+        candidates = candidates_from_dream_report(args.dream_report.resolve(), workspace, labels)
+
+    if args.write:
+        written = write_candidates(candidates, task_vault)
+        print("Written TaskNotes:")
+        for path in written:
+            print(path)
+        return 0
+
+    if args.json:
+        print(json.dumps(candidates, indent=2, ensure_ascii=False))
+    else:
+        print("# TaskNote Candidates")
+        print()
+        print("Mode: dry-run")
+        print("Writes performed: no")
+        print()
+        if not candidates:
+            print("No task candidates.")
+        for idx, candidate in enumerate(candidates, 1):
+            print(f"## {idx}. {candidate['title']}")
+            print()
+            print(f"- status: `{candidate['status']}`")
+            print(f"- priority: `{candidate['priority']}`")
+            print(f"- contexts: `{', '.join(candidate.get('contexts', []))}`")
+            print(f"- due: `{candidate.get('due', '')}`")
+            print(f"- source: `{candidate.get('source_type', '')}` / `{candidate.get('source_path', '')}`")
+            if candidate.get("mapping_note"):
+                print(f"- mapping: `{candidate['mapping_note']}`")
+            print()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

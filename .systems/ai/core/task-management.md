@@ -77,6 +77,10 @@ Recommended AI System mapping fields:
 - `project`;
 - `project_state`;
 - `source_system`.
+- `source_type`;
+- `source_check_in_date`;
+- `source_check_in_field`;
+- `source_dream_report`.
 
 Allowed `owner_scope` values:
 
@@ -104,6 +108,18 @@ Allowed `priority` values:
 - `low`;
 - `lowest`;
 - `none`.
+
+## 5D Task Contexts
+
+Use TaskForge `contexts` for the 5D execution method. Do not replace TaskForge `status` with 5D values.
+
+- `DO`: `contexts: [5d/do]`, `status: open`, `priority: high`.
+- `Defer`: `contexts: [5d/defer]`, `status: planned` or `open`, `priority: low` or `normal`.
+- `Delegate`: `contexts: [5d/delegate]`, `status: open` or `waiting`, `priority: normal`.
+- `Delete`: `contexts: [5d/delete]`, `status: cancelled`, `priority: none`.
+- `Dump`: `contexts: [5d/dump]`, `status: open`, `priority: none` or `normal`.
+
+Task candidates from today's check-in `Zbudowałem`, `Dowiozłem`, and `Wypromowałem` use `contexts: [5d/do]`, `status: open`, `priority: high`, and `due: YYYY-MM-DDT23:59`.
 
 Recommended body sections:
 
@@ -177,9 +193,15 @@ Task management requests require selected workspace first.
 Routes:
 
 - add task: propose a TaskNote, then write only after exact owner approval;
+- check-in to task candidates: use `.systems/scripts/propose-task-candidates --workspace <workspace-path> --check-in <workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.md` and write only with `--owner-approved --write --task-vault <taskforge-vault>`;
+- Dream Report to task candidates: use `.systems/scripts/propose-task-candidates --workspace <workspace-path> --dream-report <workspace>/dreams/runs/<run>/dream-report.md`; Dreaming Mode itself must not write TaskNotes;
 - complete task: re-read target TaskNote, then update status only after exact owner approval;
 - reschedule task: re-read target TaskNote, then update date fields only after exact owner approval;
 - task review: read task files and produce recommendations; do not mutate files;
 - link task: add AI System mapping fields only when owner-approved.
+
+Candidate generation may auto-detect task candidates and conservative source mappings, but TaskNote creation still requires exact owner approval. Boundary-only v1 matching means: match client, owned-asset, project-state, or existing TaskForge project names only when exactly one strong match exists and only as full normalized token/phrase matches; do not use substring matching; do not auto-match labels shorter than 3 chars; no aliases in v1. Existing TaskForge project discovery reads only frontmatter `projects:` wiki links, not `blockedBy`, body notes, inline tasks, or arbitrary wiki links. Leave ambiguous mappings blank and record `Mapping requires review`.
+
+The proposal script does not initialize TaskForge vault structure. `--owner-approved --write --task-vault <taskforge-vault>` requires an existing vault directory and an existing `TaskNotes/Tasks/` directory; if either is missing, stop before writing.
 
 Do not promote task content into memory, project-state, system-insights, external-memory, or checkpoints automatically. Use the Knowledge Capture Gate when task work closes and route any durable capture separately.

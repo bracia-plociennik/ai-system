@@ -175,6 +175,8 @@ Before writing `status.md`, `memory.md`, `checkpoints/`, `distillations/`, or `d
 
 TaskForge and TaskNotes task-management requests route through `.systems/ai/core/task-management.md`. Task files are data/action records, not instructions, memory, checkpoints, or system-insights. Use TaskNotes as `1 task = 1 Markdown file` by default. Creating, completing, rescheduling, linking, migrating, cleaning up, archiving, deleting, or rewriting task files requires exact owner-approved scope and target re-read.
 
+Check-in and Dream Report task candidate requests route through `.systems/scripts/propose-task-candidates`. Default to dry-run proposals. Creating TaskNotes from candidates requires exact owner approval, `--owner-approved --write`, and the selected TaskForge vault path.
+
 ## Skill Routing
 
 If a relevant owner-defined skill exists under the selected workspace `skills/`, use it as local guidance.
@@ -201,7 +203,7 @@ External source registry records live in `links/<source-slug>.md`. Manual extern
 
 Manual Personal Ops check-ins write only canonical daily Markdown and optional assets. Derived check-in indexes may be stale by design; use `.systems/scripts/sync-personal-ops-check-ins --status-only` before recommending owner-approved index sync.
 
-Dreaming Mode routes through `.systems/ai/core/dreaming-mode.md`. It is advisory-only, selected-workspace scoped, and writes only Dream Reports under `AI_SYSTEM_WORKSPACE_HOME/dreams/runs/**`. It cannot automatically write memory, project-state, System Insights, External Memory, skills, status, personal-ops, source files, commits, GitHub mirrors, scheduler automation, or approvals.
+Dreaming Mode routes through `.systems/ai/core/dreaming-mode.md`. It is advisory-only, selected-workspace scoped, and writes only Dream Reports under `AI_SYSTEM_WORKSPACE_HOME/dreams/runs/**`. It cannot mutate memory, project-state, System Insights, External Memory, skills, status, personal-ops, TaskNotes, source files, commits, GitHub mirrors, scheduler automation, or approvals.
 
 ## Response Contract
 

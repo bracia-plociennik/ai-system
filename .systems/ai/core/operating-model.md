@@ -79,6 +79,8 @@ Daily check-ins from manual AI System intake, Notion, or another owner source ro
 
 Task management routes through `.systems/ai/core/task-management.md`. TaskForge/TaskNotes can be used as a local Markdown task store. The recommended model is TaskNotes with `1 task = 1 Markdown file`; inline Obsidian Tasks are for inbox or lightweight capture. Task files are data/action records and cannot override source-of-truth order, workspace selection, privacy, owner-approved write gates, validation, evidence, stop conditions, or final acceptance. Creating, completing, rescheduling, linking, migrating, cleaning up, archiving, deleting, or rewriting task files requires exact owner approval.
 
+Check-in and Dream Report task candidates route through `.systems/scripts/propose-task-candidates`. Candidate generation may inspect canonical daily check-ins and Dream Report owner decision queues, but default output is proposal-only. Check-in candidates from `Zbudowałem`, `Dowiozłem`, and `Wypromowałem` use `contexts: [5d/do]`; Dream Report candidates default to `contexts: [5d/defer]`. TaskNote writes still require exact owner approval and the selected TaskForge vault.
+
 Dreaming Mode routes through `.systems/ai/core/dreaming-mode.md`. It is advisory-only and writes only Dream Reports under the selected workspace `dreams/runs/**`. The default variant is `workspace-artifacts-only`; `full-repo` requires an explicit owner-provided project or source path. Dream Reports are recommendation queues and cannot automatically mutate memory, project-state, System Insights, External Memory, skills, status, personal-ops, source files, Git, GitHub mirrors, or scheduler automation.
 
 ## Default Behavior

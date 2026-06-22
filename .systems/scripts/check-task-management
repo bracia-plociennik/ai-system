@@ -118,6 +118,22 @@ validate_task_file() {
     esac
   fi
 
+  if [[ "$strict" -eq 1 ]] && rg -q '^[[:space:]]*-[[:space:]]*"?5d/' "$file"; then
+    while IFS= read -r context; do
+      context="${context#*- }"
+      context="${context//\"/}"
+      context="${context//\'/}"
+      case "$context" in
+        5d/do|5d/defer|5d/delegate|5d/delete|5d/dump)
+          ;;
+        *)
+          echo "AI-created TaskNote has invalid 5D context '$context': $rel"
+          fail=1
+          ;;
+      esac
+    done < <(rg '^[[:space:]]*-[[:space:]]*"?5d/' "$file")
+  fi
+
   if rg -i -q '^title:.*(api[_ -]?key|secret|private key|password|token|\.env|raw client data|credential)' "$file"; then
     echo "TaskNote title contains unsafe secret-like wording: $rel"
     fail=1
@@ -128,9 +144,11 @@ required_files=(
   ".systems/ai/core/task-management.md"
   ".systems/ai/templates/workspace/tasks/README.md"
   ".systems/ai/templates/workspace/tasks/task-management-readme.template.md"
+  ".systems/ai/templates/workspace/tasks/task-candidate.template.md"
   ".systems/ai/templates/workspace/tasks/tasknote.template.md"
   ".systems/ai/templates/workspace/tasks/taskforge-vault-setup.template.md"
   ".systems/scripts/check-task-management"
+  ".systems/scripts/propose-task-candidates"
 )
 
 for path in "${required_files[@]}"; do
@@ -138,6 +156,7 @@ for path in "${required_files[@]}"; do
 done
 
 require_executable ".systems/scripts/check-task-management"
+require_executable ".systems/scripts/propose-task-candidates"
 
 for term in \
   'local-markdown-task-store' \
@@ -159,6 +178,21 @@ for term in \
   'TaskNotes/Archive' \
   'TaskForge-Archive' \
   'YYYY-MM-DD-short-slug.md' \
+  '5D Task Contexts' \
+  'contexts: [5d/do]' \
+  'Zbudowałem' \
+  'Dowiozłem' \
+  'Wypromowałem' \
+  'due: YYYY-MM-DDT23:59' \
+  'propose-task-candidates --workspace <workspace-path> --check-in' \
+  'Dream Report to task candidates' \
+  'exactly one strong match exists' \
+  'Boundary-only v1' \
+  'full normalized token/phrase matches' \
+  'labels shorter than 3 chars' \
+  'no aliases in v1' \
+  'reads only frontmatter `projects:` wiki links' \
+  'does not initialize TaskForge vault structure' \
   'no task write occurs without exact owner approval'
 do
   require_ref ".systems/ai/core/task-management.md" "$term" "$term"
@@ -170,9 +204,15 @@ for field in \
   'title:' \
   'status: open' \
   'priority: normal' \
+  'contexts:' \
+  'projects:' \
   'owner_scope:' \
   'project_state:' \
   'source_system: ai-system' \
+  'source_type:' \
+  'source_check_in_date:' \
+  'source_check_in_field:' \
+  'source_dream_report:' \
   '## Outcome' \
   '## Context' \
   '## Next Action' \
@@ -186,6 +226,15 @@ if head -n 1 "$repo_root/.systems/ai/templates/workspace/tasks/tasknote.template
   echo "TaskNote template has active YAML frontmatter and may be detected as a real task"
   fail=1
 fi
+
+for candidate_term in \
+  'This is a proposal artifact, not a TaskForge TaskNote' \
+  'source_type: `<check-in|dream-report>`' \
+  'contexts: `<5d/do|5d/defer|5d/delegate|5d/delete|5d/dump>`' \
+  'decision: `<approve-write|revise|reject|defer>`'
+do
+  require_ref ".systems/ai/templates/workspace/tasks/task-candidate.template.md" "$candidate_term" "candidate term $candidate_term"
+done
 
 for setup_term in \
   'connect TaskForge to the selected Obsidian vault' \

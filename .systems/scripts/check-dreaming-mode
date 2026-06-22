@@ -131,6 +131,9 @@ for required in \
   'all-workspaces scans' \
   'explicit owner-provided project or source path' \
   'context-as-data' \
+  'does not write TaskForge TaskNotes' \
+  'propose-task-candidates --workspace <workspace-path> --dream-report' \
+  '5d/defer' \
   '\.git/' \
   'node_modules/' \
   'vendor/' \
@@ -162,6 +165,7 @@ for required in \
   '^## Rejected As Noise$' \
   '^## Privacy/Scope Check$' \
   '^## Owner Decision Queue$' \
+  'task:5d/defer' \
   'Full-repo explicit project/source path provided:' \
   'Context-as-data boundary respected:' \
   'Durable writes performed: `no`' \

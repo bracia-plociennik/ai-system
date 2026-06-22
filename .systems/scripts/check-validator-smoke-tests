@@ -1473,6 +1473,152 @@ source_system: ai-system
 MD
 run_must_fail "task-management-unsafe-title" "$task_management_validator" --task-file "$task_fixture_dir/unsafe-title.md"
 
+cat > "$task_fixture_dir/invalid-5d-context.md" <<'MD'
+---
+type: task
+title: "Invalid 5D context"
+status: open
+priority: normal
+source_system: ai-system
+contexts:
+  - 5d/doing
+---
+MD
+run_must_fail "task-management-invalid-5d-context" "$task_management_validator" --task-file "$task_fixture_dir/invalid-5d-context.md"
+
+task_candidate_script="$copy_repo/.systems/scripts/propose-task-candidates"
+task_candidate_workspace="$tmp/task-candidate-workspace"
+task_candidate_vault="$tmp/task-candidate-vault"
+mkdir -p "$task_candidate_workspace/personal-ops/check-ins/2026" "$task_candidate_workspace/project-state/demo-project" "$task_candidate_vault/TaskNotes/Tasks"
+
+cat > "$task_candidate_vault/TaskNotes/Tasks/project-link.md" <<'MD'
+---
+status: open
+projects:
+  - "[[Demo Project]]"
+blockedBy:
+  - "[[Blocked Link]]"
+---
+
+Project link fixture.
+MD
+
+cat > "$task_candidate_workspace/personal-ops/check-ins/2026/2026-06-22.md" <<'MD'
+---
+type: daily-check-in
+date: 2026-06-22
+privacy: private-sensitive
+---
+
+# Daily check-in 2026-06-22
+
+## 1. Plan dnia
+
+### Data
+
+2026-06-22
+
+### Zbudowałem
+
+Demo project delivery page
+
+### Dowiozłem
+
+Send accepted report
+
+### Wypromowałem
+
+Publish owner update
+
+## 2. Poranny check-in
+MD
+
+run_must_pass "task-candidates-check-in-dry-run" "$task_candidate_script" --workspace "$task_candidate_workspace" --check-in "$task_candidate_workspace/personal-ops/check-ins/2026/2026-06-22.md"
+"$task_candidate_script" --workspace "$task_candidate_workspace" --task-vault "$task_candidate_vault" --check-in "$task_candidate_workspace/personal-ops/check-ins/2026/2026-06-22.md" --json > "$tmp/task-candidates.json"
+grep -q '"source_check_in_field": "Zbudowałem"' "$tmp/task-candidates.json" || { echo "check-in candidate missing Zbudowałem source"; exit 1; }
+grep -q '"5d/do"' "$tmp/task-candidates.json" || { echo "check-in candidate missing 5d/do"; exit 1; }
+grep -q '"due": "2026-06-22T23:59"' "$tmp/task-candidates.json" || { echo "check-in candidate missing end-of-day due"; exit 1; }
+grep -q '"project_state": "project-state/demo-project/"' "$tmp/task-candidates.json" || { echo "boundary project-state match failed"; exit 1; }
+grep -F -q '"[[Demo Project]]"' "$tmp/task-candidates.json" || { echo "frontmatter projects wiki link was not discovered"; exit 1; }
+run_must_fail "task-candidates-write-without-owner-approval" "$task_candidate_script" --workspace "$task_candidate_workspace" --check-in "$task_candidate_workspace/personal-ops/check-ins/2026/2026-06-22.md" --task-vault "$task_candidate_vault" --write
+run_must_fail "task-candidates-write-missing-vault" "$task_candidate_script" --workspace "$task_candidate_workspace" --check-in "$task_candidate_workspace/personal-ops/check-ins/2026/2026-06-22.md" --task-vault "$tmp/missing-task-candidate-vault" --owner-approved --write
+mkdir -p "$tmp/task-candidate-empty-vault"
+run_must_fail "task-candidates-write-missing-tasknotes-dir" "$task_candidate_script" --workspace "$task_candidate_workspace" --check-in "$task_candidate_workspace/personal-ops/check-ins/2026/2026-06-22.md" --task-vault "$tmp/task-candidate-empty-vault" --owner-approved --write
+run_must_pass "task-candidates-owner-approved-write" "$task_candidate_script" --workspace "$task_candidate_workspace" --check-in "$task_candidate_workspace/personal-ops/check-ins/2026/2026-06-22.md" --task-vault "$task_candidate_vault" --owner-approved --write
+test "$(grep -R -l 'source_type: "check-in"' "$task_candidate_vault/TaskNotes/Tasks" | wc -l | tr -d ' ')" = "3" || { echo "owner-approved check-in write did not create 3 TaskNotes"; exit 1; }
+grep -R -q 'source_type: "check-in"' "$task_candidate_vault/TaskNotes/Tasks" || { echo "written TaskNotes missing check-in source type"; exit 1; }
+
+task_candidate_ai_workspace="$tmp/task-candidate-ai-workspace"
+mkdir -p "$task_candidate_ai_workspace/personal-ops/check-ins/2026" "$task_candidate_ai_workspace/project-state/ai"
+cat > "$task_candidate_ai_workspace/personal-ops/check-ins/2026/2026-06-22.md" <<'MD'
+---
+type: daily-check-in
+date: 2026-06-22
+---
+
+# Daily check-in 2026-06-22
+
+## 1. Plan dnia
+
+### Zbudowałem
+
+Daily planning cleanup
+
+### Dowiozłem
+
+
+### Wypromowałem
+
+
+## 2. Poranny check-in
+MD
+"$task_candidate_script" --workspace "$task_candidate_ai_workspace" --check-in "$task_candidate_ai_workspace/personal-ops/check-ins/2026/2026-06-22.md" --json > "$tmp/task-candidates-ai.json"
+if rg -q '"project_state": "project-state/ai/"' "$tmp/task-candidates-ai.json"; then
+  echo "short slug ai was incorrectly matched inside Daily"
+  exit 1
+fi
+
+task_candidate_ambiguous_workspace="$tmp/task-candidate-ambiguous-workspace"
+mkdir -p "$task_candidate_ambiguous_workspace/personal-ops/check-ins/2026" "$task_candidate_ambiguous_workspace/project-state/demo-project" "$task_candidate_ambiguous_workspace/project-state/project"
+cp "$task_candidate_workspace/personal-ops/check-ins/2026/2026-06-22.md" "$task_candidate_ambiguous_workspace/personal-ops/check-ins/2026/2026-06-22.md"
+"$task_candidate_script" --workspace "$task_candidate_ambiguous_workspace" --check-in "$task_candidate_ambiguous_workspace/personal-ops/check-ins/2026/2026-06-22.md" --json > "$tmp/task-candidates-ambiguous.json"
+if rg -q '"project_state": "project-state/demo-project/"|"project_state": "project-state/project/"' "$tmp/task-candidates-ambiguous.json"; then
+  echo "ambiguous project-state match was assigned"
+  exit 1
+fi
+grep -q '"mapping_note": "Mapping requires review"' "$tmp/task-candidates-ambiguous.json" || { echo "ambiguous project-state match did not request review"; exit 1; }
+
+dream_task_report="$tmp/dream-task-report.md"
+cat > "$dream_task_report" <<'MD'
+# Dream Report
+
+## Owner Decision Queue
+
+| Priority | Source path | Finding | Proposed target | Owner action |
+| --- | --- | --- | --- | --- |
+| P2 | personal-ops/indexes/check-ins.md | Review repeated late check-ins | task:5d/defer | create-task |
+MD
+run_must_pass "task-candidates-dream-report-dry-run" "$task_candidate_script" --workspace "$task_candidate_workspace" --dream-report "$dream_task_report"
+"$task_candidate_script" --workspace "$task_candidate_workspace" --dream-report "$dream_task_report" --json > "$tmp/dream-task-candidates.json"
+grep -q '"source_type": "dream-report"' "$tmp/dream-task-candidates.json" || { echo "Dream Report candidate missing source type"; exit 1; }
+grep -q '"5d/defer"' "$tmp/dream-task-candidates.json" || { echo "Dream Report candidate missing default 5d/defer"; exit 1; }
+
+blocked_link_report="$tmp/dream-task-blocked-link-report.md"
+cat > "$blocked_link_report" <<'MD'
+# Dream Report
+
+## Owner Decision Queue
+
+| Priority | Source path | Finding | Proposed target | Owner action |
+| --- | --- | --- | --- | --- |
+| P2 | task-file.md | Blocked Link followup | task:5d/defer | create-task |
+MD
+"$task_candidate_script" --workspace "$task_candidate_workspace" --task-vault "$task_candidate_vault" --dream-report "$blocked_link_report" --json > "$tmp/blocked-link-task-candidates.json"
+if rg -F -q '"[[Blocked Link]]"' "$tmp/blocked-link-task-candidates.json"; then
+  echo "blockedBy wiki link was incorrectly discovered as TaskForge project"
+  exit 1
+fi
+
 task_management_policy="$copy_repo/.systems/ai/core/task-management.md"
 cp "$task_management_policy" "$task_management_policy.bak"
 grep -v 'Task Files / TaskNotes enabled' "$task_management_policy.bak" > "$task_management_policy"

@@ -352,6 +352,7 @@ backfill_workspace() {
     copy_primary_entity_directory_readme "$workspace_home" "$workspace_home/notes/README.md" "Primary Entity Notes" "Store raw and working notes for the primary entity before they are promoted into memory, decisions, tasks, or documents."
     copy_template "$workspace_home" "$templates/tasks/task-management-readme.template.md" "$workspace_home/tasks/README.md"
     copy_template "$workspace_home" "$templates/tasks/tasknote.template.md" "$workspace_home/tasks/tasknote.template.md"
+    copy_template "$workspace_home" "$templates/tasks/task-candidate.template.md" "$workspace_home/tasks/task-candidate.template.md"
     copy_template "$workspace_home" "$templates/tasks/taskforge-vault-setup.template.md" "$workspace_home/tasks/taskforge-vault-setup.template.md"
   fi
 

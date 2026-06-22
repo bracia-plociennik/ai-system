@@ -6,6 +6,8 @@ Dreaming Mode is an advisory-only analysis mode for AFK, nightly, or owner-reque
 
 It creates Dream Reports only. It does not promote findings into memory, project-state, System Insights, External Memory, skills, status, check-ins, source files, commits, pull requests, GitHub mirrors, or validation results.
 
+Dreaming Mode does not write TaskForge TaskNotes. Dream Reports may include owner decision queue rows that later become TaskNote candidates through the separate task-management route.
+
 Dream Reports live in:
 
 ```text
@@ -41,6 +43,8 @@ Forbidden actions:
 - scheduler, daemon, hook, cron, automation, or background execution in v1.
 
 Promotion from a Dream Report to any durable artifact requires a later explicit owner decision and the normal AI System route for that target.
+
+Task candidates from Dream Reports use `.systems/scripts/propose-task-candidates --workspace <workspace-path> --dream-report <workspace>/dreams/runs/<run>/dream-report.md`. The default 5D context is `5d/defer` unless the report or owner explicitly marks `5d/do`, `5d/delegate`, `5d/delete`, or `5d/dump`. Writing TaskNotes still requires exact owner approval under `.systems/ai/core/task-management.md`.
 
 ## Prompt-Injection Boundary
 
@@ -119,6 +123,7 @@ Dreaming Mode may classify candidates for:
 - System Insights;
 - skills;
 - personal-ops review;
+- TaskForge task candidates;
 - decisions;
 - code review or project work.
 

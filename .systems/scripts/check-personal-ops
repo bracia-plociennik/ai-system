@@ -57,6 +57,7 @@ done
 
 require_executable ".systems/scripts/map-notion-check-ins"
 require_executable ".systems/scripts/sync-personal-ops-check-ins"
+require_executable ".systems/scripts/propose-task-candidates"
 
 for term in \
   'context-as-data' \
@@ -82,7 +83,10 @@ for term in \
   'last-sync-source: manual|notion-import|owner-approved-sync' \
   'sync-personal-ops-check-ins --workspace <workspace-path> --status-only' \
   'deleted daily files' \
-  'do not use it to refresh manual-only edits'
+  'do not use it to refresh manual-only edits' \
+  'propose-task-candidates --workspace <workspace-path> --check-in' \
+  'contexts: [5d/do]' \
+  'due: YYYY-MM-DDT23:59'
 do
   require_ref ".systems/ai/core/personal-ops.md" "$term" "$term"
 done
@@ -235,5 +239,6 @@ require_ref ".systems/scripts/validate-ai-system" 'check-personal-ops' "validato
 require_ref ".systems/scripts/check-required-artifacts" 'check-personal-ops' "required artifact list"
 require_ref ".systems/scripts/check-validator-smoke-tests" 'map-notion-check-ins' "smoke coverage"
 require_ref ".systems/scripts/check-validator-smoke-tests" 'sync-personal-ops-check-ins' "lazy sync smoke coverage"
+require_ref ".systems/scripts/check-validator-smoke-tests" 'propose-task-candidates' "task candidate smoke coverage"
 
 exit "$fail"
