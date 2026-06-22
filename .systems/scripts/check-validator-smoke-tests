@@ -1359,6 +1359,134 @@ run_must_fail "personal-ops-lazy-sync-malformed-markdown" "$personal_ops_sync" -
 grep -q 'sentinel csv' "$personal_ops_sync_malformed_workspace/personal-ops/indexes/check-ins.csv" || { echo "malformed sync replaced CSV despite failure"; exit 1; }
 grep -q 'sentinel jsonl' "$personal_ops_sync_malformed_workspace/personal-ops/indexes/check-ins.jsonl" || { echo "malformed sync replaced JSONL despite failure"; exit 1; }
 
+task_management_validator="$copy_repo/.systems/scripts/check-task-management"
+
+run_must_pass "task-management-baseline" "$task_management_validator"
+
+task_fixture_dir="$tmp/task-management-fixtures"
+mkdir -p "$task_fixture_dir"
+
+cat > "$task_fixture_dir/valid-ai-task.md" <<'MD'
+---
+type: task
+title: "Prepare TaskForge setup"
+status: open
+priority: normal
+workspace: smoke-workspace
+owner_scope: project
+project: taskforge
+project_state: project-state/taskforge/
+source_system: ai-system
+---
+
+# Prepare TaskForge setup
+
+## Outcome
+
+TaskForge setup is documented.
+
+## Context
+
+Project-state reference.
+
+## Next Action
+
+- [ ] Review setup.
+
+## Evidence
+
+Smoke fixture.
+
+## Notes
+
+No sensitive data.
+MD
+run_must_pass "task-management-valid-ai-task" "$task_management_validator" --task-file "$task_fixture_dir/valid-ai-task.md"
+
+cat > "$task_fixture_dir/missing-type.md" <<'MD'
+---
+title: "Missing type"
+status: open
+priority: normal
+source_system: ai-system
+---
+MD
+run_must_fail "task-management-missing-type" "$task_management_validator" --task-file "$task_fixture_dir/missing-type.md"
+
+cat > "$task_fixture_dir/invalid-status.md" <<'MD'
+---
+type: task
+title: "Invalid status"
+status: someday
+priority: normal
+source_system: ai-system
+---
+MD
+run_must_fail "task-management-invalid-status" "$task_management_validator" --task-file "$task_fixture_dir/invalid-status.md"
+
+cat > "$task_fixture_dir/invalid-priority.md" <<'MD'
+---
+type: task
+title: "Invalid priority"
+status: open
+priority: urgent
+source_system: ai-system
+---
+MD
+run_must_fail "task-management-invalid-priority" "$task_management_validator" --task-file "$task_fixture_dir/invalid-priority.md"
+
+cat > "$task_fixture_dir/taskforge-compatibility.md" <<'MD'
+---
+status: planned
+priority: none
+dateCreated: "2026-06-21T13:22:47.054131+02:00"
+taskSourceType: taskNotes
+scheduled: "2026-06-24T13:23"
+scheduledEnd: "2026-06-24T14:53"
+duration: 90
+projects:
+  - "[[projektx]]"
+contexts:
+  - contextx
+reminders:
+  -
+    id: rem_1782040991310
+    type: relative
+    relatedTo: due
+    offset: PT0M
+blockedBy:
+  - "[[TaskNotes/Tasks/subtaskx]]"
+---
+
+Existing app-created TaskNote without title.
+MD
+run_must_pass "task-management-taskforge-compatibility" "$task_management_validator" --task-file "$task_fixture_dir/taskforge-compatibility.md"
+
+cat > "$task_fixture_dir/unsafe-title.md" <<'MD'
+---
+type: task
+title: "Store API key in task title"
+status: open
+priority: normal
+source_system: ai-system
+---
+MD
+run_must_fail "task-management-unsafe-title" "$task_management_validator" --task-file "$task_fixture_dir/unsafe-title.md"
+
+task_management_policy="$copy_repo/.systems/ai/core/task-management.md"
+cp "$task_management_policy" "$task_management_policy.bak"
+grep -v 'Task Files / TaskNotes enabled' "$task_management_policy.bak" > "$task_management_policy"
+run_must_fail "task-management-missing-app-setup-wording" "$task_management_validator"
+mv "$task_management_policy.bak" "$task_management_policy"
+
+cat > "$copy_repo/.systems/ai/core/task-management-unsafe-smoke.md" <<'MD'
+# Unsafe Task Management Smoke
+
+TaskForge app automation is allowed.
+MD
+run_must_fail "task-management-unsafe-auto-write-wording" "$task_management_validator"
+rm "$copy_repo/.systems/ai/core/task-management-unsafe-smoke.md"
+
 dreaming_validator="$copy_repo/.systems/scripts/check-dreaming-mode"
 dreaming_policy="$copy_repo/.systems/ai/core/dreaming-mode.md"
 dreaming_template="$copy_repo/.systems/ai/templates/dreaming/dream-report.template.md"
@@ -1518,7 +1646,7 @@ printf '%s\n' 'api_key: sk_test_12345678901234567890' >> "$bad_dream_report"
 run_must_fail "dreaming-mode-secret-marker-report" "$dreaming_validator" --workspace "$bad_dream_workspace"
 
 init_target="$tmp/init-system-insights-workspace"
-run_must_pass "init-workspace-system-insights" "$copy_repo/.systems/scripts/init-workspace" --workspace "$init_target" --workspace-id smoke
+run_must_pass "init-workspace-system-insights" "$copy_repo/.systems/scripts/init-workspace" --workspace "$init_target" --workspace-id smoke --workspace-profile primary-entity
 test -f "$init_target/system-insights/system-insights.md" || { echo "init-workspace did not create system insights router"; exit 1; }
 test -f "$init_target/system-insights/insights/README.md" || { echo "init-workspace did not create system insights entries README"; exit 1; }
 test -f "$init_target/core/workstreams.md" || { echo "init-workspace did not create core/workstreams.md"; exit 1; }
@@ -1527,6 +1655,9 @@ test -f "$init_target/links/README.md" || { echo "init-workspace did not create 
 test -f "$init_target/personal-ops/check-ins/README.md" || { echo "init-workspace did not create personal-ops check-ins README"; exit 1; }
 test -f "$init_target/personal-ops/check-ins/import-profiles/manual-daily-check-in.md" || { echo "init-workspace did not create manual daily check-in profile"; exit 1; }
 test -f "$init_target/personal-ops/indexes/check-ins.md" || { echo "init-workspace did not create personal-ops check-ins index"; exit 1; }
+test -f "$init_target/tasks/README.md" || { echo "init-workspace did not create tasks README"; exit 1; }
+test -f "$init_target/tasks/tasknote.template.md" || { echo "init-workspace did not create tasknote template"; exit 1; }
+test -f "$init_target/tasks/taskforge-vault-setup.template.md" || { echo "init-workspace did not create taskforge setup template"; exit 1; }
 test -f "$init_target/dreams/README.md" || { echo "init-workspace did not create dreams README"; exit 1; }
 test -d "$init_target/dreams/runs" || { echo "init-workspace did not create dreams/runs"; exit 1; }
 
@@ -1536,5 +1667,13 @@ printf '%s\n' 'existing report sentinel' > "$dreams_update_workspace/dreams/runs
 run_must_pass "update-workspace-dreams-backfill" "$copy_repo/.systems/scripts/update-workspace" --workspace "$dreams_update_workspace"
 test -f "$dreams_update_workspace/dreams/README.md" || { echo "update-workspace did not create dreams README"; exit 1; }
 grep -q 'existing report sentinel' "$dreams_update_workspace/dreams/runs/2026-06-19-existing/dream-report.md" || { echo "update-workspace overwrote existing dream report"; exit 1; }
+
+task_update_workspace="$tmp/task-management-update-workspace"
+mkdir -p "$task_update_workspace/tasks"
+printf '%s\n' 'existing tasks readme sentinel' > "$task_update_workspace/tasks/README.md"
+run_must_pass "update-workspace-task-management-backfill" "$copy_repo/.systems/scripts/update-workspace" --workspace "$task_update_workspace" --workspace-profile primary-entity
+grep -q 'existing tasks readme sentinel' "$task_update_workspace/tasks/README.md" || { echo "update-workspace overwrote existing tasks README"; exit 1; }
+test -f "$task_update_workspace/tasks/tasknote.template.md" || { echo "update-workspace did not create tasknote template"; exit 1; }
+test -f "$task_update_workspace/tasks/taskforge-vault-setup.template.md" || { echo "update-workspace did not create taskforge setup template"; exit 1; }
 
 echo "Validator smoke tests passed."

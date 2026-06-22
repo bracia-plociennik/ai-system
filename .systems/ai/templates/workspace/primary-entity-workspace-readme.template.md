@@ -43,7 +43,7 @@ Workspace home: `<WORKSPACE_HOME>`.
 - `links/` - provider-agnostic external source registry records and references.
 - `notes/` - raw and working notes.
 - `decisions/` - durable entity decisions.
-- `tasks/` - task notes and routing.
+- `tasks/` - task notes, TaskForge/TaskNotes setup templates, and owner-approved next-action routing.
 - `clients/` - external client workspaces when this workspace owns client work.
 - `micro-projects/` - small standalone work.
 - `humans/` - owner-facing summaries.

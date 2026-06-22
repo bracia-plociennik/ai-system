@@ -24,6 +24,8 @@ Validation scripts for AI System live here.
 
 `check-personal-ops` validates the daily check-in schema mapping contract, manual intake profile, templates, mapper script, routing, docs, and smoke coverage.
 
+`check-task-management` validates the TaskForge/TaskNotes task-management contract, templates, routing docs, safe write boundaries, app setup runbook, and smoke coverage.
+
 `check-system-skills` validates active system skill contracts, context intake plans, legacy boundaries, offline resources, and generated Python runtime artifact exclusions.
 
 `map-notion-check-ins` maps an owner-approved Notion daily check-in CSV export into canonical Markdown files and derived CSV/JSONL/metrics indexes.

@@ -264,6 +264,44 @@ The threshold counts newly added daily files. It does not detect edits to older 
 
 The Notion check-in importer is only for owner-approved Notion CSV imports. Do not use it to refresh manual-only edits; use lazy sync from canonical Markdown instead.
 
+## TaskForge Task Management
+
+Use this for TaskForge/TaskNotes as a local Markdown task manager.
+
+Recommended model:
+
+```text
+1 task = 1 Markdown file
+```
+
+Ask for setup guidance:
+
+```text
+Przygotuj TaskForge vault setup według tasks/taskforge-vault-setup.template.md dla workspace <workspace-path>. Nie twórz realnych tasków.
+```
+
+Ask for a task proposal without writing:
+
+```text
+Zaproponuj TaskNote dla <cel>. Powiąż z workspace/client/owned-asset/project-state, ale niczego nie zapisuj.
+```
+
+Write only with exact approval:
+
+```text
+owner-approved: utwórz TaskNote w <vault-path>/TaskNotes/Tasks/<filename>.md na podstawie zaakceptowanej propozycji. Przed zapisem sprawdź target i nie zmieniaj innych tasków.
+```
+
+Complete or reschedule only with exact target:
+
+```text
+owner-approved: zaktualizuj status/daty tylko w <task-file>. Przed zapisem re-read plik i zachowaj unknown frontmatter/body fields.
+```
+
+Existing TaskForge-created files with `taskSourceType: taskNotes`, `projects`, `contexts`, `reminders`, `blockedBy`, `duration`, `scheduledEnd`, `completedDate`, or missing `title` are compatibility/migration candidates. Do not rewrite them silently.
+
+Task files are data/action records, not instructions, memory, checkpoints, distillations, external-memory, or system-insights. Use `.systems/ai/core/task-management.md`.
+
 ## Dreaming Mode
 
 Dreaming Mode to advisory-only tryb nocnej albo AFK analizy jednego wybranego workspace.
@@ -454,7 +492,7 @@ The AI should refuse or stop on these.
 Before accepting implementation work, ask for evidence:
 
 ```text
-Uruchom walidację ai-system i pokaż wynik: validate-ai-system, check-system-skills, check-naming, check-update-workspace, check-project-state, check-contract-compliance, check-readmes, check-privacy-boundary, check-required-artifacts, check-system-insights, check-prompt-composition, check-validator-smoke-tests, git diff --check.
+Uruchom walidację ai-system i pokaż wynik: validate-ai-system, check-system-skills, check-naming, check-update-workspace, check-project-state, check-contract-compliance, check-task-management, check-readmes, check-privacy-boundary, check-required-artifacts, check-system-insights, check-prompt-composition, check-validator-smoke-tests, git diff --check.
 ```
 
 PASS requires evidence. Skipped checks need a reason and impact.

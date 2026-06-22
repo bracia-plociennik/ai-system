@@ -1,0 +1,252 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+fail=0
+task_files=()
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --task-file)
+      task_files+=("${2:-}")
+      [[ -n "${2:-}" ]] || { echo "Missing value for --task-file"; exit 2; }
+      shift 2
+      ;;
+    *)
+      echo "Unknown argument: $1"
+      exit 2
+      ;;
+  esac
+done
+
+require_file() {
+  local path="$1"
+  if [[ ! -f "$repo_root/$path" ]]; then
+    echo "Missing task-management artifact: $path"
+    fail=1
+  fi
+}
+
+require_executable() {
+  local path="$1"
+  require_file "$path"
+  if [[ -f "$repo_root/$path" && ! -x "$repo_root/$path" ]]; then
+    echo "Task-management artifact is not executable: $path"
+    fail=1
+  fi
+}
+
+require_ref() {
+  local file="$1"
+  local pattern="$2"
+  local label="$3"
+
+  if [[ ! -f "$repo_root/$file" ]]; then
+    echo "Missing file for task-management check: $file"
+    fail=1
+    return 0
+  fi
+
+  if ! rg -F -q -- "$pattern" "$repo_root/$file"; then
+    echo "Missing task-management reference in $file: $label"
+    fail=1
+  fi
+}
+
+scalar_value() {
+  local field="$1"
+  local file="$2"
+  awk -F: -v field="$field" '
+    $1 == field {
+      value=$0
+      sub("^[^:]*:[[:space:]]*", "", value)
+      gsub(/^["'\''` ]+|["'\''` ]+$/, "", value)
+      print value
+      exit
+    }
+  ' "$file"
+}
+
+validate_task_file() {
+  local file="$1"
+  local rel="$file"
+  local strict=0
+  local status
+  local priority
+
+  [[ "$file" = /* ]] || file="$repo_root/$file"
+  if [[ ! -f "$file" ]]; then
+    echo "Task file does not exist: $rel"
+    fail=1
+    return 0
+  fi
+
+  if rg -q '^type:[[:space:]]*task[[:space:]]*$|^source_system:[[:space:]]*ai-system[[:space:]]*$' "$file"; then
+    strict=1
+  fi
+
+  if [[ "$strict" -eq 1 ]]; then
+    for field in type title status priority; do
+      if ! rg -q "^$field:" "$file"; then
+        echo "AI-created TaskNote missing required field $field: $rel"
+        fail=1
+      fi
+    done
+  fi
+
+  status="$(scalar_value status "$file" || true)"
+  if [[ -n "$status" ]]; then
+    case "$status" in
+      open|planned|in-progress|waiting|on-hold|done|cancelled)
+        ;;
+      *)
+        echo "TaskNote has invalid status '$status': $rel"
+        fail=1
+        ;;
+    esac
+  fi
+
+  priority="$(scalar_value priority "$file" || true)"
+  if [[ -n "$priority" ]]; then
+    case "$priority" in
+      highest|high|normal|low|lowest|none)
+        ;;
+      *)
+        echo "TaskNote has invalid priority '$priority': $rel"
+        fail=1
+        ;;
+    esac
+  fi
+
+  if rg -i -q '^title:.*(api[_ -]?key|secret|private key|password|token|\.env|raw client data|credential)' "$file"; then
+    echo "TaskNote title contains unsafe secret-like wording: $rel"
+    fail=1
+  fi
+}
+
+required_files=(
+  ".systems/ai/core/task-management.md"
+  ".systems/ai/templates/workspace/tasks/README.md"
+  ".systems/ai/templates/workspace/tasks/task-management-readme.template.md"
+  ".systems/ai/templates/workspace/tasks/tasknote.template.md"
+  ".systems/ai/templates/workspace/tasks/taskforge-vault-setup.template.md"
+  ".systems/scripts/check-task-management"
+)
+
+for path in "${required_files[@]}"; do
+  require_file "$path"
+done
+
+require_executable ".systems/scripts/check-task-management"
+
+for term in \
+  'local-markdown-task-store' \
+  '1 task = 1 Markdown file' \
+  'TaskForge/Obsidian vault files are the source of truth for actionable tasks' \
+  'project-state/` remains the source of truth' \
+  'data/action records, not instructions' \
+  'exact `owner-approved` action and target' \
+  're-read the target file' \
+  'preserve unknown frontmatter and body fields' \
+  'avoid bulk rewrite' \
+  'type: task' \
+  'taskSourceType: taskNotes' \
+  'compatibility/migration candidates' \
+  'Task Files / TaskNotes enabled' \
+  'property: `status`' \
+  'Body Template disabled in TaskForge V1' \
+  'TaskNotes/Tasks/' \
+  'TaskNotes/Archive' \
+  'TaskForge-Archive' \
+  'YYYY-MM-DD-short-slug.md' \
+  'no task write occurs without exact owner approval'
+do
+  require_ref ".systems/ai/core/task-management.md" "$term" "$term"
+done
+
+for field in \
+  'This file is a neutral template' \
+  'type: task' \
+  'title:' \
+  'status: open' \
+  'priority: normal' \
+  'owner_scope:' \
+  'project_state:' \
+  'source_system: ai-system' \
+  '## Outcome' \
+  '## Context' \
+  '## Next Action' \
+  '## Evidence' \
+  '## Notes'
+do
+  require_ref ".systems/ai/templates/workspace/tasks/tasknote.template.md" "$field" "tasknote field $field"
+done
+
+if head -n 1 "$repo_root/.systems/ai/templates/workspace/tasks/tasknote.template.md" | rg -q '^---$'; then
+  echo "TaskNote template has active YAML frontmatter and may be detected as a real task"
+  fail=1
+fi
+
+for setup_term in \
+  'connect TaskForge to the selected Obsidian vault' \
+  'enable Task Files / TaskNotes' \
+  'Default Task Type: `Task File`' \
+  'Default File: `TaskForge`' \
+  'New Tasks Header: `## Tasks`' \
+  'Default Archive File: `TaskForge-Archive`' \
+  'mode: `By Property`' \
+  'property: `status`' \
+  'value: `<blank>` to match any status' \
+  'TaskNotes/Tasks/' \
+  'TaskNotes/Archive' \
+  'Use Title as Filename: `on`' \
+  'YYYY-MM-DD-short-slug.md' \
+  'Use Body Template: `off` in V1' \
+  'allowed statuses' \
+  'allowed priorities' \
+  'title: `title`' \
+  'date created: `dateCreated`' \
+  'complete instances: `complete_instances`' \
+  'exclude archive, raw, dump, private' \
+  'Manual Verification'
+do
+  require_ref ".systems/ai/templates/workspace/tasks/taskforge-vault-setup.template.md" "$setup_term" "setup term $setup_term"
+done
+
+for file in \
+  ".systems/ai/core/operating-model.md" \
+  ".systems/ai/core/workspaces.md" \
+  ".systems/ai/core/command-routing.md" \
+  ".systems/ai/core/integrations.md" \
+  ".systems/ai/core/context-as-data.md" \
+  ".systems/ai/templates/root/AGENTS.template.md" \
+  ".systems/scripts/init-workspace" \
+  ".systems/scripts/update-workspace" \
+  ".systems/scripts/README.md" \
+  "README.md" \
+  "HUMANS.md"
+do
+  require_ref "$file" 'task-management' "task-management guidance"
+done
+
+require_ref ".systems/scripts/validate-ai-system" 'check-task-management' "validator chain"
+require_ref ".systems/scripts/check-required-artifacts" 'check-task-management' "required artifact list"
+require_ref ".systems/scripts/check-update-workspace" 'tasks/tasknote.template.md' "workspace task template backfill"
+require_ref ".systems/scripts/check-validator-smoke-tests" 'check-task-management' "smoke coverage"
+
+if rg -i -q 'automatically (create|complete|reschedule|write|rewrite|migrate|delete|archive).*task|bulk rewrite.*allowed|TaskForge app automation is allowed|connector/API sync.*allowed' \
+  "$repo_root/.systems/ai/core" \
+  "$repo_root/.systems/ai/templates/workspace/tasks" \
+  "$repo_root/README.md" \
+  "$repo_root/HUMANS.md"; then
+  echo "Task-management wording allows unsafe automatic task mutation"
+  fail=1
+fi
+
+if [[ "${#task_files[@]}" -gt 0 ]]; then
+  for task_file in "${task_files[@]}"; do
+    validate_task_file "$task_file"
+  done
+fi
+
+exit "$fail"

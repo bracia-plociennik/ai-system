@@ -349,7 +349,9 @@ else
   copy_primary_entity_directory_readme "$workspace_home/documents/README.md" "Primary Entity Documents" "Store owner-approved documents that belong to the primary entity."
   copy_primary_entity_directory_readme "$workspace_home/dump/incoming/README.md" "Primary Entity Incoming Dump" "Drop unclassified files here when ownership is unknown, mixed, or already known to belong to the primary entity."
   copy_primary_entity_directory_readme "$workspace_home/notes/README.md" "Primary Entity Notes" "Store raw and working notes for the primary entity before they are promoted into memory, decisions, tasks, or documents."
-  copy_primary_entity_directory_readme "$workspace_home/tasks/README.md" "Primary Entity Tasks" "Store task notes, task routing, and owner-approved next actions for the primary entity."
+  copy_template "$templates/tasks/task-management-readme.template.md" "$workspace_home/tasks/README.md"
+  copy_template "$templates/tasks/tasknote.template.md" "$workspace_home/tasks/tasknote.template.md"
+  copy_template "$templates/tasks/taskforge-vault-setup.template.md" "$workspace_home/tasks/taskforge-vault-setup.template.md"
 fi
 
 copy_template "$templates/core/README.md" "$workspace_home/core/README.md"

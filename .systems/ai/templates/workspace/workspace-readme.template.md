@@ -21,6 +21,7 @@ Workspace home: `<WORKSPACE_HOME>`.
 - `external-memory/` - AI System improvement ideas.
 - `system-insights/` - anonymized operating lessons and skill candidates, with detailed entries in `system-insights/insights/`.
 - `personal-ops/` - private owner operational records such as daily check-ins and generated analytical indexes.
+- `tasks/` may exist for TaskForge/TaskNotes setup templates and owner-approved next-action routing when this workspace is promoted to or used as a primary entity workspace.
 - `dreams/` - advisory-only Dreaming Mode reports and owner decision queues.
 - `skills/` - user-defined AI skills.
 - `archive/` - archived workspace material.

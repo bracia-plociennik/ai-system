@@ -55,3 +55,5 @@ Use `dump/incoming/` for files already known to belong to this owned asset.
 Files in owned-asset dump still require classification before movement into `documents/`, `assets/`, `projects/`, `contracts/`, `memory/`, or `archive/`.
 
 Use `project-state/<project>/` for AI System owned-asset project status, memory, checkpoints, distillations, decisions, and source links when `projects/<project>/` is a git repo or source-material folder.
+
+Use `.systems/ai/core/task-management.md` before routing owned-asset tasks into TaskForge or TaskNotes. Task files are action records and do not replace owned-asset memory, project-state, decisions, or owner approvals.

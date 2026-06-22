@@ -14,6 +14,7 @@ Provider-agnostic source metadata belongs in `links/<source-slug>.md` under the 
 - manual external export import workflow artifacts governed by `.systems/ai/core/external-export-import-workflow.md`;
 - exported Notion daily check-in CSV files routed through `dump/incoming/external/notion/check-ins/`;
 - manual daily check-in profiles routed through `personal-ops/check-ins/import-profiles/`;
+- TaskForge/TaskNotes local Markdown task files governed by `.systems/ai/core/task-management.md`;
 - copied snippets supplied by the owner;
 - manual summaries;
 - file references.
@@ -25,6 +26,16 @@ Provider-agnostic source metadata belongs in `links/<source-slug>.md` under the 
 - sending emails or notifications;
 - deleting, archiving, sharing, or changing permissions;
 - changing external tasks, pages, documents, spreadsheets, or files.
+
+## TaskForge / TaskNotes
+
+TaskForge/TaskNotes is treated as a local Markdown task store, not a live external API integration.
+
+Use `.systems/ai/core/task-management.md`.
+
+AI may read task files for planning. Creating, completing, rescheduling, linking, migrating, cleaning up, archiving, deleting, or rewriting task files requires exact owner-approved scope.
+
+No TaskForge app automation, URL scheme automation, connector API, live sync, or bulk vault rewrite exists in V1.
 
 ## Read-Only API Planning
 

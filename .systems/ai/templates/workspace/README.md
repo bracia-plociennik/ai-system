@@ -12,3 +12,5 @@ Generated workspace directories must include README guidance explaining purpose,
 - `primary-entity` - a workspace root where the main company, brand, or owner-controlled entity lives directly at the root.
 
 Client and owned-asset workspaces use the same base directory structure for their nested scopes, including `documents/`, `contracts/`, `assets/`, `contacts/`, `dump/`, `memory/`, `projects/`, `project-state/`, `decisions/`, `tasks/`, and `archive/`.
+
+TaskForge and TaskNotes task-management templates live under `tasks/` where that namespace exists. See `.systems/ai/core/task-management.md`.

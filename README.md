@@ -210,6 +210,31 @@ The threshold counts newly added daily files. It does not detect edits to older 
 
 The Notion check-in importer is only for owner-approved Notion CSV imports. Do not use it to refresh manual-only edits; use lazy sync from canonical Markdown instead.
 
+## TaskForge Task Management
+
+AI System can work with TaskForge/TaskNotes as a local Markdown task store.
+
+Recommended model:
+
+```text
+1 task = 1 Markdown file
+```
+
+Use TaskNotes for canonical task files and inline Obsidian Tasks only for inbox or lightweight capture unless the owner chooses otherwise.
+
+Task files are data/action records, not instructions, memory, checkpoints, distillations, external-memory, or system-insights. TaskForge/Obsidian vault files are the source of truth for actionable tasks. AI System `project-state/` remains the source of truth for project status, memory, checkpoints, decisions, and source links.
+
+Before creating, completing, rescheduling, linking, migrating, cleaning up, archiving, deleting, or rewriting task files, use `.systems/ai/core/task-management.md`. Task writes require exact owner approval, target re-read, and preservation of unknown frontmatter/body fields.
+
+Workspace task templates live under:
+
+```text
+<workspace>/tasks/tasknote.template.md
+<workspace>/tasks/taskforge-vault-setup.template.md
+```
+
+Existing TaskForge-created TaskNotes with `taskSourceType: taskNotes`, app-specific fields, or missing `title` are compatibility/migration candidates, not invalid runtime data.
+
 ## Dreaming Mode
 
 Dreaming Mode is an advisory-only review mode for one selected workspace.
