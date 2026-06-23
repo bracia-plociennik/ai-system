@@ -1,0 +1,172 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+fail=0
+
+require_file() {
+  local path="$1"
+  if [[ ! -f "$repo_root/$path" ]]; then
+    echo "Missing end-of-task capture artifact: $path"
+    fail=1
+  fi
+}
+
+require_ref() {
+  local file="$1"
+  local pattern="$2"
+  local label="$3"
+
+  if [[ ! -f "$repo_root/$file" ]]; then
+    echo "Missing file for end-of-task capture check: $file"
+    fail=1
+    return 0
+  fi
+
+  if ! rg -q -i -- "$pattern" "$repo_root/$file"; then
+    echo "Missing end-of-task capture reference in $file: $label"
+    fail=1
+  fi
+}
+
+contract=".systems/ai/core/end-of-task-capture.md"
+template=".systems/ai/templates/capture/end-of-task-capture.template.md"
+
+required_files=(
+  "$contract"
+  "$template"
+  ".systems/scripts/check-end-of-task-capture"
+)
+
+for path in "${required_files[@]}"; do
+  require_file "$path"
+done
+
+require_ref "$contract" '^# end-of-task-capture\.md$' "core contract title"
+require_ref "$contract" 'End-of-Task Capture' "contract name"
+require_ref "$contract" 'Trigger Grammar' "trigger grammar"
+require_ref "$contract" 'Precedence Rules' "precedence rules"
+require_ref "$contract" 'Required Output' "required output"
+require_ref "$contract" 'Safety Boundaries' "safety boundaries"
+require_ref "$template" '^# End-of-Task Capture$' "template title"
+
+for trigger in \
+  'to koniec zadania' \
+  'koniec taska' \
+  'kończymy ten task' \
+  'dziękuję, utrwal wiedzę' \
+  'utrwal wiedzę z tej rozmowy' \
+  'end task and capture knowledge' \
+  'done, capture learnings'
+do
+  require_ref "$contract" "$trigger" "trigger: $trigger"
+  require_ref ".systems/ai/core/command-routing.md" "$trigger" "routing trigger: $trigger"
+done
+
+for field in \
+  'Trigger detected' \
+  'Matched route' \
+  'Precedence check' \
+  'Work mode' \
+  'Source scope reviewed' \
+  'Completion state' \
+  'Capture targets' \
+  'Writes allowed' \
+  'Owner approval' \
+  'Privacy/scope check' \
+  'Distillation needed' \
+  'Checkpoint needed' \
+  'Memory/status updates' \
+  'System Insight candidates' \
+  'External Memory candidates' \
+  'Skipped capture' \
+  'Residual risk'
+do
+  require_ref "$contract" "$field" "output field: $field"
+  require_ref "$template" "$field" "template field: $field"
+done
+
+for target in \
+  'status/evidence' \
+  'workspace-memory' \
+  'primary-entity-memory' \
+  'client-memory' \
+  'owned-asset-memory' \
+  'project-memory' \
+  'distillation' \
+  'checkpoint' \
+  'system-insights' \
+  'external-memory' \
+  'proposal-only' \
+  'none'
+do
+  require_ref "$contract" "$target" "capture target: $target"
+done
+
+for precedence in \
+  'distillation.*not End-of-Task Capture' \
+  'checkpoint.*not End-of-Task Capture' \
+  'final check.*not End-of-Task Capture' \
+  'final review.*not final check' \
+  'contract-compliance' \
+  'commit readiness'
+do
+  require_ref "$contract" "$precedence" "precedence: $precedence"
+  require_ref ".systems/ai/core/command-routing.md" "$precedence" "routing precedence: $precedence"
+done
+
+for boundary in \
+  'mark `PASS` automatically' \
+  'run final check automatically' \
+  'close a project without explicit owner approval' \
+  'update status from chat-only claims' \
+  'Durable writes are allowed only when the owner explicitly requests capture' \
+  'write raw client data' \
+  'write frontend, backend, SEO, ads, smart-contract, product, or client-work lessons into `external-memory/`'
+do
+  require_ref "$contract" "$boundary" "safety boundary: $boundary"
+done
+
+for file in \
+  ".systems/ai/templates/root/AGENTS.template.md" \
+  ".systems/ai/core/operating-model.md" \
+  ".systems/ai/core/command-routing.md" \
+  ".systems/ai/core/memory.md" \
+  ".systems/ai/core/contract-compliance.md" \
+  ".systems/ai/core/response-contract.md" \
+  "HUMANS.md" \
+  "README.md" \
+  ".systems/scripts/README.md"
+do
+  require_ref "$file" 'end-of-task-capture\.md|End-of-Task Capture' "end-of-task capture routing"
+done
+
+require_ref ".systems/scripts/validate-ai-system" 'check-end-of-task-capture' "validator chain"
+require_ref ".systems/scripts/check-required-artifacts" 'check-end-of-task-capture' "required artifact list"
+require_ref ".systems/scripts/check-validator-smoke-tests" 'end-of-task-capture' "smoke coverage"
+
+unsafe_patterns=(
+  'end task may mark PASS automatically'
+  'end task runs final check'
+  'end task may close project without owner approval'
+  'System Insights may include raw client data'
+  'External Memory stores product-domain lessons'
+  '(End-of-Task Capture|end task|koniec zadania|utrwal wiedzę)[^.\n]{0,140}\b(automatically|may|can|will|allows?)\b[^.\n]{0,140}\b(mark PASS|run final check|close project|update status from chat-only|durable write|write memory)\b'
+  '\b(Zrób distillation|Zrob distillation)\b[^.\n]{0,140}\bEnd-of-Task Capture\b'
+  '\b(Zrób checkpoint|Zrob checkpoint)\b[^.\n]{0,140}\bEnd-of-Task Capture\b'
+  '\bfinal review\b[^.\n]{0,140}\bfinal check\b'
+)
+
+for pattern in "${unsafe_patterns[@]}"; do
+  if rg -n -i --no-filename -- "$pattern" \
+    "$repo_root/.systems/ai/core" \
+    "$repo_root/.systems/ai/templates" \
+    "$repo_root/README.md" \
+    "$repo_root/HUMANS.md" \
+    | rg -v -i 'must not|does not|do not|not End-of-Task|not final check|no automatic|only when|unless|forbidden|unsafe|fails|fail|nie może|nie uruchamia|nie oznacza|nie zastępuje|mają pierwszeństwo'; then
+    echo "Unsafe end-of-task capture wording found: $pattern"
+    fail=1
+  fi
+done
+
+exit "$fail"

@@ -36,6 +36,8 @@ Contract compliance:
 
 This gate is advisory-only. It records the Knowledge capture decision before `AI_SYSTEM_WORK_CLOSURE`; it does not grant write permission or bypass privacy, evidence, validation, stop conditions, or owner approvals.
 
+If End-of-Task Capture is used, apply `.systems/ai/core/end-of-task-capture.md` and include the required `End-of-Task Capture` block before the `Contract compliance` block when both apply. The trace must state whether End-of-Task Capture was the matched route or supporting output, source scope reviewed, durable writes performed or skipped, and residual risk.
+
 ## Required Footer
 
 Use this exact shape:

@@ -42,6 +42,12 @@ Before `AI_SYSTEM_WORK_CLOSURE`, apply `.systems/ai/core/contract-compliance.md`
 
 Do not turn the gate into automatic memory writing. If capture is required, route to the narrowest correct target: `status/evidence`, `workspace-memory`, `primary-entity-memory`, `client-memory`, `owned-asset-memory`, `project-memory`, `distillation`, `checkpoint`, `external-memory`, or `system-insights`.
 
+End-of-Task Capture routes through `.systems/ai/core/end-of-task-capture.md` when the owner signals task completion and capture intent, such as `to koniec zadania`, `koniec taska`, `kończymy ten task`, `dziękuję, utrwal wiedzę`, `utrwal wiedzę z tej rozmowy`, `end task and capture knowledge`, or `done, capture learnings`.
+
+End-of-Task Capture is capture review/proposal by default. It must not mark PASS, run final check, close a project, update status from chat-only claims, or write durable memory, checkpoints, distillations, system-insights, or external-memory without explicit owner-approved target, scope, privacy/scope check, evidence, workspace, and write permission.
+
+Precedence remains: `Zrób distillation` routes to distillation, not End-of-Task Capture. `Zrób checkpoint` routes to checkpoint, not End-of-Task Capture. `Zrób final check` routes to final check, not End-of-Task Capture. `Zrób final review` routes to final review, not final check. Commit readiness, push readiness, contract-compliance, and Knowledge Capture Gate routes keep priority over End-of-Task Capture.
+
 ## Product Development Boundary / Upstream Boundary
 
 AI System management checkouts are for operations, not product development.
@@ -71,6 +77,7 @@ Do not route ordinary workspace, client, project, owned-asset, dump, memory, pro
 | `zapisz memory` | Memory capture | Select workspace first; store in the appropriate workspace, client, owned-asset, or project memory location. |
 | `zrób destylację` | Distillation workflow | Compress raw memory and identify stale facts, decisions, risks, and checkpoint needs. |
 | `zamknij task`, `handoff`, `final check`, `przed commitem`, `przed pushem` | Contract compliance and Knowledge Capture Gate | Use `.systems/ai/core/contract-compliance.md`; decide work mode, compliance, capture target, and reason before closure. |
+| `to koniec zadania`, `koniec taska`, `kończymy ten task`, `dziękuję, utrwal wiedzę`, `utrwal wiedzę z tej rozmowy`, `end task and capture knowledge`, `done, capture learnings` | End-of-Task Capture | Use `.systems/ai/core/end-of-task-capture.md`; produce capture review/proposal by default; durable writes require explicit owner-approved target and privacy-safe scope. |
 | `zaproponuj system-insights` | System Insights candidate | Select workspace first; use `.systems/ai/core/system-insights.md`; produce an anonymized candidate only, with no durable write unless exact `owner-approved` capture or checkpoint routing permits it. |
 | `zaproponuj prompt`, `zaproponuj rolę`, `wygeneruj variables`, `master prompt`, `prompt composition` | Prompt composition proposal | Select workspace first; use `.systems/ai/core/prompt-composition.md`; suggest roles, modules, or variables as advisory context; do not create durable artifacts without exact `owner-approved`. |
 | `external source`, `źródło zewnętrzne`, `links registry`, `dodaj link źródła`, `Google Sheets source`, `Notion source` | External source registry | Select workspace first; use `.systems/ai/core/external-source-registry.md`; create or update `links/<source-slug>.md` only with exact owner-approved scope; no write-back or auto-sync in v1. |

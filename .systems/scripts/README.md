@@ -12,6 +12,8 @@ Validation scripts for AI System live here.
 
 `check-contract-compliance` validates the AI System Contract Compliance and Knowledge Capture Gate policy, docs, templates, and validator wiring.
 
+`check-end-of-task-capture` validates the chat-end End-of-Task Capture contract, trigger grammar, precedence rules, output template, routing docs, and unsafe automatic-capture wording.
+
 `check-update-workspace` validates the workspace backfill script, update contract, docs, templates, and smoke coverage.
 
 `check-project-state` validates repo-safe project-state contracts, templates, routing, script wiring, and optional workspace pollution scans.

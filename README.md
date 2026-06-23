@@ -143,6 +143,14 @@ The agent must decide:
 
 Durable capture still needs the correct workspace target, privacy-safe content, and explicit owner-approved write scope unless an existing checkpoint or final-check route authorizes that exact capture.
 
+## End-of-Task Capture
+
+For chat-end task closure prompts such as `to koniec zadania`, `koniec taska`, `dziękuję, utrwal wiedzę`, or `end task and capture knowledge`, AI System uses `.systems/ai/core/end-of-task-capture.md`.
+
+This produces capture review/proposal by default. It does not mark PASS, run final check, close a project, update status from chat-only claims, create commits, or write memory automatically.
+
+Durable capture requires explicit owner-approved target, selected workspace, scope, privacy/scope check, evidence, and write permission.
+
 ## Repo-Safe Project State
 
 AI System stores project runtime state outside managed project repositories.

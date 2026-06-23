@@ -99,6 +99,8 @@ Before `AI_SYSTEM_WORK_CLOSURE`, apply `.systems/ai/core/contract-compliance.md`
 
 The gate is advisory-only. It requires a clear `Knowledge capture` decision, not automatic memory writes.
 
+When the owner explicitly says the task or chat is done and asks to preserve learnings, use `.systems/ai/core/end-of-task-capture.md`. End-of-Task Capture is a capture review/proposal by default. It does not replace contract compliance, checkpoint, distillation, final review, final check, commit readiness, workspace selection, evidence, privacy, or owner-approved write gates.
+
 Supported work modes are:
 
 - `project`;

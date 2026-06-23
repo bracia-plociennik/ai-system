@@ -12,6 +12,8 @@ This gate is advisory-only. It does not replace `AGENTS.md`, privacy rules, work
 
 The gate requires a decision. It does not grant permission to write. Durable writes still require the correct target, privacy-safe content, and explicit owner-approved scope unless a stricter checkpoint or final-check route already authorizes that exact capture.
 
+End-of-Task Capture from `.systems/ai/core/end-of-task-capture.md` can precede work closure when the owner says the task is done and asks to preserve learnings. It is capture review/proposal by default. It does not replace this compliance gate and does not grant permission to skip evidence, privacy, validation, risk, memory scope boundaries, or owner approvals.
+
 ## AI_SYSTEM_WORK_CLOSURE
 
 Apply this gate before `AI_SYSTEM_WORK_CLOSURE`.
@@ -114,3 +116,5 @@ Do not store client names, people names, domains, secrets, contract details, amo
 This gate does not allow writing the wrong memory type. If the correct target is ambiguous, stop and ask the owner to choose the target.
 
 For project work, resolve the concrete project-state path through `.systems/ai/core/project-state.md` before durable capture. Do not write AI System runtime state into a project git worktree unless the owner explicitly chooses colocated local-only state.
+
+End-of-Task Capture may help decide this target at closure, but it must not duplicate an existing checkpoint, distillation, or Knowledge Capture Gate decision.

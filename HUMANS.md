@@ -410,6 +410,18 @@ Expected targets:
 
 The gate is advisory-only. It requires a decision, not automatic writes. Durable capture still needs exact `owner-approved` scope and the correct target.
 
+## End-of-Task Capture
+
+Use this when the task or chat is done and you want AI System to review what should be preserved:
+
+```text
+To koniec zadania. Zrób End-of-Task Capture: sprawdź, czy trzeba utrwalić status/evidence, workspace memory, client memory, project memory, distillation, checkpoint, system-insights albo external-memory. Niczego nie zapisuj bez jasnego targetu i owner-approved.
+```
+
+Short triggers include `koniec taska`, `kończymy ten task`, `dziękuję, utrwal wiedzę`, `utrwal wiedzę z tej rozmowy`, `end task and capture knowledge`, and `done, capture learnings`.
+
+This route is capture review/proposal by default. It does not replace distillation, checkpoint, final review, final check, commit readiness, contract compliance, or owner approvals. It must not mark PASS, run final check, close a project, update status from chat-only claims, or write durable memory automatically.
+
 ## System Insights
 
 `system-insights/` is only for anonymized operating lessons and skill candidates that improve competence, offer, process, and quality of work.

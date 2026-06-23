@@ -179,6 +179,51 @@ mutate_contract_and_expect_fail "contract-compliance-missing-not-required" "not-
 mutate_contract_and_expect_fail "contract-compliance-missing-checkpoint-target" "checkpoint"
 mutate_contract_and_expect_fail "contract-compliance-missing-advisory-only" "advisory-only"
 
+end_of_task_validator="$copy_repo/.systems/scripts/check-end-of-task-capture"
+end_of_task_core="$copy_repo/.systems/ai/core/end-of-task-capture.md"
+end_of_task_template="$copy_repo/.systems/ai/templates/capture/end-of-task-capture.template.md"
+
+run_must_pass "end-of-task-capture-valid" "$end_of_task_validator"
+
+mv "$end_of_task_core" "$end_of_task_core.bak"
+run_must_fail "missing-end-of-task-capture-contract" "$copy_repo/.systems/scripts/check-required-artifacts"
+mv "$end_of_task_core.bak" "$end_of_task_core"
+
+mv "$end_of_task_template" "$end_of_task_template.bak"
+run_must_fail "missing-end-of-task-capture-template" "$copy_repo/.systems/scripts/check-required-artifacts"
+mv "$end_of_task_template.bak" "$end_of_task_template"
+
+mv "$end_of_task_validator" "$end_of_task_validator.bak"
+run_must_fail "missing-end-of-task-capture-validator" "$copy_repo/.systems/scripts/check-required-artifacts"
+mv "$end_of_task_validator.bak" "$end_of_task_validator"
+
+cp "$end_of_task_core" "$end_of_task_core.bak"
+perl -0pi -e 's/Trigger Grammar/Trigger List/g' "$end_of_task_core"
+run_must_fail "end-of-task-capture-requires-trigger-grammar" "$end_of_task_validator"
+mv "$end_of_task_core.bak" "$end_of_task_core"
+
+cp "$end_of_task_core" "$end_of_task_core.bak"
+perl -0pi -e 's/Precedence Rules/Routing Order/g' "$end_of_task_core"
+run_must_fail "end-of-task-capture-requires-precedence" "$end_of_task_validator"
+mv "$end_of_task_core.bak" "$end_of_task_core"
+
+cp "$end_of_task_template" "$end_of_task_template.bak"
+perl -0pi -e 's#- Privacy/scope check:\n##' "$end_of_task_template"
+run_must_fail "end-of-task-capture-requires-privacy-field" "$end_of_task_validator"
+mv "$end_of_task_template.bak" "$end_of_task_template"
+
+cat > "$copy_repo/.systems/ai/core/end-of-task-capture-unsafe-smoke.md" <<'MD'
+# Unsafe End Task Smoke
+
+end task may mark PASS automatically
+end task runs final check
+end task may close project without owner approval
+System Insights may include raw client data
+External Memory stores product-domain lessons
+MD
+run_must_fail "end-of-task-capture-unsafe-wording" "$end_of_task_validator"
+rm "$copy_repo/.systems/ai/core/end-of-task-capture-unsafe-smoke.md"
+
 project_state_validator="$copy_repo/.systems/scripts/check-project-state"
 project_state_core="$copy_repo/.systems/ai/core/project-state.md"
 project_state_workspaces_core="$copy_repo/.systems/ai/core/workspaces.md"

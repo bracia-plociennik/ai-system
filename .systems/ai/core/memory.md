@@ -54,6 +54,14 @@ Use `not-applicable` when no status, decision, evidence, reusable lesson, or dur
 
 For project memory, status, distillations, decisions, and checkpoints, use `.systems/ai/core/project-state.md`. Do not write AI System runtime files into a project git worktree unless the owner explicitly chooses colocated local-only state.
 
+## End-of-Task Capture
+
+`.systems/ai/core/end-of-task-capture.md` handles chat-end prompts such as `to koniec zadania`, `dziękuję, utrwal wiedzę`, and `end task and capture knowledge`.
+
+Default End-of-Task Capture output is proposal-only. Durable memory, distillation, checkpoint, System Insights, External Memory, or status/evidence writes require explicit owner-approved capture intent plus clear target, selected workspace, scope, privacy/scope check, evidence, and write permission.
+
+End-of-Task Capture must not store raw client data in `system-insights/` and must not store product-domain lessons in `external-memory/`.
+
 ## Distillation Reminders
 
 AI should remind the owner to distill memory when:
