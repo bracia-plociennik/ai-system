@@ -254,9 +254,11 @@ Use dry-run first:
 .systems/scripts/propose-task-candidates --workspace <workspace-path> --dream-report <workspace>/dreams/runs/<run>/dream-report.md
 ```
 
-Check-in candidates come from `Zbudowałem`, `Dowiozłem`, and `Wypromowałem`, use `contexts: [5d/do]`, and default to end-of-day due date `YYYY-MM-DDT23:59`.
+Check-in candidates come from `Zbudowałem`, `Dowiozłem`, and `Wypromowałem`, use `tags: [5d/do]`, and default to end-of-day due date `YYYY-MM-DDT23:59`.
 
-Dream Report candidates come from the owner decision queue and default to `contexts: [5d/defer]` unless explicitly marked otherwise.
+Dream Report candidates come from the owner decision queue and default to `tags: [5d/defer]` unless explicitly marked otherwise.
+
+Use TaskForge custom lists for the 5D view by filtering `Tags contains 5d/<bucket>`. Keep `contexts` for client/workspace/personal routing and `projects` for concrete project links.
 
 Client/project recognition uses boundary-only matching: full normalized token/phrase matches only, no short-slug matching, and no aliases in v1.
 

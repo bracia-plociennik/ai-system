@@ -323,7 +323,9 @@ Owner-approved write route:
 owner-approved: utwórz TaskNotes z zaakceptowanych task candidates w vault <taskforge-vault>. Użyj propose-task-candidates z --owner-approved --write.
 ```
 
-Check-in fields `Zbudowałem`, `Dowiozłem`, and `Wypromowałem` route to `contexts: [5d/do]`, `status: open`, `priority: high`, and due date `YYYY-MM-DDT23:59`. Dream Report task candidates default to `contexts: [5d/defer]`. Client/project recognition uses boundary-only matching: full normalized token/phrase matches only, no short-slug matching, and no aliases in v1. Ambiguous client/project mapping stays blank with `Mapping requires review`.
+Check-in fields `Zbudowałem`, `Dowiozłem`, and `Wypromowałem` route to `tags: [5d/do]`, `status: open`, `priority: high`, and due date `YYYY-MM-DDT23:59`. Dream Report task candidates default to `tags: [5d/defer]`. Client/project recognition uses boundary-only matching: full normalized token/phrase matches only, no short-slug matching, and no aliases in v1. Ambiguous client/project mapping stays blank with `Mapping requires review`.
+
+TaskForge custom lists should use `Tags contains 5d/<bucket>` filters. Keep `contexts` for client/workspace/personal routing and `projects` for concrete project links.
 
 Write target guard: `<taskforge-vault>` and `<taskforge-vault>/TaskNotes/Tasks/` must already exist. The proposal script does not initialize TaskForge vault structure.
 

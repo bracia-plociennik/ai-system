@@ -31,11 +31,11 @@ POLISH_REPLACEMENTS = {
 }
 
 FIVE_D = {
-    "do": {"context": "5d/do", "status": "open", "priority": "high"},
-    "defer": {"context": "5d/defer", "status": "planned", "priority": "normal"},
-    "delegate": {"context": "5d/delegate", "status": "waiting", "priority": "normal"},
-    "delete": {"context": "5d/delete", "status": "cancelled", "priority": "none"},
-    "dump": {"context": "5d/dump", "status": "open", "priority": "none"},
+    "do": {"tag": "5d/do", "status": "open", "priority": "high"},
+    "defer": {"tag": "5d/defer", "status": "planned", "priority": "normal"},
+    "delegate": {"tag": "5d/delegate", "status": "waiting", "priority": "normal"},
+    "delete": {"tag": "5d/delete", "status": "cancelled", "priority": "none"},
+    "dump": {"tag": "5d/dump", "status": "open", "priority": "none"},
 }
 
 
@@ -184,6 +184,10 @@ def unique_match(text: str, labels: list[tuple[str, str]]) -> str:
     return matches[0] if len(matches) == 1 else ""
 
 
+def set_single_context(candidate: dict[str, object], value: str) -> None:
+    candidate["contexts"] = [value]
+
+
 def apply_mapping(candidate: dict[str, object], labels: dict[str, list[tuple[str, str]]]) -> None:
     text = f"{candidate.get('title', '')} {candidate.get('raw_value', '')}"
     client = unique_match(text, labels["client"])
@@ -193,9 +197,11 @@ def apply_mapping(candidate: dict[str, object], labels: dict[str, list[tuple[str
     if client:
         candidate["client"] = client
         candidate["owner_scope"] = "client"
+        set_single_context(candidate, f"client/{client}")
     if owned_asset:
         candidate["owned_asset"] = owned_asset
         candidate["owner_scope"] = "owned-asset"
+        set_single_context(candidate, f"owned-asset/{owned_asset}")
     if project_state:
         candidate["project_state"] = f"project-state/{project_state}/"
         candidate["project"] = project_state
@@ -228,7 +234,8 @@ def candidates_from_check_in(path: Path, workspace: Path, labels: dict[str, list
             "priority": FIVE_D["do"]["priority"],
             "due": f"{check_date}T23:59",
             "scheduled": check_date,
-            "contexts": [FIVE_D["do"]["context"]],
+            "tags": [FIVE_D["do"]["tag"]],
+            "contexts": [f"workspace/{workspace.name}"],
             "workspace": workspace.name,
             "owner_scope": "workspace",
             "client": "",
@@ -282,7 +289,8 @@ def candidates_from_dream_report(path: Path, workspace: Path, labels: dict[str, 
             "priority": FIVE_D[five_d]["priority"],
             "due": "",
             "scheduled": "",
-            "contexts": [FIVE_D[five_d]["context"]],
+            "tags": [FIVE_D[five_d]["tag"]],
+            "contexts": [f"workspace/{workspace.name}"],
             "workspace": workspace.name,
             "owner_scope": "workspace",
             "client": "",
@@ -328,7 +336,7 @@ def render_tasknote(candidate: dict[str, object]) -> str:
         if key in candidate:
             value = str(candidate.get(key) or "")
             lines.append(f"{key}: {quote_yaml(value) if value else ''}")
-    for key in ("contexts", "projects"):
+    for key in ("tags", "contexts", "projects"):
         values = candidate.get(key)
         if isinstance(values, list):
             lines.append(f"{key}:")
@@ -409,6 +417,7 @@ def main() -> int:
             print()
             print(f"- status: `{candidate['status']}`")
             print(f"- priority: `{candidate['priority']}`")
+            print(f"- tags: `{', '.join(candidate.get('tags', []))}`")
             print(f"- contexts: `{', '.join(candidate.get('contexts', []))}`")
             print(f"- due: `{candidate.get('due', '')}`")
             print(f"- source: `{candidate.get('source_type', '')}` / `{candidate.get('source_path', '')}`")

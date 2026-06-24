@@ -15,7 +15,8 @@ Use it when converting a check-in or Dream Report into owner-approved task propo
 - title: `<notification-safe task title>`
 - status: `<open|planned|waiting|cancelled>`
 - priority: `<high|normal|low|none>`
-- contexts: `<5d/do|5d/defer|5d/delegate|5d/delete|5d/dump>`
+- 5d_tag: `<5d/do|5d/defer|5d/delegate|5d/delete|5d/dump>`
+- contexts: `<client/client-slug|owned-asset/asset-slug|workspace/workspace-slug|personal>`
 - due: `<YYYY-MM-DDT23:59|blank>`
 - scheduled: `<YYYY-MM-DD|blank>`
 - owner_scope: `<workspace|client|owned-asset|project|personal>`

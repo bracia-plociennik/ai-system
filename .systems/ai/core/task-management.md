@@ -109,17 +109,27 @@ Allowed `priority` values:
 - `lowest`;
 - `none`.
 
-## 5D Task Contexts
+## 5D Task Tags
 
-Use TaskForge `contexts` for the 5D execution method. Do not replace TaskForge `status` with 5D values.
+Use TaskForge `tags` for the 5D execution method. Do not replace TaskForge `status` with 5D values.
 
-- `DO`: `contexts: [5d/do]`, `status: open`, `priority: high`.
-- `Defer`: `contexts: [5d/defer]`, `status: planned` or `open`, `priority: low` or `normal`.
-- `Delegate`: `contexts: [5d/delegate]`, `status: open` or `waiting`, `priority: normal`.
-- `Delete`: `contexts: [5d/delete]`, `status: cancelled`, `priority: none`.
-- `Dump`: `contexts: [5d/dump]`, `status: open`, `priority: none` or `normal`.
+- `DO`: `tags: [5d/do]`, `status: open`, `priority: high`.
+- `Defer`: `tags: [5d/defer]`, `status: planned` or `open`, `priority: low` or `normal`.
+- `Delegate`: `tags: [5d/delegate]`, `status: open` or `waiting`, `priority: normal`.
+- `Delete`: `tags: [5d/delete]`, `status: cancelled`, `priority: none`.
+- `Dump`: `tags: [5d/dump]`, `status: open`, `priority: none` or `normal`.
 
-Task candidates from today's check-in `Zbudowałem`, `Dowiozłem`, and `Wypromowałem` use `contexts: [5d/do]`, `status: open`, `priority: high`, and `due: YYYY-MM-DDT23:59`.
+Task candidates from today's check-in `Zbudowałem`, `Dowiozłem`, and `Wypromowałem` use `tags: [5d/do]`, `status: open`, `priority: high`, and `due: YYYY-MM-DDT23:59`.
+If the TaskForge app setup UI does not expose `Waiting` for `DELEGATE`, use `On Hold` as the app-level custom-list default; do not change the AI System TaskNote status contract.
+
+Use TaskForge `contexts` for client, owned-asset, workspace, or personal routing:
+
+- recognized clients: `contexts: [client/<client-slug>]`;
+- recognized owned assets: `contexts: [owned-asset/<asset-slug>]`;
+- workspace-scoped tasks: `contexts: [workspace/<workspace-slug>]`;
+- personal tasks: `contexts: [personal]`.
+
+Custom lists should filter the main 5D axis by `Tags contains 5d/<bucket>`, not by folder path. Keep task files in `TaskNotes/Tasks/` unless a separate owner-approved migration chooses another storage model.
 
 Recommended body sections:
 
@@ -174,7 +184,8 @@ The runbook must cover:
 - status and priority values aligned with this contract;
 - Body Template disabled in TaskForge V1;
 - AI-created TaskNotes still use the recommended body sections;
-- default field mappings for title, status, priority, due, scheduled, recurrence, reminders, projects, contexts, dateCreated, completedDate, recurrence_anchor, and complete_instances;
+- default field mappings for title, status, priority, due, scheduled, recurrence, reminders, projects, contexts, tags, dateCreated, completedDate, recurrence_anchor, and complete_instances;
+- custom 5D lists filter by `Tags contains 5d/<bucket>` and may set default tag/status/priority per list;
 - archive, raw, dump, private, or unrelated folders excluded from TaskForge scanning when supported;
 - manual end-to-end verification.
 
@@ -200,7 +211,7 @@ Routes:
 - task review: read task files and produce recommendations; do not mutate files;
 - link task: add AI System mapping fields only when owner-approved.
 
-Candidate generation may auto-detect task candidates and conservative source mappings, but TaskNote creation still requires exact owner approval. Boundary-only v1 matching means: match client, owned-asset, project-state, or existing TaskForge project names only when exactly one strong match exists and only as full normalized token/phrase matches; do not use substring matching; do not auto-match labels shorter than 3 chars; no aliases in v1. Existing TaskForge project discovery reads only frontmatter `projects:` wiki links, not `blockedBy`, body notes, inline tasks, or arbitrary wiki links. Leave ambiguous mappings blank and record `Mapping requires review`.
+Candidate generation may auto-detect task candidates and conservative source mappings, but TaskNote creation still requires exact owner approval. Boundary-only v1 matching means: match client, owned-asset, project-state, or existing TaskForge project names only when exactly one strong match exists and only as full normalized token/phrase matches; do not use substring matching; do not auto-match labels shorter than 3 chars; no aliases in v1. Existing TaskForge project discovery reads only frontmatter `projects:` wiki links, not `blockedBy`, body notes, inline tasks, or arbitrary wiki links. Put 5D in `tags`; put client/workspace/personal routing in `contexts`. Leave ambiguous mappings blank and record `Mapping requires review`.
 
 The proposal script does not initialize TaskForge vault structure. `--owner-approved --write --task-vault <taskforge-vault>` requires an existing vault directory and an existing `TaskNotes/Tasks/` directory; if either is missing, stop before writing.
 

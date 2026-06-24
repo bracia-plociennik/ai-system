@@ -100,7 +100,7 @@ External Memory is only for AI System product improvement proposals.
 
 ## Owner Decision Queue
 
-Use `5d/defer` as the default proposed TaskForge context for task candidates unless the owner action or finding explicitly marks `5d/do`, `5d/delegate`, `5d/delete`, or `5d/dump`.
+Use `5d/defer` as the default proposed TaskForge tag for task candidates unless the owner action or finding explicitly marks `5d/do`, `5d/delegate`, `5d/delete`, or `5d/dump`.
 
 | Priority | Source path | Finding | Proposed target | Owner action |
 | --- | --- | --- | --- | --- |

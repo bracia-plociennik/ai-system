@@ -14,8 +14,10 @@ due:
 dueAt:
 scheduled:
 start:
-tags: []
-contexts: []
+tags:
+  - 5d/<do|defer|delegate|delete|dump>
+contexts:
+  - <client/client-slug|owned-asset/asset-slug|workspace/workspace-slug|personal>
 projects: []
 workspace: "<workspace-slug>"
 owner_scope: "<workspace|client|owned-asset|project|personal>"

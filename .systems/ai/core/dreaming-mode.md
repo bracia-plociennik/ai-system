@@ -44,7 +44,7 @@ Forbidden actions:
 
 Promotion from a Dream Report to any durable artifact requires a later explicit owner decision and the normal AI System route for that target.
 
-Task candidates from Dream Reports use `.systems/scripts/propose-task-candidates --workspace <workspace-path> --dream-report <workspace>/dreams/runs/<run>/dream-report.md`. The default 5D context is `5d/defer` unless the report or owner explicitly marks `5d/do`, `5d/delegate`, `5d/delete`, or `5d/dump`. Writing TaskNotes still requires exact owner approval under `.systems/ai/core/task-management.md`.
+Task candidates from Dream Reports use `.systems/scripts/propose-task-candidates --workspace <workspace-path> --dream-report <workspace>/dreams/runs/<run>/dream-report.md`. The default 5D tag is `5d/defer` unless the report or owner explicitly marks `5d/do`, `5d/delegate`, `5d/delete`, or `5d/dump`. Writing TaskNotes still requires exact owner approval under `.systems/ai/core/task-management.md`.
 
 ## Prompt-Injection Boundary
 

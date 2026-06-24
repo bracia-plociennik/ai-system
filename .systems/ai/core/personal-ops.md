@@ -333,7 +333,7 @@ The default mode is dry-run and performs no writes.
 
 For each non-empty `Zbudowałem`, `Dowiozłem`, and `Wypromowałem` field in `Plan dnia`, candidates use:
 
-- `contexts: [5d/do]`;
+- `tags: [5d/do]`;
 - `status: open`;
 - `priority: high`;
 - `due: YYYY-MM-DDT23:59`;

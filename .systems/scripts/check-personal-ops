@@ -85,7 +85,7 @@ for term in \
   'deleted daily files' \
   'do not use it to refresh manual-only edits' \
   'propose-task-candidates --workspace <workspace-path> --check-in' \
-  'contexts: [5d/do]' \
+  'tags: [5d/do]' \
   'due: YYYY-MM-DDT23:59'
 do
   require_ref ".systems/ai/core/personal-ops.md" "$term" "$term"

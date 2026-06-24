@@ -60,11 +60,23 @@ Use this runbook before relying on TaskForge as an operational task store.
   - reminders: `reminders`
   - projects: `projects`
   - contexts: `contexts`
+  - tags: `tags`
   - date created: `dateCreated`
   - completed date: `completedDate`
   - recurrence anchor: `recurrence_anchor`
   - complete instances: `complete_instances`
 - exclude archive, raw, dump, private, or unrelated folders from scanning when supported
+
+### 5D Custom Lists
+
+- `DO`: filter `Tags contains 5d/do`; default tag `5d/do`; default status `open`; default priority `high`
+- `DEFER`: filter `Tags contains 5d/defer`; default tag `5d/defer`; default status `planned`; default priority `normal`
+- `DELEGATE`: filter `Tags contains 5d/delegate`; default tag `5d/delegate`; default status `waiting`; default priority `normal`
+  - TaskForge 2.6.x may show `On Hold` instead of `Waiting`; use `On Hold` as the app-level default only when `Waiting` is unavailable.
+- `DELETE`: filter `Tags contains 5d/delete`; default tag `5d/delete`; default status `cancelled`; default priority `none`
+- `DUMP`: filter `Tags contains 5d/dump`; default tag `5d/dump`; default status `open`; default priority `none`
+
+Keep `TaskNotes/Tasks/` as the canonical file storage route. Do not use folders such as `DOs/` or `DEFERs/` as the primary 5D classification.
 
 ## Manual Verification
 

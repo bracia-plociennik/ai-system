@@ -1518,18 +1518,31 @@ source_system: ai-system
 MD
 run_must_fail "task-management-unsafe-title" "$task_management_validator" --task-file "$task_fixture_dir/unsafe-title.md"
 
-cat > "$task_fixture_dir/invalid-5d-context.md" <<'MD'
+cat > "$task_fixture_dir/invalid-5d-tag.md" <<'MD'
 ---
 type: task
-title: "Invalid 5D context"
+title: "Invalid 5D tag"
+status: open
+priority: normal
+source_system: ai-system
+tags:
+  - 5d/doing
+---
+MD
+run_must_fail "task-management-invalid-5d-tag" "$task_management_validator" --task-file "$task_fixture_dir/invalid-5d-tag.md"
+
+cat > "$task_fixture_dir/5d-in-context.md" <<'MD'
+---
+type: task
+title: "5D in wrong field"
 status: open
 priority: normal
 source_system: ai-system
 contexts:
-  - 5d/doing
+  - 5d/do
 ---
 MD
-run_must_fail "task-management-invalid-5d-context" "$task_management_validator" --task-file "$task_fixture_dir/invalid-5d-context.md"
+run_must_fail "task-management-5d-in-context" "$task_management_validator" --task-file "$task_fixture_dir/5d-in-context.md"
 
 task_candidate_script="$copy_repo/.systems/scripts/propose-task-candidates"
 task_candidate_workspace="$tmp/task-candidate-workspace"
@@ -1581,7 +1594,9 @@ MD
 run_must_pass "task-candidates-check-in-dry-run" "$task_candidate_script" --workspace "$task_candidate_workspace" --check-in "$task_candidate_workspace/personal-ops/check-ins/2026/2026-06-22.md"
 "$task_candidate_script" --workspace "$task_candidate_workspace" --task-vault "$task_candidate_vault" --check-in "$task_candidate_workspace/personal-ops/check-ins/2026/2026-06-22.md" --json > "$tmp/task-candidates.json"
 grep -q '"source_check_in_field": "Zbudowałem"' "$tmp/task-candidates.json" || { echo "check-in candidate missing Zbudowałem source"; exit 1; }
+grep -F -q '"tags": [' "$tmp/task-candidates.json" || { echo "check-in candidate missing tags"; exit 1; }
 grep -q '"5d/do"' "$tmp/task-candidates.json" || { echo "check-in candidate missing 5d/do"; exit 1; }
+grep -q '"workspace/task-candidate-workspace"' "$tmp/task-candidates.json" || { echo "check-in candidate missing workspace context"; exit 1; }
 grep -q '"due": "2026-06-22T23:59"' "$tmp/task-candidates.json" || { echo "check-in candidate missing end-of-day due"; exit 1; }
 grep -q '"project_state": "project-state/demo-project/"' "$tmp/task-candidates.json" || { echo "boundary project-state match failed"; exit 1; }
 grep -F -q '"[[Demo Project]]"' "$tmp/task-candidates.json" || { echo "frontmatter projects wiki link was not discovered"; exit 1; }
@@ -1646,6 +1661,7 @@ MD
 run_must_pass "task-candidates-dream-report-dry-run" "$task_candidate_script" --workspace "$task_candidate_workspace" --dream-report "$dream_task_report"
 "$task_candidate_script" --workspace "$task_candidate_workspace" --dream-report "$dream_task_report" --json > "$tmp/dream-task-candidates.json"
 grep -q '"source_type": "dream-report"' "$tmp/dream-task-candidates.json" || { echo "Dream Report candidate missing source type"; exit 1; }
+grep -F -q '"tags": [' "$tmp/dream-task-candidates.json" || { echo "Dream Report candidate missing tags"; exit 1; }
 grep -q '"5d/defer"' "$tmp/dream-task-candidates.json" || { echo "Dream Report candidate missing default 5d/defer"; exit 1; }
 
 blocked_link_report="$tmp/dream-task-blocked-link-report.md"

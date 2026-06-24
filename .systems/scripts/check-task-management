@@ -118,20 +118,38 @@ validate_task_file() {
     esac
   fi
 
-  if [[ "$strict" -eq 1 ]] && rg -q '^[[:space:]]*-[[:space:]]*"?5d/' "$file"; then
-    while IFS= read -r context; do
-      context="${context#*- }"
-      context="${context//\"/}"
-      context="${context//\'/}"
-      case "$context" in
+  if [[ "$strict" -eq 1 ]] && awk '
+    /^contexts:/ { in_contexts=1; next }
+    /^[A-Za-z0-9_-]+:/ { in_contexts=0 }
+    in_contexts && /^[[:space:]]*-[[:space:]]*"?5d\// { found=1 }
+    END { exit found ? 0 : 1 }
+  ' "$file"; then
+    echo "AI-created TaskNote uses 5D in contexts instead of tags: $rel"
+    fail=1
+  fi
+
+  if [[ "$strict" -eq 1 ]] && awk '
+    /^tags:/ { in_tags=1; next }
+    /^[A-Za-z0-9_-]+:/ { in_tags=0 }
+    in_tags && /^[[:space:]]*-[[:space:]]*"?5d\// { print }
+  ' "$file" | rg -q '5d/'; then
+    while IFS= read -r tag; do
+      tag="${tag#*- }"
+      tag="${tag//\"/}"
+      tag="${tag//\'/}"
+      case "$tag" in
         5d/do|5d/defer|5d/delegate|5d/delete|5d/dump)
           ;;
         *)
-          echo "AI-created TaskNote has invalid 5D context '$context': $rel"
+          echo "AI-created TaskNote has invalid 5D tag '$tag': $rel"
           fail=1
           ;;
       esac
-    done < <(rg '^[[:space:]]*-[[:space:]]*"?5d/' "$file")
+    done < <(awk '
+      /^tags:/ { in_tags=1; next }
+      /^[A-Za-z0-9_-]+:/ { in_tags=0 }
+      in_tags && /^[[:space:]]*-[[:space:]]*"?5d\// { print }
+    ' "$file")
   fi
 
   if rg -i -q '^title:.*(api[_ -]?key|secret|private key|password|token|\.env|raw client data|credential)' "$file"; then
@@ -178,8 +196,10 @@ for term in \
   'TaskNotes/Archive' \
   'TaskForge-Archive' \
   'YYYY-MM-DD-short-slug.md' \
-  '5D Task Contexts' \
-  'contexts: [5d/do]' \
+  '5D Task Tags' \
+  'tags: [5d/do]' \
+  'contexts: [client/<client-slug>]' \
+  'Tags contains 5d/<bucket>' \
   'Zbudowałem' \
   'Dowiozłem' \
   'Wypromowałem' \
@@ -204,6 +224,7 @@ for field in \
   'title:' \
   'status: open' \
   'priority: normal' \
+  'tags:' \
   'contexts:' \
   'projects:' \
   'owner_scope:' \
@@ -230,7 +251,7 @@ fi
 for candidate_term in \
   'This is a proposal artifact, not a TaskForge TaskNote' \
   'source_type: `<check-in|dream-report>`' \
-  'contexts: `<5d/do|5d/defer|5d/delegate|5d/delete|5d/dump>`' \
+  '5d_tag: `<5d/do|5d/defer|5d/delegate|5d/delete|5d/dump>`' \
   'decision: `<approve-write|revise|reject|defer>`'
 do
   require_ref ".systems/ai/templates/workspace/tasks/task-candidate.template.md" "$candidate_term" "candidate term $candidate_term"
@@ -254,8 +275,11 @@ for setup_term in \
   'allowed statuses' \
   'allowed priorities' \
   'title: `title`' \
+  'tags: `tags`' \
   'date created: `dateCreated`' \
   'complete instances: `complete_instances`' \
+  '`DO`: filter `Tags contains 5d/do`' \
+  'Do not use folders such as `DOs/` or `DEFERs/` as the primary 5D classification' \
   'exclude archive, raw, dump, private' \
   'Manual Verification'
 do
