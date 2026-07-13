@@ -256,6 +256,9 @@ for term in \
   'reads only frontmatter `projects:` wiki links' \
   'does not initialize TaskForge vault structure' \
   'Personal Ops V3 Initial Task Creation' \
+  'V3.1 eligibility is limited to professional WIG and must-do' \
+  'Optional items are suppressed by default' \
+  'no overload warning remains unacknowledged' \
   'source_session_date + source_plan_item_id' \
   'mechanical flag records the same approval' \
   'Task: create' \

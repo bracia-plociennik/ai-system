@@ -41,4 +41,4 @@ personal-ops/check-ins/import-profiles/manual-daily-check-in.md
 
 for native AI System daily check-ins.
 
-V3 uses one session report per day: current plan/morning state plus previous-day closure. It does not rewrite historical daily Markdown.
+V3.1 uses one session report per day: current plan/morning state plus previous-day closure. It does not rewrite historical daily Markdown. New reports use one WIG, up to two must-do items, derived overload/minimum state, and a `detailed-private` or `redacted` index policy.

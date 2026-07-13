@@ -102,7 +102,7 @@ for term in \
   'HH:MM' \
   'V2-only' \
   'check-ins.trends.md' \
-  'Detailed values for finances, budgets, calories, health' \
+  'For `detailed-private`, local `check-ins.csv`' \
   'source_session_date + source_plan_item_id' \
   'One exact `owner-approved` write' \
   'Interpreted Input' \
@@ -118,7 +118,18 @@ for term in \
   'actual_self_count' \
   'actual_close_people_count' \
   'reflection_plus_one' \
-  'reflection_redundant'
+  'reflection_redundant' \
+  'V3.1 Priorities, Minimum Day, And Overload' \
+  'WIG plan_item_id' \
+  'WIG definition of done' \
+  'must_do_plan_item_ids' \
+  'plan_readiness' \
+  'overload_status' \
+  'overload_acknowledged' \
+  'private_index_policy' \
+  'detailed-private' \
+  'redacted' \
+  'source_status: unverified'
 do
   require_ref ".systems/ai/core/personal-ops.md" "$term" "$term"
 done
@@ -149,7 +160,11 @@ for term in \
   'routine_completion_percent' \
   'actual_training_performed' \
   'actual_nsdr_performed' \
-  'reflection_plus_one'
+  'reflection_plus_one' \
+  'v3_priority_state' \
+  'v3_minimum_day_status' \
+  'private_index_policy' \
+  'redacted_v3_payload'
 do
   require_ref ".systems/scripts/sync-personal-ops-check-ins" "$term" "sync tool term $term"
 done
@@ -229,6 +244,12 @@ for section in \
   'Faktycznie zrobiłem coś dla bliskich' \
   'Task: <create|skip>' \
   'Task title:' \
+  '## Priorytety dnia' \
+  'WIG plan_item_id:' \
+  'WIG definition of done:' \
+  'Must-do plan_item_ids:' \
+  'Minimum dnia wyprowadzone:' \
+  'private_index_policy:' \
   '## Interpreted Input'
 do
   require_ref ".systems/ai/templates/workspace/personal-ops/check-in.template.md" "$section" "check-in section $section"
@@ -249,6 +270,7 @@ do
 done
 
 require_ref ".systems/ai/templates/workspace/personal-ops/check-in-settings.local.template.md" 'timezone:' "local check-in settings timezone"
+require_ref ".systems/ai/templates/workspace/personal-ops/check-in-settings.local.template.md" 'private_index_policy_default:' "local check-in settings privacy policy"
 require_ref ".systems/ai/templates/workspace/tasks/taskforge-vault.local.template.md" 'vault_path:' "local TaskForge vault path"
 require_ref ".systems/ai/templates/workspace/tasks/taskforge-vault.local.template.md" 'enabled:' "local TaskForge vault enabled flag"
 

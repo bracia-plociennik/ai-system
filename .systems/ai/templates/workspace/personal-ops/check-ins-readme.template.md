@@ -25,7 +25,7 @@ AI_SYSTEM_WORKSPACE_HOME/personal-ops/check-ins/import-profiles/
 ## Rules
 
 - One canonical Markdown V3 session report per day.
-- V3 ordered phases are: Metadane, Podsumowanie poprzedniego dnia, Plan dnia, Poranny check-in, Dodatkowe informacje, Załączniki, Kandydaci na taski, optional interpretation, Interpreted Input.
+- V3 ordered phases are: Metadane, Podsumowanie poprzedniego dnia, Plan dnia (including Priorytety dnia), Poranny check-in, Dodatkowe informacje, Załączniki, Kandydaci na taski, optional interpretation, Interpreted Input.
 - The report for day D holds D plan/morning state and D-1 closure. It does not rewrite the prior-day report and has no Seed kolejnego dnia.
 - Frontmatter stores structured fields.
 - Body sections store reflection text.
@@ -33,7 +33,7 @@ AI_SYSTEM_WORKSPACE_HOME/personal-ops/check-ins/import-profiles/
 - Empty source values stay empty; do not invent check-in values.
 - Raw Notion exports remain in `dump/incoming/external/notion/check-ins/` until owner-approved cleanup.
 - Index files in `personal-ops/indexes/` are derived artifacts. Markdown wins if they disagree.
-- V3 detailed indexes are private-sensitive. Dreaming Mode may use only sanitized `check-ins.trends.md`.
+- V3 detailed indexes are private-sensitive. `detailed-private` retains local details; `redacted` retains only safe presence flags. Dreaming Mode may use only sanitized `check-ins.trends.md`.
 
 ## Privacy
 

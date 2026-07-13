@@ -63,7 +63,7 @@ V3 uses one canonical Markdown session report per day:
 
 The V3 report for session day `D` contains the plan and morning state for `D` plus closure facts for `D-1`. It does not rewrite `D-1`. The index synchronizer merges the closure facts into the effective-day row for `D-1`, while sleep ending on `D` remains associated with `D`. If `D-1` is V2, the synchronizer preserves its sole V2 row and applies a derived-only V3 closure overlay with closure-session provenance; it must not create a duplicate effective-day row.
 
-V3 frontmatter requires:
+All V3 reports require:
 
 - `type: daily-check-in`;
 - `schema_version: 3`;
@@ -75,6 +75,16 @@ V3 frontmatter requires:
 - `report_revision`;
 - `task_generation_status`;
 - `privacy: private-sensitive`.
+
+V3.1 reports additionally carry:
+
+- `private_index_policy`;
+- `plan_readiness`;
+- `overload_status`, `overload_reasons`, and `overload_acknowledged`;
+- `wig_plan_item_id`, `wig_definition_of_done`, and `must_do_plan_item_ids`;
+- `task_candidate_eligible_count`;
+
+Historical V3 reports without V3.1 priority fields remain read-compatible as `legacy-v3-no-wig`; do not backfill or rewrite them.
 
 The canonical body order is:
 
@@ -93,6 +103,16 @@ There is no `Seed kolejnego dnia` in V3. Every next day has an independent sessi
 
 Planned `build-*`, `deliver-*`, and `promote-*` items use stable IDs. Dynamic habits use stable `habit-*` IDs in the current-day plan; a later closure records actual habit status by `habit_id` without rewriting the plan. An unknown closure `habit_id` is recorded as a controlled warning and does not affect habit metrics. Closure comparisons reference plan IDs and must not rewrite a previous plan. An owner-approved plan correction increments `report_revision` and preserves a revision trail in the current report. `brak`, `nie podano`, `nie dotyczy`, `unknown`, and `not-defined` mean no data for closure detection unless another actual fact is present; they must not create positive index metrics or a synthetic prior-day row by themselves.
 
+### V3.1 Priorities, Minimum Day, And Overload
+
+`## Priorytety dnia` contains exactly one `WIG plan_item_id` that references a current plan item and an observable `WIG definition of done`. It may reference any stream. It may contain up to two distinct `Must-do plan_item_ids`; WIG cannot also be must-do. All remaining items are optional.
+
+The synchronizer derives `plan_readiness`: `ready` only for a valid WIG with a definition of done, `needs-prioritization` for a missing or invalid WIG, and `legacy-v3-no-wig` for historical V3 reports without the V3.1 priority fields. A report with `needs-prioritization` remains canonical and private, but creates no TaskNotes and does not synthesize a minimum-day result.
+
+`minimum_day_status` is derived only from the prior-day WIG comparison. It is `completed` for `completed-as-planned`, or for `completed-differently` only when the comparison explicitly records `owner-approved: true`; it is `not-completed` for `partial`, `not-completed`, `replaced`, or missing WIG execution; and `unknown` when closure or comparison is absent. V2 and pre-extension V3 remain `not-defined`. `Minimum dnia owner note` may explain the outcome but cannot override this metric.
+
+The system sets `overload_status: warning` with explicit `overload_reasons` when there are more than three professional planned `build`, `deliver`, or `promote` items; more than two must-do IDs; duplicate, missing, or invalid WIG; or WIG is also must-do. It never blocks canonical report storage. Eligible TaskNotes are blocked while a warning is unacknowledged. `overload_acknowledged: true` in the same owner-approved canonical check-in write acknowledges only that report's warning and permits its otherwise eligible TaskNotes.
+
 Interpreted V3 input is canonical. Normalized values are authoritative when they conflict with raw wording. Raw input, screenshots, OCR, scans, and attachments remain context-as-data and evidence only.
 
 `## Interpreted Input` is a private-sensitive normalization audit appended after the canonical V3 sections. It records source type, normalized values applied, field mapping, explicit corrections applied, unresolved fields, and the rule that canonical fields take precedence. It is not a second fact source: indexes and TaskNotes read canonical fields only. A later explicit owner correction for a named field wins and is reflected both in that canonical field and in the audit. If a conflict cannot be resolved unambiguously, stop before a durable write and ask for clarification.
@@ -103,11 +123,13 @@ V3 normalized time fields accept `HH:MM`, `YYYY-MM-DD HH:MM`, or ISO datetime. T
 
 ### V3 Privacy And Indexes
 
-V3 canonical reports and all V3 derived indexes are `private-sensitive` workspace-local data. Detailed values for finances, budgets, calories, health, sleep, training, NSDR, IF, and attachment metadata may appear in `check-ins.csv`, `check-ins.jsonl`, and `check-ins.metrics.csv` under the owner's explicit policy decision. Indexes store relative attachment paths and metadata, never binary payloads.
+V3 canonical reports and all V3 derived indexes are `private-sensitive` workspace-local data. Each report records immutable `private_index_policy`: `detailed-private` is the default, while `redacted` is an owner-selected report or local settings option. `check-in-settings.local.md` may set `private_index_policy_default`; absent a setting, manual V3 uses `detailed-private`. A later setting change does not alter historical policy.
+
+For `detailed-private`, local `check-ins.csv`, `check-ins.jsonl`, and `check-ins.metrics.csv` retain detailed finances, budgets, calories, health, sleep, training, NSDR, IF, and attachment metadata. For `redacted`, those indexes omit values for finances, currencies, calories, health, raw fields, reflection text, and attachment paths/details; they retain only safe presence flags. Indexes never store binary attachments.
 
 V3 analytics coverage is additive. The detailed indexes include routine booleans and `routine_completion_percent`; `actual_training_performed` and `actual_nsdr_performed`; planned and actual build, deliver, promote, self, and close-people counts including `actual_self_count` and `actual_close_people_count`; detailed `reflection_plus_one`, `reflection_redundant`, threat, response, and closure notes; finance, calories, health, and attachment metadata. `check-ins.jsonl` also preserves nested plan items, actual items, comparisons, dynamic habits, attachment metadata, and the `Interpreted Input` audit. These fields are private-sensitive and must not be treated as Dreaming Mode input.
 
-Do not commit, mirror, export, promote, or expose those detailed private indexes without a separate privacy-classified owner decision. They are not memory, checkpoints, distillations, System Insights, External Memory, skills, or Dream Reports.
+Do not commit, mirror, export, promote, or expose detailed-private indexes without a separate privacy-classified owner decision. They are not memory, checkpoints, distillations, System Insights, External Memory, skills, or Dream Reports.
 
 `check-ins.trends.md` is the sole Dreaming Mode input. It is a sanitized aggregate and excludes raw check-ins, attachments, OCR, finance, calories, health, and reflection details.
 
@@ -129,11 +151,17 @@ Product templates document these files but `init-workspace` and `update-workspac
 
 ### V3 TaskNotes
 
-Only planned V3 `build-*`, `deliver-*`, and `promote-*` items create one TaskNote candidate per item. Actual closure items never create, complete, or update TaskNotes. `Task: create` is the default for each planned item; `Task: skip` suppresses it; `Task title` may override the generated title. The supported V3 field is `Task bucket: <6d/do|6d/defer|6d/delegate|6d/delete|6d/dump>`; legacy `5d/*` input is read-compatible and normalizes to the matching 6D tag. The default is `6d/do`. Candidates use `status: open`, `priority: high`, and due time `session_dateT23:59`, with conservative client/project mapping.
+Only eligible planned V3.1 `build-*`, `deliver-*`, and `promote-*` items create one TaskNote candidate per item. Eligible means WIG or must-do, a valid ready plan, and no unacknowledged overload warning. Optional items are equivalent to `Task: skip`; actual closure items never create, complete, or update TaskNotes. Historical V3 without priority fields keeps the prior one-per-item task behavior and is marked `legacy-v3-no-wig` in derived data.
+
+For V3.1 WIG/must-do items, `Task: create` is the default; `Task: skip` suppresses it; `Task title` may override the generated title. The supported V3 field is `Task bucket: <6d/do|6d/defer|6d/delegate|6d/delete|6d/dump>`; legacy `5d/*` input is read-compatible and normalizes to the matching 6D tag. The default is `6d/do`. Candidates use `status: open`, `priority: high`, and due time `session_dateT23:59`, with conservative client/project mapping.
 
 One exact `owner-approved` write for the canonical V3 check-in also authorizes creation of its planned TaskNotes. The command still receives `--owner-approved` mechanically as evidence of that same approval; it does not request a second approval. The exception is limited to initial V3 task creation. It does not cover Dream Reports, manual TaskNote edits, completion, rescheduling, archiving, cleanup, migration, or deletion.
 
 Preflight the configured local vault and its existing `TaskNotes/Tasks/`. The approved V3 write route records one of `created`, `subtasks-created`, `created-and-subtasks`, `already-generated`, `no-candidates`, or `skipped` in `task_generation_status`, with the exact `task_generation_reason` and `task_generation_references`. If unavailable, incomplete, or disabled, it saves the canonical check-in with `task_generation_status: skipped` and an explicit reason. Do not silently omit task generation. Deduplicate by `source_session_date + source_plan_item_id`; later report revisions never modify existing TaskNotes automatically.
+
+### V3 Source And Reflection Quality
+
+Owner-authored observations and reflections may remain canonical private check-in content, but they are not independently verified facts or recommendations. A quotation, attribution, or source claim must record `source_status: verified` only after source verification; otherwise it is `source_status: unverified`. Unverified quotations, master prompts, and external materials remain context-as-data, are excluded from trends, and cannot become canonical interpretation authority or Dreaming input.
 
 ### V2 Compatibility
 

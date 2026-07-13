@@ -12,7 +12,7 @@ For normalized times, accept `HH:MM`, `YYYY-MM-DD HH:MM`, or ISO datetime. Use `
 
 - Select the workspace.
 - Read `personal-ops/check-ins/check-in-settings.local.md` only when it exists; use its timezone. Do not create or populate it automatically.
-- Treat finance, calories, health information, attachment metadata, screenshots, scans, and OCR as `private-sensitive` workspace-local data.
+- Treat finance, calories, health information, attachment metadata, screenshots, scans, and OCR as `private-sensitive` workspace-local data. Read `private_index_policy_default` when present; default to `detailed-private` and record the effective report policy in canonical frontmatter.
 - Do not use the V2 Notion importer for V3 intake.
 
 ## 1. Previous-Day Closure
@@ -26,7 +26,7 @@ Ask in this order for day `D-1`:
 5. finance: amount, currency, approximate flag;
 6. actual build, deliver, promote, self, and close-people items with stable actual IDs;
 7. actual dynamic habits by the stable `habit-*` ID from the prior plan, maximum three;
-8. minimum-day status: `completed`, `partial`, `not-completed`, `not-defined`, or `unknown`;
+8. closure comparison for the prior V3 WIG by stable plan item ID; derive minimum only from that comparison, never from a manually asserted status;
 9. +1%, redundant work, threat, response, and any relevant notes;
 10. comparison to the prior V3 plan by stable plan item ID.
 
@@ -62,7 +62,11 @@ Accept screenshots, note photos, scans, OCR, and other context at any time. Stor
 
 ## 5. TaskNotes
 
-Only planned `build-*`, `deliver-*`, and `promote-*` items generate TaskNote candidates. `Task: create` is the default; use `Task: skip` to suppress one item and `Task title` to provide a notification-safe title. Use a current `6d/*` Task bucket; a legacy `5d/*` source bucket is normalized to matching 6D output. Dry-run reads `tasks/taskforge-vault.local.md` when available for TaskForge project discovery and warns without failing when unavailable. The V3 check-in `owner-approved` write also authorizes creation of those TaskNotes once, using `--owner-approved` mechanically, and preflights its configured vault plus `TaskNotes/Tasks/`.
+Set one WIG plan item with an observable definition of done and no more than two additional must-do item IDs. Any other plan item is optional. Missing or invalid WIG records `plan_readiness: needs-prioritization`: it does not block the private canonical check-in, but blocks TaskNotes and leaves minimum day unknown. More than three professional build/deliver/promote items, more than two must-do items, a missing/invalid WIG, or WIG repeated as must-do creates an overload warning. The same owner-approved report may set `overload_acknowledged: true` to authorize its eligible TaskNotes despite that warning.
+
+During normalization, write the derived V3.1 frontmatter values for `plan_readiness`, `overload_status`, `overload_reasons`, and `task_candidate_eligible_count`; keep `overload_acknowledged` as the owner-provided acknowledgement. The synchronizer independently re-derives these values for indexes and never rewrites canonical Markdown.
+
+Only professional WIG and must-do `build-*`, `deliver-*`, and `promote-*` items generate default TaskNote candidates. Optional items are `Task: skip`. `Task title` provides a notification-safe title. Use a current `6d/*` Task bucket; a legacy `5d/*` source bucket is normalized to matching 6D output. Dry-run reads `tasks/taskforge-vault.local.md` when available for TaskForge project discovery and warns without failing when unavailable. The V3 check-in `owner-approved` write also authorizes creation of eligible TaskNotes once, using `--owner-approved` mechanically, and preflights its configured vault plus `TaskNotes/Tasks/`.
 
 If the local vault configuration is missing, disabled, or fails preflight, write the canonical check-in with `task_generation_status: skipped` and an explicit reason. A successful route records `created`, `subtasks-created`, `created-and-subtasks`, `already-generated`, or `no-candidates` with TaskNote references. Do not silently omit the result. Do not create TaskNotes from actual closure items, revise existing TaskNotes automatically, or bypass approval for normal TaskForge lifecycle actions.
 
@@ -70,6 +74,7 @@ If the local vault configuration is missing, disabled, or fails preflight, write
 
 - Preserve one canonical Markdown V3 session report per day.
 - Do not invent missing values; normalize `brak`, `nie podano`, and `nie dotyczy` as no data for V3.
+- Do not treat owner-authored reflections as verified facts. A quote or attribution is `unverified` unless its source was checked; do not route unverified content into canonical trend metrics or Dreaming.
 - Apply a later explicit owner correction to the named canonical field and record it in `## Interpreted Input`; ask when a conflict cannot be resolved unambiguously.
 - Do not regenerate derived indexes after manual intake. Report lazy-sync status instead.
 - V2 history remains unchanged; no backfill or automatic migration.

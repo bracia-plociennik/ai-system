@@ -303,6 +303,66 @@ def v3_planned_items(section: str, stream: str) -> list[dict[str, str]]:
     return items
 
 
+def v3_priority_info(plan: str, plan_items: list[dict[str, str]], frontmatter: dict[str, str]) -> dict[str, object]:
+    """Mirror the V3.1 priority gate without changing canonical check-in content."""
+    section = v3_section(plan, "Priorytety dnia")
+    v31_fields = (
+        "wig_plan_item_id", "wig_definition_of_done", "must_do_plan_item_ids",
+        "overload_acknowledged", "plan_readiness", "overload_status",
+    )
+    is_v31 = bool(section.strip()) or any(str(frontmatter.get(field, "")).strip() for field in v31_fields)
+    if not is_v31:
+        return {"is_v31": False, "eligible_ids": None, "reason": ""}
+
+    def values(label: str, field: str) -> list[str]:
+        matches = re.findall(rf"^\s*[-*]\s+{re.escape(label)}:\s*(.*?)\s*$", section, re.MULTILINE | re.IGNORECASE)
+        if matches:
+            return [match.strip() for match in matches]
+        return [str(frontmatter.get(field, "")).strip()]
+
+    wig_values = values("WIG plan_item_id", "wig_plan_item_id")
+    definition_values = values("WIG definition of done", "wig_definition_of_done")
+    must_values = values("Must-do plan_item_ids", "must_do_plan_item_ids")
+    acknowledged_values = values("Overload acknowledged", "overload_acknowledged")
+    wig = wig_values[0] if len(wig_values) == 1 else ""
+    definition = definition_values[0] if len(definition_values) == 1 else ""
+    must_do = [
+        value.strip()
+        for raw in must_values
+        for value in re.split(r"[,;]", raw)
+        if value.strip()
+    ]
+    acknowledged = (acknowledged_values[0] if acknowledged_values else "").lower() in {"true", "yes"}
+    item_ids = {item["id"] for item in plan_items}
+    professional_ids = {item["id"] for item in plan_items if item["stream"] in {"build", "deliver", "promote"}}
+    reasons: list[str] = []
+    if len(wig_values) > 1:
+        reasons.append("duplicate-wig")
+    elif not wig:
+        reasons.append("missing-wig")
+    elif wig not in item_ids:
+        reasons.append("invalid-wig")
+    if not definition:
+        reasons.append("missing-wig-definition-of-done")
+    if len(must_do) > 2:
+        reasons.append("too-many-must-do")
+    if len(set(must_do)) != len(must_do):
+        reasons.append("duplicate-must-do")
+    if any(item_id not in item_ids for item_id in must_do):
+        reasons.append("invalid-must-do")
+    if wig and wig in must_do:
+        reasons.append("wig-also-must-do")
+    if len(professional_ids) > 3:
+        reasons.append("too-many-professional-items")
+    ready = bool(wig and wig in item_ids and definition)
+    if not ready:
+        return {"is_v31": True, "eligible_ids": set(), "reason": "V3.1 plan requires WIG prioritization"}
+    if reasons and not acknowledged:
+        return {"is_v31": True, "eligible_ids": set(), "reason": "V3.1 overload warning is not acknowledged"}
+    eligible_ids = {item_id for item_id in [wig, *must_do] if item_id in professional_ids}
+    return {"is_v31": True, "eligible_ids": eligible_ids, "reason": ""}
+
+
 def candidates_from_v3_check_in(path: Path, workspace: Path, labels: dict[str, list[tuple[str, str]]], text: str, fm: dict[str, str]) -> list[dict[str, object]]:
     check_date = fm.get("session_date") or fm.get("date") or path.stem
     try:
@@ -311,9 +371,19 @@ def candidates_from_v3_check_in(path: Path, workspace: Path, labels: dict[str, l
         raise SystemExit(f"V3 session_date is missing or invalid for {path}") from exc
     plan = v3_section(text, "Plan dnia")
     fields = [("Planuję zbudować", "build"), ("Planuję dowieźć", "deliver"), ("Planuję wypromować", "promote")]
+    all_fields = [*fields, ("Planuję zrobić coś dla siebie", "self"), ("Planuję zrobić coś dla bliskich", "close")]
+    parsed_items = [
+        item
+        for heading, stream in all_fields
+        for item in v3_planned_items(v3_section(plan, heading), stream)
+    ]
+    priority = v3_priority_info(plan, parsed_items, fm)
+    eligible_ids = priority["eligible_ids"]
     candidates: list[dict[str, object]] = []
     for heading, stream in fields:
         for item in v3_planned_items(v3_section(plan, heading), stream):
+            if eligible_ids is not None and item["id"] not in eligible_ids:
+                continue
             if item["task_policy"] not in {"create", "skip"}:
                 raise SystemExit(f"Unsupported V3 Task policy for {item['id']}: {item['task_policy']}")
             if item["task_policy"] == "skip":
@@ -626,6 +696,22 @@ def task_preflight(args: argparse.Namespace, config_path: Path) -> tuple[Path | 
         return None, str(exc)
 
 
+def v3_task_generation_gate(path: Path) -> str:
+    text = read_text(path)
+    frontmatter = parse_frontmatter(text)
+    if frontmatter.get("schema_version") != "3":
+        return ""
+    plan = v3_section(text, "Plan dnia")
+    fields = [("Planuję zbudować", "build"), ("Planuję dowieźć", "deliver"), ("Planuję wypromować", "promote")]
+    all_fields = [*fields, ("Planuję zrobić coś dla siebie", "self"), ("Planuję zrobić coś dla bliskich", "close")]
+    items = [
+        item
+        for heading, stream in all_fields
+        for item in v3_planned_items(v3_section(plan, heading), stream)
+    ]
+    return str(v3_priority_info(plan, items, frontmatter).get("reason", ""))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     source = parser.add_mutually_exclusive_group(required=True)
@@ -645,8 +731,17 @@ def main() -> int:
     if args.write and not args.owner_approved:
         raise SystemExit("--write requires --owner-approved")
     is_v3_check_in = False
+    task_generation_gate = ""
     if args.check_in:
         is_v3_check_in = parse_frontmatter(read_text(args.check_in.resolve())).get("schema_version") == "3"
+        if is_v3_check_in:
+            task_generation_gate = v3_task_generation_gate(args.check_in.resolve())
+    if task_generation_gate:
+        if args.write:
+            update_v3_task_generation_status(args.check_in.resolve(), "skipped", task_generation_gate, [], None)
+            print(f"Task generation skipped: {task_generation_gate}")
+            return 0
+        print(f"Task generation unavailable: {task_generation_gate}", file=sys.stderr)
     if args.write:
         task_vault, preflight_reason = task_preflight(args, config_path)
         if preflight_reason:

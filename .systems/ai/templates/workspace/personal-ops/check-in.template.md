@@ -11,6 +11,15 @@ report_revision: 1
 task_generation_status: pending
 task_generation_reason:
 task_generation_references:
+private_index_policy: detailed-private
+plan_readiness: needs-prioritization
+overload_status: none
+overload_reasons:
+overload_acknowledged: false
+wig_plan_item_id:
+wig_definition_of_done:
+must_do_plan_item_ids:
+task_candidate_eligible_count: 0
 privacy: private-sensitive
 ---
 
@@ -102,11 +111,13 @@ Normalized time fields accept `<HH:MM>`, `<YYYY-MM-DD HH:MM>`, or an ISO datetim
 - plan_item_id:
   - status: <completed-as-planned|partial|not-completed|completed-differently|replaced|consciously-replanned|unknown|not-applicable>
   - actual_item_ids:
+  - owner-approved: <true|false; required for completed-differently>
   - note:
 
 ### Minimum i refleksja
 
-- Minimum dnia: <completed|partial|not-completed|not-defined|unknown>
+- Minimum dnia wyprowadzone: <completed|not-completed|unknown|not-defined; derived only from WIG comparison>
+- Minimum dnia owner note: <optional explanation; does not override the derived value>
 - Co realnie dało +1%:
 - Co było zbędne:
 - Zagrożenie dnia wystąpiło:
@@ -174,6 +185,16 @@ Normalized time fields accept `<HH:MM>`, `<YYYY-MM-DD HH:MM>`, or an ISO datetim
 
 - [close-01] <planned item title>
 
+### Priorytety dnia
+
+- WIG plan_item_id: <existing plan item ID>
+- WIG definition of done: <observable completion condition>
+- Must-do plan_item_ids: <comma-separated existing plan item IDs; maximum two; do not repeat WIG>
+- Overload acknowledged: <true|false; owner-approved acknowledgement only>
+- Priority owner note:
+
+Items not named by WIG or Must-do are optional. WIG may be from any plan stream. Only professional WIG or must-do items from build, deliver, and promote are eligible for default TaskNotes.
+
 ### Planowane nawyki
 
 - Habit ID: <habit-01>
@@ -204,7 +225,9 @@ Normalized time fields accept `<HH:MM>`, `<YYYY-MM-DD HH:MM>`, or an ISO datetim
 
 - Uwagi:
 - Uwagi interpretacyjne:
-- Cytat/źródło: <unverified unless source is checked>
+- Owner-authored reflection:
+- Cytat/źródło:
+  - source_status: <verified|unverified>
 
 ## Załączniki
 

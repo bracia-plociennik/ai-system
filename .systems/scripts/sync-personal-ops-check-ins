@@ -99,6 +99,15 @@ V3_INDEX_COLUMNS = [
     "normalization_authority",
     "report_revision",
     "task_generation_status",
+    "private_index_policy",
+    "plan_readiness",
+    "overload_status",
+    "overload_reasons",
+    "overload_acknowledged",
+    "wig_plan_item_id",
+    "wig_definition_of_done",
+    "must_do_plan_item_ids",
+    "task_candidate_eligible_count",
     "source_type",
     "source_label",
     "privacy_class",
@@ -108,6 +117,10 @@ V3_INDEX_COLUMNS = [
     "work_mode",
     "organism_mode",
     "minimum_day_status",
+    "private_finance_present",
+    "private_calories_present",
+    "private_health_present",
+    "private_attachment_present",
     "planned_training_start",
     "planned_training_end",
     "planned_training_type",
@@ -203,6 +216,10 @@ V3_METRICS_COLUMNS = [
     "work_mode",
     "organism_mode",
     "minimum_day_status",
+    "private_index_policy",
+    "plan_readiness",
+    "overload_status",
+    "task_candidate_eligible_count",
     "actual_training_performed",
     "actual_nsdr_performed",
     "sleep_raw",
@@ -250,6 +267,27 @@ V3_METRICS_COLUMNS = [
     "dynamic_habit_not_completed_count",
     "dynamic_habit_unknown_count",
 ]
+
+REDACTED_V3_FIELDS = {
+    "body_subjective", "energy_subjective", "mental_subjective", "limitations_subjective",
+    "sleep_start", "sleep_end", "sleep_hours", "if_start", "if_end", "if_hours",
+    "training_start", "training_end", "training_minutes", "nsdr_start", "nsdr_end", "nsdr_minutes",
+    "planned_training_start", "planned_training_end", "planned_training_type", "planned_training_minutes",
+    "actual_training_start", "actual_training_end", "actual_training_type", "actual_training_performed",
+    "actual_training_minutes", "actual_training_rpe", "planned_nsdr_start", "planned_nsdr_end",
+    "planned_nsdr_minutes", "actual_nsdr_start", "actual_nsdr_end", "actual_nsdr_minutes",
+    "actual_nsdr_effect", "actual_nsdr_performed", "planned_if_start", "planned_if_end",
+    "planned_if_minutes", "actual_if_start", "actual_if_end", "actual_if_minutes",
+    "planned_calories_min", "planned_calories_max", "planned_calories_representative",
+    "actual_calories_min", "actual_calories_max", "actual_calories_representative",
+    "planned_budget_max", "planned_budget_currency", "finance_amount", "finance_currency",
+    "finance_approximate", "sleep_quality_score", "sleep_awakenings", "sleep_approximate",
+    "mental_clarity_score", "body_readiness_score", "health_notes", "sleep_raw",
+    "planned_training_raw", "actual_training_raw", "planned_nsdr_raw", "actual_nsdr_raw",
+    "planned_if_raw", "actual_if_raw", "planned_budget_raw", "finance_raw",
+    "reflection_plus_one", "reflection_redundant", "reflection_threat", "reflection_response",
+    "closure_notes", "attachment_paths_json", "interpreted_input", "v3_closure_session_path",
+}
 
 PLAN_FIELDS = [
     "Data",
@@ -647,10 +685,114 @@ def v3_comparisons(section: str) -> list[dict[str, str]]:
                 "plan_item_id": normalize_missing(plan_item_id),
                 "status": v3_scalar(rest, "status", "Status"),
                 "actual_item_ids": v3_scalar(rest, "actual_item_ids", "Actual item IDs"),
+                "owner_approved": bool_text(v3_scalar(rest, "owner-approved", "Owner approved")),
                 "note": v3_scalar(rest, "note", "Uwagi"),
             }
         )
     return [comparison for comparison in comparisons if comparison["plan_item_id"]]
+
+
+def v3_priority_state(plan: str, plan_items: list[dict[str, str]], frontmatter: dict[str, str]) -> dict[str, object]:
+    """Derive V3.1 priorities from canonical plan content without rewriting it."""
+    section = v3_section(plan, "Priorytety dnia")
+    fields = (
+        "wig_plan_item_id", "wig_definition_of_done", "must_do_plan_item_ids",
+        "overload_acknowledged", "plan_readiness", "overload_status",
+    )
+    is_v31 = bool(section.strip()) or any(str(frontmatter.get(field, "")).strip() for field in fields)
+    if not is_v31:
+        return {
+            "is_v31": False,
+            "plan_readiness": "legacy-v3-no-wig",
+            "overload_status": "none",
+            "overload_reasons": [],
+            "overload_acknowledged": "false",
+            "wig_plan_item_id": "",
+            "wig_definition_of_done": "",
+            "must_do_plan_item_ids": [],
+            "task_candidate_eligible_count": 0,
+            "eligible_plan_item_ids": [],
+        }
+
+    def values(label: str, field: str) -> list[str]:
+        matches = re.findall(rf"^\s*[-*]\s+{re.escape(label)}:\s*(.*?)\s*$", section, re.MULTILINE | re.IGNORECASE)
+        if matches:
+            return [normalize_missing(match) for match in matches]
+        return [normalize_missing(str(frontmatter.get(field, "")))]
+
+    wig_values = values("WIG plan_item_id", "wig_plan_item_id")
+    definition_values = values("WIG definition of done", "wig_definition_of_done")
+    must_values = values("Must-do plan_item_ids", "must_do_plan_item_ids")
+    acknowledged_values = values("Overload acknowledged", "overload_acknowledged")
+    wig = wig_values[0] if len(wig_values) == 1 else ""
+    definition = definition_values[0] if len(definition_values) == 1 else ""
+    must_do = [
+        value.strip()
+        for raw in must_values
+        for value in re.split(r"[,;]", raw)
+        if value.strip()
+    ]
+    acknowledged = bool_text(acknowledged_values[0] if acknowledged_values else "")
+    item_ids = {str(item.get("id", "")) for item in plan_items}
+    professional_ids = {
+        str(item.get("id", "")) for item in plan_items
+        if item.get("stream") in {"build", "deliver", "promote"}
+    }
+    reasons: list[str] = []
+    if len(wig_values) > 1:
+        reasons.append("duplicate-wig")
+    elif not wig:
+        reasons.append("missing-wig")
+    elif wig not in item_ids:
+        reasons.append("invalid-wig")
+    if not definition:
+        reasons.append("missing-wig-definition-of-done")
+    if len(must_do) > 2:
+        reasons.append("too-many-must-do")
+    if len(set(must_do)) != len(must_do):
+        reasons.append("duplicate-must-do")
+    if any(item_id not in item_ids for item_id in must_do):
+        reasons.append("invalid-must-do")
+    if wig and wig in must_do:
+        reasons.append("wig-also-must-do")
+    if len(professional_ids) > 3:
+        reasons.append("too-many-professional-items")
+
+    ready = bool(wig and wig in item_ids and definition)
+    priority_ids = [item_id for item_id in [wig, *must_do] if item_id in professional_ids]
+    eligible_ids = list(dict.fromkeys(priority_ids)) if ready else []
+    overload_status = "warning" if reasons else "none"
+    return {
+        "is_v31": True,
+        "plan_readiness": "ready" if ready else "needs-prioritization",
+        "overload_status": overload_status,
+        "overload_reasons": reasons,
+        "overload_acknowledged": acknowledged,
+        "wig_plan_item_id": wig,
+        "wig_definition_of_done": definition,
+        "must_do_plan_item_ids": must_do,
+        "task_candidate_eligible_count": len(eligible_ids) if not (overload_status == "warning" and acknowledged != "true") else 0,
+        "eligible_plan_item_ids": eligible_ids,
+    }
+
+
+def v3_minimum_day_status(priorities: dict[str, object], comparisons: list[dict[str, str]], has_closure: bool) -> str:
+    if priorities.get("plan_readiness") == "legacy-v3-no-wig":
+        return "not-defined"
+    if priorities.get("plan_readiness") != "ready" or not has_closure:
+        return "unknown"
+    wig = str(priorities.get("wig_plan_item_id", ""))
+    comparison = next((item for item in comparisons if item.get("plan_item_id") == wig), None)
+    if not comparison:
+        return "unknown"
+    status = comparison.get("status", "")
+    if status == "completed-as-planned":
+        return "completed"
+    if status == "completed-differently":
+        return "completed" if comparison.get("owner_approved") == "true" else "unknown"
+    if status in {"partial", "not-completed", "replaced"}:
+        return "not-completed"
+    return "unknown"
 
 
 def parse_v3_datetime(value: str, date_hint: str, field: str) -> tuple[datetime | None, bool]:
@@ -712,6 +854,11 @@ def build_v3_session(workspace: Path, markdown_path: Path) -> dict:
         raise ValueError(f"Malformed V3 session_date in {markdown_path}: {session_date!r}")
     if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", previous_day_date):
         raise ValueError(f"Malformed V3 previous_day_date in {markdown_path}: {previous_day_date!r}")
+    private_index_policy = str(frontmatter.get("private_index_policy", "") or "detailed-private").strip()
+    if private_index_policy not in {"detailed-private", "redacted"}:
+        raise ValueError(
+            f"Unsupported V3 private_index_policy in {markdown_path}: {private_index_policy!r}"
+        )
 
     metadata = v3_section(body, "Metadane")
     plan = v3_section(body, "Plan dnia")
@@ -739,6 +886,7 @@ def build_v3_session(workspace: Path, markdown_path: Path) -> dict:
         + v3_items(v3_section(closure, "Faktycznie zrobiłem coś dla siebie"), "self")
         + v3_items(v3_section(closure, "Faktycznie zrobiłem coś dla bliskich"), "close")
     )
+    priorities = v3_priority_state(plan, plan_items, frontmatter)
     comparison_section = v3_section(closure, "Porównanie plan-fakt")
     dynamic_habits = v3_dynamic_habits(v3_section(plan, "Planowane nawyki"))
     actual_dynamic_habits = v3_actual_dynamic_habits(v3_section(closure, "Faktyczne nawyki"))
@@ -754,7 +902,6 @@ def build_v3_session(workspace: Path, markdown_path: Path) -> dict:
         "source_label": v3_scalar(metadata, "Źródło"),
         "work_mode": v3_scalar(plan, "Tryb pracy", "Work mode"),
         "organism_mode": v3_scalar(plan, "Tryb organizmu", "Organism mode"),
-        "minimum_day_status": v3_scalar(closure, "Minimum dnia", "minimum_day_status"),
         "sleep_start": v3_scalar(closure, "Początek snu", "Sleep start"),
         "sleep_end": v3_scalar(closure, "Koniec snu", "Sleep end"),
         "sleep_quality_score": v3_scalar(closure, "Jakość snu", "Sleep quality"),
@@ -902,6 +1049,8 @@ def build_v3_session(workspace: Path, markdown_path: Path) -> dict:
         "previous_day_date": previous_day_date,
         "file_path": file_path,
         "frontmatter": frontmatter,
+        "private_index_policy": private_index_policy,
+        "priorities": priorities,
         "plan_items": plan_items,
         "actual_items": actual_items,
         "comparisons": v3_comparisons(comparison_section),
@@ -921,7 +1070,8 @@ def empty_v3_payload() -> dict:
         "actual_items": [], "comparisons": [], "dynamic_habits": [],
         "actual_dynamic_habits": [], "dynamic_habit_warnings": [], "attachments": [],
         "closure_session_path": "", "closure_session_date": "", "time_raw_values": {},
-        "interpreted_input": "", "closure_interpreted_input": "",
+        "interpreted_input": "", "closure_interpreted_input": "", "private_index_policy": "detailed-private",
+        "priorities": {"plan_readiness": "needs-prioritization", "overload_status": "none", "overload_reasons": []},
     }
 
 
@@ -945,6 +1095,9 @@ def apply_v3_closure(target: dict, session: dict) -> None:
         for key, value in session["time_raw_values"].items()
         if key.startswith("actual_")
     }
+    payload["closure_values"]["minimum_day_status"] = v3_minimum_day_status(
+        payload.get("priorities", {}), session["comparisons"], True
+    )
 
 
 def merge_v3_sessions(sessions: list[dict], v2_records: list[dict]) -> list[dict]:
@@ -974,6 +1127,8 @@ def merge_v3_sessions(sessions: list[dict], v2_records: list[dict]) -> list[dict
             "attachments": session["attachments"],
             "time_raw_values": session["time_raw_values"],
             "interpreted_input": session.get("interpreted_input", ""),
+            "private_index_policy": session["private_index_policy"],
+            "priorities": session["priorities"],
         })
         record["attachments"] = session["attachments"]
 
@@ -997,6 +1152,8 @@ def merge_v3_sessions(sessions: list[dict], v2_records: list[dict]) -> list[dict
                 "comparisons": session["comparisons"],
                 "actual_dynamic_habits": session["actual_dynamic_habits"],
                 "closure_values": session["closure_values"],
+                "priorities": {"plan_readiness": "legacy-v3-no-wig"},
+                "private_index_policy": session["private_index_policy"],
                 "interpreted_input": session.get("interpreted_input", ""),
                 "closure_session_path": session["file_path"],
                 "closure_session_date": session["session_date"],
@@ -1006,6 +1163,7 @@ def merge_v3_sessions(sessions: list[dict], v2_records: list[dict]) -> list[dict
                     if key.startswith("actual_")
                 },
             }
+            v2_target["v3_closure"]["closure_values"]["minimum_day_status"] = "not-defined"
             continue
         target = daily.setdefault(
             session["previous_day_date"],
@@ -1077,8 +1235,9 @@ def v2_v3_closure_row(record: dict) -> dict[str, str]:
     closure = record["v3_closure"]
     values = closure.get("closure_values", {})
     actual_items = closure.get("actual_items", [])
-    return {
+    row = {
         "schema_version": "2",
+        "private_index_policy": str(closure.get("private_index_policy", "detailed-private")),
         "minimum_day_status": str(values.get("minimum_day_status", "")),
         "actual_training_start": str(values.get("actual_training_start", "")),
         "actual_training_end": str(values.get("actual_training_end", "")),
@@ -1120,6 +1279,18 @@ def v2_v3_closure_row(record: dict) -> dict[str, str]:
         "v3_closure_session_date": str(closure.get("closure_session_date", "")),
         "v3_closure_session_path": str(closure.get("closure_session_path", "")),
     }
+    if row["private_index_policy"] == "redacted":
+        for field in (
+            "actual_training_start", "actual_training_end", "actual_training_type", "actual_training_performed",
+            "actual_training_minutes", "actual_training_rpe", "actual_training_raw", "actual_nsdr_start",
+            "actual_nsdr_end", "actual_nsdr_minutes", "actual_nsdr_effect", "actual_nsdr_performed",
+            "actual_nsdr_raw", "actual_if_start", "actual_if_end", "actual_if_minutes", "actual_if_raw",
+            "actual_calories_min", "actual_calories_max", "actual_calories_representative", "finance_amount",
+            "finance_currency", "finance_approximate", "finance_raw", "reflection_plus_one", "reflection_redundant",
+            "reflection_threat", "reflection_response", "closure_notes", "interpreted_input", "v3_closure_session_path",
+        ):
+            row[field] = ""
+    return row
 
 
 def metrics_row(record: dict) -> dict[str, str]:
@@ -1150,7 +1321,22 @@ def v3_csv_row(record: dict) -> dict[str, str]:
     actual_items = payload.get("actual_items", [])
     dynamic_habits = merged_dynamic_habits(payload)
     attachments = payload.get("attachments", record.get("attachments", []))
+    priorities = dict(payload.get("priorities", {}))
+    private_policy = str(payload.get("private_index_policy", "") or frontmatter.get("private_index_policy", "") or "detailed-private")
     minimum = combined.get("minimum_day_status", "")
+    finance_present = any(combined.get(key, "") for key in (
+        "finance_amount", "finance_currency", "finance_raw", "planned_budget_max", "planned_budget_currency", "planned_budget_raw",
+    ))
+    calories_present = any(combined.get(key, "") for key in (
+        "planned_calories_min", "planned_calories_max", "planned_calories_representative",
+        "actual_calories_min", "actual_calories_max", "actual_calories_representative",
+    ))
+    health_present = any(combined.get(key, "") for key in (
+        "sleep_start", "sleep_end", "sleep_quality_score", "sleep_awakenings", "health_notes",
+        "mental_clarity_score", "body_readiness_score", "actual_training_performed", "actual_nsdr_performed",
+        "planned_training_start", "actual_training_start", "planned_nsdr_start", "actual_nsdr_start",
+        "planned_if_start", "actual_if_start",
+    ))
     row = {column: "" for column in REQUIRED_INDEX_COLUMNS + V3_INDEX_COLUMNS}
     row.update(
         {
@@ -1196,6 +1382,15 @@ def v3_csv_row(record: dict) -> dict[str, str]:
             "normalization_authority": str(frontmatter.get("normalization_authority", "")),
             "report_revision": str(frontmatter.get("report_revision", "")),
             "task_generation_status": str(frontmatter.get("task_generation_status", "")),
+            "private_index_policy": private_policy,
+            "plan_readiness": str(priorities.get("plan_readiness", "legacy-v3-no-wig")),
+            "overload_status": str(priorities.get("overload_status", "none")),
+            "overload_reasons": ", ".join(str(value) for value in priorities.get("overload_reasons", [])),
+            "overload_acknowledged": str(priorities.get("overload_acknowledged", "false")),
+            "wig_plan_item_id": str(priorities.get("wig_plan_item_id", "")),
+            "wig_definition_of_done": str(priorities.get("wig_definition_of_done", "")),
+            "must_do_plan_item_ids": ", ".join(str(value) for value in priorities.get("must_do_plan_item_ids", [])),
+            "task_candidate_eligible_count": str(priorities.get("task_candidate_eligible_count", 0)),
             "source_type": str(frontmatter.get("source_type", "")),
             "privacy_class": str(frontmatter.get("privacy", "")),
             "weekday": combined.get("weekday", ""),
@@ -1204,6 +1399,10 @@ def v3_csv_row(record: dict) -> dict[str, str]:
             "work_mode": combined.get("work_mode", ""),
             "organism_mode": combined.get("organism_mode", ""),
             "minimum_day_status": minimum,
+            "private_finance_present": str(finance_present).lower(),
+            "private_calories_present": str(calories_present).lower(),
+            "private_health_present": str(health_present).lower(),
+            "private_attachment_present": str(bool(attachments)).lower(),
             "planned_item_count": str(len(plan_items)),
             "actual_item_count": str(len(actual_items)),
             "comparison_count": str(len(payload.get("comparisons", []))),
@@ -1229,7 +1428,49 @@ def v3_csv_row(record: dict) -> dict[str, str]:
     for key in V3_INDEX_COLUMNS:
         if key in combined and combined[key] != "":
             row[key] = str(combined[key])
+    if private_policy == "redacted":
+        for field in REDACTED_V3_FIELDS:
+            row[field] = ""
     return row
+
+
+def redacted_v3_payload(record: dict) -> dict:
+    """Return a JSONL-safe V3 projection without private detail values or attachment metadata."""
+    payload = json.loads(json.dumps(record.get("v3", {}), ensure_ascii=False))
+    for mapping_name in ("values", "closure_values"):
+        values = payload.get(mapping_name, {})
+        for key in list(values):
+            if key in REDACTED_V3_FIELDS or key in {
+                "gratitude", "sleep_start", "sleep_end", "sleep_quality_score", "sleep_awakenings",
+                "health_notes", "planned_training_start", "planned_training_end", "actual_training_start",
+                "actual_training_end", "planned_nsdr_start", "planned_nsdr_end", "actual_nsdr_start",
+                "actual_nsdr_end", "planned_if_start", "planned_if_end", "actual_if_start", "actual_if_end",
+            }:
+                values.pop(key, None)
+    payload["attachments"] = []
+    payload["attachment_count"] = len(record.get("attachments", []))
+    payload["interpreted_input"] = ""
+    payload["closure_interpreted_input"] = ""
+    payload["time_raw_values"] = {}
+    payload["closure_time_raw_values"] = {}
+    payload["redaction"] = "private_index_policy:redacted"
+    return payload
+
+
+def redacted_v3_closure(closure: dict) -> dict:
+    projected = json.loads(json.dumps(closure, ensure_ascii=False))
+    for mapping_name in ("closure_values",):
+        values = projected.get(mapping_name, {})
+        for key in list(values):
+            if key in REDACTED_V3_FIELDS or key in {
+                "finance_amount", "finance_currency", "finance_raw", "actual_calories_min",
+                "actual_calories_max", "actual_calories_representative", "health_notes",
+            }:
+                values.pop(key, None)
+    projected["interpreted_input"] = ""
+    projected["time_raw_values"] = {}
+    projected["redaction"] = "private_index_policy:redacted"
+    return projected
 
 
 def render_field_dictionary() -> str:
@@ -1418,9 +1659,19 @@ def write_indexes(records: list[dict], workspace: Path, source: str, dry_run: bo
             }
             if record.get("schema_version") == "3":
                 payload["schema_version"] = "3"
-                payload["v3"] = record.get("v3", {})
+                v3 = record.get("v3", {})
+                if v3.get("private_index_policy", "detailed-private") == "redacted":
+                    payload["v3"] = redacted_v3_payload(record)
+                    payload["attachments"] = []
+                else:
+                    payload["v3"] = v3
             if record.get("v3_closure"):
-                payload["v3_closure"] = record["v3_closure"]
+                closure = record["v3_closure"]
+                payload["v3_closure"] = (
+                    redacted_v3_closure(closure)
+                    if closure.get("private_index_policy", "detailed-private") == "redacted"
+                    else closure
+                )
             handle.write(json.dumps(payload, ensure_ascii=False, sort_keys=True) + "\n")
         temp_jsonl = Path(handle.name)
 

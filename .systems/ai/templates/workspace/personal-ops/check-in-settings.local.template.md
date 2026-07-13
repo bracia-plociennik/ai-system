@@ -5,7 +5,10 @@ This is a copyable local-only configuration shape. Do not create a populated con
 ```yaml
 ---
 timezone: Europe/Warsaw
+private_index_policy_default: detailed-private
 ---
 ```
 
-Store an owner-approved populated copy only at `personal-ops/check-ins/check-in-settings.local.md`. It supplies the timezone for manual V3 intake and contains no credentials.
+Store an owner-approved populated copy only at `personal-ops/check-ins/check-in-settings.local.md`. It supplies timezone and the default V3 index policy for manual intake, and contains no credentials.
+
+`private_index_policy_default` accepts `detailed-private` or `redacted`. Each canonical V3 report records its effective `private_index_policy`; a later settings change does not rewrite historical index policy.
