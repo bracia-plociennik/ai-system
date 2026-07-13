@@ -112,7 +112,9 @@ validate_task_file() {
     return 0
   fi
 
-  if rg -q '^type:[[:space:]]*task[[:space:]]*$|^source_system:[[:space:]]*ai-system[[:space:]]*$' "$file"; then
+  # TaskForge itself can create `type: task` files. Only the AI System marker
+  # opts a TaskNote into the stricter AI-created schema and 5D/6D checks.
+  if rg -q '^source_system:[[:space:]]*ai-system[[:space:]]*$' "$file"; then
     strict=1
   fi
 

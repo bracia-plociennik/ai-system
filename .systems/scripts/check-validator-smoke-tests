@@ -1786,6 +1786,7 @@ run_must_fail "task-management-invalid-priority" "$task_management_validator" --
 
 cat > "$task_fixture_dir/taskforge-compatibility.md" <<'MD'
 ---
+type: task
 status: planned
 priority: none
 dateCreated: "2026-06-21T13:22:47.054131+02:00"
