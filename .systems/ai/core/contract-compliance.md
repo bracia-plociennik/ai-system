@@ -10,6 +10,8 @@ It exists to make knowledge capture explicit before work closure without creatin
 
 This gate is advisory-only. It does not replace `AGENTS.md`, privacy rules, workspace selection, owner-approved write gates, validation, required evidence, stop conditions, or final owner acceptance.
 
+Select validation evidence through `.systems/ai/core/validation-profiles.md`: `fast` and `scoped` remain iteration-only, `standard` applies to ordinary closure, and `full` remains required when the work reaches a full-required gate. Profile selection does not weaken this gate or make skipped smoke tests PASS.
+
 The gate requires a decision. It does not grant permission to write. Durable writes still require the correct target, privacy-safe content, and explicit owner-approved scope unless a stricter checkpoint or final-check route already authorizes that exact capture.
 
 End-of-Task Capture from `.systems/ai/core/end-of-task-capture.md` can precede work closure when the owner says the task is done and asks to preserve learnings. It is capture review/proposal by default. It does not replace this compliance gate and does not grant permission to skip evidence, privacy, validation, risk, memory scope boundaries, or owner approvals.

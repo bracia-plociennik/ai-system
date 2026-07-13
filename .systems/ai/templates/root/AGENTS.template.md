@@ -241,19 +241,10 @@ End-of-Task Capture is capture review/proposal by default. It must not mark PASS
 
 Use lowercase kebab-case for new non-root Markdown files unless an existing template requires a different name. `AGENTS.md`, `HUMANS.md`, and `README.md` are exempt.
 
-Before claiming implementation quality, run or record the status of:
+Use `.systems/ai/core/validation-profiles.md` before claiming implementation quality. `fast` and `scoped` are iteration-only; `standard` is the default ordinary-quality profile; `full` is required for checkpoints, major verification or distillation, CI, release/final confidence, upstream update, and high-impact system-contract work.
 
-- `.systems/scripts/validate-ai-system`;
-- `.systems/scripts/check-system-skills`;
-- `.systems/scripts/check-naming`;
-- `.systems/scripts/check-contract-compliance`;
-- `.systems/scripts/check-update-workspace`;
-- `.systems/scripts/check-project-state`;
-- `.systems/scripts/check-external-source-registry`;
-- `.systems/scripts/check-personal-ops`;
-- `.systems/scripts/check-readmes`;
-- `.systems/scripts/check-privacy-boundary`;
-- `.systems/scripts/check-required-artifacts` when present;
-- `git diff --check` for repository changes.
+Run `.systems/scripts/validate-ai-system --profile full` for a full-required gate. `AI_SYSTEM_SKIP_SMOKE_TESTS=1` means the result is not final validation evidence without explicit owner acceptance of residual risk.
+
+After a successful upstream update, use `.systems/scripts/update-workspace --dry-run` before any owner-approved workspace schema backfill.
 
 Do not mark PASS without explicit evidence.

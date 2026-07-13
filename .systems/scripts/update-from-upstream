@@ -254,7 +254,7 @@ git merge --ff-only FETCH_HEAD
 if [[ "$skip_validation" -eq 1 ]]; then
   echo "WARNING: validation skipped. This update result is not eligible for final PASS."
 else
-  .systems/scripts/validate-ai-system
+  .systems/scripts/validate-ai-system --profile full
 fi
 
 echo "update-from-upstream completed."

@@ -151,6 +151,10 @@ This produces capture review/proposal by default. It does not mark PASS, run fin
 
 Durable capture requires explicit owner-approved target, selected workspace, scope, privacy/scope check, evidence, and write permission.
 
+## Validation Profiles
+
+Use `.systems/ai/core/validation-profiles.md`. `.systems/scripts/validate-ai-system` defaults to `standard`; use `fast` for quick sanity checks and `scoped --checks <check-name>` for explicit validator iteration. Use `full` for checkpoints, major verification or distillation, CI, release/final confidence, upstream updates, and high-impact AI System contract changes. `fast` and `scoped` are not final evidence, and skipped smoke tests do not support PASS without explicit owner acceptance of residual risk.
+
 ## Repo-Safe Project State
 
 AI System stores project runtime state outside managed project repositories.

@@ -18,7 +18,7 @@ jobs:
         run: chmod +x .systems/scripts/*
 
       - name: Validate AI System
-        run: .systems/scripts/validate-ai-system
+        run: .systems/scripts/validate-ai-system --profile full
 
       - name: Check whitespace
         run: git diff --check

@@ -40,6 +40,8 @@ Dreaming Mode requests route through `.systems/ai/core/dreaming-mode.md`. Select
 
 Before `AI_SYSTEM_WORK_CLOSURE`, apply `.systems/ai/core/contract-compliance.md`. The gate is advisory-only and requires an explicit `Knowledge capture: required|not-required` decision before final closure, handoff, accepted change, commit-ready or push-ready product-development work, or switching to another work unit.
 
+Validation requests route through `.systems/ai/core/validation-profiles.md`. Use `fast` for quick edit feedback, `scoped` for explicit validator iteration, `standard` for ordinary quality closure, and `full` for checkpoints, major verification or distillation, CI, final confidence, and high-impact AI System contract changes. Profiles never grant a PASS or bypass evidence, privacy, approvals, or contract compliance.
+
 Do not turn the gate into automatic memory writing. If capture is required, route to the narrowest correct target: `status/evidence`, `workspace-memory`, `primary-entity-memory`, `client-memory`, `owned-asset-memory`, `project-memory`, `distillation`, `checkpoint`, `external-memory`, or `system-insights`.
 
 End-of-Task Capture routes through `.systems/ai/core/end-of-task-capture.md` when the owner signals task completion and capture intent, such as `to koniec zadania`, `koniec taska`, `kończymy ten task`, `dziękuję, utrwal wiedzę`, `utrwal wiedzę z tej rozmowy`, `end task and capture knowledge`, or `done, capture learnings`.

@@ -23,6 +23,8 @@ It must not modify private runtime workspaces, `ai-system-workspaces.md`, client
 
 `update-workspace` may create only missing neutral workspace directories, routers, README files, and template files inside an existing selected workspace. It must not overwrite existing files.
 
+After a non-dry-run upstream merge, `update-from-upstream` runs `.systems/scripts/validate-ai-system --profile full`. See `.systems/ai/core/validation-profiles.md`; skipped validation is not final evidence.
+
 ## Recommended Update Flow
 
 After a successful upstream update, run:

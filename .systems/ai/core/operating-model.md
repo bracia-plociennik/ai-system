@@ -95,6 +95,8 @@ When multiple workspaces exist, AI selects the workspace before reading runtime 
 
 Before `AI_SYSTEM_WORK_CLOSURE`, apply `.systems/ai/core/contract-compliance.md`.
 
+Use `.systems/ai/core/validation-profiles.md` to select validation evidence: `fast` and `scoped` are iteration-only, `standard` supports ordinary quality closure, and `full` is required for checkpoint-level, major, final-confidence, CI, upstream-update, and high-impact system-contract work. Profiles do not weaken privacy, evidence, owner approvals, or final acceptance.
+
 `AI_SYSTEM_WORK_CLOSURE` is the point before a final substantive response, handoff, accepted change, commit-ready or push-ready product-development state, or switch to another unrelated work unit.
 
 The gate is advisory-only. It requires a clear `Knowledge capture` decision, not automatic memory writes.

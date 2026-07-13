@@ -528,10 +528,12 @@ The AI should refuse or stop on these.
 
 ## Validation
 
+Profile walidacji są opisane w `.systems/ai/core/validation-profiles.md`.
+
 Before accepting implementation work, ask for evidence:
 
 ```text
-Uruchom walidację ai-system i pokaż wynik: validate-ai-system, check-system-skills, check-naming, check-update-workspace, check-project-state, check-contract-compliance, check-task-management, check-readmes, check-privacy-boundary, check-required-artifacts, check-system-insights, check-prompt-composition, check-validator-smoke-tests, git diff --check.
+Uruchom zwykłą walidację AI System: .systems/scripts/validate-ai-system --profile standard. Dla checkpointu, dużej weryfikacji lub zmiany kontraktów/validatorów użyj --profile full. Do szybkiej iteracji użyj --profile fast, a do konkretnego walidatora --profile scoped --checks check-<name>. Pokaż profil, wykonane i pominięte checki oraz residual risk.
 ```
 
-PASS requires evidence. Skipped checks need a reason and impact.
+Profile `fast` i `scoped` nie są finalnym evidence. PASS requires evidence. Skipped checks need a reason, impact, and owner acceptance when narrow validation is used.

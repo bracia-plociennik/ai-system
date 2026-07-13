@@ -1883,4 +1883,53 @@ grep -q 'existing tasks readme sentinel' "$task_update_workspace/tasks/README.md
 test -f "$task_update_workspace/tasks/tasknote.template.md" || { echo "update-workspace did not create tasknote template"; exit 1; }
 test -f "$task_update_workspace/tasks/taskforge-vault-setup.template.md" || { echo "update-workspace did not create taskforge setup template"; exit 1; }
 
+validation_profiles_validator="$copy_repo/.systems/scripts/check-validation-profiles"
+validation_profiles_script="$copy_repo/.systems/scripts/validate-ai-system"
+run_must_pass "validation-profiles-valid" "$validation_profiles_validator"
+run_must_pass "validation-profile-fast-explain" "$validation_profiles_script" --profile fast --explain
+run_must_pass "validation-profile-scoped-check" "$validation_profiles_script" --profile scoped --checks check-validation-profiles --explain
+run_must_fail "validation-profile-scoped-requires-checks" "$validation_profiles_script" --profile scoped
+
+validation_profiles_skip_out="$tmp/validation-profile-full-skip-smoke.out"
+if ! (cd "$copy_repo" && env AI_SYSTEM_SKIP_SMOKE_TESTS=1 "$validation_profiles_script" --profile full) >"$validation_profiles_skip_out" 2>&1; then
+  echo "Smoke test failed: validation-profile-full-skip-smoke should have passed"
+  cat "$validation_profiles_skip_out"
+  exit 1
+fi
+grep -F -q 'AI System validation completed with smoke tests skipped; not final validation evidence without explicit owner acceptance of residual risk.' "$validation_profiles_skip_out" || { echo "Skipped-smoke validation missing non-final completion wording"; exit 1; }
+if grep -F -q 'AI System validation passed (full profile).' "$validation_profiles_skip_out"; then
+  echo "Skipped-smoke validation reported full-profile pass"
+  exit 1
+fi
+
+cp "$copy_repo/.systems/scripts/validate-ai-system" "$copy_repo/.systems/scripts/validate-ai-system.bak"
+perl -0pi -e 's/profile="standard"/profile="full"/' "$copy_repo/.systems/scripts/validate-ai-system"
+run_must_fail "validation-profiles-require-standard-default" "$validation_profiles_validator"
+mv "$copy_repo/.systems/scripts/validate-ai-system.bak" "$copy_repo/.systems/scripts/validate-ai-system"
+
+cp "$copy_repo/.github/workflows/ai-system-validate.yml" "$copy_repo/.github/workflows/ai-system-validate.yml.bak"
+perl -0pi -e 's/validate-ai-system --profile full/validate-ai-system/' "$copy_repo/.github/workflows/ai-system-validate.yml"
+run_must_fail "validation-profiles-require-ci-explicit-full" "$validation_profiles_validator"
+mv "$copy_repo/.github/workflows/ai-system-validate.yml.bak" "$copy_repo/.github/workflows/ai-system-validate.yml"
+
+cp "$copy_repo/.systems/scripts/validate-ai-system" "$copy_repo/.systems/scripts/validate-ai-system.bak"
+perl -0pi -e 's/check-validator-smoke-tests/check-validator-light-tests/g' "$copy_repo/.systems/scripts/validate-ai-system"
+run_must_fail "validation-profiles-require-full-smoke-tests" "$validation_profiles_validator"
+mv "$copy_repo/.systems/scripts/validate-ai-system.bak" "$copy_repo/.systems/scripts/validate-ai-system"
+
+cp "$copy_repo/.systems/ai/core/validation-profiles.md" "$copy_repo/.systems/ai/core/validation-profiles.md.bak"
+printf '\nfast is enough before commit\n' >> "$copy_repo/.systems/ai/core/validation-profiles.md"
+run_must_fail "validation-profiles-block-fast-enough-before-commit" "$validation_profiles_validator"
+mv "$copy_repo/.systems/ai/core/validation-profiles.md.bak" "$copy_repo/.systems/ai/core/validation-profiles.md"
+
+cp "$copy_repo/.systems/ai/core/validation-profiles.md" "$copy_repo/.systems/ai/core/validation-profiles.md.bak"
+printf '\nstandard may replace full\n' >> "$copy_repo/.systems/ai/core/validation-profiles.md"
+run_must_fail "validation-profiles-block-standard-replaces-full" "$validation_profiles_validator"
+mv "$copy_repo/.systems/ai/core/validation-profiles.md.bak" "$copy_repo/.systems/ai/core/validation-profiles.md"
+
+cp "$copy_repo/.systems/ai/core/validation-profiles.md" "$copy_repo/.systems/ai/core/validation-profiles.md.bak"
+printf '\nskip smoke tests and mark PASS\n' >> "$copy_repo/.systems/ai/core/validation-profiles.md"
+run_must_fail "validation-profiles-block-skipped-smoke-pass" "$validation_profiles_validator"
+mv "$copy_repo/.systems/ai/core/validation-profiles.md.bak" "$copy_repo/.systems/ai/core/validation-profiles.md"
+
 echo "Validator smoke tests passed."

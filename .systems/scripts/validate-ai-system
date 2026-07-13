@@ -2,23 +2,184 @@
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+profile="standard"
+checks=""
+explain=0
 
-"$script_dir/check-required-artifacts"
-"$script_dir/check-readmes"
-"$script_dir/check-naming"
-"$script_dir/check-privacy-boundary"
-"$script_dir/check-system-skills"
-"$script_dir/check-contract-compliance"
-"$script_dir/check-end-of-task-capture"
-"$script_dir/check-update-workspace"
-"$script_dir/check-project-state"
-"$script_dir/check-external-source-registry"
-"$script_dir/check-external-export-import-workflow"
-"$script_dir/check-personal-ops"
-"$script_dir/check-task-management"
-"$script_dir/check-dreaming-mode"
-"$script_dir/check-system-insights"
-"$script_dir/check-prompt-composition"
-"$script_dir/check-validator-smoke-tests"
+usage() {
+  cat <<'EOF'
+Usage:
+  .systems/scripts/validate-ai-system [--profile full|standard|scoped|fast] [--checks check-a,check-b] [--explain]
 
-echo "AI System validation passed."
+Profiles:
+  standard  Complete AI System validator chain without smoke tests. Default daily validator.
+  full      Complete validation, including check-validator-smoke-tests.
+  scoped    Fast base checks plus explicit --checks validators. Iteration only.
+  fast      Cheap sanity checks. Iteration only.
+EOF
+}
+
+while [[ "$#" -gt 0 ]]; do
+  case "$1" in
+    --profile)
+      [[ "$#" -ge 2 ]] || { echo "Missing value for --profile"; exit 1; }
+      profile="$2"
+      shift 2
+      ;;
+    --checks)
+      [[ "$#" -ge 2 ]] || { echo "Missing value for --checks"; exit 1; }
+      checks="$2"
+      shift 2
+      ;;
+    --explain)
+      explain=1
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown validate-ai-system argument: $1"
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+case "$profile" in
+  full|standard|scoped|fast) ;;
+  *) echo "Unknown validation profile: $profile"; exit 1 ;;
+esac
+
+smoke_skipped=0
+if [[ "$profile" == "full" && "${AI_SYSTEM_SKIP_SMOKE_TESTS:-0}" == "1" ]]; then
+  smoke_skipped=1
+fi
+
+if [[ -n "$checks" && "$profile" != "scoped" ]]; then
+  echo "--checks is valid only with --profile scoped"
+  exit 1
+fi
+
+if [[ "$profile" == "scoped" && -z "$checks" ]]; then
+  echo "--profile scoped requires --checks <check-a,check-b>"
+  exit 1
+fi
+
+run_cmd() {
+  if [[ "$explain" == "1" ]]; then
+    printf '+ %s\n' "$*"
+  fi
+  "$@"
+}
+
+explain_profile() {
+  [[ "$explain" == "1" ]] || return 0
+  case "$profile" in
+    full)
+      echo "Validation profile: full"
+      if [[ "$smoke_skipped" == "1" ]]; then
+        echo "Smoke tests: skipped by AI_SYSTEM_SKIP_SMOKE_TESTS=1"
+        echo "Final validation evidence: no, unless owner explicitly accepts residual risk"
+      else
+        echo "Smoke tests: run"
+        echo "Final validation evidence: yes"
+      fi
+      ;;
+    standard)
+      echo "Validation profile: standard"
+      echo "Smoke tests: skipped"
+      echo "Final validation evidence: yes for ordinary work; no when a full-required gate applies"
+      ;;
+    scoped)
+      echo "Validation profile: scoped"
+      echo "Scoped checks: $checks"
+      echo "Smoke tests: skipped"
+      echo "Final validation evidence: no, unless owner explicitly accepts narrow validation with residual risk"
+      ;;
+    fast)
+      echo "Validation profile: fast"
+      echo "Smoke tests: skipped"
+      echo "Final validation evidence: no, iteration only"
+      ;;
+  esac
+}
+
+run_fast_checks() {
+  if git -C "$script_dir/../.." rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    run_cmd git -C "$script_dir/../.." diff --check
+  elif [[ "$explain" == "1" ]]; then
+    echo "+ git diff --check (skipped: not a git repository)"
+  fi
+  run_cmd "$script_dir/check-required-artifacts"
+  run_cmd "$script_dir/check-naming"
+  run_cmd "$script_dir/check-privacy-boundary"
+  run_cmd "$script_dir/check-contract-compliance"
+}
+
+run_named_check() {
+  local check_name="$1"
+  local check_path
+  if [[ ! "$check_name" =~ ^check-[a-z0-9-]+$ ]]; then
+    echo "Invalid scoped check name: $check_name"
+    exit 1
+  fi
+  check_path="$script_dir/$check_name"
+  if [[ ! -f "$check_path" || ! -x "$check_path" ]]; then
+    echo "Unknown scoped check: $check_name"
+    exit 1
+  fi
+  run_cmd "$check_path"
+}
+
+run_standard_checks() {
+  run_cmd "$script_dir/check-required-artifacts"
+  run_cmd "$script_dir/check-readmes"
+  run_cmd "$script_dir/check-naming"
+  run_cmd "$script_dir/check-privacy-boundary"
+  run_cmd "$script_dir/check-system-skills"
+  run_cmd "$script_dir/check-contract-compliance"
+  run_cmd "$script_dir/check-end-of-task-capture"
+  run_cmd "$script_dir/check-update-workspace"
+  run_cmd "$script_dir/check-project-state"
+  run_cmd "$script_dir/check-external-source-registry"
+  run_cmd "$script_dir/check-external-export-import-workflow"
+  run_cmd "$script_dir/check-personal-ops"
+  run_cmd "$script_dir/check-task-management"
+  run_cmd "$script_dir/check-dreaming-mode"
+  run_cmd "$script_dir/check-system-insights"
+  run_cmd "$script_dir/check-prompt-composition"
+  run_cmd "$script_dir/check-validation-profiles"
+}
+
+explain_profile
+
+if [[ "$profile" == "fast" ]]; then
+  run_fast_checks
+  exit 0
+fi
+
+if [[ "$profile" == "scoped" ]]; then
+  run_fast_checks
+  IFS=',' read -r -a selected_checks <<< "$checks"
+  for check_name in "${selected_checks[@]}"; do
+    check_name="${check_name//[[:space:]]/}"
+    [[ -n "$check_name" ]] || { echo "Empty scoped check name in --checks"; exit 1; }
+    run_named_check "$check_name"
+  done
+  exit 0
+fi
+
+run_standard_checks
+
+if [[ "$profile" == "full" && "$smoke_skipped" != "1" ]]; then
+  run_cmd "$script_dir/check-validator-smoke-tests"
+fi
+
+if [[ "$smoke_skipped" == "1" ]]; then
+  echo "AI System validation completed with smoke tests skipped; not final validation evidence without explicit owner acceptance of residual risk."
+  exit 0
+fi
+
+echo "AI System validation passed ($profile profile)."

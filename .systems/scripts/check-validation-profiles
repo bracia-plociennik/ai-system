@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+fail=0
+
+require_file() {
+  local path="$1"
+  if [[ ! -f "$repo_root/$path" ]]; then
+    echo "Missing validation profile artifact: $path"
+    fail=1
+  fi
+}
+
+require_ref() {
+  local path="$1"
+  local pattern="$2"
+  local label="$3"
+  if [[ ! -f "$repo_root/$path" ]] || ! rg -q -- "$pattern" "$repo_root/$path"; then
+    echo "Missing validation profile reference: $label ($path)"
+    fail=1
+  fi
+}
+
+required_files=(
+  ".systems/ai/core/validation-profiles.md"
+  ".systems/scripts/validate-ai-system"
+  ".systems/scripts/check-validation-profiles"
+)
+
+for path in "${required_files[@]}"; do
+  require_file "$path"
+done
+
+contract=".systems/ai/core/validation-profiles.md"
+validate=".systems/scripts/validate-ai-system"
+
+for term in \
+  'Validation Profiles' \
+  'full' \
+  'standard' \
+  'scoped' \
+  'fast' \
+  'final validation evidence' \
+  'check-validator-smoke-tests' \
+  'Default `.systems/scripts/validate-ai-system` with no arguments is the `standard` profile' \
+  'CI and `.systems/scripts/update-from-upstream` must call `.systems/scripts/validate-ai-system --profile full` explicitly' \
+  '--profile full' \
+  '--profile standard' \
+  '--profile scoped --checks' \
+  '--profile fast' \
+  '--explain' \
+  'residual risk'
+do
+  require_ref "$contract" "$term" "contract term: $term"
+done
+
+for term in \
+  'profile="standard"' \
+  '--profile' \
+  '--checks' \
+  '--explain' \
+  'run_fast_checks' \
+  'run_standard_checks' \
+  'run_named_check' \
+  'check-validator-smoke-tests' \
+  'Final validation evidence: yes for ordinary work' \
+  'AI_SYSTEM_SKIP_SMOKE_TESTS' \
+  'AI System validation completed with smoke tests skipped; not final validation evidence without explicit owner acceptance of residual risk.'
+do
+  require_ref "$validate" "$term" "validate-ai-system support: $term"
+done
+
+require_ref "$validate" 'if \[\[ "\$profile" == "full" && "\$smoke_skipped" != "1" \]\]' "full profile smoke gate"
+require_ref "$validate" 'if \[\[ "\$smoke_skipped" == "1" \]\]' "skipped-smoke non-final completion gate"
+require_ref "$validate" '--profile scoped requires --checks' "scoped requires explicit checks"
+require_ref "$validate" '--checks is valid only with --profile scoped' "checks scoped-only"
+
+for file in README.md HUMANS.md .systems/ai/core/operating-model.md .systems/ai/core/command-routing.md .systems/ai/core/contract-compliance.md .systems/ai/templates/root/AGENTS.template.md; do
+  require_ref "$file" 'validation-profiles\.md|Validation Profiles|validation profile' "$file profile guidance"
+  require_ref "$file" 'full' "$file full guidance"
+  require_ref "$file" 'standard' "$file standard guidance"
+  require_ref "$file" 'scoped' "$file scoped guidance"
+  require_ref "$file" 'fast' "$file fast guidance"
+done
+
+require_ref ".systems/ai/core/update-from-upstream.md" 'validation-profiles\.md' "upstream update profile guidance"
+require_ref ".systems/ai/core/update-from-upstream.md" 'full' "upstream update full guidance"
+
+require_ref ".github/workflows/ai-system-validate.yml" '\.systems/scripts/validate-ai-system --profile full' "CI explicit full validation"
+require_ref ".systems/scripts/update-from-upstream" '\.systems/scripts/validate-ai-system --profile full' "upstream update explicit full validation"
+require_ref ".systems/scripts/check-required-artifacts" 'validation-profiles\.md' "required core contract"
+require_ref ".systems/scripts/check-required-artifacts" 'check-validation-profiles' "required validator"
+require_ref ".systems/scripts/check-validator-smoke-tests" 'validation-profile' "smoke coverage"
+require_ref ".systems/scripts/validate-ai-system" 'check-validation-profiles' "standard chain wiring"
+require_ref ".systems/scripts/README.md" 'check-validation-profiles' "scripts documentation"
+
+unsafe_patterns=(
+  'fast is enough before commit'
+  'scoped is enough before commit'
+  'standard is enough before commit'
+  'fast is enough before push'
+  'scoped is enough before push'
+  'standard is enough before push'
+  'standard is enough for checkpoint'
+  'standard is enough for major distillation'
+  'standard is enough for major verification'
+  'standard is enough for CI'
+  'standard is enough for release'
+  'standard may replace full'
+  'standard can replace full'
+  'scoped may replace full'
+  'fast may replace full'
+  'skip smoke tests and mark PASS'
+)
+
+for pattern in "${unsafe_patterns[@]}"; do
+  if rg -qi -- "$pattern" \
+    "$repo_root/README.md" \
+    "$repo_root/HUMANS.md" \
+    "$repo_root/.systems/ai/core" \
+    "$repo_root/.systems/ai/templates/root/AGENTS.template.md" \
+    "$repo_root/.systems/scripts/validate-ai-system" \
+    "$repo_root/.github/workflows"
+  then
+    echo "Unsafe validation profile wording found: $pattern"
+    fail=1
+  fi
+done
+
+exit "$fail"
