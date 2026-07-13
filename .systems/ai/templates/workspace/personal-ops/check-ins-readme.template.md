@@ -25,7 +25,7 @@ AI_SYSTEM_WORKSPACE_HOME/personal-ops/check-ins/import-profiles/
 ## Rules
 
 - One canonical Markdown V3 session report per day.
-- V3 ordered phases are: Metadane, Podsumowanie poprzedniego dnia, Plan dnia, Poranny check-in, Dodatkowe informacje, Załączniki, Kandydaci na taski.
+- V3 ordered phases are: Metadane, Podsumowanie poprzedniego dnia, Plan dnia, Poranny check-in, Dodatkowe informacje, Załączniki, Kandydaci na taski, optional interpretation, Interpreted Input.
 - The report for day D holds D plan/morning state and D-1 closure. It does not rewrite the prior-day report and has no Seed kolejnego dnia.
 - Frontmatter stores structured fields.
 - Body sections store reflection text.

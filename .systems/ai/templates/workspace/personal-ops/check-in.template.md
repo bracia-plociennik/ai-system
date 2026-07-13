@@ -16,6 +16,8 @@ privacy: private-sensitive
 
 # Daily Check-In <YYYY-MM-DD>
 
+Normalized time fields accept `<HH:MM>`, `<YYYY-MM-DD HH:MM>`, or an ISO datetime. `HH:MM` is resolved from the section context: plan = `session_date`, closure = `previous_day_date`, sleep = `previous_day_date` to `session_date`.
+
 ## Metadane
 
 - Data: <YYYY-MM-DD>
@@ -38,6 +40,7 @@ privacy: private-sensitive
 
 ### Faktyczny trening
 
+- Faktyczny trening wykonany: <true|false|unknown>
 - Faktyczny trening start:
 - Faktyczny trening koniec:
 - Faktyczny trening typ:
@@ -46,6 +49,7 @@ privacy: private-sensitive
 
 ### Faktyczny NSDR
 
+- Faktyczny NSDR wykonany: <true|false|unknown>
 - Faktyczny NSDR start:
 - Faktyczny NSDR koniec:
 - Efekt NSDR:
@@ -78,6 +82,14 @@ privacy: private-sensitive
 ### Faktycznie wypromowałem
 
 - [actual-promote-01] <actual item title>
+
+### Faktycznie zrobiłem coś dla siebie
+
+- [actual-self-01] <actual item title>
+
+### Faktycznie zrobiłem coś dla bliskich
+
+- [actual-close-01] <actual item title>
 
 ### Faktyczne nawyki
 
@@ -136,14 +148,23 @@ privacy: private-sensitive
 ### Planuję zbudować
 
 - [build-01] <planned item title>
+  - Task: <create|skip>
+  - Task title: <optional TaskNote title>
+  - Task bucket: <6d/do|6d/defer|6d/delegate|6d/delete|6d/dump>
 
 ### Planuję dowieźć
 
 - [deliver-01] <planned item title>
+  - Task: <create|skip>
+  - Task title: <optional TaskNote title>
+  - Task bucket: <6d/do|6d/defer|6d/delegate|6d/delete|6d/dump>
 
 ### Planuję wypromować
 
 - [promote-01] <planned item title>
+  - Task: <create|skip>
+  - Task title: <optional TaskNote title>
+  - Task bucket: <6d/do|6d/defer|6d/delegate|6d/delete|6d/dump>
 
 ### Planuję zrobić coś dla siebie
 
@@ -192,8 +213,19 @@ privacy: private-sensitive
 
 ## Kandydaci na taski
 
-Task candidates are derived only from planned `build-*`, `deliver-*`, and `promote-*` items. A single owner-approved V3 check-in write may create the corresponding TaskNotes if the local vault preflight passes. Do not create candidates from actual closure items.
+Task candidates are derived only from planned `build-*`, `deliver-*`, and `promote-*` items. `Task: create` is the default when omitted; use `Task: skip` to opt out. `Task title` overrides the generated title. A single owner-approved V3 check-in write may create the corresponding TaskNotes if the local vault preflight passes. Do not create candidates from actual closure items.
 
 ## Opcjonalna interpretacja
 
 Interpretation is advisory-only. It is not memory, System Insights, External Memory, or a verified source.
+
+## Interpreted Input
+
+This private-sensitive normalization record is appended by AI System after the canonical sections. Canonical V3 fields above are the source of truth for indexes and TaskNotes.
+
+- Source type:
+- Normalized values applied:
+- Field mapping:
+- Corrections applied: <later explicit owner correction wins for the named field>
+- Unresolved fields:
+- Precedence: canonical fields above take precedence over this audit context.

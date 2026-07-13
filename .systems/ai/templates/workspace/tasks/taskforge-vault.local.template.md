@@ -9,4 +9,4 @@ vault_path: /absolute/private/path/to/taskforge-vault
 ---
 ```
 
-Store an owner-approved populated copy only at `tasks/taskforge-vault.local.md`. V3 check-in task generation reads this record only for an owner-approved canonical V3 check-in write and requires an existing `TaskNotes/Tasks/` directory.
+Store an owner-approved populated copy only at `tasks/taskforge-vault.local.md`. Dry-run task proposals may read this record to discover TaskForge project links; missing, disabled, or invalid configuration produces a warning without blocking the proposal. V3 check-in task generation requires an owner-approved canonical write and an existing `TaskNotes/Tasks/` directory.

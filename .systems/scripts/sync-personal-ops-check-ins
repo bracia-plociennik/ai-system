@@ -12,7 +12,7 @@ import json
 import re
 import sys
 import tempfile
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 SYNC_THRESHOLD = 7
@@ -99,6 +99,12 @@ V3_INDEX_COLUMNS = [
     "normalization_authority",
     "report_revision",
     "task_generation_status",
+    "source_type",
+    "source_label",
+    "privacy_class",
+    "weekday",
+    "recording_time",
+    "date_weekday_conflict",
     "work_mode",
     "organism_mode",
     "minimum_day_status",
@@ -109,6 +115,7 @@ V3_INDEX_COLUMNS = [
     "actual_training_start",
     "actual_training_end",
     "actual_training_type",
+    "actual_training_performed",
     "actual_training_minutes",
     "actual_training_rpe",
     "planned_nsdr_start",
@@ -118,6 +125,7 @@ V3_INDEX_COLUMNS = [
     "actual_nsdr_end",
     "actual_nsdr_minutes",
     "actual_nsdr_effect",
+    "actual_nsdr_performed",
     "planned_if_start",
     "planned_if_end",
     "planned_if_minutes",
@@ -138,24 +146,54 @@ V3_INDEX_COLUMNS = [
     "sleep_quality_score",
     "sleep_awakenings",
     "sleep_approximate",
+    "sleep_raw",
     "mental_clarity_score",
     "body_readiness_score",
     "health_notes",
+    "planned_training_raw",
+    "actual_training_raw",
+    "planned_nsdr_raw",
+    "actual_nsdr_raw",
+    "planned_if_raw",
+    "actual_if_raw",
+    "planned_budget_raw",
+    "finance_raw",
+    "routine_wakeup",
+    "routine_hygiene_mantra",
+    "routine_kitchen",
+    "routine_outdoors",
+    "routine_deep_focus",
+    "routine_close_people_wishes",
+    "routine_done_count",
+    "routine_total_count",
+    "routine_completion_percent",
+    "reflection_plus_one",
+    "reflection_redundant",
+    "reflection_threat",
+    "reflection_response",
+    "closure_notes",
     "planned_item_count",
     "actual_item_count",
     "comparison_count",
     "planned_build_count",
     "planned_deliver_count",
     "planned_promote_count",
+    "planned_self_count",
+    "planned_close_people_count",
     "actual_build_count",
     "actual_deliver_count",
     "actual_promote_count",
+    "actual_self_count",
+    "actual_close_people_count",
     "dynamic_habit_count",
     "dynamic_habit_done_count",
     "dynamic_habit_partial_count",
     "dynamic_habit_not_completed_count",
     "dynamic_habit_unknown_count",
     "attachment_paths_json",
+    "interpreted_input",
+    "v3_closure_session_date",
+    "v3_closure_session_path",
 ]
 
 V3_METRICS_COLUMNS = [
@@ -165,6 +203,17 @@ V3_METRICS_COLUMNS = [
     "work_mode",
     "organism_mode",
     "minimum_day_status",
+    "actual_training_performed",
+    "actual_nsdr_performed",
+    "sleep_raw",
+    "planned_training_raw",
+    "actual_training_raw",
+    "planned_nsdr_raw",
+    "actual_nsdr_raw",
+    "planned_if_raw",
+    "actual_if_raw",
+    "planned_budget_raw",
+    "finance_raw",
     "planned_training_minutes",
     "actual_training_minutes",
     "planned_nsdr_minutes",
@@ -179,10 +228,22 @@ V3_METRICS_COLUMNS = [
     "sleep_awakenings",
     "mental_clarity_score",
     "body_readiness_score",
-    "health_notes",
+    "routine_done_count",
+    "routine_total_count",
+    "routine_completion_percent",
     "planned_item_count",
     "actual_item_count",
     "comparison_count",
+    "planned_build_count",
+    "planned_deliver_count",
+    "planned_promote_count",
+    "planned_self_count",
+    "planned_close_people_count",
+    "actual_build_count",
+    "actual_deliver_count",
+    "actual_promote_count",
+    "actual_self_count",
+    "actual_close_people_count",
     "dynamic_habit_count",
     "dynamic_habit_done_count",
     "dynamic_habit_partial_count",
@@ -517,10 +578,22 @@ def v3_scalar(text: str, *labels: str) -> str:
 
 def v3_items(section: str, stream: str) -> list[dict[str, str]]:
     items: list[dict[str, str]] = []
-    for match in re.finditer(r"^\s*[-*]\s+\[(?P<id>[a-z][a-z0-9-]*)\]\s+(?P<title>.+?)\s*$", section, re.MULTILINE | re.IGNORECASE):
+    matches = list(re.finditer(r"^\s*[-*]\s+\[(?P<id>[a-z][a-z0-9-]*)\]\s+(?P<title>.+?)\s*$", section, re.MULTILINE | re.IGNORECASE))
+    for index, match in enumerate(matches):
         title = normalize_missing(match.group("title"))
         if title:
-            items.append({"id": match.group("id"), "title": title, "stream": stream})
+            block_end = matches[index + 1].start() if index + 1 < len(matches) else len(section)
+            block = section[match.end() : block_end]
+            items.append(
+                {
+                    "id": match.group("id"),
+                    "title": title,
+                    "stream": stream,
+                    "task_policy": v3_scalar(block, "Task") or "create",
+                    "task_title": v3_scalar(block, "Task title"),
+                    "task_bucket": v3_scalar(block, "Task bucket"),
+                }
+            )
     return items
 
 
@@ -580,8 +653,42 @@ def v3_comparisons(section: str) -> list[dict[str, str]]:
     return [comparison for comparison in comparisons if comparison["plan_item_id"]]
 
 
-def v3_duration_minutes(start: str, end: str) -> str:
-    return duration(start, end, "minutes")
+def parse_v3_datetime(value: str, date_hint: str, field: str) -> tuple[datetime | None, bool]:
+    """Parse a V3 time value and report whether it was supplied as time-only."""
+    raw = normalize_missing(value)
+    if not raw:
+        return None, False
+    if re.fullmatch(r"\d{2}:\d{2}", raw):
+        return datetime.strptime(f"{date_hint} {raw}", "%Y-%m-%d %H:%M"), True
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError as error:
+        raise ValueError(
+            f"Malformed V3 time for {field}: {raw!r}; use HH:MM or an ISO datetime"
+        ) from error
+    # Check-ins describe local wall-clock time. Do not silently shift an explicit offset.
+    return parsed.replace(tzinfo=None), False
+
+
+def v3_normalize_range(
+    start: str,
+    end: str,
+    start_date: str,
+    end_date: str,
+    field: str,
+) -> tuple[str, str, str]:
+    """Normalize a V3 range to datetimes and calculate a duration without changing source Markdown."""
+    start_dt, _ = parse_v3_datetime(start, start_date, f"{field} start")
+    end_dt, end_is_time_only = parse_v3_datetime(end, end_date, f"{field} end")
+    if start_dt and end_dt and end_dt < start_dt:
+        if end_is_time_only:
+            end_dt += timedelta(days=1)
+        else:
+            raise ValueError(f"V3 {field} end is before start")
+    start_text = start_dt.strftime("%Y-%m-%d %H:%M") if start_dt else ""
+    end_text = end_dt.strftime("%Y-%m-%d %H:%M") if end_dt else ""
+    minutes = str(int((end_dt - start_dt).total_seconds() // 60)) if start_dt and end_dt else ""
+    return start_text, end_text, minutes
 
 
 def build_v3_session(workspace: Path, markdown_path: Path) -> dict:
@@ -606,6 +713,7 @@ def build_v3_session(workspace: Path, markdown_path: Path) -> dict:
     if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", previous_day_date):
         raise ValueError(f"Malformed V3 previous_day_date in {markdown_path}: {previous_day_date!r}")
 
+    metadata = v3_section(body, "Metadane")
     plan = v3_section(body, "Plan dnia")
     closure = "\n\n".join(
         section
@@ -621,11 +729,15 @@ def build_v3_session(workspace: Path, markdown_path: Path) -> dict:
         v3_items(v3_section(plan, "Planuję zbudować"), "build")
         + v3_items(v3_section(plan, "Planuję dowieźć"), "deliver")
         + v3_items(v3_section(plan, "Planuję wypromować"), "promote")
+        + v3_items(v3_section(plan, "Planuję zrobić coś dla siebie"), "self")
+        + v3_items(v3_section(plan, "Planuję zrobić coś dla bliskich"), "close")
     )
     actual_items = (
         v3_items(v3_section(closure, "Faktycznie zbudowałem"), "build")
         + v3_items(v3_section(closure, "Faktycznie dowiozłem"), "deliver")
         + v3_items(v3_section(closure, "Faktycznie wypromowałem"), "promote")
+        + v3_items(v3_section(closure, "Faktycznie zrobiłem coś dla siebie"), "self")
+        + v3_items(v3_section(closure, "Faktycznie zrobiłem coś dla bliskich"), "close")
     )
     comparison_section = v3_section(closure, "Porównanie plan-fakt")
     dynamic_habits = v3_dynamic_habits(v3_section(plan, "Planowane nawyki"))
@@ -636,6 +748,10 @@ def build_v3_session(workspace: Path, markdown_path: Path) -> dict:
     file_path = markdown_path.relative_to(workspace).as_posix()
 
     values = {
+        "weekday": v3_scalar(metadata, "Dzień tygodnia"),
+        "recording_time": v3_scalar(metadata, "Godzina nagrania"),
+        "date_weekday_conflict": v3_scalar(metadata, "Konflikt daty i dnia tygodnia"),
+        "source_label": v3_scalar(metadata, "Źródło"),
         "work_mode": v3_scalar(plan, "Tryb pracy", "Work mode"),
         "organism_mode": v3_scalar(plan, "Tryb organizmu", "Organism mode"),
         "minimum_day_status": v3_scalar(closure, "Minimum dnia", "minimum_day_status"),
@@ -644,48 +760,100 @@ def build_v3_session(workspace: Path, markdown_path: Path) -> dict:
         "sleep_quality_score": v3_scalar(closure, "Jakość snu", "Sleep quality"),
         "sleep_awakenings": v3_scalar(closure, "Liczba przebudzeń", "Awakenings"),
         "sleep_approximate": v3_scalar(closure, "Przybliżenie snu", "Sleep approximate"),
+        "sleep_raw": v3_scalar(closure, "Sen raw"),
         "mental_clarity_score": v3_scalar(morning, "Klarowność mentalna", "Mental"),
         "body_readiness_score": v3_scalar(morning, "Gotowość ciała", "Ciało"),
         "health_notes": v3_scalar(morning, "Ograniczenia", "Health notes"),
+        "gratitude": v3_scalar(morning, "Wdzięczność", "Jestem wdzięczny za"),
+        "routine_wakeup": bool_text(v3_scalar(morning, "Pobudka bez negocjacji")),
+        "routine_hygiene_mantra": bool_text(v3_scalar(morning, "Toaleta + mantra", "Toaleta, zęby, zimna woda i mantra")),
+        "routine_kitchen": bool_text(v3_scalar(morning, "Kuchnia")),
+        "routine_outdoors": bool_text(v3_scalar(morning, "Dwór", "Dwór, słońce, ruch")),
+        "routine_deep_focus": bool_text(v3_scalar(morning, "Deep Focus", "Muzyka Deep Focus")),
+        "routine_close_people_wishes": bool_text(v3_scalar(morning, "Życzenia dla bliskich", "Życzenia miłego dnia dla bliskich")),
         "planned_training_start": v3_scalar(plan, "Planowany trening start", "Planowany trening od"),
         "planned_training_end": v3_scalar(plan, "Planowany trening koniec", "Planowany trening do"),
         "planned_training_type": v3_scalar(plan, "Planowany trening typ", "Planowany typ treningu"),
+        "planned_training_raw": v3_scalar(plan, "Trening raw"),
         "actual_training_start": v3_scalar(closure, "Faktyczny trening start", "Faktyczny trening od"),
         "actual_training_end": v3_scalar(closure, "Faktyczny trening koniec", "Faktyczny trening do"),
         "actual_training_type": v3_scalar(closure, "Faktyczny trening typ", "Faktyczny typ treningu"),
+        "actual_training_performed": bool_text(v3_scalar(closure, "Faktyczny trening wykonany", "Trening wykonany")),
         "actual_training_rpe": v3_scalar(closure, "RPE"),
+        "actual_training_raw": v3_scalar(closure, "Trening raw"),
         "planned_nsdr_start": v3_scalar(plan, "Planowany NSDR start", "Planowany NSDR od"),
         "planned_nsdr_end": v3_scalar(plan, "Planowany NSDR koniec", "Planowany NSDR do"),
+        "planned_nsdr_raw": v3_scalar(plan, "NSDR raw"),
         "actual_nsdr_start": v3_scalar(closure, "Faktyczny NSDR start", "Faktyczny NSDR od"),
         "actual_nsdr_end": v3_scalar(closure, "Faktyczny NSDR koniec", "Faktyczny NSDR do"),
         "actual_nsdr_effect": v3_scalar(closure, "Efekt NSDR"),
+        "actual_nsdr_raw": v3_scalar(closure, "NSDR raw"),
+        "actual_nsdr_performed": bool_text(v3_scalar(closure, "Faktyczny NSDR wykonany", "NSDR wykonany")),
         "planned_if_start": v3_scalar(plan, "Planowany IF start", "Planowany intermittent fasting od"),
         "planned_if_end": v3_scalar(plan, "Planowany IF koniec", "Planowany intermittent fasting do"),
+        "planned_if_raw": v3_scalar(plan, "IF raw"),
         "actual_if_start": v3_scalar(closure, "Faktyczny IF start", "Faktyczny intermittent fasting od"),
         "actual_if_end": v3_scalar(closure, "Faktyczny IF koniec", "Faktyczny intermittent fasting do"),
+        "actual_if_raw": v3_scalar(closure, "IF raw"),
         "planned_calories_min": v3_scalar(plan, "Planowane kalorie minimum", "Kalorie minimum"),
         "planned_calories_max": v3_scalar(plan, "Planowane kalorie maksimum", "Kalorie maksimum"),
         "planned_calories_representative": v3_scalar(plan, "Planowane kalorie reprezentatywne", "Kalorie reprezentatywne"),
         "planned_budget_max": v3_scalar(plan, "Budżet maksimum"),
         "planned_budget_currency": v3_scalar(plan, "Budżet waluta"),
+        "planned_budget_raw": v3_scalar(plan, "Budżet raw"),
         "actual_calories_min": v3_scalar(closure, "Faktyczne kalorie minimum"),
         "actual_calories_max": v3_scalar(closure, "Faktyczne kalorie maksimum"),
         "actual_calories_representative": v3_scalar(closure, "Faktyczne kalorie reprezentatywne"),
         "finance_amount": v3_scalar(closure, "Finanse kwota", "Kwota"),
         "finance_currency": v3_scalar(closure, "Finanse waluta", "Waluta"),
         "finance_approximate": v3_scalar(closure, "Finanse przybliżenie"),
+        "finance_raw": v3_scalar(closure, "Finanse raw"),
+        "reflection_plus_one": v3_scalar(closure, "Co realnie dało +1%"),
+        "reflection_redundant": v3_scalar(closure, "Co było zbędne"),
+        "reflection_threat": bool_text(v3_scalar(closure, "Zagrożenie dnia wystąpiło")),
+        "reflection_response": v3_scalar(closure, "Czy odpowiednio zareagowałem"),
+        "closure_notes": v3_scalar(closure, "Dodatkowe informacje"),
         "additional": additional,
     }
-    values.update(
-        {
-            "planned_training_minutes": v3_duration_minutes(values["planned_training_start"], values["planned_training_end"]),
-            "actual_training_minutes": v3_duration_minutes(values["actual_training_start"], values["actual_training_end"]),
-            "planned_nsdr_minutes": v3_duration_minutes(values["planned_nsdr_start"], values["planned_nsdr_end"]),
-            "actual_nsdr_minutes": v3_duration_minutes(values["actual_nsdr_start"], values["actual_nsdr_end"]),
-            "planned_if_minutes": v3_duration_minutes(values["planned_if_start"], values["planned_if_end"]),
-            "actual_if_minutes": v3_duration_minutes(values["actual_if_start"], values["actual_if_end"]),
-        }
+    routine_values = [values[key] for key in (
+        "routine_wakeup", "routine_hygiene_mantra", "routine_kitchen", "routine_outdoors",
+        "routine_deep_focus", "routine_close_people_wishes",
+    )]
+    known_routine_values = [value for value in routine_values if value in {"true", "false"}]
+    values["routine_done_count"] = str(sum(value == "true" for value in known_routine_values))
+    values["routine_total_count"] = str(len(known_routine_values))
+    values["routine_completion_percent"] = (
+        str(round(100 * sum(value == "true" for value in known_routine_values) / len(known_routine_values), 2))
+        if known_routine_values else ""
     )
+    time_raw_values = {
+        key: values[key]
+        for key in (
+            "sleep_start", "sleep_end",
+            "planned_training_start", "planned_training_end",
+            "actual_training_start", "actual_training_end",
+            "planned_nsdr_start", "planned_nsdr_end",
+            "actual_nsdr_start", "actual_nsdr_end",
+            "planned_if_start", "planned_if_end",
+            "actual_if_start", "actual_if_end",
+        )
+    }
+    for prefix, start_date, end_date, label in (
+        ("sleep", previous_day_date, session_date, "sleep"),
+        ("planned_training", session_date, session_date, "planned training"),
+        ("actual_training", previous_day_date, previous_day_date, "actual training"),
+        ("planned_nsdr", session_date, session_date, "planned NSDR"),
+        ("actual_nsdr", previous_day_date, previous_day_date, "actual NSDR"),
+        ("planned_if", session_date, session_date, "planned IF"),
+        ("actual_if", previous_day_date, previous_day_date, "actual IF"),
+    ):
+        start, end, minutes = v3_normalize_range(
+            values[f"{prefix}_start"], values[f"{prefix}_end"], start_date, end_date, label
+        )
+        values[f"{prefix}_start"] = start
+        values[f"{prefix}_end"] = end
+        if prefix != "sleep":
+            values[f"{prefix}_minutes"] = minutes
     current_values = {
         key: values[key]
         for key in values
@@ -698,16 +866,35 @@ def build_v3_session(workspace: Path, markdown_path: Path) -> dict:
             "sleep_quality_score",
             "sleep_awakenings",
             "sleep_approximate",
+            "sleep_raw",
             "mental_clarity_score",
             "body_readiness_score",
             "health_notes",
+            "gratitude",
+            "weekday",
+            "recording_time",
+            "date_weekday_conflict",
+            "source_label",
+            "routine_wakeup",
+            "routine_hygiene_mantra",
+            "routine_kitchen",
+            "routine_outdoors",
+            "routine_deep_focus",
+            "routine_close_people_wishes",
+            "routine_done_count",
+            "routine_total_count",
+            "routine_completion_percent",
         }
     }
     closure_values = {
         key: values[key]
         for key in values
         if key.startswith("actual_")
-        or key in {"minimum_day_status", "finance_amount", "finance_currency", "finance_approximate"}
+        or key in {
+            "minimum_day_status", "finance_amount", "finance_currency", "finance_approximate", "finance_raw",
+            "reflection_plus_one", "reflection_redundant", "reflection_threat", "reflection_response", "closure_notes",
+            "actual_training_raw", "actual_nsdr_raw", "actual_if_raw",
+        }
     }
     return {
         "schema_version": "3",
@@ -720,14 +907,49 @@ def build_v3_session(workspace: Path, markdown_path: Path) -> dict:
         "comparisons": v3_comparisons(comparison_section),
         "dynamic_habits": dynamic_habits,
         "actual_dynamic_habits": actual_dynamic_habits,
+        "interpreted_input": v3_section(body, "Interpreted Input"),
         "attachments": attachments,
+        "time_raw_values": time_raw_values,
         "values": current_values,
         "closure_values": closure_values,
     }
 
 
-def merge_v3_sessions(sessions: list[dict]) -> list[dict]:
+def empty_v3_payload() -> dict:
+    return {
+        "session_date": "", "previous_day_date": "", "values": {}, "plan_items": [],
+        "actual_items": [], "comparisons": [], "dynamic_habits": [],
+        "actual_dynamic_habits": [], "dynamic_habit_warnings": [], "attachments": [],
+        "closure_session_path": "", "closure_session_date": "", "time_raw_values": {},
+        "interpreted_input": "", "closure_interpreted_input": "",
+    }
+
+
+def apply_v3_closure(target: dict, session: dict) -> None:
+    payload = target["v3"]
+    payload["actual_items"] = session["actual_items"]
+    payload["comparisons"] = session["comparisons"]
+    payload["actual_dynamic_habits"] = session["actual_dynamic_habits"]
+    known_habit_ids = {str(habit.get("id", "")) for habit in payload.get("dynamic_habits", [])}
+    payload["dynamic_habit_warnings"] = [
+        f"Unmatched actual dynamic habit ID: {habit['habit_id']}"
+        for habit in session["actual_dynamic_habits"]
+        if habit["habit_id"] not in known_habit_ids
+    ]
+    payload["closure_values"] = session["closure_values"]
+    payload["closure_interpreted_input"] = session.get("interpreted_input", "")
+    payload["closure_session_path"] = session["file_path"]
+    payload["closure_session_date"] = session["session_date"]
+    payload["closure_time_raw_values"] = {
+        key: value
+        for key, value in session["time_raw_values"].items()
+        if key.startswith("actual_")
+    }
+
+
+def merge_v3_sessions(sessions: list[dict], v2_records: list[dict]) -> list[dict]:
     daily: dict[str, dict] = {}
+    v2_by_date = {record["date"]: record for record in v2_records}
     for session in sorted(sessions, key=lambda item: item["session_date"]):
         date = session["session_date"]
         record = daily.setdefault(
@@ -737,7 +959,7 @@ def merge_v3_sessions(sessions: list[dict]) -> list[dict]:
                 "file_path": session["file_path"],
                 "frontmatter": session["frontmatter"],
                 "schema_version": "3",
-                "v3": {"session_date": date, "previous_day_date": "", "values": {}, "plan_items": [], "actual_items": [], "comparisons": [], "dynamic_habits": [], "actual_dynamic_habits": [], "dynamic_habit_warnings": [], "attachments": [], "closure_session_path": "", "closure_session_date": ""},
+                "v3": empty_v3_payload(),
                 "phases": {}, "habits": [], "reflections": {}, "attachments": [], "unmapped_fields": {},
             },
         )
@@ -750,6 +972,8 @@ def merge_v3_sessions(sessions: list[dict]) -> list[dict]:
             "plan_items": session["plan_items"],
             "dynamic_habits": session["dynamic_habits"],
             "attachments": session["attachments"],
+            "time_raw_values": session["time_raw_values"],
+            "interpreted_input": session.get("interpreted_input", ""),
         })
         record["attachments"] = session["attachments"]
 
@@ -766,27 +990,33 @@ def merge_v3_sessions(sessions: list[dict]) -> list[dict]:
         )
         if not has_closure:
             continue
+        v2_target = v2_by_date.get(session["previous_day_date"])
+        if v2_target:
+            v2_target["v3_closure"] = {
+                "actual_items": session["actual_items"],
+                "comparisons": session["comparisons"],
+                "actual_dynamic_habits": session["actual_dynamic_habits"],
+                "closure_values": session["closure_values"],
+                "interpreted_input": session.get("interpreted_input", ""),
+                "closure_session_path": session["file_path"],
+                "closure_session_date": session["session_date"],
+                "time_raw_values": {
+                    key: value
+                    for key, value in session["time_raw_values"].items()
+                    if key.startswith("actual_")
+                },
+            }
+            continue
         target = daily.setdefault(
             session["previous_day_date"],
             {
                 "date": session["previous_day_date"],
                 "file_path": "", "frontmatter": {}, "schema_version": "3",
-                "v3": {"session_date": "", "previous_day_date": "", "values": {}, "plan_items": [], "actual_items": [], "comparisons": [], "dynamic_habits": [], "actual_dynamic_habits": [], "dynamic_habit_warnings": [], "attachments": [], "closure_session_path": "", "closure_session_date": ""},
+                "v3": empty_v3_payload(),
                 "phases": {}, "habits": [], "reflections": {}, "attachments": [], "unmapped_fields": {},
             },
         )
-        target["v3"]["actual_items"] = session["actual_items"]
-        target["v3"]["comparisons"] = session["comparisons"]
-        target["v3"]["actual_dynamic_habits"] = session["actual_dynamic_habits"]
-        known_habit_ids = {str(habit.get("id", "")) for habit in target["v3"].get("dynamic_habits", [])}
-        target["v3"]["dynamic_habit_warnings"] = [
-            f"Unmatched actual dynamic habit ID: {habit['habit_id']}"
-            for habit in session["actual_dynamic_habits"]
-            if habit["habit_id"] not in known_habit_ids
-        ]
-        target["v3"]["closure_values"] = session["closure_values"]
-        target["v3"]["closure_session_path"] = session["file_path"]
-        target["v3"]["closure_session_date"] = session["session_date"]
+        apply_v3_closure(target, session)
     return [daily[date] for date in sorted(daily)]
 
 
@@ -837,7 +1067,59 @@ def csv_row(record: dict) -> dict[str, str]:
     for habit in habits:
         value = habit["value"]
         row[f"habit_{habit['slug']}"] = str(value).lower() if value != "" else ""
+    if record.get("v3_closure"):
+        row.update(v2_v3_closure_row(record))
     return row
+
+
+def v2_v3_closure_row(record: dict) -> dict[str, str]:
+    """Render the additive V3 closure overlay without changing V2 base columns."""
+    closure = record["v3_closure"]
+    values = closure.get("closure_values", {})
+    actual_items = closure.get("actual_items", [])
+    return {
+        "schema_version": "2",
+        "minimum_day_status": str(values.get("minimum_day_status", "")),
+        "actual_training_start": str(values.get("actual_training_start", "")),
+        "actual_training_end": str(values.get("actual_training_end", "")),
+        "actual_training_type": str(values.get("actual_training_type", "")),
+        "actual_training_performed": str(values.get("actual_training_performed", "")),
+        "actual_training_minutes": str(values.get("actual_training_minutes", "")),
+        "actual_training_rpe": str(values.get("actual_training_rpe", "")),
+        "actual_training_raw": str(values.get("actual_training_raw", "")),
+        "actual_nsdr_start": str(values.get("actual_nsdr_start", "")),
+        "actual_nsdr_end": str(values.get("actual_nsdr_end", "")),
+        "actual_nsdr_minutes": str(values.get("actual_nsdr_minutes", "")),
+        "actual_nsdr_effect": str(values.get("actual_nsdr_effect", "")),
+        "actual_nsdr_performed": str(values.get("actual_nsdr_performed", "")),
+        "actual_nsdr_raw": str(values.get("actual_nsdr_raw", "")),
+        "actual_if_start": str(values.get("actual_if_start", "")),
+        "actual_if_end": str(values.get("actual_if_end", "")),
+        "actual_if_minutes": str(values.get("actual_if_minutes", "")),
+        "actual_if_raw": str(values.get("actual_if_raw", "")),
+        "actual_calories_min": str(values.get("actual_calories_min", "")),
+        "actual_calories_max": str(values.get("actual_calories_max", "")),
+        "actual_calories_representative": str(values.get("actual_calories_representative", "")),
+        "finance_amount": str(values.get("finance_amount", "")),
+        "finance_currency": str(values.get("finance_currency", "")),
+        "finance_approximate": str(values.get("finance_approximate", "")),
+        "finance_raw": str(values.get("finance_raw", "")),
+        "reflection_plus_one": str(values.get("reflection_plus_one", "")),
+        "reflection_redundant": str(values.get("reflection_redundant", "")),
+        "reflection_threat": str(values.get("reflection_threat", "")),
+        "reflection_response": str(values.get("reflection_response", "")),
+        "closure_notes": str(values.get("closure_notes", "")),
+        "actual_item_count": str(len(actual_items)),
+        "comparison_count": str(len(closure.get("comparisons", []))),
+        "actual_build_count": str(sum(1 for item in actual_items if item.get("stream") == "build")),
+        "actual_deliver_count": str(sum(1 for item in actual_items if item.get("stream") == "deliver")),
+        "actual_promote_count": str(sum(1 for item in actual_items if item.get("stream") == "promote")),
+        "actual_self_count": str(sum(1 for item in actual_items if item.get("stream") == "self")),
+        "actual_close_people_count": str(sum(1 for item in actual_items if item.get("stream") == "close")),
+        "interpreted_input": str(closure.get("interpreted_input", "")),
+        "v3_closure_session_date": str(closure.get("closure_session_date", "")),
+        "v3_closure_session_path": str(closure.get("closure_session_path", "")),
+    }
 
 
 def metrics_row(record: dict) -> dict[str, str]:
@@ -880,6 +1162,7 @@ def v3_csv_row(record: dict) -> dict[str, str]:
             "day_mode": combined.get("work_mode", ""),
             "body_subjective": combined.get("body_readiness_score", ""),
             "mental_subjective": combined.get("mental_clarity_score", ""),
+            "limitations_subjective": combined.get("health_notes", ""),
             "sleep_start": combined.get("sleep_start", ""),
             "sleep_end": combined.get("sleep_end", ""),
             "sleep_hours": duration(combined.get("sleep_start", ""), combined.get("sleep_end", ""), "hours"),
@@ -897,9 +1180,14 @@ def v3_csv_row(record: dict) -> dict[str, str]:
             "nsdr_minutes": combined.get("actual_nsdr_minutes") or combined.get("planned_nsdr_minutes", ""),
             "habit_count_done": str(sum(1 for habit in dynamic_habits if habit.get("actual_status") == "completed")),
             "habit_count_total": str(len(dynamic_habits)),
+            "has_plus_one": str(bool(combined.get("reflection_plus_one", ""))).lower(),
+            "has_threat": str(combined.get("reflection_threat", "")),
             "has_built": str(bool([item for item in actual_items if item.get("stream") == "build"])).lower(),
             "has_delivered": str(bool([item for item in actual_items if item.get("stream") == "deliver"])).lower(),
             "has_promoted": str(bool([item for item in actual_items if item.get("stream") == "promote"])).lower(),
+            "has_close_people_action": str(bool([item for item in actual_items if item.get("stream") == "close"])).lower(),
+            "has_gratitude": str(bool(combined.get("gratitude", ""))).lower(),
+            "has_redundant": str(bool(combined.get("reflection_redundant", ""))).lower(),
             **attachment_counts(attachments),
             "schema_version": "3",
             "session_date": payload.get("session_date", ""),
@@ -908,6 +1196,11 @@ def v3_csv_row(record: dict) -> dict[str, str]:
             "normalization_authority": str(frontmatter.get("normalization_authority", "")),
             "report_revision": str(frontmatter.get("report_revision", "")),
             "task_generation_status": str(frontmatter.get("task_generation_status", "")),
+            "source_type": str(frontmatter.get("source_type", "")),
+            "privacy_class": str(frontmatter.get("privacy", "")),
+            "weekday": combined.get("weekday", ""),
+            "recording_time": combined.get("recording_time", ""),
+            "date_weekday_conflict": combined.get("date_weekday_conflict", ""),
             "work_mode": combined.get("work_mode", ""),
             "organism_mode": combined.get("organism_mode", ""),
             "minimum_day_status": minimum,
@@ -917,15 +1210,20 @@ def v3_csv_row(record: dict) -> dict[str, str]:
             "planned_build_count": str(sum(1 for item in plan_items if item.get("stream") == "build")),
             "planned_deliver_count": str(sum(1 for item in plan_items if item.get("stream") == "deliver")),
             "planned_promote_count": str(sum(1 for item in plan_items if item.get("stream") == "promote")),
+            "planned_self_count": str(sum(1 for item in plan_items if item.get("stream") == "self")),
+            "planned_close_people_count": str(sum(1 for item in plan_items if item.get("stream") == "close")),
             "actual_build_count": str(sum(1 for item in actual_items if item.get("stream") == "build")),
             "actual_deliver_count": str(sum(1 for item in actual_items if item.get("stream") == "deliver")),
             "actual_promote_count": str(sum(1 for item in actual_items if item.get("stream") == "promote")),
+            "actual_self_count": str(sum(1 for item in actual_items if item.get("stream") == "self")),
+            "actual_close_people_count": str(sum(1 for item in actual_items if item.get("stream") == "close")),
             "dynamic_habit_count": str(len(dynamic_habits)),
             "dynamic_habit_done_count": str(sum(1 for habit in dynamic_habits if habit.get("actual_status") == "completed")),
             "dynamic_habit_partial_count": str(sum(1 for habit in dynamic_habits if habit.get("actual_status") == "partial")),
             "dynamic_habit_not_completed_count": str(sum(1 for habit in dynamic_habits if habit.get("actual_status") == "not-completed")),
             "dynamic_habit_unknown_count": str(sum(1 for habit in dynamic_habits if habit.get("actual_status") == "unknown")),
             "attachment_paths_json": json.dumps(attachments, ensure_ascii=False),
+            "interpreted_input": str(payload.get("interpreted_input", "")),
         }
     )
     for key in V3_INDEX_COLUMNS:
@@ -1022,17 +1320,25 @@ def write_text_atomic(path: Path, content: str) -> None:
 def render_trends(records: list[dict]) -> str:
     """Render aggregated V3-only trends without raw sensitive values or attachments."""
     v3_records = [record for record in records if record.get("schema_version") == "3"]
-    closed = sum(1 for record in v3_records if record.get("v3", {}).get("closure_session_path"))
+    v2_closure_records = [record for record in records if record.get("v3_closure")]
+    closed = sum(1 for record in v3_records if record.get("v3", {}).get("closure_session_path")) + len(v2_closure_records)
+    closure_payloads = [
+        record.get("v3", {})
+        for record in v3_records
+        if record.get("v3", {}).get("closure_session_path")
+    ] + [record["v3_closure"] for record in v2_closure_records]
     minimum = {
         status: sum(
             1
-            for record in v3_records
-            if (record.get("v3", {}).get("closure_values", {}) or record.get("v3", {}).get("values", {})).get("minimum_day_status") == status
+            for payload in closure_payloads
+            if payload.get("closure_values", {}).get("minimum_day_status") == status
         )
         for status in ("completed", "partial", "not-completed", "not-defined", "unknown")
     }
     plan_count = sum(len(record.get("v3", {}).get("plan_items", [])) for record in v3_records)
-    actual_count = sum(len(record.get("v3", {}).get("actual_items", [])) for record in v3_records)
+    actual_count = sum(len(record.get("v3", {}).get("actual_items", [])) for record in v3_records) + sum(
+        len(record.get("v3_closure", {}).get("actual_items", [])) for record in v2_closure_records
+    )
     return "\n".join(
         [
             "# Daily Check-In Trends",
@@ -1041,6 +1347,7 @@ def render_trends(records: list[dict]) -> str:
             "",
             f"- v3-effective-day-count: {len(v3_records)}",
             f"- v3-days-with-closure: {closed}",
+            f"- v2-days-with-v3-closure-overlay: {len(v2_closure_records)}",
             f"- planned-item-count: {plan_count}",
             f"- actual-item-count: {actual_count}",
             f"- minimum-completed-count: {minimum['completed']}",
@@ -1112,6 +1419,8 @@ def write_indexes(records: list[dict], workspace: Path, source: str, dry_run: bo
             if record.get("schema_version") == "3":
                 payload["schema_version"] = "3"
                 payload["v3"] = record.get("v3", {})
+            if record.get("v3_closure"):
+                payload["v3_closure"] = record["v3_closure"]
             handle.write(json.dumps(payload, ensure_ascii=False, sort_keys=True) + "\n")
         temp_jsonl = Path(handle.name)
 
@@ -1136,7 +1445,7 @@ def load_records(workspace: Path) -> list[dict]:
             v3_sessions.append(build_v3_session(workspace, path))
         else:
             v2_records.append(build_record(workspace, path, existing_unmapped))
-    return sorted(v2_records + merge_v3_sessions(v3_sessions), key=lambda record: (record["date"], record.get("file_path", "")))
+    return sorted(v2_records + merge_v3_sessions(v3_sessions, v2_records), key=lambda record: (record["date"], record.get("file_path", "")))
 
 
 def print_status(records: list[dict], router_path: Path, source_files: list[Path]) -> None:

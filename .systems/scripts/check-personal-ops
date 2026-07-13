@@ -98,11 +98,27 @@ for term in \
   'task_generation_reason' \
   'task_generation_references' \
   'V2 Compatibility' \
+  'derived-only V3 closure overlay' \
+  'HH:MM' \
   'V2-only' \
   'check-ins.trends.md' \
   'Detailed values for finances, budgets, calories, health' \
   'source_session_date + source_plan_item_id' \
-  'One exact `owner-approved` write'
+  'One exact `owner-approved` write' \
+  'Interpreted Input' \
+  'canonical fields take precedence' \
+  'Task: create' \
+  'Task: skip' \
+  'Task title' \
+  'Task bucket: <6d/do|6d/defer|6d/delegate|6d/delete|6d/dump>' \
+  'legacy `5d/*` input is read-compatible and normalizes to the matching 6D tag' \
+  'routine_completion_percent' \
+  'actual_training_performed' \
+  'actual_nsdr_performed' \
+  'actual_self_count' \
+  'actual_close_people_count' \
+  'reflection_plus_one' \
+  'reflection_redundant'
 do
   require_ref ".systems/ai/core/personal-ops.md" "$term" "$term"
 done
@@ -125,8 +141,15 @@ for term in \
   'never rewrites daily Markdown' \
   'build_v3_session' \
   'merge_v3_sessions' \
+  'v3_normalize_range' \
+  'v3_closure' \
   'schema_version' \
-  'normalize_missing'
+  'normalize_missing' \
+  'interpreted_input' \
+  'routine_completion_percent' \
+  'actual_training_performed' \
+  'actual_nsdr_performed' \
+  'reflection_plus_one'
 do
   require_ref ".systems/scripts/sync-personal-ops-check-ins" "$term" "sync tool term $term"
 done
@@ -199,7 +222,14 @@ for section in \
   'Porównanie plan-fakt' \
   'Planowane nawyki' \
   'Habit ID: <habit-01>' \
-  'Faktyczne nawyki'
+  'Faktyczne nawyki' \
+  'Faktyczny trening wykonany' \
+  'Faktyczny NSDR wykonany' \
+  'Faktycznie zrobiłem coś dla siebie' \
+  'Faktycznie zrobiłem coś dla bliskich' \
+  'Task: <create|skip>' \
+  'Task title:' \
+  '## Interpreted Input'
 do
   require_ref ".systems/ai/templates/workspace/personal-ops/check-in.template.md" "$section" "check-in section $section"
 done

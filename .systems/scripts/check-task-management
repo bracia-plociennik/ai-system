@@ -258,6 +258,11 @@ for term in \
   'Personal Ops V3 Initial Task Creation' \
   'source_session_date + source_plan_item_id' \
   'mechanical flag records the same approval' \
+  'Task: create' \
+  'Task: skip' \
+  'Task title' \
+  'legacy `5d/*` input is read-compatible and normalizes to the matching `6d/*` tag' \
+  'warns without failing when project discovery cannot run' \
   'task_generation_status: skipped' \
   'task_generation_references' \
   'Project matching reads AI System `project:` plus TaskForge frontmatter `projects:` wiki links only' \
@@ -298,6 +303,7 @@ do
 done
 
 require_ref ".systems/ai/templates/workspace/tasks/taskforge-vault.local.template.md" 'vault_path:' "local vault configuration"
+require_ref ".systems/ai/templates/workspace/tasks/taskforge-vault.local.template.md" 'Dry-run task proposals may read this record' "dry-run vault discovery"
 
 if head -n 1 "$repo_root/.systems/ai/templates/workspace/tasks/tasknote.template.md" | rg -q '^---$'; then
   echo "TaskNote template has active YAML frontmatter and may be detected as a real task"

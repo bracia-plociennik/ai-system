@@ -1423,6 +1423,12 @@ privacy: private-sensitive
 
 # Daily Check-In 2026-07-10
 
+## Metadane
+
+- Dzień tygodnia: friday
+- Godzina nagrania: 08:00
+- Konflikt daty i dnia tygodnia: false
+
 ## Podsumowanie poprzedniego dnia
 
 ### Sen
@@ -1431,6 +1437,7 @@ privacy: private-sensitive
 - Koniec snu: 2026-07-10 07:00
 - Jakość snu: 4
 - Liczba przebudzeń: 1
+- Sen raw: Around 23:00-07:00.
 
 ## Plan dnia
 
@@ -1450,10 +1457,13 @@ privacy: private-sensitive
 ### Planuję dowieźć
 
 - [deliver-01] Send accepted report
+  - Task title: Send approved report to owner
+  - Task bucket: 5d/defer
 
 ### Planuję wypromować
 
 - [promote-01] Publish owner update
+  - Task: skip
 
 ### Planowane nawyki
 
@@ -1465,12 +1475,30 @@ privacy: private-sensitive
 
 ## Poranny check-in
 
+### Rutyna
+
+- Pobudka bez negocjacji: true
+- Toaleta + mantra: true
+- Kuchnia: true
+- Dwór: false
+- Deep Focus: true
+- Życzenia dla bliskich: true
+
 - Klarowność mentalna: 4
 - Gotowość ciała: 5
 
 ## Dodatkowe informacje
 
 - Uwagi: V3 smoke fixture.
+
+## Interpreted Input
+
+- Source type: voice-check-in
+- Normalized values applied: planned times and routine booleans.
+- Field mapping: source labels mapped to canonical V3 fields.
+- Corrections applied: sleep quality corrected to 4.
+- Unresolved fields: none.
+- Precedence: canonical fields above take precedence over this audit context.
 MD
 mkdir -p "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-10.assets"
 printf 'fixture' > "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-10.assets/screenshot-v3.png"
@@ -1495,16 +1523,20 @@ privacy: private-sensitive
 
 ### Faktyczny trening
 
+- Faktyczny trening wykonany: true
 - Faktyczny trening start: 2026-07-10 17:00
 - Faktyczny trening koniec: 2026-07-10 18:30
 - Faktyczny trening typ: full_body_b
 - RPE: 7
+- Trening raw: Full session completed.
 
 ### Faktyczny NSDR
 
+- Faktyczny NSDR wykonany: true
 - Faktyczny NSDR start: 2026-07-10 12:50
 - Faktyczny NSDR koniec: 2026-07-10 13:10
 - Efekt NSDR: better
+- NSDR raw: Short guided recovery.
 
 ### Faktyczny IF i kalorie
 
@@ -1513,16 +1545,26 @@ privacy: private-sensitive
 - Faktyczne kalorie minimum: 2300
 - Faktyczne kalorie maksimum: 2500
 - Faktyczne kalorie reprezentatywne: 2400
+- IF raw: First meal at noon, final meal at eight.
 
 ### Finanse
 
 - Finanse kwota: 70
 - Finanse waluta: PLN
 - Finanse przybliżenie: true
+- Finanse raw: Approximate personal spend.
 
 ### Faktycznie zbudowałem
 
 - [actual-build-01] Demo project delivery page
+
+### Faktycznie zrobiłem coś dla siebie
+
+- [actual-self-01] Rested after training
+
+### Faktycznie zrobiłem coś dla bliskich
+
+- [actual-close-01] Shared dinner with close people
 
 ### Faktyczne nawyki
 
@@ -1543,6 +1585,11 @@ privacy: private-sensitive
 ### Minimum i refleksja
 
 - Minimum dnia: partial
+- Co realnie dało +1%: Protected the product work block.
+- Co było zbędne: Repeated inbox refreshes.
+- Zagrożenie dnia wystąpiło: true
+- Czy odpowiednio zareagowałem: partial
+- Dodatkowe informacje: Closure note retained in detailed indexes.
 
 ## Plan dnia
 
@@ -1577,6 +1624,17 @@ row = rows['2026-07-10']
 assert row['previous_day_date'] == '2026-07-09', row
 assert row['dynamic_habit_done_count'] == '1', row
 assert row['dynamic_habit_unknown_count'] == '0', row
+assert row['routine_done_count'] == '5', row
+assert row['routine_total_count'] == '6', row
+assert row['actual_training_performed'] == 'true', row
+assert row['actual_nsdr_performed'] == 'true', row
+assert row['actual_self_count'] == '1', row
+assert row['actual_close_people_count'] == '1', row
+assert row['reflection_plus_one'] == 'Protected the product work block.', row
+assert row['reflection_redundant'] == 'Repeated inbox refreshes.', row
+assert row['actual_training_raw'] == 'Full session completed.', row
+assert row['finance_raw'] == 'Approximate personal spend.', row
+assert row['interpreted_input'].startswith('- Source type: voice-check-in'), row
 PY
 test -f "$personal_ops_v3_workspace/personal-ops/indexes/check-ins.trends.md" || { echo "V3 sync missing sanitized trends"; exit 1; }
 if rg -q '2400|70|PLN|actual-build-01|screenshot-v3' "$personal_ops_v3_workspace/personal-ops/indexes/check-ins.trends.md"; then
@@ -1613,15 +1671,88 @@ projects:
 - [ ] Existing work.
 MD
 run_must_pass "personal-ops-v3-task-candidates-dry-run" "$task_candidate_script" --workspace "$personal_ops_v3_workspace" --check-in "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-10.md"
+"$task_candidate_script" --workspace "$personal_ops_v3_workspace" --check-in "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-10.md" --json > "$tmp/personal-ops-v3-task-candidates.json"
+python3 - "$tmp/personal-ops-v3-task-candidates.json" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding='utf-8') as handle:
+    candidates = json.load(handle)
+assert {candidate['source_plan_item_id'] for candidate in candidates} == {'build-01', 'deliver-01'}, candidates
+deliver = next(candidate for candidate in candidates if candidate['source_plan_item_id'] == 'deliver-01')
+assert deliver['title'] == 'Send approved report to owner', deliver
+assert deliver['tags'] == ['6d/defer'], deliver
+assert deliver['status'] == 'planned', deliver
+assert deliver['priority'] == 'normal', deliver
+assert deliver['task_method'] == '6d', deliver
+build = next(candidate for candidate in candidates if candidate['source_plan_item_id'] == 'build-01')
+assert build['projects'] == ['[[Demo Project]]'], build
+PY
 run_must_pass "personal-ops-v3-task-candidates-owner-approved-write" "$task_candidate_script" --workspace "$personal_ops_v3_workspace" --check-in "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-10.md" --owner-approved --write
 grep -q 'ai-system:v3:2026-07-10:build-01' "$personal_ops_v3_vault/TaskNotes/Tasks/demo-parent.md" || { echo "V3 similar task was not extended with subtask"; exit 1; }
 test "$(grep -R -l 'source_plan_item_id: "deliver-01"' "$personal_ops_v3_vault/TaskNotes/Tasks" | wc -l | tr -d ' ')" = "1" || { echo "V3 deliver item did not create one TaskNote"; exit 1; }
+if rg -q '5d/' "$personal_ops_v3_vault/TaskNotes/Tasks"; then
+  echo "V3 task generation wrote a legacy 5D tag"
+  exit 1
+fi
 grep -q 'task_generation_status: "created-and-subtasks"' "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-10.md" || { echo "V3 task generation status was not recorded"; exit 1; }
 run_must_pass "personal-ops-v3-task-candidates-deduplicate" "$task_candidate_script" --workspace "$personal_ops_v3_workspace" --check-in "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-10.md" --owner-approved --write
 test "$(grep -c 'ai-system:v3:2026-07-10:build-01' "$personal_ops_v3_vault/TaskNotes/Tasks/demo-parent.md")" = "1" || { echo "V3 task subtask was duplicated"; exit 1; }
 run_must_pass "personal-ops-v3-task-candidates-vault-skipped" "$task_candidate_script" --workspace "$personal_ops_v3_workspace" --check-in "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-11.md" --task-vault "$tmp/missing-taskforge-vault" --owner-approved --write
 grep -q 'task_generation_status: "skipped"' "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-11.md" || { echo "V3 unavailable vault did not record skipped status"; exit 1; }
 grep -q 'task_generation_reason:' "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-11.md" || { echo "V3 unavailable vault did not record skipped reason"; exit 1; }
+
+cat > "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-12.md" <<'MD'
+---
+type: daily-check-in
+schema_version: 3
+date: 2026-07-12
+session_date: 2026-07-12
+previous_day_date: 2026-07-11
+timezone: Europe/Warsaw
+source_type: manual-interpreted
+normalization_authority: interpreted-report
+report_revision: 1
+task_generation_status: pending
+privacy: private-sensitive
+---
+
+## Plan dnia
+
+### Planuję zbudować
+
+- [build-do] Do task
+  - Task bucket: 6d/do
+- [build-defer] Defer task
+  - Task bucket: 6d/defer
+- [build-delegate] Delegate task
+  - Task bucket: 6d/delegate
+- [build-delete] Delete task
+  - Task bucket: 6d/delete
+- [build-dump] Dump task
+  - Task bucket: 6d/dump
+MD
+"$task_candidate_script" --workspace "$personal_ops_v3_workspace" --check-in "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-12.md" --json > "$tmp/personal-ops-v3-all-buckets.json"
+python3 - "$tmp/personal-ops-v3-all-buckets.json" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding='utf-8') as handle:
+    candidates = {candidate['source_plan_item_id']: candidate for candidate in json.load(handle)}
+expected = {
+    'build-do': ('6d/do', 'open', 'high'),
+    'build-defer': ('6d/defer', 'planned', 'normal'),
+    'build-delegate': ('6d/delegate', 'waiting', 'normal'),
+    'build-delete': ('6d/delete', 'cancelled', 'none'),
+    'build-dump': ('6d/dump', 'open', 'none'),
+}
+assert set(candidates) == set(expected), candidates
+for item_id, (tag, status, priority) in expected.items():
+    candidate = candidates[item_id]
+    assert candidate['tags'] == [tag], candidate
+    assert candidate['status'] == status, candidate
+    assert candidate['priority'] == priority, candidate
+PY
 
 personal_ops_v3_unknown_workspace="$tmp/personal-ops-v3-unknown-workspace"
 mkdir -p "$personal_ops_v3_unknown_workspace/personal-ops/check-ins/2026"
@@ -1660,6 +1791,132 @@ if grep -q '^2026-07-19,' "$personal_ops_v3_unknown_workspace/personal-ops/index
   echo "V3 unknown closure indexed an absent prior day"
   exit 1
 fi
+
+personal_ops_v3_v2_overlay_workspace="$tmp/personal-ops-v3-v2-overlay-workspace"
+mkdir -p "$personal_ops_v3_v2_overlay_workspace/personal-ops/check-ins/2026"
+cat > "$personal_ops_v3_v2_overlay_workspace/personal-ops/check-ins/2026/2026-07-09.md" <<'MD'
+---
+type: daily-check-in
+date: 2026-07-09
+source: manual
+minimum_day_done: false
+day_mode: legacy
+---
+
+# Legacy V2 check-in
+MD
+cat > "$personal_ops_v3_v2_overlay_workspace/personal-ops/check-ins/2026/2026-07-10.md" <<'MD'
+---
+type: daily-check-in
+schema_version: 3
+date: 2026-07-10
+session_date: 2026-07-10
+previous_day_date: 2026-07-09
+timezone: Europe/Warsaw
+source_type: manual-interpreted
+normalization_authority: interpreted-report
+report_revision: 1
+task_generation_status: pending
+privacy: private-sensitive
+---
+
+## Podsumowanie poprzedniego dnia
+
+### Sen
+
+- Początek snu: 23:00
+- Koniec snu: 07:00
+
+### Faktyczny trening
+
+- Faktyczny trening start: 17:00
+- Faktyczny trening koniec: 19:00
+
+### Faktyczny IF i kalorie
+
+- Faktyczny IF start: 20:00
+- Faktyczny IF koniec: 01:00
+
+### Faktycznie zbudowałem
+
+- [actual-build-01] Legacy closure work
+
+### Minimum i refleksja
+
+- Minimum dnia: completed
+
+## Plan dnia
+
+- Tryb pracy: normalny
+
+### Planowany trening
+
+- Planowany trening start: 08:00
+- Planowany trening koniec: 09:00
+
+## Poranny check-in
+
+- Klarowność mentalna: 3
+MD
+run_must_pass "personal-ops-v3-v2-overlay-and-time-only-sync" "$personal_ops_sync" --workspace "$personal_ops_v3_v2_overlay_workspace"
+python3 - "$personal_ops_v3_v2_overlay_workspace/personal-ops/indexes/check-ins.csv" "$personal_ops_v3_v2_overlay_workspace/personal-ops/indexes/check-ins.jsonl" <<'PY'
+import csv
+import json
+import sys
+
+with open(sys.argv[1], newline='', encoding='utf-8') as handle:
+    rows = list(csv.DictReader(handle))
+assert [row['date'] for row in rows] == ['2026-07-09', '2026-07-10'], rows
+legacy = rows[0]
+current = rows[1]
+assert legacy['schema_version'] == '2', legacy
+assert legacy['day_mode'] == 'legacy', legacy
+assert legacy['minimum_day_done'] == 'false', legacy
+assert legacy['actual_training_start'] == '2026-07-09 17:00', legacy
+assert legacy['actual_training_minutes'] == '120', legacy
+assert legacy['actual_if_end'] == '2026-07-10 01:00', legacy
+assert legacy['actual_if_minutes'] == '300', legacy
+assert legacy['v3_closure_session_date'] == '2026-07-10', legacy
+assert current['planned_training_start'] == '2026-07-10 08:00', current
+assert current['planned_training_minutes'] == '60', current
+assert current['sleep_start'] == '2026-07-09 23:00', current
+assert current['sleep_end'] == '2026-07-10 07:00', current
+assert current['sleep_hours'] == '8', current
+with open(sys.argv[2], encoding='utf-8') as handle:
+    payloads = [json.loads(line) for line in handle if line.strip()]
+legacy_payload = next(payload for payload in payloads if payload['date'] == '2026-07-09')
+assert legacy_payload['v3_closure']['closure_session_path'].endswith('2026-07-10.md'), legacy_payload
+PY
+grep -q 'v2-days-with-v3-closure-overlay: 1' "$personal_ops_v3_v2_overlay_workspace/personal-ops/indexes/check-ins.trends.md" || { echo "V2 closure overlay was not represented in sanitized trends"; exit 1; }
+grep -q 'minimum-completed-count: 1' "$personal_ops_v3_v2_overlay_workspace/personal-ops/indexes/check-ins.trends.md" || { echo "V2 closure overlay minimum status was not represented in sanitized trends"; exit 1; }
+
+personal_ops_v3_bad_time_workspace="$tmp/personal-ops-v3-bad-time-workspace"
+mkdir -p "$personal_ops_v3_bad_time_workspace/personal-ops/check-ins/2026" "$personal_ops_v3_bad_time_workspace/personal-ops/indexes"
+printf '%s\n' 'sentinel csv' > "$personal_ops_v3_bad_time_workspace/personal-ops/indexes/check-ins.csv"
+cat > "$personal_ops_v3_bad_time_workspace/personal-ops/check-ins/2026/2026-07-21.md" <<'MD'
+---
+type: daily-check-in
+schema_version: 3
+date: 2026-07-21
+session_date: 2026-07-21
+previous_day_date: 2026-07-20
+timezone: Europe/Warsaw
+source_type: manual-interpreted
+normalization_authority: interpreted-report
+report_revision: 1
+task_generation_status: pending
+privacy: private-sensitive
+---
+
+## Plan dnia
+
+### Planowany trening
+
+- Planowany trening start: after breakfast
+- Planowany trening koniec: 09:00
+MD
+run_must_fail "personal-ops-v3-malformed-time-preserves-indexes" "$personal_ops_sync" --workspace "$personal_ops_v3_bad_time_workspace"
+grep -q 'sentinel csv' "$personal_ops_v3_bad_time_workspace/personal-ops/indexes/check-ins.csv" || { echo "Malformed V3 time replaced CSV despite failure"; exit 1; }
 
 task_management_validator="$copy_repo/.systems/scripts/check-task-management"
 
@@ -1964,6 +2221,10 @@ Publish owner update
 MD
 
 run_must_pass "task-candidates-check-in-dry-run" "$task_candidate_script" --workspace "$task_candidate_workspace" --check-in "$task_candidate_workspace/personal-ops/check-ins/2026/2026-06-22.md"
+test ! -e "$task_candidate_workspace/tasks" || { echo "dry-run unexpectedly created local vault configuration"; exit 1; }
+"$task_candidate_script" --workspace "$task_candidate_workspace" --check-in "$task_candidate_workspace/personal-ops/check-ins/2026/2026-06-22.md" --json > "$tmp/task-candidates-no-config.json" 2> "$tmp/task-candidates-no-config.err"
+grep -q 'TaskForge project mapping unavailable' "$tmp/task-candidates-no-config.err" || { echo "dry-run missing vault configuration did not warn"; exit 1; }
+test ! -e "$task_candidate_workspace/tasks" || { echo "dry-run wrote local vault configuration"; exit 1; }
 "$task_candidate_script" --workspace "$task_candidate_workspace" --task-vault "$task_candidate_vault" --check-in "$task_candidate_workspace/personal-ops/check-ins/2026/2026-06-22.md" --json > "$tmp/task-candidates.json"
 grep -q '"source_check_in_field": "Zbudowałem"' "$tmp/task-candidates.json" || { echo "check-in candidate missing Zbudowałem source"; exit 1; }
 grep -F -q '"tags": [' "$tmp/task-candidates.json" || { echo "check-in candidate missing tags"; exit 1; }

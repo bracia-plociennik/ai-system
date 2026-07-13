@@ -175,7 +175,7 @@ Existing TaskForge-created TaskNotes with `taskSourceType: taskNotes` but withou
 
 ## Personal Ops V3 Initial Task Creation
 
-For one canonical V3 daily check-in write, the exact `owner-approved` approval for that check-in also authorizes initial TaskNotes from its planned `build-*`, `deliver-*`, and `promote-*` items. This is not a general TaskForge write exemption.
+For one canonical V3 daily check-in write, the exact `owner-approved` approval for that check-in also authorizes initial TaskNotes from its planned `build-*`, `deliver-*`, and `promote-*` items. `Task: create` is the per-item default, `Task: skip` suppresses one candidate, and `Task title` may override the generated title. An explicit `6d/*` Task bucket controls the output; a legacy `5d/*` input is read-compatible and normalizes to the matching `6d/*` tag. Absent an override, the route uses `6d/do`. This is not a general TaskForge write exemption.
 
 The route uses `.systems/scripts/propose-task-candidates --owner-approved --write --task-vault-config <workspace>/tasks/taskforge-vault.local.md`. The mechanical flag records the same approval; do not request a second approval. The local-only vault configuration must be enabled, point to an existing vault, and the vault must already contain `TaskNotes/Tasks/`.
 
@@ -231,14 +231,14 @@ Task management requests require selected workspace first.
 Routes:
 
 - add task: propose a TaskNote, then write only after exact owner approval;
-- V3 check-in to task candidates: use `.systems/scripts/propose-task-candidates --workspace <workspace-path> --check-in <workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.md`; during the same owner-approved V3 check-in write, use `--owner-approved --write --task-vault-config <workspace>/tasks/taskforge-vault.local.md`;
+- V3 check-in to task candidates: use `.systems/scripts/propose-task-candidates --workspace <workspace-path> --check-in <workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.md`; dry-run reads `<workspace>/tasks/taskforge-vault.local.md` when available to discover TaskForge project links and warns without failing when it is unavailable; during the same owner-approved V3 check-in write, use `--owner-approved --write --task-vault-config <workspace>/tasks/taskforge-vault.local.md`;
 - Dream Report to task candidates: use `.systems/scripts/propose-task-candidates --workspace <workspace-path> --dream-report <workspace>/dreams/runs/<run>/dream-report.md`; Dreaming Mode itself must not write TaskNotes;
 - complete task: re-read target TaskNote, then update status only after exact owner approval;
 - reschedule task: re-read target TaskNote, then update date fields only after exact owner approval;
 - task review: read task files and produce recommendations; do not mutate files;
 - link task: add AI System mapping fields only when owner-approved.
 
-Candidate generation may auto-detect task candidates and conservative source mappings, but TaskNote creation still requires exact owner approval. Boundary-only v1 matching means: match client, owned-asset, project-state, or existing TaskForge project names only when exactly one strong match exists and only as full normalized token/phrase matches; do not use substring matching; do not auto-match labels shorter than 3 chars; no aliases in v1. Existing TaskForge project discovery reads only frontmatter `projects:` wiki links, not `blockedBy`, body notes, inline tasks, or arbitrary wiki links. New writes put 6D in `tags`; client/workspace/personal routing stays in `contexts`. The generator reads explicit historical `5d/*` and current `6d/*` source markers, normalizes their bucket, and writes only `6d/*`. Leave ambiguous mappings blank and record `Mapping requires review`.
+Candidate generation may auto-detect task candidates and conservative source mappings, but TaskNote creation still requires exact owner approval. Boundary-only v1 matching means: match client, owned-asset, project-state, or existing TaskForge project names only when exactly one strong match exists and only as full normalized token/phrase matches; do not use substring matching; do not auto-match labels shorter than 3 chars; no aliases in v1. Existing TaskForge project discovery reads only frontmatter `projects:` wiki links, not `blockedBy`, body notes, inline tasks, or arbitrary wiki links. Dry-run uses the configured local-only vault when available and warns without failing when project discovery cannot run. New writes put 6D in `tags`; client/workspace/personal routing stays in `contexts`. The generator reads explicit historical `5d/*` and current `6d/*` source markers, normalizes their bucket, and writes only `6d/*`. Leave ambiguous mappings blank and record `Mapping requires review`.
 
 The proposal script does not initialize TaskForge vault structure. `--owner-approved --write --task-vault <taskforge-vault>` requires an existing vault directory and an existing `TaskNotes/Tasks/` directory; if either is missing, stop before writing.
 

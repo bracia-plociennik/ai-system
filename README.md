@@ -209,7 +209,7 @@ Generated analytical indexes live in:
 <workspace>/personal-ops/indexes/check-ins.trends.md
 ```
 
-Markdown is the source of truth. V3 session `D` captures day `D` plan/morning state and day `D-1` closure without modifying the old file. Detailed V3 CSV/JSONL/metrics indexes are `private-sensitive` local runtime data and may include finance, calorie, health, and attachment metadata. `check-ins.trends.md` is a sanitized aggregate for Dreaming Mode; it excludes raw private fields and attachments. Check-ins and attachments are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
+Markdown is the source of truth. V3 session `D` captures day `D` plan/morning state and day `D-1` closure without modifying the old file. AI System may append `## Interpreted Input` at the end as a private-sensitive normalization audit; canonical fields remain authoritative. Detailed V3 CSV/JSONL/metrics indexes are `private-sensitive` local runtime data and may include finance, calorie, health, routine, reflection, and attachment metadata. `check-ins.trends.md` is a sanitized aggregate for Dreaming Mode; it excludes raw private fields and attachments. Check-ins and attachments are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
 
 Manual check-ins write only the daily Markdown file and optional assets. Derived indexes may be intentionally stale. Use lazy sync status before recommending a database refresh:
 
@@ -259,7 +259,9 @@ Use dry-run first:
 .systems/scripts/propose-task-candidates --workspace <workspace-path> --dream-report <workspace>/dreams/runs/<run>/dream-report.md
 ```
 
-V3 check-in candidates come one-per-item from planned `build-*`, `deliver-*`, and `promote-*` items, use `tags: [6d/do]`, and default to session-day end-of-day due date `YYYY-MM-DDT23:59`. Actual closure items never create TaskNotes.
+V3 check-in candidates come one-per-item from planned `build-*`, `deliver-*`, and `promote-*` items, use `tags: [6d/do]`, and default to session-day end-of-day due date `YYYY-MM-DDT23:59`. `Task: skip` suppresses an item and `Task title` can override its generated TaskNote title. Actual closure items never create TaskNotes.
+
+An explicit legacy `5d/*` source bucket is normalized to the matching `6d/*` output; new TaskNotes never write `5d/*`. Dry-run reads `<workspace>/tasks/taskforge-vault.local.md` when available to discover TaskForge project links. Missing, disabled, or invalid configuration produces a warning and leaves the proposal read-only.
 
 Dream Report candidates come from the owner decision queue and default to `tags: [6d/defer]` unless explicitly marked otherwise. Historical `5d/*` tags remain read-compatible; `DONE` is derived from `status: done`.
 

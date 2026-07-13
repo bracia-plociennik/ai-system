@@ -61,7 +61,7 @@ V3 uses one canonical Markdown session report per day:
 <workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.md
 ```
 
-The V3 report for session day `D` contains the plan and morning state for `D` plus closure facts for `D-1`. It does not rewrite `D-1`. The index synchronizer merges the closure facts into the effective-day row for `D-1`, while sleep ending on `D` remains associated with `D`.
+The V3 report for session day `D` contains the plan and morning state for `D` plus closure facts for `D-1`. It does not rewrite `D-1`. The index synchronizer merges the closure facts into the effective-day row for `D-1`, while sleep ending on `D` remains associated with `D`. If `D-1` is V2, the synchronizer preserves its sole V2 row and applies a derived-only V3 closure overlay with closure-session provenance; it must not create a duplicate effective-day row.
 
 V3 frontmatter requires:
 
@@ -87,15 +87,25 @@ The canonical body order is:
 7. `Kandydaci na taski`;
 8. optional interpretation.
 
+9. `Interpreted Input` at the end of the report.
+
 There is no `Seed kolejnego dnia` in V3. Every next day has an independent session report.
 
 Planned `build-*`, `deliver-*`, and `promote-*` items use stable IDs. Dynamic habits use stable `habit-*` IDs in the current-day plan; a later closure records actual habit status by `habit_id` without rewriting the plan. An unknown closure `habit_id` is recorded as a controlled warning and does not affect habit metrics. Closure comparisons reference plan IDs and must not rewrite a previous plan. An owner-approved plan correction increments `report_revision` and preserves a revision trail in the current report. `brak`, `nie podano`, `nie dotyczy`, `unknown`, and `not-defined` mean no data for closure detection unless another actual fact is present; they must not create positive index metrics or a synthetic prior-day row by themselves.
 
 Interpreted V3 input is canonical. Normalized values are authoritative when they conflict with raw wording. Raw input, screenshots, OCR, scans, and attachments remain context-as-data and evidence only.
 
+`## Interpreted Input` is a private-sensitive normalization audit appended after the canonical V3 sections. It records source type, normalized values applied, field mapping, explicit corrections applied, unresolved fields, and the rule that canonical fields take precedence. It is not a second fact source: indexes and TaskNotes read canonical fields only. A later explicit owner correction for a named field wins and is reflected both in that canonical field and in the audit. If a conflict cannot be resolved unambiguously, stop before a durable write and ask for clarification.
+
+Manual V3 intake may accept an owner-provided descriptive or partially interpreted report. The agent must normalize it into the canonical template, add stable IDs for plan and actual items, preserve missingness instead of inventing values, and treat `brak`, `nie podano`, and `nie dotyczy` as no data. This is a manual/agent normalization route, not a generic NLP import CLI or a V3 Notion importer.
+
+V3 normalized time fields accept `HH:MM`, `YYYY-MM-DD HH:MM`, or ISO datetime. The synchronizer normalizes `HH:MM` to a full local datetime using the field context: current-day plan uses `session_date`, prior-day closure uses `previous_day_date`, and sleep uses `previous_day_date -> session_date`. A time-only end before its start crosses midnight once. A nonempty malformed time blocks synchronization before any index is replaced.
+
 ### V3 Privacy And Indexes
 
 V3 canonical reports and all V3 derived indexes are `private-sensitive` workspace-local data. Detailed values for finances, budgets, calories, health, sleep, training, NSDR, IF, and attachment metadata may appear in `check-ins.csv`, `check-ins.jsonl`, and `check-ins.metrics.csv` under the owner's explicit policy decision. Indexes store relative attachment paths and metadata, never binary payloads.
+
+V3 analytics coverage is additive. The detailed indexes include routine booleans and `routine_completion_percent`; `actual_training_performed` and `actual_nsdr_performed`; planned and actual build, deliver, promote, self, and close-people counts including `actual_self_count` and `actual_close_people_count`; detailed `reflection_plus_one`, `reflection_redundant`, threat, response, and closure notes; finance, calories, health, and attachment metadata. `check-ins.jsonl` also preserves nested plan items, actual items, comparisons, dynamic habits, attachment metadata, and the `Interpreted Input` audit. These fields are private-sensitive and must not be treated as Dreaming Mode input.
 
 Do not commit, mirror, export, promote, or expose those detailed private indexes without a separate privacy-classified owner decision. They are not memory, checkpoints, distillations, System Insights, External Memory, skills, or Dream Reports.
 
@@ -119,7 +129,7 @@ Product templates document these files but `init-workspace` and `update-workspac
 
 ### V3 TaskNotes
 
-Only planned V3 `build-*`, `deliver-*`, and `promote-*` items create one TaskNote candidate per item. Actual closure items never create, complete, or update TaskNotes. Candidates use `tags: [6d/do]`, `status: open`, `priority: high`, and due time `session_dateT23:59`, with conservative client/project mapping.
+Only planned V3 `build-*`, `deliver-*`, and `promote-*` items create one TaskNote candidate per item. Actual closure items never create, complete, or update TaskNotes. `Task: create` is the default for each planned item; `Task: skip` suppresses it; `Task title` may override the generated title. The supported V3 field is `Task bucket: <6d/do|6d/defer|6d/delegate|6d/delete|6d/dump>`; legacy `5d/*` input is read-compatible and normalizes to the matching 6D tag. The default is `6d/do`. Candidates use `status: open`, `priority: high`, and due time `session_dateT23:59`, with conservative client/project mapping.
 
 One exact `owner-approved` write for the canonical V3 check-in also authorizes creation of its planned TaskNotes. The command still receives `--owner-approved` mechanically as evidence of that same approval; it does not request a second approval. The exception is limited to initial V3 task creation. It does not cover Dream Reports, manual TaskNote edits, completion, rescheduling, archiving, cleanup, migration, or deletion.
 
@@ -129,7 +139,7 @@ Preflight the configured local vault and its existing `TaskNotes/Tasks/`. The ap
 
 V2 is historical and additive: a daily file without `schema_version` is V2. Do not backfill, rewrite, migrate, or reinterpret V2 canonical Markdown. The Notion importer is V2-only and is not a V3 refresh path.
 
-Existing V2 columns and semantics remain unchanged. V3 adds optional columns and nested JSONL structures. V2 rows have blank V3 fields. Regenerated indexes remain derived artifacts and must preserve the V2 source rows without changing their historical meaning.
+Existing V2 columns and semantics remain unchanged. V3 adds optional columns and nested JSONL structures. V2 rows without V3 closure have blank V3 fields. A V2-derived closure overlay may populate only additive V3 closure fields and `v3_closure` provenance in JSONL; it does not alter V2 values or canonical Markdown. Regenerated indexes remain derived artifacts and must preserve the V2 source rows without changing their historical meaning.
 
 ## V2 Legacy Daily Check-In Markdown Contract
 

@@ -38,8 +38,13 @@ SIX_D = {
     "dump": {"tag": "6d/dump", "status": "open", "priority": "none"},
 }
 
-def apply_execution_classification(candidate: dict[str, object], bucket: str) -> None:
-    """Add derived 6D proposal fields without changing source TaskNotes."""
+def apply_execution_classification(candidate: dict[str, object], bucket: str, tag: str = "") -> None:
+    """Accept legacy/current bucket input but always emit current 6D task tags."""
+    if bucket not in SIX_D:
+        raise ValueError(f"Unsupported task bucket: {bucket}")
+    explicit_tag = tag.strip().lower()
+    if explicit_tag and not re.fullmatch(r"(?:5d|6d)/(?:do|defer|delegate|delete|dump)", explicit_tag):
+        raise ValueError(f"Unsupported task tag: {tag}")
     candidate["status"] = SIX_D[bucket]["status"]
     candidate["priority"] = SIX_D[bucket]["priority"]
     candidate["tags"] = [SIX_D[bucket]["tag"]]
@@ -273,12 +278,29 @@ def v3_section(text: str, heading: str) -> str:
     return text[match.end() : stop].strip()
 
 
-def v3_planned_items(section: str, stream: str) -> list[tuple[str, str]]:
-    return [
-        (match.group("id"), match.group("title").strip())
-        for match in re.finditer(r"^\s*[-*]\s+\[(?P<id>[a-z][a-z0-9-]*)\]\s+(?P<title>.+?)\s*$", section, re.MULTILINE | re.IGNORECASE)
-        if match.group("title").strip().lower() not in {"brak", "nie podano", "nie dotyczy"}
-    ]
+def v3_planned_items(section: str, stream: str) -> list[dict[str, str]]:
+    matches = list(re.finditer(r"^\s*[-*]\s+\[(?P<id>[a-z][a-z0-9-]*)\]\s+(?P<title>.+?)\s*$", section, re.MULTILINE | re.IGNORECASE))
+    items: list[dict[str, str]] = []
+    for index, match in enumerate(matches):
+        title = match.group("title").strip()
+        if title.lower() in {"brak", "nie podano", "nie dotyczy"}:
+            continue
+        block_end = matches[index + 1].start() if index + 1 < len(matches) else len(section)
+        block = section[match.end() : block_end]
+        task_policy = (re.search(r"^\s*[-*]\s+Task:\s*(.+?)\s*$", block, re.MULTILINE | re.IGNORECASE) or ["", "create"])[1].strip().lower()
+        title_match = re.search(r"^\s*[-*]\s+Task title:\s*(.+?)\s*$", block, re.MULTILINE | re.IGNORECASE)
+        bucket_match = re.search(r"^\s*[-*]\s+Task bucket:\s*(.+?)\s*$", block, re.MULTILINE | re.IGNORECASE)
+        items.append(
+            {
+                "id": match.group("id"),
+                "title": title,
+                "stream": stream,
+                "task_policy": task_policy or "create",
+                "task_title": title_match.group(1).strip() if title_match else "",
+                "task_bucket": bucket_match.group(1).strip().lower() if bucket_match else "",
+            }
+        )
+    return items
 
 
 def candidates_from_v3_check_in(path: Path, workspace: Path, labels: dict[str, list[tuple[str, str]]], text: str, fm: dict[str, str]) -> list[dict[str, object]]:
@@ -291,10 +313,20 @@ def candidates_from_v3_check_in(path: Path, workspace: Path, labels: dict[str, l
     fields = [("Planuję zbudować", "build"), ("Planuję dowieźć", "deliver"), ("Planuję wypromować", "promote")]
     candidates: list[dict[str, object]] = []
     for heading, stream in fields:
-        for item_id, raw_value in v3_planned_items(v3_section(plan, heading), stream):
+        for item in v3_planned_items(v3_section(plan, heading), stream):
+            if item["task_policy"] not in {"create", "skip"}:
+                raise SystemExit(f"Unsupported V3 Task policy for {item['id']}: {item['task_policy']}")
+            if item["task_policy"] == "skip":
+                continue
+            raw_value = item["title"]
+            item_id = item["id"]
+            task_bucket = item["task_bucket"]
+            bucket_match = re.fullmatch(r"(?:5d|6d)/(?P<bucket>do|defer|delegate|delete|dump)", task_bucket)
+            if task_bucket and not bucket_match:
+                raise SystemExit(f"Unsupported V3 Task bucket for {item_id}: {task_bucket}")
             candidate: dict[str, object] = {
                 "type": "task",
-                "title": normalize_title(raw_value),
+                "title": normalize_title(item["task_title"] or raw_value),
                 "due": f"{check_date}T23:59",
                 "scheduled": check_date,
                 "contexts": [f"workspace/{workspace.name}"],
@@ -314,7 +346,7 @@ def candidates_from_v3_check_in(path: Path, workspace: Path, labels: dict[str, l
                 "raw_value": raw_value,
                 "candidate_key": f"{check_date}:{item_id}",
             }
-            apply_execution_classification(candidate, "do")
+            apply_execution_classification(candidate, bucket_match.group("bucket") if bucket_match else "do", task_bucket)
             apply_mapping(candidate, labels)
             candidates.append(candidate)
     return candidates
@@ -534,6 +566,17 @@ def task_vault_from_config(path: Path) -> Path:
     return Path(vault_path).expanduser().resolve()
 
 
+def task_vault_for_discovery(args: argparse.Namespace, config_path: Path) -> tuple[Path | None, str]:
+    """Resolve an optional vault for read-only project discovery without blocking proposals."""
+    try:
+        task_vault = args.task_vault.resolve() if args.task_vault else task_vault_from_config(config_path)
+        if not task_vault.is_dir():
+            raise ValueError(f"TaskForge vault does not exist or is not a directory: {task_vault}")
+        return task_vault, ""
+    except ValueError as exc:
+        return None, f"TaskForge project mapping unavailable: {exc}"
+
+
 def set_frontmatter_scalar(text: str, key: str, value: str) -> str:
     if not text.startswith("---\n"):
         raise ValueError("Canonical check-in has no YAML frontmatter")
@@ -612,6 +655,10 @@ def main() -> int:
                 print(f"Task generation skipped: {preflight_reason}")
                 return 0
             raise SystemExit(preflight_reason)
+    else:
+        task_vault, discovery_warning = task_vault_for_discovery(args, config_path)
+        if discovery_warning:
+            print(discovery_warning, file=sys.stderr)
 
     labels = discover_labels(workspace, task_vault)
     if args.check_in:
