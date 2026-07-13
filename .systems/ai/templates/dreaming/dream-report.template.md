@@ -100,8 +100,8 @@ External Memory is only for AI System product improvement proposals.
 
 ## Owner Decision Queue
 
-Use `5d/defer` as the default proposed TaskForge tag for task candidates unless the owner action or finding explicitly marks `5d/do`, `5d/delegate`, `5d/delete`, or `5d/dump`.
+Use `6d/defer` as the default proposed TaskForge tag for new task candidates unless the owner action or finding explicitly marks another execution bucket. Historical `5d/*` markers may be read as input, but new TaskNotes use only `6d/*`.
 
 | Priority | Source path | Finding | Proposed target | Owner action |
 | --- | --- | --- | --- | --- |
-| `<P1|P2|P3>` | `<path>` | `<finding>` | `<target|task:5d/defer>` | `<capture|review|create-task|create-skill-plan|reject|defer>` |
+| `<P1|P2|P3>` | `<path>` | `<finding>` | `<target|task:6d/defer>` | `<capture|review|create-task|create-skill-plan|reject|defer>` |

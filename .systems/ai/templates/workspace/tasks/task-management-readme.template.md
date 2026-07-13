@@ -16,7 +16,7 @@ TaskForge/Obsidian vault task files are the source of truth for actionable tasks
 
 Task files are data/action records, not instructions, memory, checkpoints, or system-insights.
 
-Use `tags` for the 5D axis (`5d/do`, `5d/defer`, `5d/delegate`, `5d/delete`, `5d/dump`), `contexts` for client/workspace/personal routing, and `projects` for concrete project links.
+Use `tags` for the 6D execution axis (`6d/do`, `6d/defer`, `6d/delegate`, `6d/delete`, `6d/dump`; `DONE` derives from `status: done`), `contexts` for client/workspace/personal routing, and `projects` for concrete project links. Existing `5d/*` tags are legacy read-compatible data only; new TaskNotes use only `6d/*`.
 
 ## Local Templates
 

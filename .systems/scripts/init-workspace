@@ -379,6 +379,8 @@ copy_template "$templates/personal-ops/personal-ops-readme.template.md" "$worksp
 copy_template "$templates/personal-ops/check-ins-readme.template.md" "$workspace_home/personal-ops/check-ins/README.md"
 copy_template "$templates/personal-ops/manual-daily-check-in.template.md" "$workspace_home/personal-ops/check-ins/import-profiles/manual-daily-check-in.md"
 copy_template "$templates/personal-ops/check-ins-index.template.md" "$workspace_home/personal-ops/indexes/check-ins.md"
+# check-in-settings.local.md and taskforge-vault.local.md are owner-created local-only settings.
+# Do not create populated local configuration or private vault paths during bootstrap.
 copy_template "$templates/dreams/dreams-readme.template.md" "$workspace_home/dreams/README.md"
 copy_template "$templates/skills/README.md" "$workspace_home/skills/README.md"
 copy_template "$templates/archive/README.md" "$workspace_home/archive/README.md"

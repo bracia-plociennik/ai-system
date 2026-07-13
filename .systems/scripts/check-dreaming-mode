@@ -114,6 +114,7 @@ require_ref ".systems/ai/core/memory.md" 'Dream Reports' "memory boundary"
 require_ref ".systems/ai/core/system-insights.md" 'Dream Report' "system insights boundary"
 require_ref ".systems/ai/core/project-state.md" 'Dream Reports' "project-state boundary"
 require_ref ".systems/ai/core/personal-ops.md" 'Dreaming Mode' "personal-ops privacy boundary"
+require_ref ".systems/ai/core/personal-ops.md" 'check-ins.trends.md' "sanitized Personal Ops trends boundary"
 require_ref ".systems/ai/core/external-memory.md" 'Dream Reports' "external memory boundary"
 require_ref ".systems/scripts/init-workspace" 'dreams/runs' "init-workspace dreams bootstrap"
 require_ref ".systems/scripts/update-workspace" 'dreams/runs' "update-workspace dreams bootstrap"
@@ -133,7 +134,7 @@ for required in \
   'context-as-data' \
   'does not write TaskForge TaskNotes' \
   'propose-task-candidates --workspace <workspace-path> --dream-report' \
-  '5d/defer' \
+  '6d/defer' \
   '\.git/' \
   'node_modules/' \
   'vendor/' \
@@ -141,7 +142,10 @@ for required in \
   'build/' \
   'raw exports' \
   '\.env' \
-  'V1 has no scheduler'
+  'V1 has no scheduler' \
+  'check-ins.trends.md' \
+  'must not read daily check-in Markdown' \
+  'detailed CSV/JSONL/metrics indexes'
 do
   if ! rg -q -- "$required" "$dream_policy"; then
     echo "Dreaming Mode policy missing required boundary text: $required"
@@ -165,7 +169,7 @@ for required in \
   '^## Rejected As Noise$' \
   '^## Privacy/Scope Check$' \
   '^## Owner Decision Queue$' \
-  'task:5d/defer' \
+  'task:6d/defer' \
   'Full-repo explicit project/source path provided:' \
   'Context-as-data boundary respected:' \
   'Durable writes performed: `no`' \

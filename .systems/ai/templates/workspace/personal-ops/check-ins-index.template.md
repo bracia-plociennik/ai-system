@@ -21,8 +21,11 @@ are the source of truth.
 - `check-ins.metrics.csv` - analytics-grade derived metrics for pattern analysis.
 - `check-ins-fields.md` - field dictionary and source-label audit trail.
 - `check-ins-conflicts.md` - duplicate date/source conflicts, when present.
+- `check-ins.trends.md` - sanitized aggregate allowed for Dreaming Mode.
 
 If Markdown and an index disagree, Markdown wins.
+
+The detailed CSV, JSONL, and metrics indexes are `private-sensitive` workspace-local data and may contain finance, calorie, health, and attachment metadata. `check-ins.trends.md` excludes raw check-ins, attachments, OCR, finance, calories, health, and reflections.
 
 ## Lazy Sync State
 

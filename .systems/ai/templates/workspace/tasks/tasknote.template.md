@@ -15,7 +15,7 @@ dueAt:
 scheduled:
 start:
 tags:
-  - 5d/<do|defer|delegate|delete|dump>
+  - 6d/<do|defer|delegate|delete|dump>
 contexts:
   - <client/client-slug|owned-asset/asset-slug|workspace/workspace-slug|personal>
 projects: []
@@ -29,6 +29,8 @@ source_system: ai-system
 source_type:
 source_check_in_date:
 source_check_in_field:
+source_session_date:
+source_plan_item_id:
 source_dream_report:
 ---
 
@@ -45,6 +47,10 @@ source_dream_report:
 ## Next Action
 
 - [ ] <next owner-approved action>
+
+## Subtasks
+
+- [ ] <optional scoped subtask>
 
 ## Evidence
 

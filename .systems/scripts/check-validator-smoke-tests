@@ -1404,6 +1404,263 @@ run_must_fail "personal-ops-lazy-sync-malformed-markdown" "$personal_ops_sync" -
 grep -q 'sentinel csv' "$personal_ops_sync_malformed_workspace/personal-ops/indexes/check-ins.csv" || { echo "malformed sync replaced CSV despite failure"; exit 1; }
 grep -q 'sentinel jsonl' "$personal_ops_sync_malformed_workspace/personal-ops/indexes/check-ins.jsonl" || { echo "malformed sync replaced JSONL despite failure"; exit 1; }
 
+personal_ops_v3_workspace="$tmp/personal-ops-v3-workspace"
+mkdir -p "$personal_ops_v3_workspace/personal-ops/check-ins/2026" "$personal_ops_v3_workspace/project-state/demo-project" "$personal_ops_v3_workspace/tasks"
+cat > "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-10.md" <<'MD'
+---
+type: daily-check-in
+schema_version: 3
+date: 2026-07-10
+session_date: 2026-07-10
+previous_day_date: 2026-07-09
+timezone: Europe/Warsaw
+source_type: manual-interpreted
+normalization_authority: interpreted-report
+report_revision: 1
+task_generation_status: pending
+privacy: private-sensitive
+---
+
+# Daily Check-In 2026-07-10
+
+## Podsumowanie poprzedniego dnia
+
+### Sen
+
+- Początek snu: 2026-07-09 23:00
+- Koniec snu: 2026-07-10 07:00
+- Jakość snu: 4
+- Liczba przebudzeń: 1
+
+## Plan dnia
+
+- Tryb pracy: wzrost
+- Tryb organizmu: pelna-moc
+
+### Planowany trening
+
+- Planowany trening start: 2026-07-10 17:00
+- Planowany trening koniec: 2026-07-10 18:00
+- Planowany trening typ: full_body_b
+
+### Planuję zbudować
+
+- [build-01] Demo project delivery page
+
+### Planuję dowieźć
+
+- [deliver-01] Send accepted report
+
+### Planuję wypromować
+
+- [promote-01] Publish owner update
+
+### Planowane nawyki
+
+- Habit ID: habit-01
+  - Nazwa: Short walk
+  - Trigger: 12:00
+  - Kryterium: 10 minutes outside
+  - Status: planned
+
+## Poranny check-in
+
+- Klarowność mentalna: 4
+- Gotowość ciała: 5
+
+## Dodatkowe informacje
+
+- Uwagi: V3 smoke fixture.
+MD
+mkdir -p "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-10.assets"
+printf 'fixture' > "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-10.assets/screenshot-v3.png"
+cat > "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-11.md" <<'MD'
+---
+type: daily-check-in
+schema_version: 3
+date: 2026-07-11
+session_date: 2026-07-11
+previous_day_date: 2026-07-10
+timezone: Europe/Warsaw
+source_type: manual-interpreted
+normalization_authority: interpreted-report
+report_revision: 1
+task_generation_status: pending
+privacy: private-sensitive
+---
+
+# Daily Check-In 2026-07-11
+
+## Podsumowanie poprzedniego dnia
+
+### Faktyczny trening
+
+- Faktyczny trening start: 2026-07-10 17:00
+- Faktyczny trening koniec: 2026-07-10 18:30
+- Faktyczny trening typ: full_body_b
+- RPE: 7
+
+### Faktyczny NSDR
+
+- Faktyczny NSDR start: 2026-07-10 12:50
+- Faktyczny NSDR koniec: 2026-07-10 13:10
+- Efekt NSDR: better
+
+### Faktyczny IF i kalorie
+
+- Faktyczny IF start: 2026-07-10 12:00
+- Faktyczny IF koniec: 2026-07-10 20:00
+- Faktyczne kalorie minimum: 2300
+- Faktyczne kalorie maksimum: 2500
+- Faktyczne kalorie reprezentatywne: 2400
+
+### Finanse
+
+- Finanse kwota: 70
+- Finanse waluta: PLN
+- Finanse przybliżenie: true
+
+### Faktycznie zbudowałem
+
+- [actual-build-01] Demo project delivery page
+
+### Faktyczne nawyki
+
+- Habit ID: habit-01
+  - Status: completed
+  - Note: completed after lunch
+
+- Habit ID: habit-unknown
+  - Status: completed
+
+### Porównanie plan-fakt
+
+- plan_item_id: build-01
+  - status: completed-as-planned
+  - actual_item_ids: actual-build-01
+  - note: completed
+
+### Minimum i refleksja
+
+- Minimum dnia: partial
+
+## Plan dnia
+
+- Tryb pracy: normalny
+- Tryb organizmu: normalny
+
+### Planuję zbudować
+
+- [build-01] Next-day plan item
+
+## Poranny check-in
+
+- Klarowność mentalna: 3
+- Gotowość ciała: 3
+MD
+v3_markdown_checksum_before="$(cksum "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-10.md")"
+v3_asset_checksum_before="$(cksum "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-10.assets/screenshot-v3.png")"
+run_must_pass "personal-ops-v3-cross-day-sync" "$personal_ops_sync" --workspace "$personal_ops_v3_workspace"
+grep -q 'schema_version' "$personal_ops_v3_workspace/personal-ops/indexes/check-ins.csv" || { echo "V3 CSV missing schema column"; exit 1; }
+grep -q '2026-07-10' "$personal_ops_v3_workspace/personal-ops/indexes/check-ins.csv" || { echo "V3 CSV missing effective day"; exit 1; }
+grep -q ',2400,' "$personal_ops_v3_workspace/personal-ops/indexes/check-ins.csv" || { echo "V3 CSV missing private calorie detail"; exit 1; }
+grep -q ',70,PLN,' "$personal_ops_v3_workspace/personal-ops/indexes/check-ins.csv" || { echo "V3 CSV missing private finance detail"; exit 1; }
+grep -q 'actual-build-01' "$personal_ops_v3_workspace/personal-ops/indexes/check-ins.jsonl" || { echo "V3 JSONL missing actual item"; exit 1; }
+grep -q 'Unmatched actual dynamic habit ID: habit-unknown' "$personal_ops_v3_workspace/personal-ops/indexes/check-ins.jsonl" || { echo "V3 unknown habit ID was not reported"; exit 1; }
+python3 - "$personal_ops_v3_workspace/personal-ops/indexes/check-ins.csv" <<'PY'
+import csv
+import sys
+
+with open(sys.argv[1], newline='', encoding='utf-8') as handle:
+    rows = {row['date']: row for row in csv.DictReader(handle)}
+row = rows['2026-07-10']
+assert row['previous_day_date'] == '2026-07-09', row
+assert row['dynamic_habit_done_count'] == '1', row
+assert row['dynamic_habit_unknown_count'] == '0', row
+PY
+test -f "$personal_ops_v3_workspace/personal-ops/indexes/check-ins.trends.md" || { echo "V3 sync missing sanitized trends"; exit 1; }
+if rg -q '2400|70|PLN|actual-build-01|screenshot-v3' "$personal_ops_v3_workspace/personal-ops/indexes/check-ins.trends.md"; then
+  echo "sanitized V3 trends leaked private detail"
+  exit 1
+fi
+test "$v3_markdown_checksum_before" = "$(cksum "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-10.md")" || { echo "V3 sync modified canonical Markdown"; exit 1; }
+test "$v3_asset_checksum_before" = "$(cksum "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-10.assets/screenshot-v3.png")" || { echo "V3 sync modified assets"; exit 1; }
+
+task_management_validator="$copy_repo/.systems/scripts/check-task-management"
+task_candidate_script="$copy_repo/.systems/scripts/propose-task-candidates"
+personal_ops_v3_vault="$tmp/personal-ops-v3-vault"
+mkdir -p "$personal_ops_v3_vault/TaskNotes/Tasks"
+cat > "$personal_ops_v3_workspace/tasks/taskforge-vault.local.md" <<MD
+---
+enabled: true
+vault_path: $personal_ops_v3_vault
+---
+MD
+cat > "$personal_ops_v3_vault/TaskNotes/Tasks/demo-parent.md" <<'MD'
+---
+type: task
+title: "Demo project delivery"
+status: open
+priority: high
+projects:
+  - "[[Demo Project]]"
+---
+
+# Demo project delivery
+
+## Next Action
+
+- [ ] Existing work.
+MD
+run_must_pass "personal-ops-v3-task-candidates-dry-run" "$task_candidate_script" --workspace "$personal_ops_v3_workspace" --check-in "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-10.md"
+run_must_pass "personal-ops-v3-task-candidates-owner-approved-write" "$task_candidate_script" --workspace "$personal_ops_v3_workspace" --check-in "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-10.md" --owner-approved --write
+grep -q 'ai-system:v3:2026-07-10:build-01' "$personal_ops_v3_vault/TaskNotes/Tasks/demo-parent.md" || { echo "V3 similar task was not extended with subtask"; exit 1; }
+test "$(grep -R -l 'source_plan_item_id: "deliver-01"' "$personal_ops_v3_vault/TaskNotes/Tasks" | wc -l | tr -d ' ')" = "1" || { echo "V3 deliver item did not create one TaskNote"; exit 1; }
+grep -q 'task_generation_status: "created-and-subtasks"' "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-10.md" || { echo "V3 task generation status was not recorded"; exit 1; }
+run_must_pass "personal-ops-v3-task-candidates-deduplicate" "$task_candidate_script" --workspace "$personal_ops_v3_workspace" --check-in "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-10.md" --owner-approved --write
+test "$(grep -c 'ai-system:v3:2026-07-10:build-01' "$personal_ops_v3_vault/TaskNotes/Tasks/demo-parent.md")" = "1" || { echo "V3 task subtask was duplicated"; exit 1; }
+run_must_pass "personal-ops-v3-task-candidates-vault-skipped" "$task_candidate_script" --workspace "$personal_ops_v3_workspace" --check-in "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-11.md" --task-vault "$tmp/missing-taskforge-vault" --owner-approved --write
+grep -q 'task_generation_status: "skipped"' "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-11.md" || { echo "V3 unavailable vault did not record skipped status"; exit 1; }
+grep -q 'task_generation_reason:' "$personal_ops_v3_workspace/personal-ops/check-ins/2026/2026-07-11.md" || { echo "V3 unavailable vault did not record skipped reason"; exit 1; }
+
+personal_ops_v3_unknown_workspace="$tmp/personal-ops-v3-unknown-workspace"
+mkdir -p "$personal_ops_v3_unknown_workspace/personal-ops/check-ins/2026"
+cat > "$personal_ops_v3_unknown_workspace/personal-ops/check-ins/2026/2026-07-20.md" <<'MD'
+---
+type: daily-check-in
+schema_version: 3
+date: 2026-07-20
+session_date: 2026-07-20
+previous_day_date: 2026-07-19
+timezone: Europe/Warsaw
+source_type: manual-interpreted
+normalization_authority: interpreted-report
+report_revision: 1
+task_generation_status: pending
+privacy: private-sensitive
+---
+
+## Podsumowanie poprzedniego dnia
+
+### Minimum i refleksja
+
+- Minimum dnia: unknown
+
+## Plan dnia
+
+- Tryb pracy: normalny
+
+## Poranny check-in
+
+- Klarowność mentalna: 3
+MD
+run_must_pass "personal-ops-v3-unknown-is-not-closure" "$personal_ops_sync" --workspace "$personal_ops_v3_unknown_workspace"
+test "$(tail -n +2 "$personal_ops_v3_unknown_workspace/personal-ops/indexes/check-ins.csv" | wc -l | tr -d ' ')" = "1" || { echo "V3 unknown closure created a synthetic prior-day row"; exit 1; }
+if grep -q '^2026-07-19,' "$personal_ops_v3_unknown_workspace/personal-ops/indexes/check-ins.csv"; then
+  echo "V3 unknown closure indexed an absent prior day"
+  exit 1
+fi
+
 task_management_validator="$copy_repo/.systems/scripts/check-task-management"
 
 run_must_pass "task-management-baseline" "$task_management_validator"
@@ -1447,6 +1704,53 @@ Smoke fixture.
 No sensitive data.
 MD
 run_must_pass "task-management-valid-ai-task" "$task_management_validator" --task-file "$task_fixture_dir/valid-ai-task.md"
+
+for classification_tag in 5d/do 5d/defer 5d/delegate 5d/delete 5d/dump 6d/do 6d/defer 6d/delegate 6d/delete 6d/dump; do
+  classification_status="open"
+  classification_priority="normal"
+  if [[ "$classification_tag" == */delete ]]; then
+    classification_status="cancelled"
+    classification_priority="none"
+  fi
+  cat > "$task_fixture_dir/${classification_tag//\//-}.md" <<MD
+---
+type: task
+title: "${classification_tag} compatibility"
+status: ${classification_status}
+priority: ${classification_priority}
+source_system: ai-system
+tags:
+  - ${classification_tag}
+---
+MD
+  run_must_pass "task-management-valid-${classification_tag//\//-}" "$task_management_validator" --task-file "$task_fixture_dir/${classification_tag//\//-}.md"
+done
+
+cat > "$task_fixture_dir/done-legacy-routing.md" <<'MD'
+---
+type: task
+title: "Completed legacy task"
+status: done
+priority: high
+source_system: ai-system
+tags:
+  - 5d/do
+---
+MD
+run_must_pass "task-management-done-legacy-routing" "$task_management_validator" --task-file "$task_fixture_dir/done-legacy-routing.md"
+
+cat > "$task_fixture_dir/done-current-routing.md" <<'MD'
+---
+type: task
+title: "Completed current task"
+status: done
+priority: high
+source_system: ai-system
+tags:
+  - 6d/do
+---
+MD
+run_must_pass "task-management-done-current-routing" "$task_management_validator" --task-file "$task_fixture_dir/done-current-routing.md"
 
 cat > "$task_fixture_dir/missing-type.md" <<'MD'
 ---
@@ -1531,6 +1835,60 @@ tags:
 MD
 run_must_fail "task-management-invalid-5d-tag" "$task_management_validator" --task-file "$task_fixture_dir/invalid-5d-tag.md"
 
+cat > "$task_fixture_dir/invalid-6d-done.md" <<'MD'
+---
+type: task
+title: "Invalid 6D done tag"
+status: done
+priority: normal
+source_system: ai-system
+tags:
+  - 6d/done
+---
+MD
+run_must_fail "task-management-invalid-6d-done" "$task_management_validator" --task-file "$task_fixture_dir/invalid-6d-done.md"
+
+cat > "$task_fixture_dir/invalid-6d-delete-status.md" <<'MD'
+---
+type: task
+title: "Invalid 6D delete status"
+status: open
+priority: none
+source_system: ai-system
+tags:
+  - 6d/delete
+---
+MD
+run_must_fail "task-management-invalid-6d-delete-status" "$task_management_validator" --task-file "$task_fixture_dir/invalid-6d-delete-status.md"
+
+cat > "$task_fixture_dir/mixed-5d-6d.md" <<'MD'
+---
+type: task
+title: "Mixed task classification"
+status: open
+priority: normal
+source_system: ai-system
+tags:
+  - 5d/do
+  - 6d/do
+---
+MD
+run_must_fail "task-management-mixed-5d-6d" "$task_management_validator" --task-file "$task_fixture_dir/mixed-5d-6d.md"
+
+cat > "$task_fixture_dir/two-6d-tags.md" <<'MD'
+---
+type: task
+title: "Two task classifications"
+status: open
+priority: normal
+source_system: ai-system
+tags:
+  - 6d/do
+  - 6d/defer
+---
+MD
+run_must_fail "task-management-two-6d-tags" "$task_management_validator" --task-file "$task_fixture_dir/two-6d-tags.md"
+
 cat > "$task_fixture_dir/5d-in-context.md" <<'MD'
 ---
 type: task
@@ -1543,6 +1901,19 @@ contexts:
 ---
 MD
 run_must_fail "task-management-5d-in-context" "$task_management_validator" --task-file "$task_fixture_dir/5d-in-context.md"
+
+cat > "$task_fixture_dir/6d-in-context.md" <<'MD'
+---
+type: task
+title: "6D in wrong field"
+status: open
+priority: normal
+source_system: ai-system
+contexts:
+  - 6d/do
+---
+MD
+run_must_fail "task-management-6d-in-context" "$task_management_validator" --task-file "$task_fixture_dir/6d-in-context.md"
 
 task_candidate_script="$copy_repo/.systems/scripts/propose-task-candidates"
 task_candidate_workspace="$tmp/task-candidate-workspace"
@@ -1595,7 +1966,9 @@ run_must_pass "task-candidates-check-in-dry-run" "$task_candidate_script" --work
 "$task_candidate_script" --workspace "$task_candidate_workspace" --task-vault "$task_candidate_vault" --check-in "$task_candidate_workspace/personal-ops/check-ins/2026/2026-06-22.md" --json > "$tmp/task-candidates.json"
 grep -q '"source_check_in_field": "Zbudowałem"' "$tmp/task-candidates.json" || { echo "check-in candidate missing Zbudowałem source"; exit 1; }
 grep -F -q '"tags": [' "$tmp/task-candidates.json" || { echo "check-in candidate missing tags"; exit 1; }
-grep -q '"5d/do"' "$tmp/task-candidates.json" || { echo "check-in candidate missing 5d/do"; exit 1; }
+grep -q '"6d/do"' "$tmp/task-candidates.json" || { echo "check-in candidate missing 6d/do"; exit 1; }
+grep -q '"task_method": "6d"' "$tmp/task-candidates.json" || { echo "check-in candidate missing 6D method"; exit 1; }
+grep -q '"execution_bucket": "do"' "$tmp/task-candidates.json" || { echo "check-in candidate missing DO execution bucket"; exit 1; }
 grep -q '"workspace/task-candidate-workspace"' "$tmp/task-candidates.json" || { echo "check-in candidate missing workspace context"; exit 1; }
 grep -q '"due": "2026-06-22T23:59"' "$tmp/task-candidates.json" || { echo "check-in candidate missing end-of-day due"; exit 1; }
 grep -q '"project_state": "project-state/demo-project/"' "$tmp/task-candidates.json" || { echo "boundary project-state match failed"; exit 1; }
@@ -1662,7 +2035,22 @@ run_must_pass "task-candidates-dream-report-dry-run" "$task_candidate_script" --
 "$task_candidate_script" --workspace "$task_candidate_workspace" --dream-report "$dream_task_report" --json > "$tmp/dream-task-candidates.json"
 grep -q '"source_type": "dream-report"' "$tmp/dream-task-candidates.json" || { echo "Dream Report candidate missing source type"; exit 1; }
 grep -F -q '"tags": [' "$tmp/dream-task-candidates.json" || { echo "Dream Report candidate missing tags"; exit 1; }
-grep -q '"5d/defer"' "$tmp/dream-task-candidates.json" || { echo "Dream Report candidate missing default 5d/defer"; exit 1; }
+grep -q '"6d/defer"' "$tmp/dream-task-candidates.json" || { echo "Dream Report candidate did not normalize legacy 5d/defer to 6d/defer"; exit 1; }
+grep -q '"execution_bucket": "defer"' "$tmp/dream-task-candidates.json" || { echo "Dream Report candidate missing DEFER execution bucket"; exit 1; }
+
+current_dream_task_report="$tmp/current-dream-task-report.md"
+cat > "$current_dream_task_report" <<'MD'
+# Dream Report
+
+## Owner Decision Queue
+
+| Priority | Source path | Finding | Proposed target | Owner action |
+| --- | --- | --- | --- | --- |
+| P2 | task-file.md | Cancel obsolete follow-up | task:6d/delete | create-task |
+MD
+"$task_candidate_script" --workspace "$task_candidate_workspace" --dream-report "$current_dream_task_report" --json > "$tmp/current-dream-task-candidates.json"
+grep -q '"6d/delete"' "$tmp/current-dream-task-candidates.json" || { echo "Dream Report current 6D tag was not preserved"; exit 1; }
+grep -q '"status": "cancelled"' "$tmp/current-dream-task-candidates.json" || { echo "Dream Report DELETE status was not normalized"; exit 1; }
 
 blocked_link_report="$tmp/dream-task-blocked-link-report.md"
 cat > "$blocked_link_report" <<'MD'

@@ -20,7 +20,7 @@ They are not memory, checkpoints, distillations, system-insights, external-memor
 
 TaskForge/Obsidian vault files are the source of truth for actionable tasks. AI System `project-state/` remains the source of truth for project status, memory, checkpoints, distillations, decisions, and source links.
 
-AI may read task files for planning and review. AI may write task files only with exact `owner-approved` action and target.
+AI may read task files for planning and review. AI may write task files only with exact `owner-approved` action and target, except the narrow Personal Ops V3 initial-creation route defined below.
 
 Before any task write:
 
@@ -109,17 +109,31 @@ Allowed `priority` values:
 - `lowest`;
 - `none`.
 
-## 5D Task Tags
+## 6D Task Tags And 5D Compatibility
 
-Use TaskForge `tags` for the 5D execution method. Do not replace TaskForge `status` with 5D values.
+Use TaskForge `tags` for execution routing. Do not replace canonical TaskForge `status` with a classification tag.
 
-- `DO`: `tags: [5d/do]`, `status: open`, `priority: high`.
-- `Defer`: `tags: [5d/defer]`, `status: planned` or `open`, `priority: low` or `normal`.
-- `Delegate`: `tags: [5d/delegate]`, `status: open` or `waiting`, `priority: normal`.
-- `Delete`: `tags: [5d/delete]`, `status: cancelled`, `priority: none`.
-- `Dump`: `tags: [5d/dump]`, `status: open`, `priority: none` or `normal`.
+New AI-created TaskNotes are single-write 6D:
 
-Task candidates from today's check-in `Zbudowałem`, `Dowiozłem`, and `Wypromowałem` use `tags: [5d/do]`, `status: open`, `priority: high`, and `due: YYYY-MM-DDT23:59`.
+- `DO`: `tags: [6d/do]`, `status: open`, `priority: high`.
+- `DEFER`: `tags: [6d/defer]`, `status: planned` or `open`, `priority: normal`.
+- `DELEGATE`: `tags: [6d/delegate]`, `status: waiting`, `priority: normal`.
+- `DELETE`: `tags: [6d/delete]`, `status: cancelled`, `priority: none`.
+- `DUMP`: `tags: [6d/dump]`, `status: open`, `priority: none` or `normal`.
+- `DONE`: no `6d/done` tag exists. It is derived from `status: done` and retains the task's routing tag when TaskForge changes status.
+
+Existing `5d/do`, `5d/defer`, `5d/delegate`, `5d/delete`, and `5d/dump` tags are legacy read-compatible data. Do not add `6d/*`, rename files, or backfill historical TaskNotes. A completed historical task may remain `tags: [5d/do]` with `status: done`.
+
+For derived views and proposals, normalize without editing source files:
+
+```text
+task_method: legacy-5d | 6d | none
+execution_bucket: do | defer | delegate | delete | dump | done | unclassified
+```
+
+`status: done` has precedence and derives `execution_bucket: done` regardless of the remaining 5D or 6D routing tag. A TaskNote may contain at most one classification tag across both families. `6d/done` is invalid, and no `5d/*` or `6d/*` tag belongs in `contexts`.
+
+Task candidates from today's check-in `Zbudowałem`, `Dowiozłem`, and `Wypromowałem` use `tags: [6d/do]`, `status: open`, `priority: high`, and `due: YYYY-MM-DDT23:59`.
 If the TaskForge app setup UI does not expose `Waiting` for `DELEGATE`, use `On Hold` as the app-level custom-list default; do not change the AI System TaskNote status contract.
 
 Use TaskForge `contexts` for client, owned-asset, workspace, or personal routing:
@@ -129,7 +143,7 @@ Use TaskForge `contexts` for client, owned-asset, workspace, or personal routing
 - workspace-scoped tasks: `contexts: [workspace/<workspace-slug>]`;
 - personal tasks: `contexts: [personal]`.
 
-Custom lists should filter the main 5D axis by `Tags contains 5d/<bucket>`, not by folder path. Keep task files in `TaskNotes/Tasks/` unless a separate owner-approved migration chooses another storage model.
+Custom lists should filter the main 6D axis by `Tags contains 6d/<bucket>`, not by folder path. Keep task files in `TaskNotes/Tasks/` unless a separate owner-approved migration chooses another storage model.
 
 Recommended body sections:
 
@@ -159,6 +173,18 @@ Existing TaskForge-created TaskNotes with `taskSourceType: taskNotes` but withou
 
 `projects` and `contexts` are TaskForge app-facing fields. AI System mapping fields such as `workspace`, `owner_scope`, `client`, `owned_asset`, `project`, and `project_state` should be added by AI-created templates or by owner-approved migration.
 
+## Personal Ops V3 Initial Task Creation
+
+For one canonical V3 daily check-in write, the exact `owner-approved` approval for that check-in also authorizes initial TaskNotes from its planned `build-*`, `deliver-*`, and `promote-*` items. This is not a general TaskForge write exemption.
+
+The route uses `.systems/scripts/propose-task-candidates --owner-approved --write --task-vault-config <workspace>/tasks/taskforge-vault.local.md`. The mechanical flag records the same approval; do not request a second approval. The local-only vault configuration must be enabled, point to an existing vault, and the vault must already contain `TaskNotes/Tasks/`.
+
+Each V3 TaskNote is deduplicated by `source_session_date + source_plan_item_id`. Report revisions must not update an existing TaskNote automatically. The approved route records `created`, `subtasks-created`, `created-and-subtasks`, `already-generated`, `no-candidates`, or `skipped` plus `task_generation_reason` and `task_generation_references` in the canonical V3 check-in. If preflight fails, the canonical check-in remains writable with `task_generation_status: skipped` and a reason; no TaskNote is written.
+
+Before creating a V3 TaskNote, inspect existing open TaskNotes in `TaskNotes/Tasks/`. Only when exactly one existing task has the same mapped client or project and a strong title-token match may the route extend that TaskNote with one Markdown subtask under `## Subtasks`. Project matching reads AI System `project:` plus TaskForge frontmatter `projects:` wiki links only; it does not infer projects from body text or unrelated fields. TaskForge subtask entries stay in the parent file. The subtask carries an `ai-system:v3:<session>:<plan-item>` marker for deduplication. Missing, ambiguous, weak, or cross-project similarity creates a separate TaskNote; never bulk-merge or rewrite task descriptions.
+
+This exception does not authorize TaskNotes from actual closure items, Dream Reports, manual TaskNote changes, status changes, rescheduling, archiving, cleanup, migration, deletion, or bulk rewrite. Those actions retain their normal exact owner-approved scope.
+
 Task titles may appear in widgets, calendars, reminders, and notifications. Keep titles notification-safe and do not place secrets, raw client data, credentials, private keys, `.env` values, or sensitive identifiers in titles.
 
 ## App Setup Runbook
@@ -185,7 +211,8 @@ The runbook must cover:
 - Body Template disabled in TaskForge V1;
 - AI-created TaskNotes still use the recommended body sections;
 - default field mappings for title, status, priority, due, scheduled, recurrence, reminders, projects, contexts, tags, dateCreated, completedDate, recurrence_anchor, and complete_instances;
-- custom 5D lists filter by `Tags contains 5d/<bucket>` and may set default tag/status/priority per list;
+- custom 6D lists filter by `Tags contains 6d/<bucket>` and may set default tag/status/priority per list; `DONE` filters `status: done`;
+- an optional compatibility view may read legacy `5d/*` tags without changing them. If TaskForge cannot express an OR filter, use separate temporary legacy views per bucket;
 - archive, raw, dump, private, or unrelated folders excluded from TaskForge scanning when supported;
 - manual end-to-end verification.
 
@@ -204,14 +231,14 @@ Task management requests require selected workspace first.
 Routes:
 
 - add task: propose a TaskNote, then write only after exact owner approval;
-- check-in to task candidates: use `.systems/scripts/propose-task-candidates --workspace <workspace-path> --check-in <workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.md` and write only with `--owner-approved --write --task-vault <taskforge-vault>`;
+- V3 check-in to task candidates: use `.systems/scripts/propose-task-candidates --workspace <workspace-path> --check-in <workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.md`; during the same owner-approved V3 check-in write, use `--owner-approved --write --task-vault-config <workspace>/tasks/taskforge-vault.local.md`;
 - Dream Report to task candidates: use `.systems/scripts/propose-task-candidates --workspace <workspace-path> --dream-report <workspace>/dreams/runs/<run>/dream-report.md`; Dreaming Mode itself must not write TaskNotes;
 - complete task: re-read target TaskNote, then update status only after exact owner approval;
 - reschedule task: re-read target TaskNote, then update date fields only after exact owner approval;
 - task review: read task files and produce recommendations; do not mutate files;
 - link task: add AI System mapping fields only when owner-approved.
 
-Candidate generation may auto-detect task candidates and conservative source mappings, but TaskNote creation still requires exact owner approval. Boundary-only v1 matching means: match client, owned-asset, project-state, or existing TaskForge project names only when exactly one strong match exists and only as full normalized token/phrase matches; do not use substring matching; do not auto-match labels shorter than 3 chars; no aliases in v1. Existing TaskForge project discovery reads only frontmatter `projects:` wiki links, not `blockedBy`, body notes, inline tasks, or arbitrary wiki links. Put 5D in `tags`; put client/workspace/personal routing in `contexts`. Leave ambiguous mappings blank and record `Mapping requires review`.
+Candidate generation may auto-detect task candidates and conservative source mappings, but TaskNote creation still requires exact owner approval. Boundary-only v1 matching means: match client, owned-asset, project-state, or existing TaskForge project names only when exactly one strong match exists and only as full normalized token/phrase matches; do not use substring matching; do not auto-match labels shorter than 3 chars; no aliases in v1. Existing TaskForge project discovery reads only frontmatter `projects:` wiki links, not `blockedBy`, body notes, inline tasks, or arbitrary wiki links. New writes put 6D in `tags`; client/workspace/personal routing stays in `contexts`. The generator reads explicit historical `5d/*` and current `6d/*` source markers, normalizes their bucket, and writes only `6d/*`. Leave ambiguous mappings blank and record `Mapping requires review`.
 
 The proposal script does not initialize TaskForge vault structure. `--owner-approved --write --task-vault <taskforge-vault>` requires an existing vault directory and an existing `TaskNotes/Tasks/` directory; if either is missing, stop before writing.
 

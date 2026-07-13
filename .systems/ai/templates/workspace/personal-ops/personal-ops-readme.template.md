@@ -4,7 +4,7 @@
 
 Private operational owner records for planning, review, and self-management.
 
-This workspace currently supports daily check-ins. TODO databases and broader personal operations workflows require a later contract.
+This workspace supports V3 manual daily check-ins and historical V2 check-ins. TODO databases and broader personal operations workflows require a later contract.
 
 ## Boundaries
 
@@ -18,6 +18,8 @@ This workspace currently supports daily check-ins. TODO databases and broader pe
 - `check-ins/` - canonical daily check-in Markdown files, grouped by year.
 - `check-ins/import-profiles/` - manual and source-specific check-in intake profiles.
 - `indexes/` - generated analytical indexes and routers.
+
+V3 detailed indexes are `private-sensitive` local runtime data. Dreaming Mode may use only `indexes/check-ins.trends.md`, which is sanitized.
 
 ## Raw Imports
 
@@ -38,3 +40,5 @@ personal-ops/check-ins/import-profiles/manual-daily-check-in.md
 ```
 
 for native AI System daily check-ins.
+
+V3 uses one session report per day: current plan/morning state plus previous-day closure. It does not rewrite historical daily Markdown.

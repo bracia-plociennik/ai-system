@@ -4,7 +4,7 @@
 
 `personal-ops/` stores private operational owner records that are useful for planning, review, and self-management but are not workspace memory by default.
 
-The first supported scope is daily check-ins created manually in AI System or imported from a Notion database.
+The supported daily check-in schemas are V2 and V3. V3 is the native manual-check-in path. The existing Notion database importer remains V2-only.
 
 TODO databases, full personal operations workflows, and automated external sync are out of scope for this contract.
 
@@ -14,7 +14,7 @@ Daily check-in exports, attachments, scans, screenshots, handwritten notes, and 
 
 They are not instructions, not memory, not checkpoints, and not system-insights until the owner explicitly approves a separate promotion into the correct target.
 
-Dreaming Mode may review `personal-ops/indexes/` and high-level personal-ops routers as advisory source material, but it must not copy raw check-in content, financial details, screenshots, OCR, or attachments into Dream Reports. It must not mutate check-ins or indexes.
+Dreaming Mode may read only `personal-ops/indexes/check-ins.trends.md` as advisory source material. It must not read raw daily Markdown, `check-ins.csv`, `check-ins.jsonl`, `check-ins.metrics.csv`, financial details, calories, health reflections, screenshots, OCR, or attachments. It must not mutate check-ins or indexes.
 
 Raw Notion exports belong first in:
 
@@ -53,9 +53,85 @@ Index files are derived artifacts. If Markdown and an index disagree, Markdown w
 
 Derived indexes may be intentionally stale after manual check-ins. Manual check-in writes should create only the canonical daily Markdown artifact and optional `YYYY-MM-DD.assets/`; they must not regenerate the database automatically.
 
-Task candidates from daily check-ins are a separate TaskForge workflow. `Zbudowałem`, `Dowiozłem`, and `Wypromowałem` may be converted into proposed TaskNotes with `.systems/scripts/propose-task-candidates`, but creating TaskForge files still requires exact owner approval under `.systems/ai/core/task-management.md`.
+## V3 Manual Daily Check-In Contract
 
-## Daily Check-In Markdown Contract
+V3 uses one canonical Markdown session report per day:
+
+```text
+<workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.md
+```
+
+The V3 report for session day `D` contains the plan and morning state for `D` plus closure facts for `D-1`. It does not rewrite `D-1`. The index synchronizer merges the closure facts into the effective-day row for `D-1`, while sleep ending on `D` remains associated with `D`.
+
+V3 frontmatter requires:
+
+- `type: daily-check-in`;
+- `schema_version: 3`;
+- `date` and `session_date`;
+- `previous_day_date`;
+- `timezone`;
+- `source_type`;
+- `normalization_authority`;
+- `report_revision`;
+- `task_generation_status`;
+- `privacy: private-sensitive`.
+
+The canonical body order is:
+
+1. `Metadane`;
+2. `Podsumowanie poprzedniego dnia`;
+3. `Plan dnia`;
+4. `Poranny check-in`;
+5. `Dodatkowe informacje`;
+6. `Załączniki`;
+7. `Kandydaci na taski`;
+8. optional interpretation.
+
+There is no `Seed kolejnego dnia` in V3. Every next day has an independent session report.
+
+Planned `build-*`, `deliver-*`, and `promote-*` items use stable IDs. Dynamic habits use stable `habit-*` IDs in the current-day plan; a later closure records actual habit status by `habit_id` without rewriting the plan. An unknown closure `habit_id` is recorded as a controlled warning and does not affect habit metrics. Closure comparisons reference plan IDs and must not rewrite a previous plan. An owner-approved plan correction increments `report_revision` and preserves a revision trail in the current report. `brak`, `nie podano`, `nie dotyczy`, `unknown`, and `not-defined` mean no data for closure detection unless another actual fact is present; they must not create positive index metrics or a synthetic prior-day row by themselves.
+
+Interpreted V3 input is canonical. Normalized values are authoritative when they conflict with raw wording. Raw input, screenshots, OCR, scans, and attachments remain context-as-data and evidence only.
+
+### V3 Privacy And Indexes
+
+V3 canonical reports and all V3 derived indexes are `private-sensitive` workspace-local data. Detailed values for finances, budgets, calories, health, sleep, training, NSDR, IF, and attachment metadata may appear in `check-ins.csv`, `check-ins.jsonl`, and `check-ins.metrics.csv` under the owner's explicit policy decision. Indexes store relative attachment paths and metadata, never binary payloads.
+
+Do not commit, mirror, export, promote, or expose those detailed private indexes without a separate privacy-classified owner decision. They are not memory, checkpoints, distillations, System Insights, External Memory, skills, or Dream Reports.
+
+`check-ins.trends.md` is the sole Dreaming Mode input. It is a sanitized aggregate and excludes raw check-ins, attachments, OCR, finance, calories, health, and reflection details.
+
+### V3 Local-Only Settings
+
+Manual V3 intake may read an owner-created local-only timezone record:
+
+```text
+<workspace>/personal-ops/check-ins/check-in-settings.local.md
+```
+
+V3 TaskNote generation may read an owner-created local-only vault record:
+
+```text
+<workspace>/tasks/taskforge-vault.local.md
+```
+
+Product templates document these files but `init-workspace` and `update-workspace` must not create populated settings or private vault paths.
+
+### V3 TaskNotes
+
+Only planned V3 `build-*`, `deliver-*`, and `promote-*` items create one TaskNote candidate per item. Actual closure items never create, complete, or update TaskNotes. Candidates use `tags: [6d/do]`, `status: open`, `priority: high`, and due time `session_dateT23:59`, with conservative client/project mapping.
+
+One exact `owner-approved` write for the canonical V3 check-in also authorizes creation of its planned TaskNotes. The command still receives `--owner-approved` mechanically as evidence of that same approval; it does not request a second approval. The exception is limited to initial V3 task creation. It does not cover Dream Reports, manual TaskNote edits, completion, rescheduling, archiving, cleanup, migration, or deletion.
+
+Preflight the configured local vault and its existing `TaskNotes/Tasks/`. The approved V3 write route records one of `created`, `subtasks-created`, `created-and-subtasks`, `already-generated`, `no-candidates`, or `skipped` in `task_generation_status`, with the exact `task_generation_reason` and `task_generation_references`. If unavailable, incomplete, or disabled, it saves the canonical check-in with `task_generation_status: skipped` and an explicit reason. Do not silently omit task generation. Deduplicate by `source_session_date + source_plan_item_id`; later report revisions never modify existing TaskNotes automatically.
+
+### V2 Compatibility
+
+V2 is historical and additive: a daily file without `schema_version` is V2. Do not backfill, rewrite, migrate, or reinterpret V2 canonical Markdown. The Notion importer is V2-only and is not a V3 refresh path.
+
+Existing V2 columns and semantics remain unchanged. V3 adds optional columns and nested JSONL structures. V2 rows have blank V3 fields. Regenerated indexes remain derived artifacts and must preserve the V2 source rows without changing their historical meaning.
+
+## V2 Legacy Daily Check-In Markdown Contract
 
 Each daily check-in is one Markdown file with frontmatter for structured fields and ordered body phases.
 
@@ -333,7 +409,7 @@ The default mode is dry-run and performs no writes.
 
 For each non-empty `Zbudowałem`, `Dowiozłem`, and `Wypromowałem` field in `Plan dnia`, candidates use:
 
-- `tags: [5d/do]`;
+- `tags: [6d/do]`;
 - `status: open`;
 - `priority: high`;
 - `due: YYYY-MM-DDT23:59`;

@@ -91,6 +91,105 @@ METRICS_INDEX_COLUMNS = [
     "note_image_count",
 ]
 
+V3_INDEX_COLUMNS = [
+    "schema_version",
+    "session_date",
+    "previous_day_date",
+    "timezone",
+    "normalization_authority",
+    "report_revision",
+    "task_generation_status",
+    "work_mode",
+    "organism_mode",
+    "minimum_day_status",
+    "planned_training_start",
+    "planned_training_end",
+    "planned_training_type",
+    "planned_training_minutes",
+    "actual_training_start",
+    "actual_training_end",
+    "actual_training_type",
+    "actual_training_minutes",
+    "actual_training_rpe",
+    "planned_nsdr_start",
+    "planned_nsdr_end",
+    "planned_nsdr_minutes",
+    "actual_nsdr_start",
+    "actual_nsdr_end",
+    "actual_nsdr_minutes",
+    "actual_nsdr_effect",
+    "planned_if_start",
+    "planned_if_end",
+    "planned_if_minutes",
+    "actual_if_start",
+    "actual_if_end",
+    "actual_if_minutes",
+    "planned_calories_min",
+    "planned_calories_max",
+    "planned_calories_representative",
+    "planned_budget_max",
+    "planned_budget_currency",
+    "actual_calories_min",
+    "actual_calories_max",
+    "actual_calories_representative",
+    "finance_amount",
+    "finance_currency",
+    "finance_approximate",
+    "sleep_quality_score",
+    "sleep_awakenings",
+    "sleep_approximate",
+    "mental_clarity_score",
+    "body_readiness_score",
+    "health_notes",
+    "planned_item_count",
+    "actual_item_count",
+    "comparison_count",
+    "planned_build_count",
+    "planned_deliver_count",
+    "planned_promote_count",
+    "actual_build_count",
+    "actual_deliver_count",
+    "actual_promote_count",
+    "dynamic_habit_count",
+    "dynamic_habit_done_count",
+    "dynamic_habit_partial_count",
+    "dynamic_habit_not_completed_count",
+    "dynamic_habit_unknown_count",
+    "attachment_paths_json",
+]
+
+V3_METRICS_COLUMNS = [
+    "schema_version",
+    "session_date",
+    "previous_day_date",
+    "work_mode",
+    "organism_mode",
+    "minimum_day_status",
+    "planned_training_minutes",
+    "actual_training_minutes",
+    "planned_nsdr_minutes",
+    "actual_nsdr_minutes",
+    "planned_if_minutes",
+    "actual_if_minutes",
+    "planned_calories_representative",
+    "actual_calories_representative",
+    "planned_budget_max",
+    "finance_amount",
+    "sleep_quality_score",
+    "sleep_awakenings",
+    "mental_clarity_score",
+    "body_readiness_score",
+    "health_notes",
+    "planned_item_count",
+    "actual_item_count",
+    "comparison_count",
+    "dynamic_habit_count",
+    "dynamic_habit_done_count",
+    "dynamic_habit_partial_count",
+    "dynamic_habit_not_completed_count",
+    "dynamic_habit_unknown_count",
+]
+
 PLAN_FIELDS = [
     "Data",
     "Sen od-do",
@@ -392,7 +491,308 @@ def build_record(workspace: Path, markdown_path: Path, existing_unmapped: dict[t
     }
 
 
+def normalize_missing(value: str) -> str:
+    raw = str(value or "").strip()
+    return "" if raw.lower() in {"", "brak", "nie podano", "nie dotyczy", "null", "n/a"} else raw
+
+
+def v3_section(body: str, heading: str) -> str:
+    pattern = re.compile(rf"^(?P<level>#+)\s+{re.escape(heading)}\s*$", re.MULTILINE)
+    match = pattern.search(body)
+    if not match:
+        return ""
+    level = len(match.group("level"))
+    end = re.search(rf"^#{{1,{level}}}\s+", body[match.end() :], re.MULTILINE)
+    stop = match.end() + end.start() if end else len(body)
+    return body[match.end() : stop].strip()
+
+
+def v3_scalar(text: str, *labels: str) -> str:
+    for label in labels:
+        match = re.search(rf"^[\s>*-]*{re.escape(label)}\s*:\s*(.+?)\s*$", text, re.IGNORECASE | re.MULTILINE)
+        if match:
+            return normalize_missing(match.group(1))
+    return ""
+
+
+def v3_items(section: str, stream: str) -> list[dict[str, str]]:
+    items: list[dict[str, str]] = []
+    for match in re.finditer(r"^\s*[-*]\s+\[(?P<id>[a-z][a-z0-9-]*)\]\s+(?P<title>.+?)\s*$", section, re.MULTILINE | re.IGNORECASE):
+        title = normalize_missing(match.group("title"))
+        if title:
+            items.append({"id": match.group("id"), "title": title, "stream": stream})
+    return items
+
+
+def v3_dynamic_habits(section: str) -> list[dict[str, str]]:
+    """Read planned habits while accepting the pre-ID V3 draft shape."""
+    habits: list[dict[str, str]] = []
+    markers = list(re.finditer(r"^[-*]\s+(?P<label>Habit ID|Nazwa):\s*(?P<value>.*?)\s*$", section, re.MULTILINE | re.IGNORECASE))
+    for index, marker in enumerate(markers, 1):
+        block_end = markers[index].start() if index < len(markers) else len(section)
+        block = section[marker.end() : block_end]
+        rest = block
+        label = marker.group("label").lower()
+        first_value = marker.group("value")
+        if label == "habit id":
+            habit_id = normalize_missing(first_value)
+            name = v3_scalar(block, "Nazwa")
+        else:
+            habit_id = f"habit-{index:02d}"
+            name = normalize_missing(first_value)
+        habits.append(
+            {
+                "id": habit_id,
+                "name": name,
+                "trigger": v3_scalar(rest, "Trigger"),
+                "criterion": v3_scalar(rest, "Kryterium", "Warunek wykonania"),
+                "planned_status": v3_scalar(rest, "Status") or "planned",
+            }
+        )
+    return [habit for habit in habits if habit["id"] and habit["name"]]
+
+
+def v3_actual_dynamic_habits(section: str) -> list[dict[str, str]]:
+    habits: list[dict[str, str]] = []
+    blocks = re.split(r"^\s*[-*]\s+Habit ID:\s*", section, flags=re.MULTILINE | re.IGNORECASE)
+    for block in blocks[1:]:
+        habit_id, _, rest = block.partition("\n")
+        habit_id = normalize_missing(habit_id)
+        status = v3_scalar(rest, "Status")
+        if habit_id and status:
+            habits.append({"habit_id": habit_id, "status": status, "note": v3_scalar(rest, "Note", "Uwagi")})
+    return habits
+
+
+def v3_comparisons(section: str) -> list[dict[str, str]]:
+    comparisons: list[dict[str, str]] = []
+    blocks = re.split(r"^\s*[-*]\s+plan_item_id:\s*", section, flags=re.MULTILINE)
+    for block in blocks[1:]:
+        plan_item_id, _, rest = block.partition("\n")
+        comparisons.append(
+            {
+                "plan_item_id": normalize_missing(plan_item_id),
+                "status": v3_scalar(rest, "status", "Status"),
+                "actual_item_ids": v3_scalar(rest, "actual_item_ids", "Actual item IDs"),
+                "note": v3_scalar(rest, "note", "Uwagi"),
+            }
+        )
+    return [comparison for comparison in comparisons if comparison["plan_item_id"]]
+
+
+def v3_duration_minutes(start: str, end: str) -> str:
+    return duration(start, end, "minutes")
+
+
+def build_v3_session(workspace: Path, markdown_path: Path) -> dict:
+    frontmatter, body = parse_frontmatter(markdown_path.read_text(encoding="utf-8"), markdown_path)
+    for field in (
+        "schema_version",
+        "date",
+        "session_date",
+        "previous_day_date",
+        "timezone",
+        "source_type",
+        "normalization_authority",
+        "report_revision",
+        "task_generation_status",
+    ):
+        if str(frontmatter.get(field, "")).strip() == "":
+            raise ValueError(f"Missing required V3 frontmatter {field} in {markdown_path}")
+    session_date = str(frontmatter.get("session_date") or frontmatter.get("date") or "").strip()
+    previous_day_date = str(frontmatter.get("previous_day_date") or "").strip()
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", session_date):
+        raise ValueError(f"Malformed V3 session_date in {markdown_path}: {session_date!r}")
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", previous_day_date):
+        raise ValueError(f"Malformed V3 previous_day_date in {markdown_path}: {previous_day_date!r}")
+
+    plan = v3_section(body, "Plan dnia")
+    closure = "\n\n".join(
+        section
+        for section in [
+            v3_section(body, "Podsumowanie poprzedniego dnia"),
+            v3_section(body, "Zamknięcie poprzedniego dnia"),
+        ]
+        if section
+    )
+    morning = v3_section(body, "Poranny check-in")
+    additional = v3_section(body, "Dodatkowe informacje")
+    plan_items = (
+        v3_items(v3_section(plan, "Planuję zbudować"), "build")
+        + v3_items(v3_section(plan, "Planuję dowieźć"), "deliver")
+        + v3_items(v3_section(plan, "Planuję wypromować"), "promote")
+    )
+    actual_items = (
+        v3_items(v3_section(closure, "Faktycznie zbudowałem"), "build")
+        + v3_items(v3_section(closure, "Faktycznie dowiozłem"), "deliver")
+        + v3_items(v3_section(closure, "Faktycznie wypromowałem"), "promote")
+    )
+    comparison_section = v3_section(closure, "Porównanie plan-fakt")
+    dynamic_habits = v3_dynamic_habits(v3_section(plan, "Planowane nawyki"))
+    actual_dynamic_habits = v3_actual_dynamic_habits(v3_section(closure, "Faktyczne nawyki"))
+    if len(dynamic_habits) > 3:
+        raise ValueError(f"V3 check-in has more than three dynamic habits: {markdown_path}")
+    attachments = collect_attachments(markdown_path)
+    file_path = markdown_path.relative_to(workspace).as_posix()
+
+    values = {
+        "work_mode": v3_scalar(plan, "Tryb pracy", "Work mode"),
+        "organism_mode": v3_scalar(plan, "Tryb organizmu", "Organism mode"),
+        "minimum_day_status": v3_scalar(closure, "Minimum dnia", "minimum_day_status"),
+        "sleep_start": v3_scalar(closure, "Początek snu", "Sleep start"),
+        "sleep_end": v3_scalar(closure, "Koniec snu", "Sleep end"),
+        "sleep_quality_score": v3_scalar(closure, "Jakość snu", "Sleep quality"),
+        "sleep_awakenings": v3_scalar(closure, "Liczba przebudzeń", "Awakenings"),
+        "sleep_approximate": v3_scalar(closure, "Przybliżenie snu", "Sleep approximate"),
+        "mental_clarity_score": v3_scalar(morning, "Klarowność mentalna", "Mental"),
+        "body_readiness_score": v3_scalar(morning, "Gotowość ciała", "Ciało"),
+        "health_notes": v3_scalar(morning, "Ograniczenia", "Health notes"),
+        "planned_training_start": v3_scalar(plan, "Planowany trening start", "Planowany trening od"),
+        "planned_training_end": v3_scalar(plan, "Planowany trening koniec", "Planowany trening do"),
+        "planned_training_type": v3_scalar(plan, "Planowany trening typ", "Planowany typ treningu"),
+        "actual_training_start": v3_scalar(closure, "Faktyczny trening start", "Faktyczny trening od"),
+        "actual_training_end": v3_scalar(closure, "Faktyczny trening koniec", "Faktyczny trening do"),
+        "actual_training_type": v3_scalar(closure, "Faktyczny trening typ", "Faktyczny typ treningu"),
+        "actual_training_rpe": v3_scalar(closure, "RPE"),
+        "planned_nsdr_start": v3_scalar(plan, "Planowany NSDR start", "Planowany NSDR od"),
+        "planned_nsdr_end": v3_scalar(plan, "Planowany NSDR koniec", "Planowany NSDR do"),
+        "actual_nsdr_start": v3_scalar(closure, "Faktyczny NSDR start", "Faktyczny NSDR od"),
+        "actual_nsdr_end": v3_scalar(closure, "Faktyczny NSDR koniec", "Faktyczny NSDR do"),
+        "actual_nsdr_effect": v3_scalar(closure, "Efekt NSDR"),
+        "planned_if_start": v3_scalar(plan, "Planowany IF start", "Planowany intermittent fasting od"),
+        "planned_if_end": v3_scalar(plan, "Planowany IF koniec", "Planowany intermittent fasting do"),
+        "actual_if_start": v3_scalar(closure, "Faktyczny IF start", "Faktyczny intermittent fasting od"),
+        "actual_if_end": v3_scalar(closure, "Faktyczny IF koniec", "Faktyczny intermittent fasting do"),
+        "planned_calories_min": v3_scalar(plan, "Planowane kalorie minimum", "Kalorie minimum"),
+        "planned_calories_max": v3_scalar(plan, "Planowane kalorie maksimum", "Kalorie maksimum"),
+        "planned_calories_representative": v3_scalar(plan, "Planowane kalorie reprezentatywne", "Kalorie reprezentatywne"),
+        "planned_budget_max": v3_scalar(plan, "Budżet maksimum"),
+        "planned_budget_currency": v3_scalar(plan, "Budżet waluta"),
+        "actual_calories_min": v3_scalar(closure, "Faktyczne kalorie minimum"),
+        "actual_calories_max": v3_scalar(closure, "Faktyczne kalorie maksimum"),
+        "actual_calories_representative": v3_scalar(closure, "Faktyczne kalorie reprezentatywne"),
+        "finance_amount": v3_scalar(closure, "Finanse kwota", "Kwota"),
+        "finance_currency": v3_scalar(closure, "Finanse waluta", "Waluta"),
+        "finance_approximate": v3_scalar(closure, "Finanse przybliżenie"),
+        "additional": additional,
+    }
+    values.update(
+        {
+            "planned_training_minutes": v3_duration_minutes(values["planned_training_start"], values["planned_training_end"]),
+            "actual_training_minutes": v3_duration_minutes(values["actual_training_start"], values["actual_training_end"]),
+            "planned_nsdr_minutes": v3_duration_minutes(values["planned_nsdr_start"], values["planned_nsdr_end"]),
+            "actual_nsdr_minutes": v3_duration_minutes(values["actual_nsdr_start"], values["actual_nsdr_end"]),
+            "planned_if_minutes": v3_duration_minutes(values["planned_if_start"], values["planned_if_end"]),
+            "actual_if_minutes": v3_duration_minutes(values["actual_if_start"], values["actual_if_end"]),
+        }
+    )
+    current_values = {
+        key: values[key]
+        for key in values
+        if key.startswith("planned_")
+        or key in {
+            "work_mode",
+            "organism_mode",
+            "sleep_start",
+            "sleep_end",
+            "sleep_quality_score",
+            "sleep_awakenings",
+            "sleep_approximate",
+            "mental_clarity_score",
+            "body_readiness_score",
+            "health_notes",
+        }
+    }
+    closure_values = {
+        key: values[key]
+        for key in values
+        if key.startswith("actual_")
+        or key in {"minimum_day_status", "finance_amount", "finance_currency", "finance_approximate"}
+    }
+    return {
+        "schema_version": "3",
+        "session_date": session_date,
+        "previous_day_date": previous_day_date,
+        "file_path": file_path,
+        "frontmatter": frontmatter,
+        "plan_items": plan_items,
+        "actual_items": actual_items,
+        "comparisons": v3_comparisons(comparison_section),
+        "dynamic_habits": dynamic_habits,
+        "actual_dynamic_habits": actual_dynamic_habits,
+        "attachments": attachments,
+        "values": current_values,
+        "closure_values": closure_values,
+    }
+
+
+def merge_v3_sessions(sessions: list[dict]) -> list[dict]:
+    daily: dict[str, dict] = {}
+    for session in sorted(sessions, key=lambda item: item["session_date"]):
+        date = session["session_date"]
+        record = daily.setdefault(
+            date,
+            {
+                "date": date,
+                "file_path": session["file_path"],
+                "frontmatter": session["frontmatter"],
+                "schema_version": "3",
+                "v3": {"session_date": date, "previous_day_date": "", "values": {}, "plan_items": [], "actual_items": [], "comparisons": [], "dynamic_habits": [], "actual_dynamic_habits": [], "dynamic_habit_warnings": [], "attachments": [], "closure_session_path": "", "closure_session_date": ""},
+                "phases": {}, "habits": [], "reflections": {}, "attachments": [], "unmapped_fields": {},
+            },
+        )
+        record["file_path"] = session["file_path"]
+        record["frontmatter"] = session["frontmatter"]
+        record["v3"].update({
+            "session_date": session["session_date"],
+            "previous_day_date": session["previous_day_date"],
+            "values": session["values"],
+            "plan_items": session["plan_items"],
+            "dynamic_habits": session["dynamic_habits"],
+            "attachments": session["attachments"],
+        })
+        record["attachments"] = session["attachments"]
+
+        meaningful_closure_values = {
+            key: value
+            for key, value in session["closure_values"].items()
+            if value and not (key == "minimum_day_status" and value in {"unknown", "not-defined"})
+        }
+        has_closure = bool(
+            session["actual_items"]
+            or session["comparisons"]
+            or session["actual_dynamic_habits"]
+            or meaningful_closure_values
+        )
+        if not has_closure:
+            continue
+        target = daily.setdefault(
+            session["previous_day_date"],
+            {
+                "date": session["previous_day_date"],
+                "file_path": "", "frontmatter": {}, "schema_version": "3",
+                "v3": {"session_date": "", "previous_day_date": "", "values": {}, "plan_items": [], "actual_items": [], "comparisons": [], "dynamic_habits": [], "actual_dynamic_habits": [], "dynamic_habit_warnings": [], "attachments": [], "closure_session_path": "", "closure_session_date": ""},
+                "phases": {}, "habits": [], "reflections": {}, "attachments": [], "unmapped_fields": {},
+            },
+        )
+        target["v3"]["actual_items"] = session["actual_items"]
+        target["v3"]["comparisons"] = session["comparisons"]
+        target["v3"]["actual_dynamic_habits"] = session["actual_dynamic_habits"]
+        known_habit_ids = {str(habit.get("id", "")) for habit in target["v3"].get("dynamic_habits", [])}
+        target["v3"]["dynamic_habit_warnings"] = [
+            f"Unmatched actual dynamic habit ID: {habit['habit_id']}"
+            for habit in session["actual_dynamic_habits"]
+            if habit["habit_id"] not in known_habit_ids
+        ]
+        target["v3"]["closure_values"] = session["closure_values"]
+        target["v3"]["closure_session_path"] = session["file_path"]
+        target["v3"]["closure_session_date"] = session["session_date"]
+    return [daily[date] for date in sorted(daily)]
+
+
 def csv_row(record: dict) -> dict[str, str]:
+    if record.get("schema_version") == "3":
+        return v3_csv_row(record)
     frontmatter = record["frontmatter"]
     habits = record["habits"]
     habit_done = sum(1 for habit in habits if habit["value"] is True)
@@ -442,7 +842,96 @@ def csv_row(record: dict) -> dict[str, str]:
 
 def metrics_row(record: dict) -> dict[str, str]:
     row = csv_row(record)
-    return {column: row.get(column, "") for column in METRICS_INDEX_COLUMNS}
+    return {column: row.get(column, "") for column in METRICS_INDEX_COLUMNS + V3_METRICS_COLUMNS}
+
+
+def merged_dynamic_habits(payload: dict) -> list[dict[str, str]]:
+    actual_by_id = {
+        str(habit.get("habit_id", "")): habit
+        for habit in payload.get("actual_dynamic_habits", [])
+        if habit.get("habit_id")
+    }
+    merged: list[dict[str, str]] = []
+    for habit in payload.get("dynamic_habits", []):
+        actual = actual_by_id.get(str(habit.get("id", "")), {})
+        merged.append({**habit, "actual_status": str(actual.get("status", "unknown") or "unknown"), "actual_note": str(actual.get("note", ""))})
+    return merged
+
+
+def v3_csv_row(record: dict) -> dict[str, str]:
+    payload = record["v3"]
+    values = dict(payload.get("values", {}))
+    closure = dict(payload.get("closure_values", {}))
+    combined = {**values, **{key: value for key, value in closure.items() if value}}
+    frontmatter = record.get("frontmatter", {})
+    plan_items = payload.get("plan_items", [])
+    actual_items = payload.get("actual_items", [])
+    dynamic_habits = merged_dynamic_habits(payload)
+    attachments = payload.get("attachments", record.get("attachments", []))
+    minimum = combined.get("minimum_day_status", "")
+    row = {column: "" for column in REQUIRED_INDEX_COLUMNS + V3_INDEX_COLUMNS}
+    row.update(
+        {
+            "date": record["date"],
+            "file_path": record.get("file_path", "") or payload.get("closure_session_path", ""),
+            "source_provider": str(frontmatter.get("source_provider", "ai-system")),
+            "source_row_id": str(frontmatter.get("source_row_id", "")),
+            "minimum_day_done": "true" if minimum == "completed" else "false" if minimum == "not-completed" else "",
+            "day_mode": combined.get("work_mode", ""),
+            "body_subjective": combined.get("body_readiness_score", ""),
+            "mental_subjective": combined.get("mental_clarity_score", ""),
+            "sleep_start": combined.get("sleep_start", ""),
+            "sleep_end": combined.get("sleep_end", ""),
+            "sleep_hours": duration(combined.get("sleep_start", ""), combined.get("sleep_end", ""), "hours"),
+            "if_start": combined.get("actual_if_start") or combined.get("planned_if_start", ""),
+            "if_end": combined.get("actual_if_end") or combined.get("planned_if_end", ""),
+            "if_hours": (
+                f"{int(combined.get('actual_if_minutes') or combined.get('planned_if_minutes') or 0) / 60:.2f}".rstrip("0").rstrip(".")
+                if (combined.get("actual_if_minutes") or combined.get("planned_if_minutes")) else ""
+            ),
+            "training_start": combined.get("actual_training_start") or combined.get("planned_training_start", ""),
+            "training_end": combined.get("actual_training_end") or combined.get("planned_training_end", ""),
+            "training_minutes": combined.get("actual_training_minutes") or combined.get("planned_training_minutes", ""),
+            "nsdr_start": combined.get("actual_nsdr_start") or combined.get("planned_nsdr_start", ""),
+            "nsdr_end": combined.get("actual_nsdr_end") or combined.get("planned_nsdr_end", ""),
+            "nsdr_minutes": combined.get("actual_nsdr_minutes") or combined.get("planned_nsdr_minutes", ""),
+            "habit_count_done": str(sum(1 for habit in dynamic_habits if habit.get("actual_status") == "completed")),
+            "habit_count_total": str(len(dynamic_habits)),
+            "has_built": str(bool([item for item in actual_items if item.get("stream") == "build"])).lower(),
+            "has_delivered": str(bool([item for item in actual_items if item.get("stream") == "deliver"])).lower(),
+            "has_promoted": str(bool([item for item in actual_items if item.get("stream") == "promote"])).lower(),
+            **attachment_counts(attachments),
+            "schema_version": "3",
+            "session_date": payload.get("session_date", ""),
+            "previous_day_date": payload.get("previous_day_date", ""),
+            "timezone": str(frontmatter.get("timezone", "")),
+            "normalization_authority": str(frontmatter.get("normalization_authority", "")),
+            "report_revision": str(frontmatter.get("report_revision", "")),
+            "task_generation_status": str(frontmatter.get("task_generation_status", "")),
+            "work_mode": combined.get("work_mode", ""),
+            "organism_mode": combined.get("organism_mode", ""),
+            "minimum_day_status": minimum,
+            "planned_item_count": str(len(plan_items)),
+            "actual_item_count": str(len(actual_items)),
+            "comparison_count": str(len(payload.get("comparisons", []))),
+            "planned_build_count": str(sum(1 for item in plan_items if item.get("stream") == "build")),
+            "planned_deliver_count": str(sum(1 for item in plan_items if item.get("stream") == "deliver")),
+            "planned_promote_count": str(sum(1 for item in plan_items if item.get("stream") == "promote")),
+            "actual_build_count": str(sum(1 for item in actual_items if item.get("stream") == "build")),
+            "actual_deliver_count": str(sum(1 for item in actual_items if item.get("stream") == "deliver")),
+            "actual_promote_count": str(sum(1 for item in actual_items if item.get("stream") == "promote")),
+            "dynamic_habit_count": str(len(dynamic_habits)),
+            "dynamic_habit_done_count": str(sum(1 for habit in dynamic_habits if habit.get("actual_status") == "completed")),
+            "dynamic_habit_partial_count": str(sum(1 for habit in dynamic_habits if habit.get("actual_status") == "partial")),
+            "dynamic_habit_not_completed_count": str(sum(1 for habit in dynamic_habits if habit.get("actual_status") == "not-completed")),
+            "dynamic_habit_unknown_count": str(sum(1 for habit in dynamic_habits if habit.get("actual_status") == "unknown")),
+            "attachment_paths_json": json.dumps(attachments, ensure_ascii=False),
+        }
+    )
+    for key in V3_INDEX_COLUMNS:
+        if key in combined and combined[key] != "":
+            row[key] = str(combined[key])
+    return row
 
 
 def render_field_dictionary() -> str:
@@ -455,7 +944,7 @@ def render_field_dictionary() -> str:
         "| Source | Target |",
         "| --- | --- |",
     ]
-    for key in REQUIRED_INDEX_COLUMNS:
+    for key in REQUIRED_INDEX_COLUMNS + V3_INDEX_COLUMNS:
         lines.append(f"| `{key}` | index column |")
     for label in HABIT_FIELD_MAP.values():
         lines.append(f"| `{label}` | habit_{normalize_slug(label)} |")
@@ -469,10 +958,10 @@ def read_last_synced_count(router_path: Path) -> int:
     return int(match.group(1)) if match else 0
 
 
-def sync_state(records: list[dict], previous_synced_count: int, source: str) -> dict:
-    current_count = len(records)
+def sync_state(records: list[dict], previous_synced_count: int, source: str, source_files: list[Path]) -> dict:
+    current_count = len(source_files)
     unsynced_count = max(0, current_count - previous_synced_count)
-    unsynced_dates = [record["date"] for record in records[-unsynced_count:]] if unsynced_count else []
+    unsynced_dates = [path.stem for path in source_files[-unsynced_count:]] if unsynced_count else []
     return {
         "last_synced_at": datetime.now().isoformat(timespec="seconds"),
         "last_synced_check_in_count": current_count if source != "manual" else previous_synced_count,
@@ -503,6 +992,7 @@ def render_router(state: dict) -> str:
             "- `check-ins.jsonl`",
             "- `check-ins.metrics.csv`",
             "- `check-ins-fields.md`",
+            "- `check-ins.trends.md` (sanitized for Dreaming Mode)",
             "- `check-ins-conflicts.md`",
             "",
             "## Lazy Sync State",
@@ -529,6 +1019,39 @@ def write_text_atomic(path: Path, content: str) -> None:
     temp_path.replace(path)
 
 
+def render_trends(records: list[dict]) -> str:
+    """Render aggregated V3-only trends without raw sensitive values or attachments."""
+    v3_records = [record for record in records if record.get("schema_version") == "3"]
+    closed = sum(1 for record in v3_records if record.get("v3", {}).get("closure_session_path"))
+    minimum = {
+        status: sum(
+            1
+            for record in v3_records
+            if (record.get("v3", {}).get("closure_values", {}) or record.get("v3", {}).get("values", {})).get("minimum_day_status") == status
+        )
+        for status in ("completed", "partial", "not-completed", "not-defined", "unknown")
+    }
+    plan_count = sum(len(record.get("v3", {}).get("plan_items", [])) for record in v3_records)
+    actual_count = sum(len(record.get("v3", {}).get("actual_items", [])) for record in v3_records)
+    return "\n".join(
+        [
+            "# Daily Check-In Trends",
+            "",
+            "Sanitized derived trends for Dreaming Mode. It excludes raw check-ins, attachments, OCR, finance, calorie, health, and reflection details.",
+            "",
+            f"- v3-effective-day-count: {len(v3_records)}",
+            f"- v3-days-with-closure: {closed}",
+            f"- planned-item-count: {plan_count}",
+            f"- actual-item-count: {actual_count}",
+            f"- minimum-completed-count: {minimum['completed']}",
+            f"- minimum-partial-count: {minimum['partial']}",
+            f"- minimum-not-completed-count: {minimum['not-completed']}",
+            f"- minimum-not-defined-count: {minimum['not-defined']}",
+            f"- minimum-unknown-count: {minimum['unknown']}",
+        ]
+    ) + "\n"
+
+
 def write_indexes(records: list[dict], workspace: Path, source: str, dry_run: bool) -> None:
     index_dir = workspace / "personal-ops" / "indexes"
     router_path = index_dir / "check-ins.md"
@@ -537,6 +1060,7 @@ def write_indexes(records: list[dict], workspace: Path, source: str, dry_run: bo
         index_dir / "check-ins.jsonl",
         index_dir / "check-ins.metrics.csv",
         index_dir / "check-ins-fields.md",
+        index_dir / "check-ins.trends.md",
         router_path,
     ]
     if dry_run:
@@ -553,7 +1077,7 @@ def write_indexes(records: list[dict], workspace: Path, source: str, dry_run: bo
             if key.startswith("habit_") and key not in REQUIRED_INDEX_COLUMNS
         }
     )
-    fieldnames_out = REQUIRED_INDEX_COLUMNS + habit_columns
+    fieldnames_out = REQUIRED_INDEX_COLUMNS + V3_INDEX_COLUMNS + habit_columns
     index_dir.mkdir(parents=True, exist_ok=True)
 
     csv_path = index_dir / "check-ins.csv"
@@ -566,7 +1090,7 @@ def write_indexes(records: list[dict], workspace: Path, source: str, dry_run: bo
 
     metrics_path = index_dir / "check-ins.metrics.csv"
     with tempfile.NamedTemporaryFile("w", newline="", encoding="utf-8", dir=index_dir, delete=False) as handle:
-        writer = csv.DictWriter(handle, fieldnames=METRICS_INDEX_COLUMNS, extrasaction="ignore")
+        writer = csv.DictWriter(handle, fieldnames=METRICS_INDEX_COLUMNS + V3_METRICS_COLUMNS, extrasaction="ignore")
         writer.writeheader()
         for record in records:
             writer.writerow(metrics_row(record))
@@ -585,26 +1109,38 @@ def write_indexes(records: list[dict], workspace: Path, source: str, dry_run: bo
                 "attachments": record.get("attachments", []),
                 "unmapped_fields": record.get("unmapped_fields", {}),
             }
+            if record.get("schema_version") == "3":
+                payload["schema_version"] = "3"
+                payload["v3"] = record.get("v3", {})
             handle.write(json.dumps(payload, ensure_ascii=False, sort_keys=True) + "\n")
         temp_jsonl = Path(handle.name)
 
     previous_count = read_last_synced_count(router_path)
-    state = sync_state(records, previous_count, source)
+    state = sync_state(records, previous_count, source, daily_files(workspace))
     temp_csv.replace(csv_path)
     temp_metrics.replace(metrics_path)
     temp_jsonl.replace(jsonl_path)
     write_text_atomic(index_dir / "check-ins-fields.md", render_field_dictionary())
+    write_text_atomic(index_dir / "check-ins.trends.md", render_trends(records))
     write_text_atomic(router_path, render_router(state))
 
 
 def load_records(workspace: Path) -> list[dict]:
     index_dir = workspace / "personal-ops" / "indexes"
     existing_unmapped = load_existing_unmapped(index_dir)
-    return [build_record(workspace, path, existing_unmapped) for path in daily_files(workspace)]
+    v2_records: list[dict] = []
+    v3_sessions: list[dict] = []
+    for path in daily_files(workspace):
+        frontmatter, _ = parse_frontmatter(path.read_text(encoding="utf-8"), path)
+        if str(frontmatter.get("schema_version", "")).strip() == "3":
+            v3_sessions.append(build_v3_session(workspace, path))
+        else:
+            v2_records.append(build_record(workspace, path, existing_unmapped))
+    return sorted(v2_records + merge_v3_sessions(v3_sessions), key=lambda record: (record["date"], record.get("file_path", "")))
 
 
-def print_status(records: list[dict], router_path: Path) -> None:
-    current = len(records)
+def print_status(records: list[dict], router_path: Path, source_files: list[Path]) -> None:
+    current = len(source_files)
     last = read_last_synced_count(router_path)
     unsynced = max(0, current - last)
     print(f"current-check-in-count: {current}")
@@ -616,7 +1152,7 @@ def print_status(records: list[dict], router_path: Path) -> None:
     else:
         print("sync-recommendation: not required yet")
     if unsynced:
-        print("latest-unsynced-dates: " + ", ".join(record["date"] for record in records[-unsynced:][-7:]))
+        print("latest-unsynced-dates: " + ", ".join(path.stem for path in source_files[-unsynced:][-7:]))
 
 
 def main() -> int:
@@ -629,12 +1165,13 @@ def main() -> int:
     try:
         workspace = args.workspace
         records = load_records(workspace)
+        source_files = daily_files(workspace)
         router_path = workspace / "personal-ops" / "indexes" / "check-ins.md"
         if args.status_only:
-            print_status(records, router_path)
+            print_status(records, router_path, source_files)
             return 0
         if args.dry_run:
-            print_status(records, router_path)
+            print_status(records, router_path, source_files)
             write_indexes(records, workspace, "owner-approved-sync", dry_run=True)
             return 0
         write_indexes(records, workspace, "owner-approved-sync", dry_run=False)

@@ -211,7 +211,7 @@ Zrób destylację pamięci klienta/projektu <slug>. Wypisz co zostaje, co jest p
 
 ## Personal Ops Check-Ins
 
-Use this for native daily check-ins and daily check-in data exported from Notion.
+Use V3 for native manual daily check-ins. The Notion CSV importer remains V2-only and historical V2 check-ins are not rewritten or backfilled.
 
 For a new manual day, use:
 
@@ -246,7 +246,7 @@ Expected outputs:
 - `<workspace>/personal-ops/indexes/check-ins.metrics.csv`;
 - `<workspace>/personal-ops/indexes/check-ins.md`.
 
-Check-ins and attachments are private-sensitive by default. They are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
+V3 session `D` records day `D` plan/morning state plus day `D-1` closure without editing the prior-day Markdown. Detailed V3 CSV/JSONL/metrics indexes are `private-sensitive` workspace-local data and may contain finance, calories, health, and attachment metadata. Dreaming Mode may use only sanitized `check-ins.trends.md`. Check-ins and attachments are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
 
 Manual check-ins do not refresh the derived database automatically. After writing a manual check-in, ask for lazy sync status:
 
@@ -323,9 +323,11 @@ Owner-approved write route:
 owner-approved: utwórz TaskNotes z zaakceptowanych task candidates w vault <taskforge-vault>. Użyj propose-task-candidates z --owner-approved --write.
 ```
 
-Check-in fields `Zbudowałem`, `Dowiozłem`, and `Wypromowałem` route to `tags: [5d/do]`, `status: open`, `priority: high`, and due date `YYYY-MM-DDT23:59`. Dream Report task candidates default to `tags: [5d/defer]`. Client/project recognition uses boundary-only matching: full normalized token/phrase matches only, no short-slug matching, and no aliases in v1. Ambiguous client/project mapping stays blank with `Mapping requires review`.
+V3 planned `build-*`, `deliver-*`, and `promote-*` items route one-per-item to `tags: [6d/do]`, `status: open`, `priority: high`, and due date `YYYY-MM-DDT23:59`. Actual closure items create no TaskNotes. A single owner-approved V3 check-in write also authorizes only those initial TaskNotes, using local-only `tasks/taskforge-vault.local.md`; if vault preflight fails, save the check-in with `task_generation_status: skipped`. Dream Report task candidates default to `tags: [6d/defer]`. Historical `5d/*` tags remain unchanged and read-compatible; `DONE` is derived from `status: done`. Client/project recognition uses boundary-only matching: full normalized token/phrase matches only, no short-slug matching, and no aliases in v1. Ambiguous client/project mapping stays blank with `Mapping requires review`.
 
-TaskForge custom lists should use `Tags contains 5d/<bucket>` filters. Keep `contexts` for client/workspace/personal routing and `projects` for concrete project links.
+Before creating a V3 TaskNote, the system checks existing open TaskNotes. It adds a marked subtask only for one strong, unambiguous task with the same mapped client or project; otherwise it creates a separate TaskNote. It never merges tasks from weak text similarity alone.
+
+TaskForge custom lists should use `Tags contains 6d/<bucket>` filters plus a `DONE` view filtering `status: done`. Keep `contexts` for client/workspace/personal routing and `projects` for concrete project links.
 
 Write target guard: `<taskforge-vault>` and `<taskforge-vault>/TaskNotes/Tasks/` must already exist. The proposal script does not initialize TaskForge vault structure.
 

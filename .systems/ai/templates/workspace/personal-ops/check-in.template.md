@@ -1,138 +1,199 @@
 ---
 type: daily-check-in
+schema_version: 3
 date: <YYYY-MM-DD>
-title: "Daily check-in <YYYY-MM-DD>"
-source: manual
-source_provider: ai-system
-source_database: manual-daily-check-in
-source_row_id:
+session_date: <YYYY-MM-DD>
+previous_day_date: <YYYY-MM-DD>
+timezone: <IANA timezone from check-in-settings.local.md>
+source_type: manual-interpreted
+normalization_authority: interpreted-report
+report_revision: 1
+task_generation_status: pending
+task_generation_reason:
+task_generation_references:
 privacy: private-sensitive
-minimum_day_done:
-day_mode:
-day_mode_raw:
-body_subjective:
-energy_subjective:
-mental_subjective:
-routine_state_subjective:
-limitations_subjective:
-sleep_start:
-sleep_end:
-sleep_raw:
-if_start:
-if_end:
-if_raw:
-training_start:
-training_end:
-training_raw:
-nsdr_start:
-nsdr_end:
-nsdr_raw:
-day_plan_status:
-morning_check_in_status:
-afternoon_check_in_status:
-next_day_seed_status:
 ---
 
-# Daily check-in <YYYY-MM-DD>
+# Daily Check-In <YYYY-MM-DD>
 
-## 1. Plan dnia
+## Metadane
 
-### Data
+- Data: <YYYY-MM-DD>
+- Dzień tygodnia: <monday|tuesday|wednesday|thursday|friday|saturday|sunday>
+- Godzina nagrania: <HH:MM>
+- Konflikt daty i dnia tygodnia: <true|false>
+- Źródło: <manual|voice-check-in|other>
+- Prywatność: private-sensitive
 
-### Sen od-do
+## Podsumowanie poprzedniego dnia
 
-### Trening od-do
+### Sen
 
-### NSDR od-do
+- Początek snu:
+- Koniec snu:
+- Jakość snu:
+- Liczba przebudzeń:
+- Przybliżenie snu:
+- Sen raw:
 
-### IF od-do
+### Faktyczny trening
 
-### Tryb dnia
+- Faktyczny trening start:
+- Faktyczny trening koniec:
+- Faktyczny trening typ:
+- RPE:
+- Trening raw:
 
-### Zbudowałem
+### Faktyczny NSDR
 
-### Dowiozłem
+- Faktyczny NSDR start:
+- Faktyczny NSDR koniec:
+- Efekt NSDR:
+- NSDR raw:
 
-### Wypromowałem
+### Faktyczny IF i kalorie
 
-### Coś dla ciała
+- Faktyczny IF start:
+- Faktyczny IF koniec:
+- Faktyczne kalorie minimum:
+- Faktyczne kalorie maksimum:
+- Faktyczne kalorie reprezentatywne:
+- IF raw:
 
-### Coś dla ducha
+### Finanse
 
-### Coś dla bliskich
+- Finanse kwota:
+- Finanse waluta:
+- Finanse przybliżenie:
+- Finanse raw:
 
-## 2. Poranny check-in
+### Faktycznie zbudowałem
 
-### Pobudka
+- [actual-build-01] <actual item title>
 
-### Kuchnia
+### Faktycznie dowiozłem
 
-### Dwór
+- [actual-deliver-01] <actual item title>
 
-### Napiłem się
+### Faktycznie wypromowałem
 
-### Mantra
+- [actual-promote-01] <actual item title>
 
-### Deep Focus
+### Faktyczne nawyki
 
-### Mama i Oliwia
+- Habit ID: <habit-01>
+  - Status: <completed|partial|not-completed|unknown>
+  - Note:
 
-### Insta Story
+### Porównanie plan-fakt
 
-### Stan po rutynie
+- plan_item_id:
+  - status: <completed-as-planned|partial|not-completed|completed-differently|replaced|consciously-replanned|unknown|not-applicable>
+  - actual_item_ids:
+  - note:
 
-### Energia
+### Minimum i refleksja
 
-### Mental
+- Minimum dnia: <completed|partial|not-completed|not-defined|unknown>
+- Co realnie dało +1%:
+- Co było zbędne:
+- Zagrożenie dnia wystąpiło:
+- Czy odpowiednio zareagowałem:
 
-### Ciało
+## Plan dnia
 
-### Ograniczenia
+- Tryb pracy: <wzrost|obrona-reputacji|normalny|nie-podano>
+- Tryb organizmu: <pelna-moc|normalny|regeneracja|nie-podano>
 
-### Jestem wdzięczny
+### Planowany trening
 
-### Zagrożenie dnia
+- Planowany trening start:
+- Planowany trening koniec:
+- Planowany trening typ:
+- Trening raw:
 
-## 3. Popołudniowy check-in
+### Planowany NSDR
 
-### Czy zrobiłem minimum
+- Planowany NSDR start:
+- Planowany NSDR koniec:
+- NSDR raw:
 
-### Nawyki
+### Planowany IF i kalorie
 
-### Co dało +1%
+- Planowany IF start:
+- Planowany IF koniec:
+- Planowane kalorie minimum:
+- Planowane kalorie maksimum:
+- Planowane kalorie reprezentatywne:
+- IF raw:
 
-### Co było zbędne
+### Budżet
 
-## 4. Seed kolejnego dnia
+- Budżet maksimum:
+- Budżet waluta:
+- Budżet raw:
 
-### Data
+### Planuję zbudować
 
-### Sen od-do
+- [build-01] <planned item title>
 
-### Trening od-do
+### Planuję dowieźć
 
-### NSDR od-do
+- [deliver-01] <planned item title>
 
-### IF od-do
+### Planuję wypromować
 
-### Tryb dnia
+- [promote-01] <planned item title>
 
-### Zbudowałem
+### Planuję zrobić coś dla siebie
 
-### Dowiozłem
+- [self-01] <planned item title>
 
-### Wypromowałem
+### Planuję zrobić coś dla bliskich
 
-### Coś dla ciała
+- [close-01] <planned item title>
 
-### Coś dla ducha
+### Planowane nawyki
 
-### Coś dla bliskich
+- Habit ID: <habit-01>
+  - Nazwa:
+  - Trigger:
+  - Kryterium:
+  - Status: planned
 
-## 5. Dodatkowe informacje
+## Poranny check-in
 
-### Dodatkowe informacje
+### Rutyna
 
-### Załączniki
+- Pobudka bez negocjacji:
+- Toaleta + mantra:
+- Kuchnia:
+- Dwór:
+- Deep Focus:
+- Życzenia dla bliskich:
 
--
+### Aktualny stan
+
+- Klarowność mentalna:
+- Gotowość ciała:
+- Ograniczenia:
+- Wdzięczność:
+
+## Dodatkowe informacje
+
+- Uwagi:
+- Uwagi interpretacyjne:
+- Cytat/źródło: <unverified unless source is checked>
+
+## Załączniki
+
+- Relative asset path:
+- Kind: <screenshot|note_image|ocr|other>
+
+## Kandydaci na taski
+
+Task candidates are derived only from planned `build-*`, `deliver-*`, and `promote-*` items. A single owner-approved V3 check-in write may create the corresponding TaskNotes if the local vault preflight passes. Do not create candidates from actual closure items.
+
+## Opcjonalna interpretacja
+
+Interpretation is advisory-only. It is not memory, System Insights, External Memory, or a verified source.

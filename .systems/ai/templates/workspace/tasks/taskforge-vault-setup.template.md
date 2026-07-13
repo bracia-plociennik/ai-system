@@ -67,16 +67,24 @@ Use this runbook before relying on TaskForge as an operational task store.
   - complete instances: `complete_instances`
 - exclude archive, raw, dump, private, or unrelated folders from scanning when supported
 
-### 5D Custom Lists
+### 6D Custom Lists
 
-- `DO`: filter `Tags contains 5d/do`; default tag `5d/do`; default status `open`; default priority `high`
-- `DEFER`: filter `Tags contains 5d/defer`; default tag `5d/defer`; default status `planned`; default priority `normal`
-- `DELEGATE`: filter `Tags contains 5d/delegate`; default tag `5d/delegate`; default status `waiting`; default priority `normal`
+- `DO`: filter `Tags contains 6d/do`; default tag `6d/do`; default status `open`; default priority `high`
+- `DEFER`: filter `Tags contains 6d/defer`; default tag `6d/defer`; default status `planned`; default priority `normal`
+- `DELEGATE`: filter `Tags contains 6d/delegate`; default tag `6d/delegate`; default status `waiting`; default priority `normal`
   - TaskForge 2.6.x may show `On Hold` instead of `Waiting`; use `On Hold` as the app-level default only when `Waiting` is unavailable.
-- `DELETE`: filter `Tags contains 5d/delete`; default tag `5d/delete`; default status `cancelled`; default priority `none`
-- `DUMP`: filter `Tags contains 5d/dump`; default tag `5d/dump`; default status `open`; default priority `none`
+- `DELETE`: filter `Tags contains 6d/delete`; default tag `6d/delete`; default status `cancelled`; default priority `none`
+- `DUMP`: filter `Tags contains 6d/dump`; default tag `6d/dump`; default status `open`; default priority `none`
+- `DONE`: filter `status: done`; do not create or assign a `6d/done` tag.
 
-Keep `TaskNotes/Tasks/` as the canonical file storage route. Do not use folders such as `DOs/` or `DEFERs/` as the primary 5D classification.
+### Legacy 5D Compatibility
+
+- Do not migrate or rewrite historical `5d/*` TaskNotes.
+- If TaskForge supports OR tag filtering, an optional `Legacy 5D` list may match all five `5d/*` tags.
+- If OR filtering is unavailable, use separate temporary lists `Legacy DO`, `Legacy DEFER`, `Legacy DELEGATE`, `Legacy DELETE`, and `Legacy DUMP`.
+- The `DONE` list remains status-based and therefore includes completed historical 5D and current 6D tasks.
+
+Keep `TaskNotes/Tasks/` as the canonical file storage route. Do not use folders such as `DOs/` or `DEFERs/` as the primary 6D classification.
 
 ## Manual Verification
 

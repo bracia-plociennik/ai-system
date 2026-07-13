@@ -30,13 +30,21 @@ POLISH_REPLACEMENTS = {
     "ź": "z",
 }
 
-FIVE_D = {
-    "do": {"tag": "5d/do", "status": "open", "priority": "high"},
-    "defer": {"tag": "5d/defer", "status": "planned", "priority": "normal"},
-    "delegate": {"tag": "5d/delegate", "status": "waiting", "priority": "normal"},
-    "delete": {"tag": "5d/delete", "status": "cancelled", "priority": "none"},
-    "dump": {"tag": "5d/dump", "status": "open", "priority": "none"},
+SIX_D = {
+    "do": {"tag": "6d/do", "status": "open", "priority": "high"},
+    "defer": {"tag": "6d/defer", "status": "planned", "priority": "normal"},
+    "delegate": {"tag": "6d/delegate", "status": "waiting", "priority": "normal"},
+    "delete": {"tag": "6d/delete", "status": "cancelled", "priority": "none"},
+    "dump": {"tag": "6d/dump", "status": "open", "priority": "none"},
 }
+
+def apply_execution_classification(candidate: dict[str, object], bucket: str) -> None:
+    """Add derived 6D proposal fields without changing source TaskNotes."""
+    candidate["status"] = SIX_D[bucket]["status"]
+    candidate["priority"] = SIX_D[bucket]["priority"]
+    candidate["tags"] = [SIX_D[bucket]["tag"]]
+    candidate["task_method"] = "6d"
+    candidate["execution_bucket"] = bucket
 
 
 def read_text(path: Path) -> str:
@@ -215,6 +223,8 @@ def apply_mapping(candidate: dict[str, object], labels: dict[str, list[tuple[str
 def candidates_from_check_in(path: Path, workspace: Path, labels: dict[str, list[tuple[str, str]]]) -> list[dict[str, object]]:
     text = read_text(path)
     fm = parse_frontmatter(text)
+    if fm.get("schema_version") == "3":
+        return candidates_from_v3_check_in(path, workspace, labels, text, fm)
     check_date = fm.get("date") or path.stem
     try:
         dt.date.fromisoformat(check_date)
@@ -230,11 +240,8 @@ def candidates_from_check_in(path: Path, workspace: Path, labels: dict[str, list
         candidate: dict[str, object] = {
             "type": "task",
             "title": title,
-            "status": FIVE_D["do"]["status"],
-            "priority": FIVE_D["do"]["priority"],
             "due": f"{check_date}T23:59",
             "scheduled": check_date,
-            "tags": [FIVE_D["do"]["tag"]],
             "contexts": [f"workspace/{workspace.name}"],
             "workspace": workspace.name,
             "owner_scope": "workspace",
@@ -250,16 +257,77 @@ def candidates_from_check_in(path: Path, workspace: Path, labels: dict[str, list
             "raw_value": value,
             "candidate_key": source_key,
         }
+        apply_execution_classification(candidate, "do")
         apply_mapping(candidate, labels)
         candidates.append(candidate)
     return candidates
 
 
-def five_d_from_text(text: str) -> str:
-    lowered = text.lower()
-    for key in FIVE_D:
-        if f"5d/{key}" in lowered or re.search(rf"\b{key}\b", lowered):
-            return key
+def v3_section(text: str, heading: str) -> str:
+    match = re.search(rf"^(?P<level>#+)\s+{re.escape(heading)}\s*$", text, re.MULTILINE)
+    if not match:
+        return ""
+    level = len(match.group("level"))
+    end = re.search(rf"^#{{1,{level}}}\s+", text[match.end() :], re.MULTILINE)
+    stop = match.end() + end.start() if end else len(text)
+    return text[match.end() : stop].strip()
+
+
+def v3_planned_items(section: str, stream: str) -> list[tuple[str, str]]:
+    return [
+        (match.group("id"), match.group("title").strip())
+        for match in re.finditer(r"^\s*[-*]\s+\[(?P<id>[a-z][a-z0-9-]*)\]\s+(?P<title>.+?)\s*$", section, re.MULTILINE | re.IGNORECASE)
+        if match.group("title").strip().lower() not in {"brak", "nie podano", "nie dotyczy"}
+    ]
+
+
+def candidates_from_v3_check_in(path: Path, workspace: Path, labels: dict[str, list[tuple[str, str]]], text: str, fm: dict[str, str]) -> list[dict[str, object]]:
+    check_date = fm.get("session_date") or fm.get("date") or path.stem
+    try:
+        dt.date.fromisoformat(check_date)
+    except ValueError as exc:
+        raise SystemExit(f"V3 session_date is missing or invalid for {path}") from exc
+    plan = v3_section(text, "Plan dnia")
+    fields = [("Planuję zbudować", "build"), ("Planuję dowieźć", "deliver"), ("Planuję wypromować", "promote")]
+    candidates: list[dict[str, object]] = []
+    for heading, stream in fields:
+        for item_id, raw_value in v3_planned_items(v3_section(plan, heading), stream):
+            candidate: dict[str, object] = {
+                "type": "task",
+                "title": normalize_title(raw_value),
+                "due": f"{check_date}T23:59",
+                "scheduled": check_date,
+                "contexts": [f"workspace/{workspace.name}"],
+                "workspace": workspace.name,
+                "owner_scope": "workspace",
+                "client": "",
+                "owned_asset": "",
+                "project": "",
+                "project_state": "",
+                "source_system": "ai-system",
+                "source_type": "check-in-v3",
+                "source_session_date": check_date,
+                "source_check_in_date": check_date,
+                "source_check_in_field": heading,
+                "source_plan_item_id": item_id,
+                "source_path": str(path),
+                "raw_value": raw_value,
+                "candidate_key": f"{check_date}:{item_id}",
+            }
+            apply_execution_classification(candidate, "do")
+            apply_mapping(candidate, labels)
+            candidates.append(candidate)
+    return candidates
+
+
+def execution_bucket_from_text(text: str) -> str:
+    """Read legacy/new explicit tags but always emit a new 6D tag."""
+    matches = {
+        match.group("bucket")
+        for match in re.finditer(r"(?<![a-z0-9])(?:5d|6d)/(?P<bucket>do|defer|delegate|delete|dump)(?![a-z0-9])", text.lower())
+    }
+    if len(matches) == 1:
+        return matches.pop()
     return "defer"
 
 
@@ -277,7 +345,7 @@ def candidates_from_dream_report(path: Path, workspace: Path, labels: dict[str, 
         row_text = " ".join(cells)
         if "create-task" not in owner_action and "task" not in proposed_target.lower():
             continue
-        five_d = five_d_from_text(row_text)
+        execution_bucket = execution_bucket_from_text(row_text)
         title = normalize_title(finding)
         if not title:
             continue
@@ -285,11 +353,8 @@ def candidates_from_dream_report(path: Path, workspace: Path, labels: dict[str, 
         candidate: dict[str, object] = {
             "type": "task",
             "title": title,
-            "status": FIVE_D[five_d]["status"],
-            "priority": FIVE_D[five_d]["priority"],
             "due": "",
             "scheduled": "",
-            "tags": [FIVE_D[five_d]["tag"]],
             "contexts": [f"workspace/{workspace.name}"],
             "workspace": workspace.name,
             "owner_scope": "workspace",
@@ -305,6 +370,7 @@ def candidates_from_dream_report(path: Path, workspace: Path, labels: dict[str, 
             "raw_value": finding,
             "candidate_key": f"dream-{today}",
         }
+        apply_execution_classification(candidate, execution_bucket)
         apply_mapping(candidate, labels)
         candidates.append(candidate)
     return candidates
@@ -329,6 +395,8 @@ def render_tasknote(candidate: dict[str, object]) -> str:
         "source_type",
         "source_check_in_date",
         "source_check_in_field",
+        "source_session_date",
+        "source_plan_item_id",
         "source_dream_report",
         "source_dream_priority",
     ]
@@ -351,15 +419,99 @@ def render_tasknote(candidate: dict[str, object]) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
-def write_candidates(candidates: list[dict[str, object]], task_vault: Path) -> list[Path]:
+def existing_task_keys(task_dir: Path) -> set[tuple[str, str]]:
+    keys: set[tuple[str, str]] = set()
+    for path in task_dir.glob("*.md"):
+        frontmatter = parse_frontmatter(read_text(path))
+        key = (frontmatter.get("source_session_date", ""), frontmatter.get("source_plan_item_id", ""))
+        if all(key):
+            keys.add(key)
+    return keys
+
+
+def task_token_similarity(left: str, right: str) -> float:
+    left_tokens = set(match_tokens(left))
+    right_tokens = set(match_tokens(right))
+    if len(left_tokens) < 3 or len(right_tokens) < 3:
+        return 0.0
+    return len(left_tokens & right_tokens) / min(len(left_tokens), len(right_tokens))
+
+
+def equivalent_label(left: str, right: str) -> bool:
+    return bool(left and right and match_tokens(left) == match_tokens(right))
+
+
+def candidate_project_labels(candidate: dict[str, object]) -> list[str]:
+    labels = [str(candidate.get("project", "")).strip()]
+    for value in candidate.get("projects", []):
+        labels.extend(wikilinks(str(value)))
+    return [label for label in labels if label]
+
+
+def compatible_parent(candidate: dict[str, object], text: str) -> bool:
+    frontmatter = parse_frontmatter(text)
+    candidate_projects = candidate_project_labels(candidate)
+    parent_projects = [frontmatter.get("project", "").strip(), *projects_from_frontmatter(text)]
+    if candidate_projects and any(equivalent_label(candidate_project, parent_project) for candidate_project in candidate_projects for parent_project in parent_projects):
+        return True
+    candidate_client = str(candidate.get("client", "")).strip()
+    parent_client = frontmatter.get("client", "").strip()
+    return bool(candidate_client and parent_client and candidate_client == parent_client)
+
+
+def find_similar_parent(candidate: dict[str, object], task_dir: Path) -> Path | None:
+    matches: list[Path] = []
+    for path in task_dir.glob("*.md"):
+        text = read_text(path)
+        frontmatter = parse_frontmatter(text)
+        if frontmatter.get("status") in {"done", "cancelled"}:
+            continue
+        if not compatible_parent(candidate, text):
+            continue
+        if task_token_similarity(str(candidate.get("title", "")), frontmatter.get("title", "")) >= 0.75:
+            matches.append(path)
+    return matches[0] if len(matches) == 1 else None
+
+
+def append_subtask(parent_path: Path, candidate: dict[str, object]) -> None:
+    marker = f"ai-system:v3:{candidate['source_session_date']}:{candidate['source_plan_item_id']}"
+    text = read_text(parent_path)
+    if marker in text:
+        return
+    line = f"- [ ] {candidate['title']} <!-- {marker} -->"
+    heading = re.search(r"^##\s+Subtasks\s*$", text, re.MULTILINE | re.IGNORECASE)
+    if heading:
+        insertion = heading.end()
+        text = text[:insertion] + "\n\n" + line + text[insertion:]
+    else:
+        text = text.rstrip() + "\n\n## Subtasks\n\n" + line + "\n"
+    parent_path.write_text(text, encoding="utf-8")
+
+
+def write_candidates(candidates: list[dict[str, object]], task_vault: Path) -> tuple[list[Path], int, list[Path]]:
     task_dir = task_vault / "TaskNotes" / "Tasks"
     if not task_vault.is_dir():
-        raise SystemExit(f"--task-vault does not exist or is not a directory: {task_vault}")
+        raise ValueError(f"--task-vault does not exist or is not a directory: {task_vault}")
     if not task_dir.is_dir():
-        raise SystemExit(f"--task-vault must already contain TaskNotes/Tasks/: {task_vault}")
+        raise ValueError(f"--task-vault must already contain TaskNotes/Tasks/: {task_vault}")
     written: list[Path] = []
+    skipped = 0
+    extended: list[Path] = []
+    existing = existing_task_keys(task_dir)
     for candidate in candidates:
-        base = f"{dt.date.today().isoformat()}-{slugify(str(candidate['title']))}"
+        key = (str(candidate.get("source_session_date", "")), str(candidate.get("source_plan_item_id", "")))
+        if all(key) and key in existing:
+            skipped += 1
+            continue
+        parent = find_similar_parent(candidate, task_dir)
+        if parent:
+            append_subtask(parent, candidate)
+            extended.append(parent)
+            if all(key):
+                existing.add(key)
+            continue
+        source_date = str(candidate.get("source_session_date") or candidate.get("source_check_in_date") or dt.date.today().isoformat())
+        base = f"{source_date}-{slugify(str(candidate['title']))}"
         path = task_dir / f"{base}.md"
         counter = 2
         while path.exists():
@@ -367,7 +519,68 @@ def write_candidates(candidates: list[dict[str, object]], task_vault: Path) -> l
             counter += 1
         path.write_text(render_tasknote(candidate), encoding="utf-8")
         written.append(path)
-    return written
+        if all(key):
+            existing.add(key)
+    return written, skipped, extended
+
+
+def task_vault_from_config(path: Path) -> Path:
+    if not path.is_file():
+        raise ValueError(f"TaskForge vault configuration is missing: {path}")
+    values = parse_frontmatter(read_text(path))
+    vault_path = values.get("vault_path", "")
+    if values.get("enabled", "").lower() not in {"true", "yes"} or not vault_path:
+        raise ValueError(f"TaskForge vault configuration is disabled or incomplete: {path}")
+    return Path(vault_path).expanduser().resolve()
+
+
+def set_frontmatter_scalar(text: str, key: str, value: str) -> str:
+    if not text.startswith("---\n"):
+        raise ValueError("Canonical check-in has no YAML frontmatter")
+    end = text.find("\n---", 4)
+    if end == -1:
+        raise ValueError("Canonical check-in frontmatter is unterminated")
+    frontmatter = text[4:end]
+    line = f"{key}: {quote_yaml(value)}"
+    pattern = re.compile(rf"^{re.escape(key)}\s*:\s*.*$", re.MULTILINE)
+    if pattern.search(frontmatter):
+        frontmatter = pattern.sub(line, frontmatter)
+    else:
+        frontmatter = frontmatter.rstrip() + "\n" + line
+    return "---\n" + frontmatter + text[end:]
+
+
+def update_v3_task_generation_status(path: Path, status: str, reason: str, references: list[Path], task_vault: Path | None) -> None:
+    text = read_text(path)
+    frontmatter = parse_frontmatter(text)
+    if frontmatter.get("schema_version") != "3":
+        return
+    reference_values: list[str] = []
+    for reference in references:
+        if task_vault:
+            try:
+                reference_values.append(reference.relative_to(task_vault).as_posix())
+                continue
+            except ValueError:
+                pass
+        reference_values.append(str(reference))
+    updated = set_frontmatter_scalar(text, "task_generation_status", status)
+    updated = set_frontmatter_scalar(updated, "task_generation_reason", reason)
+    updated = set_frontmatter_scalar(updated, "task_generation_references", ", ".join(reference_values))
+    path.write_text(updated, encoding="utf-8")
+
+
+def task_preflight(args: argparse.Namespace, config_path: Path) -> tuple[Path | None, str]:
+    try:
+        task_vault = args.task_vault.resolve() if args.task_vault else task_vault_from_config(config_path)
+        task_dir = task_vault / "TaskNotes" / "Tasks"
+        if not task_vault.is_dir():
+            raise ValueError(f"TaskForge vault does not exist or is not a directory: {task_vault}")
+        if not task_dir.is_dir():
+            raise ValueError(f"TaskForge vault must already contain TaskNotes/Tasks/: {task_vault}")
+        return task_vault, ""
+    except ValueError as exc:
+        return None, str(exc)
 
 
 def main() -> int:
@@ -377,17 +590,28 @@ def main() -> int:
     source.add_argument("--dream-report", type=Path, help="Dream Report Markdown file")
     parser.add_argument("--workspace", type=Path, required=True, help="AI System workspace path")
     parser.add_argument("--task-vault", type=Path, help="TaskForge vault path")
+    parser.add_argument("--task-vault-config", type=Path, help="Local-only TaskForge vault configuration")
     parser.add_argument("--write", action="store_true", help="Write TaskNotes instead of printing candidates")
     parser.add_argument("--owner-approved", action="store_true", help="Required for --write")
     parser.add_argument("--json", action="store_true", help="Print JSON instead of Markdown")
     args = parser.parse_args()
 
     workspace = args.workspace.resolve()
+    config_path = args.task_vault_config or (workspace / "tasks" / "taskforge-vault.local.md")
     task_vault = args.task_vault.resolve() if args.task_vault else None
     if args.write and not args.owner_approved:
         raise SystemExit("--write requires --owner-approved")
-    if args.write and not task_vault:
-        raise SystemExit("--write requires --task-vault")
+    is_v3_check_in = False
+    if args.check_in:
+        is_v3_check_in = parse_frontmatter(read_text(args.check_in.resolve())).get("schema_version") == "3"
+    if args.write:
+        task_vault, preflight_reason = task_preflight(args, config_path)
+        if preflight_reason:
+            if args.check_in and is_v3_check_in:
+                update_v3_task_generation_status(args.check_in.resolve(), "skipped", preflight_reason, [], None)
+                print(f"Task generation skipped: {preflight_reason}")
+                return 0
+            raise SystemExit(preflight_reason)
 
     labels = discover_labels(workspace, task_vault)
     if args.check_in:
@@ -396,9 +620,38 @@ def main() -> int:
         candidates = candidates_from_dream_report(args.dream_report.resolve(), workspace, labels)
 
     if args.write:
-        written = write_candidates(candidates, task_vault)
+        try:
+            written, skipped, extended = write_candidates(candidates, task_vault)
+        except ValueError as exc:
+            if args.check_in and is_v3_check_in:
+                update_v3_task_generation_status(args.check_in.resolve(), "skipped", str(exc), [], task_vault)
+                print(f"Task generation skipped: {exc}")
+                return 0
+            raise SystemExit(str(exc)) from exc
+        if args.check_in and is_v3_check_in:
+            if written and extended:
+                status = "created-and-subtasks"
+            elif written:
+                status = "created"
+            elif extended:
+                status = "subtasks-created"
+            elif candidates:
+                status = "already-generated"
+            else:
+                status = "no-candidates"
+            update_v3_task_generation_status(
+                args.check_in.resolve(),
+                status,
+                "TaskForge preflight passed; task generation completed.",
+                [*written, *extended],
+                task_vault,
+            )
         print("Written TaskNotes:")
         for path in written:
+            print(path)
+        print(f"Skipped existing TaskNotes: {skipped}")
+        print("Extended existing TaskNotes with subtasks:")
+        for path in extended:
             print(path)
         return 0
 
@@ -418,6 +671,8 @@ def main() -> int:
             print(f"- status: `{candidate['status']}`")
             print(f"- priority: `{candidate['priority']}`")
             print(f"- tags: `{', '.join(candidate.get('tags', []))}`")
+            print(f"- task method: `{candidate.get('task_method', 'none')}`")
+            print(f"- execution bucket: `{candidate.get('execution_bucket', 'unclassified')}`")
             print(f"- contexts: `{', '.join(candidate.get('contexts', []))}`")
             print(f"- due: `{candidate.get('due', '')}`")
             print(f"- source: `{candidate.get('source_type', '')}` / `{candidate.get('source_path', '')}`")

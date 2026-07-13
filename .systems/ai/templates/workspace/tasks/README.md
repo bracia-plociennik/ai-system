@@ -6,5 +6,6 @@ Templates for AI System task management under `AI_SYSTEM_WORKSPACE_HOME/tasks/`.
 - `tasknote.template.md` -> `AI_SYSTEM_WORKSPACE_HOME/tasks/tasknote.template.md`
 - `task-candidate.template.md` -> `AI_SYSTEM_WORKSPACE_HOME/tasks/task-candidate.template.md`
 - `taskforge-vault-setup.template.md` -> `AI_SYSTEM_WORKSPACE_HOME/tasks/taskforge-vault-setup.template.md`
+- `taskforge-vault.local.template.md` documents the owner-created local-only vault record used by the narrow V3 check-in initial-task route; it is never copied as a populated configuration.
 
 These are neutral templates. They do not create real TaskForge tasks.

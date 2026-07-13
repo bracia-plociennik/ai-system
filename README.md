@@ -179,7 +179,7 @@ If a project path is inside a git worktree, do not write AI System `status.md`, 
 
 ## Personal Ops Check-Ins
 
-AI System supports a workspace-local schema for native manual daily check-ins and check-ins migrated from a Notion CSV export.
+AI System supports V3 native manual daily check-ins and historical V2 Notion CSV imports. V3 starts from a new day and never rewrites or backfills V2 history.
 
 Manual daily check-ins use:
 
@@ -206,9 +206,10 @@ Generated analytical indexes live in:
 <workspace>/personal-ops/indexes/check-ins.csv
 <workspace>/personal-ops/indexes/check-ins.jsonl
 <workspace>/personal-ops/indexes/check-ins.metrics.csv
+<workspace>/personal-ops/indexes/check-ins.trends.md
 ```
 
-Markdown is the source of truth. Indexes are derived and may be rebuilt. Check-ins and attachments are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
+Markdown is the source of truth. V3 session `D` captures day `D` plan/morning state and day `D-1` closure without modifying the old file. Detailed V3 CSV/JSONL/metrics indexes are `private-sensitive` local runtime data and may include finance, calorie, health, and attachment metadata. `check-ins.trends.md` is a sanitized aggregate for Dreaming Mode; it excludes raw private fields and attachments. Check-ins and attachments are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
 
 Manual check-ins write only the daily Markdown file and optional assets. Derived indexes may be intentionally stale. Use lazy sync status before recommending a database refresh:
 
@@ -220,7 +221,7 @@ If `unsynced-check-in-count` is below `7`, sync is not required yet. If it is `7
 
 The threshold counts newly added daily files. It does not detect edits to older check-ins or reliably detect deleted daily files as a stale-index event; after editing or deleting an existing day, run owner-approved sync manually when the indexes need to be fresh.
 
-The Notion check-in importer is only for owner-approved Notion CSV imports. Do not use it to refresh manual-only edits; use lazy sync from canonical Markdown instead.
+The Notion check-in importer is V2-only for owner-approved Notion CSV imports. Do not use it to refresh V3 or manual-only edits; use lazy sync from canonical Markdown instead.
 
 ## TaskForge Task Management
 
@@ -258,11 +259,11 @@ Use dry-run first:
 .systems/scripts/propose-task-candidates --workspace <workspace-path> --dream-report <workspace>/dreams/runs/<run>/dream-report.md
 ```
 
-Check-in candidates come from `Zbudowałem`, `Dowiozłem`, and `Wypromowałem`, use `tags: [5d/do]`, and default to end-of-day due date `YYYY-MM-DDT23:59`.
+V3 check-in candidates come one-per-item from planned `build-*`, `deliver-*`, and `promote-*` items, use `tags: [6d/do]`, and default to session-day end-of-day due date `YYYY-MM-DDT23:59`. Actual closure items never create TaskNotes.
 
-Dream Report candidates come from the owner decision queue and default to `tags: [5d/defer]` unless explicitly marked otherwise.
+Dream Report candidates come from the owner decision queue and default to `tags: [6d/defer]` unless explicitly marked otherwise. Historical `5d/*` tags remain read-compatible; `DONE` is derived from `status: done`.
 
-Use TaskForge custom lists for the 5D view by filtering `Tags contains 5d/<bucket>`. Keep `contexts` for client/workspace/personal routing and `projects` for concrete project links.
+Use TaskForge custom lists for the 6D view by filtering `Tags contains 6d/<bucket>` and a `DONE` list by `status: done`. Keep `contexts` for client/workspace/personal routing and `projects` for concrete project links.
 
 Client/project recognition uses boundary-only matching: full normalized token/phrase matches only, no short-slug matching, and no aliases in v1.
 
@@ -271,6 +272,10 @@ Write TaskNotes only with exact owner approval:
 ```text
 .systems/scripts/propose-task-candidates --workspace <workspace-path> --check-in <check-in.md> --task-vault <taskforge-vault> --owner-approved --write
 ```
+
+For an owner-approved V3 canonical check-in write, that same approval also authorizes its initial planned TaskNotes once. It uses the local-only `<workspace>/tasks/taskforge-vault.local.md` record with `--task-vault-config`; missing or invalid vault preflight records `task_generation_status: skipped` in the check-in and writes no task.
+
+Before creating a V3 TaskNote, AI System checks open TaskNotes for one strong, unambiguous match in the same mapped project or client. Such a match is extended with a marked Markdown subtask in the parent file; weak or ambiguous similarity creates a separate task.
 
 The target vault and `TaskNotes/Tasks/` must already exist; the proposal script does not initialize TaskForge vault structure.
 

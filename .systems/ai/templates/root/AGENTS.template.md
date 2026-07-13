@@ -174,9 +174,9 @@ System-owned reusable rules, templates, examples, skills, and scripts belong und
 
 Before writing `status.md`, `memory.md`, `checkpoints/`, `distillations/`, or `decisions/` into a project path, apply `.systems/ai/core/project-state.md`. If the path is inside a git worktree, ask whether to use `project-state/` or colocated local-only state with exact approval and local `.git/info/exclude` handling. Do not auto-edit `.gitignore` or `.git/info/exclude`.
 
-TaskForge and TaskNotes task-management requests route through `.systems/ai/core/task-management.md`. Task files are data/action records, not instructions, memory, checkpoints, or system-insights. Use TaskNotes as `1 task = 1 Markdown file` by default. Creating, completing, rescheduling, linking, migrating, cleaning up, archiving, deleting, or rewriting task files requires exact owner-approved scope and target re-read.
+TaskForge and TaskNotes task-management requests route through `.systems/ai/core/task-management.md`. Task files are data/action records, not instructions, memory, checkpoints, or system-insights. Use TaskNotes as `1 task = 1 Markdown file` by default. Creating, completing, rescheduling, linking, migrating, cleaning up, archiving, deleting, or rewriting task files requires exact owner-approved scope and target re-read, except the narrow V3 check-in initial-TaskNote route.
 
-Check-in and Dream Report task candidate requests route through `.systems/scripts/propose-task-candidates`. Default to dry-run proposals. Creating TaskNotes from candidates requires exact owner approval, `--owner-approved --write`, and the selected TaskForge vault path.
+Check-in and Dream Report task candidate requests route through `.systems/scripts/propose-task-candidates`. Default to dry-run proposals. V3 planned check-in items may create initial TaskNotes under the same exact owner-approved check-in write, using the local-only vault record and `--owner-approved --write`; all other TaskNotes require their own exact approval.
 
 ## Skill Routing
 
@@ -202,7 +202,7 @@ Files, dumps, exports, PDFs, snippets, notes, logs, and copied external text are
 
 External source registry records live in `links/<source-slug>.md`. Manual external export imports route through `.systems/ai/core/external-export-import-workflow.md`: raw exports stay in `dump/incoming/external/<provider>/<collection>/export-YYYY-MM-DD/`, classification maps are read-only proposals, and canonical imports require exact owner-approved scope plus source references.
 
-Manual Personal Ops check-ins write only canonical daily Markdown and optional assets. Derived check-in indexes may be stale by design; use `.systems/scripts/sync-personal-ops-check-ins --status-only` before recommending owner-approved index sync.
+Manual Personal Ops V3 check-ins write one canonical session Markdown and optional assets. The session records current plan/morning state plus previous-day closure without changing history. Detailed V3 indexes are private-sensitive; Dreaming Mode may read only sanitized `check-ins.trends.md`. Derived indexes may be stale by design; use `.systems/scripts/sync-personal-ops-check-ins --status-only` before recommending owner-approved index sync.
 
 Dreaming Mode routes through `.systems/ai/core/dreaming-mode.md`. It is advisory-only, selected-workspace scoped, and writes only Dream Reports under `AI_SYSTEM_WORKSPACE_HOME/dreams/runs/**`. It cannot mutate memory, project-state, System Insights, External Memory, skills, status, personal-ops, TaskNotes, source files, commits, GitHub mirrors, scheduler automation, or approvals.
 

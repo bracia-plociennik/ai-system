@@ -20,7 +20,9 @@ AI_SYSTEM_WORKSPACE_HOME/dreams/
 
 ## Variants
 
-`workspace-artifacts-only` is the default variant. It may inspect selected workspace runtime artifacts such as `core/`, `dump/`, `memory/`, `project-state/`, `system-insights/`, `external-memory/`, `links/`, `personal-ops/indexes/`, `micro-projects/`, `skills/`, client routers, owned-asset routers, distillations, checkpoints, decisions, and status evidence.
+`workspace-artifacts-only` is the default variant. It may inspect selected workspace runtime artifacts such as `core/`, `dump/`, `memory/`, `project-state/`, `system-insights/`, `external-memory/`, `links/`, `personal-ops/indexes/check-ins.trends.md`, `micro-projects/`, `skills/`, client routers, owned-asset routers, distillations, checkpoints, decisions, and status evidence.
+
+For Personal Ops V3, Dreaming Mode may read only the sanitized `personal-ops/indexes/check-ins.trends.md`. It must not read daily check-in Markdown, detailed CSV/JSONL/metrics indexes, attachments, OCR, finances, calories, health details, or reflections.
 
 `full-repo` is explicit owner-requested only. It may inspect selected workspace artifacts plus one owner-specified project or source path for review candidates, repeated patterns, useful practices, missing capabilities, weak areas, and removal candidates.
 
@@ -44,7 +46,7 @@ Forbidden actions:
 
 Promotion from a Dream Report to any durable artifact requires a later explicit owner decision and the normal AI System route for that target.
 
-Task candidates from Dream Reports use `.systems/scripts/propose-task-candidates --workspace <workspace-path> --dream-report <workspace>/dreams/runs/<run>/dream-report.md`. The default 5D tag is `5d/defer` unless the report or owner explicitly marks `5d/do`, `5d/delegate`, `5d/delete`, or `5d/dump`. Writing TaskNotes still requires exact owner approval under `.systems/ai/core/task-management.md`.
+Task candidates from Dream Reports use `.systems/scripts/propose-task-candidates --workspace <workspace-path> --dream-report <workspace>/dreams/runs/<run>/dream-report.md`. The default new-task 6D tag is `6d/defer` unless the report or owner explicitly marks an execution bucket. The generator reads explicit `5d/*` or `6d/*` markers for compatibility and writes only the corresponding `6d/*` tag. Writing TaskNotes still requires exact owner approval under `.systems/ai/core/task-management.md`.
 
 ## Prompt-Injection Boundary
 

@@ -46,6 +46,8 @@ required_files=(
   ".systems/ai/templates/workspace/personal-ops/check-ins-index.template.md"
   ".systems/ai/templates/workspace/personal-ops/manual-daily-check-in.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-in.template.md"
+  ".systems/ai/templates/workspace/personal-ops/check-in-settings.local.template.md"
+  ".systems/ai/templates/workspace/tasks/taskforge-vault.local.template.md"
   ".systems/scripts/map-notion-check-ins"
   ".systems/scripts/sync-personal-ops-check-ins"
   ".systems/scripts/check-personal-ops"
@@ -85,8 +87,22 @@ for term in \
   'deleted daily files' \
   'do not use it to refresh manual-only edits' \
   'propose-task-candidates --workspace <workspace-path> --check-in' \
-  'tags: [5d/do]' \
-  'due: YYYY-MM-DDT23:59'
+  'tags: [6d/do]' \
+  'due: YYYY-MM-DDT23:59' \
+  'schema_version: 3' \
+  'session_date' \
+  'previous_day_date' \
+  'normalization_authority' \
+  'report_revision' \
+  'task_generation_status' \
+  'task_generation_reason' \
+  'task_generation_references' \
+  'V2 Compatibility' \
+  'V2-only' \
+  'check-ins.trends.md' \
+  'Detailed values for finances, budgets, calories, health' \
+  'source_session_date + source_plan_item_id' \
+  'One exact `owner-approved` write'
 do
   require_ref ".systems/ai/core/personal-ops.md" "$term" "$term"
 done
@@ -100,12 +116,17 @@ for term in \
   'check-ins.csv' \
   'check-ins.jsonl' \
   'check-ins.metrics.csv' \
+  'check-ins.trends.md' \
   'check-ins-fields.md' \
   'check-ins.md' \
   'Malformed check-in Markdown' \
   'unmapped_fields' \
   'write_indexes' \
-  'never rewrites daily Markdown'
+  'never rewrites daily Markdown' \
+  'build_v3_session' \
+  'merge_v3_sessions' \
+  'schema_version' \
+  'normalize_missing'
 do
   require_ref ".systems/scripts/sync-personal-ops-check-ins" "$term" "sync tool term $term"
 done
@@ -156,58 +177,50 @@ do
 done
 
 for section in \
-  '## 1. Plan dnia' \
-  '### Data' \
-  '### Sen od-do' \
-  '### Trening od-do' \
-  '### NSDR od-do' \
-  '### IF od-do' \
-  '### Tryb dnia' \
-  '### Zbudowałem' \
-  '### Dowiozłem' \
-  '### Wypromowałem' \
-  '### Coś dla ciała' \
-  '### Coś dla ducha' \
-  '### Coś dla bliskich' \
-  '## 2. Poranny check-in' \
-  '### Pobudka' \
-  '### Kuchnia' \
-  '### Dwór' \
-  '### Napiłem się' \
-  '### Mantra' \
-  '### Deep Focus' \
-  '### Mama i Oliwia' \
-  '### Insta Story' \
-  '### Stan po rutynie' \
-  '### Energia' \
-  '### Mental' \
-  '### Ciało' \
-  '### Ograniczenia' \
-  '### Jestem wdzięczny' \
-  '### Zagrożenie dnia' \
-  '## 3. Popołudniowy check-in' \
-  '### Czy zrobiłem minimum' \
-  '### Nawyki' \
-  '### Co dało +1%' \
-  '### Co było zbędne' \
-  '## 4. Seed kolejnego dnia' \
-  '## 5. Dodatkowe informacje' \
-  '### Załączniki'
+  'schema_version: 3' \
+  'session_date:' \
+  'previous_day_date:' \
+  'normalization_authority:' \
+  'report_revision:' \
+  'task_generation_status:' \
+  '## Metadane' \
+  '## Podsumowanie poprzedniego dnia' \
+  '## Plan dnia' \
+  '## Poranny check-in' \
+  '## Dodatkowe informacje' \
+  '## Załączniki' \
+  '## Kandydaci na taski' \
+  '### Planuję zbudować' \
+  '### Planuję dowieźć' \
+  '### Planuję wypromować' \
+  '[build-01]' \
+  '[deliver-01]' \
+  '[promote-01]' \
+  'Porównanie plan-fakt' \
+  'Planowane nawyki' \
+  'Habit ID: <habit-01>' \
+  'Faktyczne nawyki'
 do
   require_ref ".systems/ai/templates/workspace/personal-ops/check-in.template.md" "$section" "check-in section $section"
 done
 
 for profile_term in \
-  'Manual daily check-in profile' \
-  '## 1. Plan dnia' \
-  '## 2. Poranny check-in' \
-  '## 3. Popołudniowy check-in' \
-  '## 4. Seed kolejnego dnia' \
-  '## 5. Dodatkowe informacje' \
-  'from Data to Coś dla bliskich'
+  'Manual Daily Check-In v3' \
+  'Previous-Day Closure' \
+  'Current-Day Plan' \
+  'Morning Check-In' \
+  'check-in-settings.local.md' \
+  'taskforge-vault.local.md' \
+  'task_generation_status: skipped' \
+  'maximum three' \
+  'never rewrites the prior-day Markdown'
 do
   require_ref ".systems/ai/templates/workspace/personal-ops/manual-daily-check-in.template.md" "$profile_term" "manual profile term $profile_term"
 done
+
+require_ref ".systems/ai/templates/workspace/personal-ops/check-in-settings.local.template.md" 'timezone:' "local check-in settings timezone"
+require_ref ".systems/ai/templates/workspace/tasks/taskforge-vault.local.template.md" 'vault_path:' "local TaskForge vault path"
+require_ref ".systems/ai/templates/workspace/tasks/taskforge-vault.local.template.md" 'enabled:' "local TaskForge vault enabled flag"
 
 for file in \
   ".systems/ai/core/operating-model.md" \

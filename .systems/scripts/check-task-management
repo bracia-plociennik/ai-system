@@ -67,12 +67,43 @@ scalar_value() {
   ' "$file"
 }
 
+classification_values() {
+  local field="$1"
+  local file="$2"
+  awk -v field="$field" '
+    $0 ~ "^" field ":[[:space:]]*\\[" {
+      line=$0
+      sub("^[^:]*:[[:space:]]*\\[", "", line)
+      sub("\\][[:space:]]*$", "", line)
+      count=split(line, values, ",")
+      for (item_index=1; item_index<=count; item_index++) {
+        value=values[item_index]
+        gsub(/^[[:space:]"'"'"'`]+|[[:space:]"'"'"'`]+$/, "", value)
+        if (value ~ /^[56]d\//) print value
+      }
+      next
+    }
+    $0 ~ "^" field ":[[:space:]]*$" { in_field=1; next }
+    in_field && /^[A-Za-z0-9_-]+:/ { in_field=0 }
+    in_field && /^[[:space:]]*-[[:space:]]*/ {
+      value=$0
+      sub(/^[[:space:]]*-[[:space:]]*/, "", value)
+      gsub(/^[[:space:]"'"'"'`]+|[[:space:]"'"'"'`]+$/, "", value)
+      if (value ~ /^[56]d\//) print value
+    }
+  ' "$file"
+}
+
 validate_task_file() {
   local file="$1"
   local rel="$file"
   local strict=0
   local status
   local priority
+  local classification_tag
+  local classification_count=0
+  local saw_5d=0
+  local saw_6d=0
 
   [[ "$file" = /* ]] || file="$repo_root/$file"
   if [[ ! -f "$file" ]]; then
@@ -118,38 +149,42 @@ validate_task_file() {
     esac
   fi
 
-  if [[ "$strict" -eq 1 ]] && awk '
-    /^contexts:/ { in_contexts=1; next }
-    /^[A-Za-z0-9_-]+:/ { in_contexts=0 }
-    in_contexts && /^[[:space:]]*-[[:space:]]*"?5d\// { found=1 }
-    END { exit found ? 0 : 1 }
-  ' "$file"; then
-    echo "AI-created TaskNote uses 5D in contexts instead of tags: $rel"
-    fail=1
-  fi
+  if [[ "$strict" -eq 1 ]]; then
+    while IFS= read -r classification_tag; do
+      [[ -n "$classification_tag" ]] || continue
+      echo "AI-created TaskNote uses classification tag in contexts instead of tags: $rel"
+      fail=1
+    done < <(classification_values contexts "$file")
 
-  if [[ "$strict" -eq 1 ]] && awk '
-    /^tags:/ { in_tags=1; next }
-    /^[A-Za-z0-9_-]+:/ { in_tags=0 }
-    in_tags && /^[[:space:]]*-[[:space:]]*"?5d\// { print }
-  ' "$file" | rg -q '5d/'; then
-    while IFS= read -r tag; do
-      tag="${tag#*- }"
-      tag="${tag//\"/}"
-      tag="${tag//\'/}"
-      case "$tag" in
+    while IFS= read -r classification_tag; do
+      [[ -n "$classification_tag" ]] || continue
+      classification_count=$((classification_count + 1))
+      case "$classification_tag" in
         5d/do|5d/defer|5d/delegate|5d/delete|5d/dump)
+          saw_5d=1
+          ;;
+        6d/do|6d/defer|6d/delegate|6d/delete|6d/dump)
+          saw_6d=1
           ;;
         *)
-          echo "AI-created TaskNote has invalid 5D tag '$tag': $rel"
+          echo "AI-created TaskNote has invalid classification tag '$classification_tag': $rel"
           fail=1
           ;;
       esac
-    done < <(awk '
-      /^tags:/ { in_tags=1; next }
-      /^[A-Za-z0-9_-]+:/ { in_tags=0 }
-      in_tags && /^[[:space:]]*-[[:space:]]*"?5d\// { print }
-    ' "$file")
+      if [[ "$classification_tag" == "6d/delete" && "$status" != "cancelled" ]]; then
+        echo "AI-created TaskNote uses 6d/delete without status cancelled: $rel"
+        fail=1
+      fi
+    done < <(classification_values tags "$file")
+
+    if [[ "$classification_count" -gt 1 ]]; then
+      echo "AI-created TaskNote has more than one 5D/6D classification tag: $rel"
+      fail=1
+    fi
+    if [[ "$saw_5d" -eq 1 && "$saw_6d" -eq 1 ]]; then
+      echo "AI-created TaskNote mixes legacy 5D and current 6D tags: $rel"
+      fail=1
+    fi
   fi
 
   if rg -i -q '^title:.*(api[_ -]?key|secret|private key|password|token|\.env|raw client data|credential)' "$file"; then
@@ -165,6 +200,7 @@ required_files=(
   ".systems/ai/templates/workspace/tasks/task-candidate.template.md"
   ".systems/ai/templates/workspace/tasks/tasknote.template.md"
   ".systems/ai/templates/workspace/tasks/taskforge-vault-setup.template.md"
+  ".systems/ai/templates/workspace/tasks/taskforge-vault.local.template.md"
   ".systems/scripts/check-task-management"
   ".systems/scripts/propose-task-candidates"
 )
@@ -196,10 +232,14 @@ for term in \
   'TaskNotes/Archive' \
   'TaskForge-Archive' \
   'YYYY-MM-DD-short-slug.md' \
-  '5D Task Tags' \
-  'tags: [5d/do]' \
+  '6D Task Tags And 5D Compatibility' \
+  'tags: [6d/do]' \
+  'legacy-5d | 6d | none' \
+  'execution_bucket: do | defer | delegate | delete | dump | done | unclassified' \
+  'status: done` has precedence' \
+  '6d/done' \
   'contexts: [client/<client-slug>]' \
-  'Tags contains 5d/<bucket>' \
+  'Tags contains 6d/<bucket>' \
   'Zbudowałem' \
   'Dowiozłem' \
   'Wypromowałem' \
@@ -213,6 +253,15 @@ for term in \
   'no aliases in v1' \
   'reads only frontmatter `projects:` wiki links' \
   'does not initialize TaskForge vault structure' \
+  'Personal Ops V3 Initial Task Creation' \
+  'source_session_date + source_plan_item_id' \
+  'mechanical flag records the same approval' \
+  'task_generation_status: skipped' \
+  'task_generation_references' \
+  'Project matching reads AI System `project:` plus TaskForge frontmatter `projects:` wiki links only' \
+  'strong title-token match' \
+  '## Subtasks' \
+  'Missing, ambiguous, weak, or cross-project similarity' \
   'no task write occurs without exact owner approval'
 do
   require_ref ".systems/ai/core/task-management.md" "$term" "$term"
@@ -233,15 +282,20 @@ for field in \
   'source_type:' \
   'source_check_in_date:' \
   'source_check_in_field:' \
+  'source_session_date:' \
+  'source_plan_item_id:' \
   'source_dream_report:' \
   '## Outcome' \
   '## Context' \
   '## Next Action' \
+  '## Subtasks' \
   '## Evidence' \
   '## Notes'
 do
   require_ref ".systems/ai/templates/workspace/tasks/tasknote.template.md" "$field" "tasknote field $field"
 done
+
+require_ref ".systems/ai/templates/workspace/tasks/taskforge-vault.local.template.md" 'vault_path:' "local vault configuration"
 
 if head -n 1 "$repo_root/.systems/ai/templates/workspace/tasks/tasknote.template.md" | rg -q '^---$'; then
   echo "TaskNote template has active YAML frontmatter and may be detected as a real task"
@@ -251,7 +305,9 @@ fi
 for candidate_term in \
   'This is a proposal artifact, not a TaskForge TaskNote' \
   'source_type: `<check-in|dream-report>`' \
-  '5d_tag: `<5d/do|5d/defer|5d/delegate|5d/delete|5d/dump>`' \
+  'task_method: `<legacy-5d|6d|none>`' \
+  'execution_bucket: `<do|defer|delegate|delete|dump|done|unclassified>`' \
+  '6d_tag: `<6d/do|6d/defer|6d/delegate|6d/delete|6d/dump>`' \
   'decision: `<approve-write|revise|reject|defer>`'
 do
   require_ref ".systems/ai/templates/workspace/tasks/task-candidate.template.md" "$candidate_term" "candidate term $candidate_term"
@@ -278,8 +334,10 @@ for setup_term in \
   'tags: `tags`' \
   'date created: `dateCreated`' \
   'complete instances: `complete_instances`' \
-  '`DO`: filter `Tags contains 5d/do`' \
-  'Do not use folders such as `DOs/` or `DEFERs/` as the primary 5D classification' \
+  '`DO`: filter `Tags contains 6d/do`' \
+  '`DONE`: filter `status: done`' \
+  'Legacy 5D Compatibility' \
+  'Do not use folders such as `DOs/` or `DEFERs/` as the primary 6D classification' \
   'exclude archive, raw, dump, private' \
   'Manual Verification'
 do

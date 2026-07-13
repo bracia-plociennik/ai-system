@@ -15,7 +15,9 @@ Use it when converting a check-in or Dream Report into owner-approved task propo
 - title: `<notification-safe task title>`
 - status: `<open|planned|waiting|cancelled>`
 - priority: `<high|normal|low|none>`
-- 5d_tag: `<5d/do|5d/defer|5d/delegate|5d/delete|5d/dump>`
+- task_method: `<legacy-5d|6d|none>`
+- execution_bucket: `<do|defer|delegate|delete|dump|done|unclassified>`
+- 6d_tag: `<6d/do|6d/defer|6d/delegate|6d/delete|6d/dump>`
 - contexts: `<client/client-slug|owned-asset/asset-slug|workspace/workspace-slug|personal>`
 - due: `<YYYY-MM-DDT23:59|blank>`
 - scheduled: `<YYYY-MM-DD|blank>`
