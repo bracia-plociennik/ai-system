@@ -10,7 +10,7 @@ The report has three different roles:
 2. `## Interpreted Check-In` is a readable projection of the normalized properties, including the current plan, prior-day closure, WIG, and task eligibility.
 3. `## Raw Check-In` preserves the owner message verbatim as private-sensitive context-as-data. OCR and working-note text live in `## OCR / Notatka robocza`.
 
-Do not use this route for V2 Notion imports. Existing V2/V3.1 files and `check-ins.*` indexes remain history; this route writes only `check-ins-v3.*` after a separate owner-approved sync.
+Do not use this route for V2 Notion imports. Existing V2 files and `check-ins.*` indexes remain history; this route writes only `check-ins-v3.*` after a separate owner-approved sync. A V3 report without `index_contract: 3` must be owner-migrated before use.
 
 ## Intake Precedence
 

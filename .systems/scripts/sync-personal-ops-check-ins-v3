@@ -125,7 +125,7 @@ def read_last_count(router: Path) -> int:
 
 def render_router(current: int, source: str) -> str:
     return "\n".join([
-        "# Check-Ins v3 Index", "", "Derived index router for reports with `index_contract: 3` only. Current `check-ins.*` files remain V2/V3.1 history.", "",
+        "# Check-Ins v3 Index", "", "Derived index router for reports with `index_contract: 3` only. Current `check-ins.*` files remain V2 history.", "",
         f"last-synced-at: {__import__('datetime').datetime.now().astimezone().isoformat(timespec='seconds')}",
         f"last-synced-check-in-count: {current}", f"current-check-in-count: {current}", "unsynced-check-in-count: 0",
         f"sync-recommendation-threshold: {SYNC_THRESHOLD}", f"last-sync-source: {source}",

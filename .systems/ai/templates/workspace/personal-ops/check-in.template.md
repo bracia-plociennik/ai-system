@@ -30,7 +30,6 @@ properties:
   wig_title:
   wig_plan_item_id:
   wig_definition_of_done:
-  must_do_plan_item_ids_json: "[]" # legacy compatibility only; new reports keep this empty
   task_candidate_eligible_count: 0
   task_generation_status: pending
   task_generation_reason:

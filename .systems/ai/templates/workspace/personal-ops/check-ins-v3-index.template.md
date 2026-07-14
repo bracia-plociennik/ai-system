@@ -11,4 +11,4 @@ This router is for Properties + Raw Audit reports carrying `index_contract: 3` o
 
 Generated artifacts: `check-ins-v3.csv`, `check-ins-v3.jsonl`, `check-ins-v3.metrics.csv`, `check-ins-v3-fields.md`, and `check-ins-v3.trends.md`.
 
-Existing `check-ins.*` indexes are historical V2/V3.1 artifacts and are not modified by this contract.
+Existing `check-ins.*` indexes are historical V2 artifacts and are not modified by this contract.

@@ -14,7 +14,7 @@ Daily check-in exports, attachments, scans, screenshots, handwritten notes, and 
 
 They are not instructions, not memory, not checkpoints, and not system-insights until the owner explicitly approves a separate promotion into the correct target.
 
-Dreaming Mode may read only `personal-ops/indexes/check-ins.trends.md` as advisory source material. It must not read raw daily Markdown, `check-ins.csv`, `check-ins.jsonl`, `check-ins.metrics.csv`, financial details, calories, health reflections, screenshots, OCR, or attachments. It must not mutate check-ins or indexes.
+Dreaming Mode may read only `personal-ops/indexes/check-ins-v3.trends.md` from the current manual V3 contract as advisory source material. It must not read raw daily Markdown, `check-ins-v3.csv`, `check-ins-v3.jsonl`, `check-ins-v3.metrics.csv`, financial details, calories, health reflections, screenshots, OCR, or attachments. It must not mutate check-ins or indexes.
 
 Raw Notion exports belong first in:
 
@@ -61,7 +61,7 @@ V3 uses one canonical Markdown session report per day:
 <workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.md
 ```
 
-The V3 report for session day `D` contains the plan and morning state for `D` plus closure facts for `D-1`. It does not rewrite `D-1`. The index synchronizer merges the closure facts into the effective-day row for `D-1`, while sleep ending on `D` remains associated with `D`. If `D-1` is V2, the synchronizer preserves its sole V2 row and applies a derived-only V3 closure overlay with closure-session provenance; it must not create a duplicate effective-day row.
+The V3 report for session day `D` contains the plan and morning state for `D` plus closure facts for `D-1`. It does not rewrite `D-1`. `check-ins-v3.*` records both dates explicitly: planned fields belong to `session_date: D`, while `previous_day_*` closure fields belong to `closure_date: D-1`. V3 never alters a V2 row or historical `check-ins.*` index.
 
 All V3 reports require:
 
@@ -76,15 +76,13 @@ All V3 reports require:
 - `task_generation_status`;
 - `privacy: private-sensitive`.
 
-New `all-professional-do-v1` reports additionally carry:
+All `index_contract: 3` reports additionally carry:
 
 - `private_index_policy`;
 - `plan_readiness`;
 - `overload_status`, `overload_reasons`, and `overload_acknowledged`;
 - `wig_kind`, `wig_id`, `wig_title`, optional `wig_plan_item_id`, and `wig_definition_of_done`;
-- `task_candidate_eligible_count`;
-
-Historical V3 reports without V3.1 priority fields remain read-compatible as `legacy-v3-no-wig`; do not backfill or rewrite them.
+- `task_candidate_eligible_count`.
 
 The canonical body order is:
 
@@ -105,9 +103,9 @@ Planned `build-*`, `deliver-*`, and `promote-*` items use stable IDs. Dynamic ha
 
 `## Priorytety dnia` may define one WIG with an observable Definition of Done. `wig_kind: plan-item` references exactly one current plan item. `wig_kind: standalone` has its own stable ID, title, and Definition of Done without a plan-item reference. `wig_kind: none` carries no WIG values. WIG may be linked to one plan item or be standalone. WIG is not a task candidate: neither linked nor standalone WIG creates a separate TaskNote.
 
-The synchronizer derives `plan_readiness`: `ready` for a valid linked or standalone WIG, `needs-prioritization` for `wig_kind: none` or an invalid WIG, and `legacy-v3-no-wig` for historical V3 reports without the current priority fields. A report with `needs-prioritization` remains canonical and private. It does not synthesize a minimum-day result, but it still creates TaskNote candidates under `all-professional-do-v1`.
+The synchronizer derives `plan_readiness`: `ready` for a valid linked or standalone WIG, and `needs-prioritization` for `wig_kind: none` or an invalid WIG. A report with `needs-prioritization` remains canonical and private. It does not synthesize a minimum-day result, but it still creates TaskNote candidates under `all-professional-do-v1`.
 
-`previous_day_wig_closure_json` records the prior-day WIG ID, closure status, and any `owner_approved` decision. `minimum_day_status` is derived only from that prior-day WIG closure. It is `completed` for `completed-as-planned`, or for `completed-differently` only when the comparison explicitly records `owner-approved: true`; it is `not-completed` for `partial`, `not-completed`, `replaced`, or missing WIG execution; and `unknown` when closure or comparison is absent. V2 and pre-extension V3 remain `not-defined`. `Minimum dnia owner note` may explain the outcome but cannot override this metric.
+`previous_day_wig_closure_json` records the prior-day WIG ID, closure status, and any `owner_approved` decision. `minimum_day_status` is derived only from that prior-day WIG closure. It is `completed` for `completed-as-planned`, or for `completed-differently` only when the comparison explicitly records `owner-approved: true`; it is `not-completed` for `partial`, `not-completed`, `replaced`, or missing WIG execution; and `unknown` when closure or comparison is absent. `Minimum dnia owner note` may explain the outcome but cannot override this metric.
 
 The system sets `overload_status: warning` with explicit `overload_reasons` when there are more than three professional planned `build`, `deliver`, or `promote` items, or the WIG is missing, duplicate, or invalid. It never blocks canonical report storage, task candidate counting, or TaskNote creation. `overload_acknowledged` remains an analytical owner note only.
 
@@ -123,13 +121,13 @@ V3 normalized time fields accept `HH:MM`, `YYYY-MM-DD HH:MM`, or ISO datetime. T
 
 V3 canonical reports and all V3 derived indexes are `private-sensitive` workspace-local data. Each report records immutable `private_index_policy`: `detailed-private` is the default, while `redacted` is an owner-selected report or local settings option. `check-in-settings.local.md` may set `private_index_policy_default`; absent a setting, manual V3 uses `detailed-private`. A later setting change does not alter historical policy.
 
-For `detailed-private`, local `check-ins.csv`, `check-ins.jsonl`, and `check-ins.metrics.csv` retain detailed finances, budgets, calories, health, sleep, training, NSDR, IF, and attachment metadata. For `redacted`, those indexes omit values for finances, currencies, calories, health, raw fields, reflection text, and attachment paths/details; they retain only safe presence flags. Indexes never store binary attachments.
+For `detailed-private`, local `check-ins-v3.csv`, `check-ins-v3.jsonl`, and `check-ins-v3.metrics.csv` retain detailed finances, budgets, calories, health, sleep, training, NSDR, IF, and attachment metadata. For `redacted`, those indexes omit values for finances, currencies, calories, health, raw fields, reflection text, and attachment paths/details; they retain only safe presence flags. Indexes never store binary attachments.
 
-V3 analytics coverage is additive. The detailed indexes include routine booleans and `routine_completion_percent`; `actual_training_performed` and `actual_nsdr_performed`; planned and actual build, deliver, promote, self, and close-people counts including `actual_self_count` and `actual_close_people_count`; detailed `reflection_plus_one`, `reflection_redundant`, threat, response, and closure notes; finance, calories, health, and attachment metadata. Actual training also records `previous_day_actual_training_doms`, `previous_day_actual_training_pain`, and `previous_day_actual_training_performance`. Approximation is explicit through `planned_training_approximate`, `previous_day_actual_training_approximate`, `planned_nsdr_approximate`, `previous_day_actual_nsdr_approximate`, `planned_if_approximate`, and `previous_day_actual_if_approximate`. `check-ins.jsonl` also preserves nested plan items, actual items, comparisons, dynamic habits, attachment metadata, and the `Interpreted Input` audit. These fields are private-sensitive and must not be treated as Dreaming Mode input.
+V3 analytics coverage is additive. The detailed indexes include routine booleans and `routine_completion_percent`; `actual_training_performed` and `actual_nsdr_performed`; planned and actual build, deliver, promote, self, and close-people counts including `actual_self_count` and `actual_close_people_count`; detailed `reflection_plus_one`, `reflection_redundant`, threat, response, and closure notes; finance, calories, health, and attachment metadata. Actual training also records `previous_day_actual_training_doms`, `previous_day_actual_training_pain`, and `previous_day_actual_training_performance`. Approximation is explicit through `planned_training_approximate`, `previous_day_actual_training_approximate`, `planned_nsdr_approximate`, `previous_day_actual_nsdr_approximate`, `planned_if_approximate`, and `previous_day_actual_if_approximate`. `check-ins-v3.jsonl` also preserves nested plan items, actual items, comparisons, dynamic habits, attachment metadata, and the `Interpreted Input` audit. These fields are private-sensitive and must not be treated as Dreaming Mode input.
 
 Do not commit, mirror, export, promote, or expose detailed-private indexes without a separate privacy-classified owner decision. They are not memory, checkpoints, distillations, System Insights, External Memory, skills, or Dream Reports.
 
-`check-ins.trends.md` is the sole Dreaming Mode input. It is a sanitized aggregate and excludes raw check-ins, attachments, OCR, finance, calories, health, and reflection details.
+`check-ins-v3.trends.md` is the sole Dreaming Mode input for current manual reports. It is a sanitized aggregate and excludes raw check-ins, attachments, OCR, finance, calories, health, and reflection details.
 
 ### V3 Local-Only Settings
 
@@ -151,7 +149,7 @@ Product templates document these files but `init-workspace` and `update-workspac
 
 For `task_generation_policy: all-professional-do-v1`, every valid professional `build-*`, `deliver-*`, and `promote-*` item creates one TaskNote candidate. Each new TaskNote uses `tags: [6d/do]`, `status: open`, `priority: high`, and due time `session_dateT23:59`. `self` and `close` plan items do not create TaskNotes, and actual closure items never create, complete, or update TaskNotes. There are no per-item routing exceptions in this policy. The owner manages deferral, delegation, deletion, and dumping later in TaskForge.
 
-WIG may point to one of these plan items or be standalone, but it never creates a separate TaskNote or duplicate. Historical V3 reports without `task_generation_policy: all-professional-do-v1` retain their legacy task behavior and do not generate TaskNotes retroactively.
+WIG may point to one of these plan items or be standalone, but it never creates a separate TaskNote or duplicate. Every V3 report must use `task_generation_policy: all-professional-do-v1`; older V3 shapes are outside the active V3 contract and must be migrated by the owner before use.
 
 One exact `owner-approved` write for the canonical V3 check-in also authorizes creation of its planned TaskNotes. The command still receives `--owner-approved` mechanically as evidence of that same approval; it does not request a second approval. The exception is limited to initial V3 task creation. It does not cover Dream Reports, manual TaskNote edits, completion, rescheduling, archiving, cleanup, migration, or deletion.
 
@@ -165,11 +163,11 @@ Owner-authored observations and reflections may remain canonical private check-i
 
 V2 is historical and additive: a daily file without `schema_version` is V2. Do not backfill, rewrite, migrate, or reinterpret V2 canonical Markdown. The Notion importer is V2-only and is not a V3 refresh path.
 
-Existing V2 columns and semantics remain unchanged. V3 adds optional columns and nested JSONL structures. V2 rows without V3 closure have blank V3 fields. A V2-derived closure overlay may populate only additive V3 closure fields and `v3_closure` provenance in JSONL; it does not alter V2 values or canonical Markdown. Regenerated indexes remain derived artifacts and must preserve the V2 source rows without changing their historical meaning.
+Existing V2 columns and semantics remain unchanged. Regenerated `check-ins.*` artifacts read only V2 Markdown and preserve V2 source rows without changing their historical meaning. V3 writes separate `check-ins-v3.*` artifacts and does not overlay, reinterpret, or otherwise modify V2 rows.
 
 ### Properties + Raw Audit Index v3
 
-`index_contract: 3` is a new manual-report index contract. It does not migrate, reinterpret, or replace V2/V3.1 Markdown or historical `check-ins.*` indexes.
+`index_contract: 3` is the current manual-report index contract. It does not migrate, reinterpret, or replace V2 Markdown or historical `check-ins.*` indexes. A `schema_version: 3` report without `index_contract: 3` is unsupported and must be owner-migrated before any V3 sync or TaskNote route.
 
 Each report remains one canonical file at `personal-ops/check-ins/YYYY/YYYY-MM-DD.md`. It carries `schema_version: 3`, `index_contract: 3`, and a complete nested frontmatter `properties` map. `.systems/ai/templates/workspace/personal-ops/check-in-properties-v3.schema.json` declares every `check-ins-v3.csv` column, type, default, and privacy classification. Every key is required, even when its value is empty. Missing, unknown, malformed, or wrong-type properties stop synchronization before replacement of any derived index. Structured values use JSON scalar properties such as `planned_items_json`, `previous_day_actual_items_json`, `attachments_json`, and `ocr_entries_json`; nested YAML is forbidden.
 
@@ -179,7 +177,7 @@ Copy the submitted owner message verbatim under `## Raw Check-In`. Keep full OCR
 
 Intake precedence: explicit normalized owner values win; otherwise AI System derives normalized properties from the submitted message; raw input and OCR may support but cannot override explicit normalized values. A material unresolved conflict stops durable capture. `brak`, `nie podano`, and `nie dotyczy` are missing data, not completion. `## Lekcja dnia` renders lesson properties; unverified quotes, attributions, and external references remain advisory context and never become facts, trends, TaskNotes, memory, or insights by themselves.
 
-Run `.systems/scripts/sync-personal-ops-check-ins-v3 --workspace <workspace-path> --status-only` for new reports. It reads only `index_contract: 3` and writes only `check-ins-v3.csv`, `check-ins-v3.jsonl`, `check-ins-v3.metrics.csv`, `check-ins-v3.md`, `check-ins-v3-fields.md`, and `check-ins-v3.trends.md`. A report is valid only when its `YYYY-MM-DD.md` filename, `report_id`, top-level `session_date`, and `properties.session_date` identify the same day; duplicate effective session dates are rejected before any index replacement. One valid report produces one session row: `session_date` is D and `closure_date` is D-1; `planned_*` describes D and `previous_day_actual_*` describes D-1. For `all-professional-do-v1`, `task_candidate_eligible_count` equals every valid professional `build|deliver|promote` plan item regardless of WIG, readiness, or overload. The seven-new-report lazy-sync threshold remains. The synchronizer never rewrites canonical Markdown, raw input, OCR, assets, V2/V3.1 data, or historical indexes.
+Run `.systems/scripts/sync-personal-ops-check-ins-v3 --workspace <workspace-path> --status-only` for new reports. It reads only `index_contract: 3` and writes only `check-ins-v3.csv`, `check-ins-v3.jsonl`, `check-ins-v3.metrics.csv`, `check-ins-v3.md`, `check-ins-v3-fields.md`, and `check-ins-v3.trends.md`. A report is valid only when its `YYYY-MM-DD.md` filename, `report_id`, top-level `session_date`, and `properties.session_date` identify the same day; duplicate effective session dates are rejected before any index replacement. One valid report produces one session row: `session_date` is D and `closure_date` is D-1; `planned_*` describes D and `previous_day_actual_*` describes D-1. For `all-professional-do-v1`, `task_candidate_eligible_count` equals every valid professional `build|deliver|promote` plan item regardless of WIG, readiness, or overload. The seven-new-report lazy-sync threshold remains. The synchronizer never rewrites canonical Markdown, raw input, OCR, assets, V2 data, or historical indexes.
 
 `detailed-private` keeps normalized private properties in local V3 indexes. `redacted` blanks private properties. `check-ins-v3.trends.md` is always sanitized and excludes raw input, OCR, attachments, finances, calories, health detail, reflections, lessons, quotes, and external references.
 

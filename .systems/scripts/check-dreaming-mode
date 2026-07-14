@@ -114,7 +114,7 @@ require_ref ".systems/ai/core/memory.md" 'Dream Reports' "memory boundary"
 require_ref ".systems/ai/core/system-insights.md" 'Dream Report' "system insights boundary"
 require_ref ".systems/ai/core/project-state.md" 'Dream Reports' "project-state boundary"
 require_ref ".systems/ai/core/personal-ops.md" 'Dreaming Mode' "personal-ops privacy boundary"
-require_ref ".systems/ai/core/personal-ops.md" 'check-ins.trends.md' "sanitized Personal Ops trends boundary"
+require_ref ".systems/ai/core/personal-ops.md" 'check-ins-v3.trends.md' "sanitized Personal Ops trends boundary"
 require_ref ".systems/ai/core/external-memory.md" 'Dream Reports' "external memory boundary"
 require_ref ".systems/scripts/init-workspace" 'dreams/runs' "init-workspace dreams bootstrap"
 require_ref ".systems/scripts/update-workspace" 'dreams/runs' "update-workspace dreams bootstrap"
@@ -143,7 +143,7 @@ for required in \
   'raw exports' \
   '\.env' \
   'V1 has no scheduler' \
-  'check-ins.trends.md' \
+  'check-ins-v3.trends.md' \
   'must not read daily check-in Markdown' \
   'detailed CSV/JSONL/metrics indexes'
 do

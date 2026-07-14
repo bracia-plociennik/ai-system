@@ -103,11 +103,11 @@ for term in \
   'task_generation_reason' \
   'task_generation_references' \
   'V2 Compatibility' \
-  'derived-only V3 closure overlay' \
+  'unsupported and must be owner-migrated' \
   'HH:MM' \
   'V2-only' \
-  'check-ins.trends.md' \
-  'For `detailed-private`, local `check-ins.csv`' \
+  'check-ins-v3.trends.md' \
+  'For `detailed-private`, local `check-ins-v3.csv`' \
   'source_session_date + source_plan_item_id' \
   'One exact `owner-approved` write' \
   'Interpreted Input' \
@@ -147,11 +147,28 @@ do
   require_ref ".systems/ai/core/personal-ops.md" "$term" "$term"
 done
 
+for retired_v3_term in \
+  'legacy-wig-priority' \
+  'legacy-v3-no-wig' \
+  'must_do_plan_item_ids'
+do
+  if rg -F -q -- "$retired_v3_term" \
+    "$repo_root/.systems/ai/core/personal-ops.md" \
+    "$repo_root/.systems/ai/templates/workspace/personal-ops" \
+    "$repo_root/.systems/scripts/personal_ops_properties_v3.py" \
+    "$repo_root/.systems/scripts/propose-task-candidates" \
+    "$repo_root/.systems/scripts/sync-personal-ops-check-ins"; then
+    echo "Retired V3 compatibility term remains in active contract: $retired_v3_term"
+    fail=1
+  fi
+done
+
 for term in \
   '--status-only' \
   '--dry-run' \
   'SYNC_THRESHOLD = 7' \
   'daily_files' \
+  'historical_daily_files' \
   'personal-ops/check-ins' \
   'check-ins.csv' \
   'check-ins.jsonl' \
@@ -163,22 +180,7 @@ for term in \
   'unmapped_fields' \
   'write_indexes' \
   'never rewrites daily Markdown' \
-  'build_v3_session' \
-  'merge_v3_sessions' \
-  'v3_normalize_range' \
-  'v3_closure' \
-  'schema_version' \
-  'normalize_missing' \
-  'interpreted_input' \
-  'routine_completion_percent' \
-  'actual_training_performed' \
-  'actual_nsdr_performed' \
-  'reflection_plus_one' \
-  'v3_priority_state' \
-  'v3_minimum_day_status' \
-  'private_index_policy' \
-  'redacted_v3_payload' \
-  'index_contract'
+  'schema_version'
 do
   require_ref ".systems/scripts/sync-personal-ops-check-ins" "$term" "sync tool term $term"
 done

@@ -262,7 +262,7 @@ for term in \
   'source_session_date + source_plan_item_id' \
   'mechanical flag records the same approval' \
   'WIG may be linked to one plan item or standalone' \
-  'legacy `5d/*` input is read-compatible and normalizes to the matching `6d/*` tag' \
+  'current V3 policy never emits a `5d/*` TaskNote' \
   'warns without failing when project discovery cannot run' \
   'task_generation_status: skipped' \
   'task_generation_references_json' \

@@ -233,7 +233,7 @@ def candidates_from_check_in(path: Path, workspace: Path, labels: dict[str, list
     if fm.get("index_contract") == "3":
         return candidates_from_index_v3_check_in(path, workspace, labels, text)
     if fm.get("schema_version") == "3":
-        return candidates_from_v3_check_in(path, workspace, labels, text, fm)
+        raise SystemExit(f"V3 check-ins require index_contract: 3 and the current properties contract: {path}")
     check_date = fm.get("date") or path.stem
     try:
         dt.date.fromisoformat(check_date)
@@ -283,29 +283,15 @@ def candidates_from_index_v3_check_in(path: Path, workspace: Path, labels: dict[
         raise SystemExit(f"V3 session_date is missing or invalid for {path}") from exc
     try:
         items = json.loads(str(properties["planned_items_json"]))
-        must_do = json.loads(str(properties["must_do_plan_item_ids_json"]))
     except json.JSONDecodeError as exc:
         raise SystemExit(f"Malformed V3 planned item JSON in {path}: {exc}") from exc
-    if not isinstance(items, list) or not isinstance(must_do, list):
-        raise SystemExit(f"V3 planned_items_json and must_do_plan_item_ids_json must be JSON arrays in {path}")
+    if not isinstance(items, list):
+        raise SystemExit(f"V3 planned_items_json must be a JSON array in {path}")
     item_ids = [str(item.get("id", "")).strip() for item in items if isinstance(item, dict)]
     if len(item_ids) != len(set(item_ids)):
         raise SystemExit(f"V3 planned_items_json has duplicate item IDs in {path}")
-    policy = str(properties["task_generation_policy"])
-    if policy == "legacy-wig-priority":
-        if properties["plan_readiness"] != "ready":
-            return []
-        if properties["overload_status"] == "warning" and properties["overload_acknowledged"] is not True:
-            return []
-        wig = str(properties["wig_plan_item_id"]).strip()
-        must_ids = [str(value).strip() for value in must_do]
-        if not wig or wig not in item_ids or len(must_ids) > 2 or len(set(must_ids)) != len(must_ids) or wig in must_ids or any(item_id not in item_ids for item_id in must_ids):
-            raise SystemExit(f"V3 WIG/must-do properties are inconsistent with planned_items_json in {path}")
-        priority_ids = {wig, *must_ids}
-    elif policy == "all-professional-do-v1":
-        priority_ids = set()
-    else:
-        raise SystemExit(f"Unsupported V3 task generation policy in {path}: {policy}")
+    if str(properties["task_generation_policy"]) != "all-professional-do-v1":
+        raise SystemExit(f"V3 requires task_generation_policy: all-professional-do-v1 in {path}")
 
     candidates: list[dict[str, object]] = []
     for item in items:
@@ -318,18 +304,8 @@ def candidates_from_index_v3_check_in(path: Path, workspace: Path, labels: dict[
             raise SystemExit(f"V3 planned item requires id and title in {path}")
         if stream not in {"build", "deliver", "promote"}:
             continue
-        raw_bucket = ""
-        match = None
-        if policy == "legacy-wig-priority":
-            task_policy = str(item.get("task", "create")).strip().lower() or "create"
-            if task_policy not in {"create", "skip"}:
-                raise SystemExit(f"Unsupported V3 Task policy for {item_id}: {task_policy}")
-            if task_policy == "skip":
-                continue
-            raw_bucket = str(item.get("task_bucket", "")).strip().lower()
-            match = re.fullmatch(r"(?:5d|6d)/(?P<bucket>do|defer|delegate|delete|dump)", raw_bucket)
-            if raw_bucket and not match:
-                raise SystemExit(f"Unsupported V3 Task bucket for {item_id}: {raw_bucket}")
+        if "task" in item or "task_bucket" in item:
+            raise SystemExit(f"V3 does not allow per-item task routing in {path}: {item_id}")
         candidate: dict[str, object] = {
             "type": "task",
             "title": normalize_title(str(item.get("task_title", "")) or title),
@@ -352,166 +328,9 @@ def candidates_from_index_v3_check_in(path: Path, workspace: Path, labels: dict[
             "raw_value": title,
             "candidate_key": f"{session_date}:{item_id}",
         }
-        # New reports route every professional plan item to DO. Legacy reports
-        # retain their historical WIG/must-do classification behavior.
-        default_bucket = "do" if policy == "all-professional-do-v1" or item_id in priority_ids else "dump"
-        apply_execution_classification(candidate, match.group("bucket") if match else default_bucket, raw_bucket)
+        apply_execution_classification(candidate, "do")
         apply_mapping(candidate, labels)
         candidates.append(candidate)
-    return candidates
-
-
-def v3_section(text: str, heading: str) -> str:
-    match = re.search(rf"^(?P<level>#+)\s+{re.escape(heading)}\s*$", text, re.MULTILINE)
-    if not match:
-        return ""
-    level = len(match.group("level"))
-    end = re.search(rf"^#{{1,{level}}}\s+", text[match.end() :], re.MULTILINE)
-    stop = match.end() + end.start() if end else len(text)
-    return text[match.end() : stop].strip()
-
-
-def v3_planned_items(section: str, stream: str) -> list[dict[str, str]]:
-    matches = list(re.finditer(r"^\s*[-*]\s+\[(?P<id>[a-z][a-z0-9-]*)\]\s+(?P<title>.+?)\s*$", section, re.MULTILINE | re.IGNORECASE))
-    items: list[dict[str, str]] = []
-    for index, match in enumerate(matches):
-        title = match.group("title").strip()
-        if title.lower() in {"brak", "nie podano", "nie dotyczy"}:
-            continue
-        block_end = matches[index + 1].start() if index + 1 < len(matches) else len(section)
-        block = section[match.end() : block_end]
-        task_policy = (re.search(r"^\s*[-*]\s+Task:\s*(.+?)\s*$", block, re.MULTILINE | re.IGNORECASE) or ["", "create"])[1].strip().lower()
-        title_match = re.search(r"^\s*[-*]\s+Task title:\s*(.+?)\s*$", block, re.MULTILINE | re.IGNORECASE)
-        bucket_match = re.search(r"^\s*[-*]\s+Task bucket:\s*(.+?)\s*$", block, re.MULTILINE | re.IGNORECASE)
-        items.append(
-            {
-                "id": match.group("id"),
-                "title": title,
-                "stream": stream,
-                "task_policy": task_policy or "create",
-                "task_title": title_match.group(1).strip() if title_match else "",
-                "task_bucket": bucket_match.group(1).strip().lower() if bucket_match else "",
-            }
-        )
-    return items
-
-
-def v3_priority_info(plan: str, plan_items: list[dict[str, str]], frontmatter: dict[str, str]) -> dict[str, object]:
-    """Mirror the V3.1 priority gate without changing canonical check-in content."""
-    section = v3_section(plan, "Priorytety dnia")
-    v31_fields = (
-        "wig_plan_item_id", "wig_definition_of_done", "must_do_plan_item_ids",
-        "overload_acknowledged", "plan_readiness", "overload_status",
-    )
-    is_v31 = bool(section.strip()) or any(str(frontmatter.get(field, "")).strip() for field in v31_fields)
-    if not is_v31:
-        return {"is_v31": False, "eligible_ids": None, "reason": ""}
-
-    def values(label: str, field: str) -> list[str]:
-        matches = re.findall(rf"^\s*[-*]\s+{re.escape(label)}:\s*(.*?)\s*$", section, re.MULTILINE | re.IGNORECASE)
-        if matches:
-            return [match.strip() for match in matches]
-        return [str(frontmatter.get(field, "")).strip()]
-
-    wig_values = values("WIG plan_item_id", "wig_plan_item_id")
-    definition_values = values("WIG definition of done", "wig_definition_of_done")
-    must_values = values("Must-do plan_item_ids", "must_do_plan_item_ids")
-    acknowledged_values = values("Overload acknowledged", "overload_acknowledged")
-    wig = wig_values[0] if len(wig_values) == 1 else ""
-    definition = definition_values[0] if len(definition_values) == 1 else ""
-    must_do = [
-        value.strip()
-        for raw in must_values
-        for value in re.split(r"[,;]", raw)
-        if value.strip()
-    ]
-    acknowledged = (acknowledged_values[0] if acknowledged_values else "").lower() in {"true", "yes"}
-    item_ids = {item["id"] for item in plan_items}
-    professional_ids = {item["id"] for item in plan_items if item["stream"] in {"build", "deliver", "promote"}}
-    reasons: list[str] = []
-    if len(wig_values) > 1:
-        reasons.append("duplicate-wig")
-    elif not wig:
-        reasons.append("missing-wig")
-    elif wig not in item_ids:
-        reasons.append("invalid-wig")
-    if not definition:
-        reasons.append("missing-wig-definition-of-done")
-    if len(must_do) > 2:
-        reasons.append("too-many-must-do")
-    if len(set(must_do)) != len(must_do):
-        reasons.append("duplicate-must-do")
-    if any(item_id not in item_ids for item_id in must_do):
-        reasons.append("invalid-must-do")
-    if wig and wig in must_do:
-        reasons.append("wig-also-must-do")
-    if len(professional_ids) > 3:
-        reasons.append("too-many-professional-items")
-    ready = bool(wig and wig in item_ids and definition)
-    if not ready:
-        return {"is_v31": True, "eligible_ids": set(), "reason": "V3.1 plan requires WIG prioritization"}
-    if reasons and not acknowledged:
-        return {"is_v31": True, "eligible_ids": set(), "reason": "V3.1 overload warning is not acknowledged"}
-    eligible_ids = {item_id for item_id in [wig, *must_do] if item_id in professional_ids}
-    return {"is_v31": True, "eligible_ids": eligible_ids, "reason": ""}
-
-
-def candidates_from_v3_check_in(path: Path, workspace: Path, labels: dict[str, list[tuple[str, str]]], text: str, fm: dict[str, str]) -> list[dict[str, object]]:
-    check_date = fm.get("session_date") or fm.get("date") or path.stem
-    try:
-        dt.date.fromisoformat(check_date)
-    except ValueError as exc:
-        raise SystemExit(f"V3 session_date is missing or invalid for {path}") from exc
-    plan = v3_section(text, "Plan dnia")
-    fields = [("Planuję zbudować", "build"), ("Planuję dowieźć", "deliver"), ("Planuję wypromować", "promote")]
-    all_fields = [*fields, ("Planuję zrobić coś dla siebie", "self"), ("Planuję zrobić coś dla bliskich", "close")]
-    parsed_items = [
-        item
-        for heading, stream in all_fields
-        for item in v3_planned_items(v3_section(plan, heading), stream)
-    ]
-    priority = v3_priority_info(plan, parsed_items, fm)
-    eligible_ids = priority["eligible_ids"]
-    candidates: list[dict[str, object]] = []
-    for heading, stream in fields:
-        for item in v3_planned_items(v3_section(plan, heading), stream):
-            if eligible_ids is not None and item["id"] not in eligible_ids:
-                continue
-            if item["task_policy"] not in {"create", "skip"}:
-                raise SystemExit(f"Unsupported V3 Task policy for {item['id']}: {item['task_policy']}")
-            if item["task_policy"] == "skip":
-                continue
-            raw_value = item["title"]
-            item_id = item["id"]
-            task_bucket = item["task_bucket"]
-            bucket_match = re.fullmatch(r"(?:5d|6d)/(?P<bucket>do|defer|delegate|delete|dump)", task_bucket)
-            if task_bucket and not bucket_match:
-                raise SystemExit(f"Unsupported V3 Task bucket for {item_id}: {task_bucket}")
-            candidate: dict[str, object] = {
-                "type": "task",
-                "title": normalize_title(item["task_title"] or raw_value),
-                "due": f"{check_date}T23:59",
-                "scheduled": check_date,
-                "contexts": [f"workspace/{workspace.name}"],
-                "workspace": workspace.name,
-                "owner_scope": "workspace",
-                "client": "",
-                "owned_asset": "",
-                "project": "",
-                "project_state": "",
-                "source_system": "ai-system",
-                "source_type": "check-in-v3",
-                "source_session_date": check_date,
-                "source_check_in_date": check_date,
-                "source_check_in_field": heading,
-                "source_plan_item_id": item_id,
-                "source_path": str(path),
-                "raw_value": raw_value,
-                "candidate_key": f"{check_date}:{item_id}",
-            }
-            apply_execution_classification(candidate, bucket_match.group("bucket") if bucket_match else "do", task_bucket)
-            apply_mapping(candidate, labels)
-            candidates.append(candidate)
     return candidates
 
 
@@ -825,23 +644,10 @@ def v3_task_generation_gate(path: Path) -> str:
     if frontmatter.get("index_contract") == "3":
         top, properties, _ = parse_frontmatter_and_properties(text, path)
         validate_properties(top, properties, path)
-        if properties["task_generation_policy"] == "legacy-wig-priority":
-            if properties["plan_readiness"] != "ready":
-                return "V3 properties plan requires WIG prioritization"
-            if properties["overload_status"] == "warning" and properties["overload_acknowledged"] is not True:
-                return "V3 properties overload warning is not acknowledged"
         return ""
-    if frontmatter.get("schema_version") != "3":
-        return ""
-    plan = v3_section(text, "Plan dnia")
-    fields = [("Planuję zbudować", "build"), ("Planuję dowieźć", "deliver"), ("Planuję wypromować", "promote")]
-    all_fields = [*fields, ("Planuję zrobić coś dla siebie", "self"), ("Planuję zrobić coś dla bliskich", "close")]
-    items = [
-        item
-        for heading, stream in all_fields
-        for item in v3_planned_items(v3_section(plan, heading), stream)
-    ]
-    return str(v3_priority_info(plan, items, frontmatter).get("reason", ""))
+    if frontmatter.get("schema_version") == "3":
+        return "V3 check-ins require index_contract: 3 and the current properties contract"
+    return ""
 
 
 def main() -> int:
@@ -863,9 +669,19 @@ def main() -> int:
     if args.write and not args.owner_approved:
         raise SystemExit("--write requires --owner-approved")
     is_v3_check_in = False
+    unsupported_v3_check_in = False
     task_generation_gate = ""
     if args.check_in:
-        is_v3_check_in = parse_frontmatter(read_text(args.check_in.resolve())).get("schema_version") == "3"
+        check_in_frontmatter = parse_frontmatter(read_text(args.check_in.resolve()))
+        is_v3_check_in = check_in_frontmatter.get("index_contract") == "3"
+        unsupported_v3_check_in = (
+            check_in_frontmatter.get("schema_version") == "3" and not is_v3_check_in
+        )
+        if unsupported_v3_check_in:
+            raise SystemExit(
+                "V3 check-ins require index_contract: 3 and the current properties contract; "
+                "migrate the report before task generation"
+            )
         if is_v3_check_in:
             task_generation_gate = v3_task_generation_gate(args.check_in.resolve())
     if task_generation_gate:
