@@ -179,7 +179,7 @@ If a project path is inside a git worktree, do not write AI System `status.md`, 
 
 ## Personal Ops Check-Ins
 
-AI System supports V3 native manual daily check-ins and historical V2 Notion CSV imports. V3 starts from a new day and never rewrites or backfills V2 history.
+AI System supports native manual daily check-ins through Properties + Raw Audit V3. V2 sync and the V2 Notion importer are retired; existing V2 Markdown can enter official V3 indexes only through one immutable, owner-approved legacy snapshot.
 
 Manual daily check-ins use:
 
@@ -204,12 +204,12 @@ Generated analytical indexes live in:
 
 ```text
 <workspace>/personal-ops/indexes/check-ins-v3.csv
-<workspace>/personal-ops/indexes/check-ins.jsonl
-<workspace>/personal-ops/indexes/check-ins.metrics.csv
+<workspace>/personal-ops/indexes/check-ins-v3.jsonl
+<workspace>/personal-ops/indexes/check-ins-v3.metrics.csv
 <workspace>/personal-ops/indexes/check-ins-v3.trends.md
 ```
 
-Markdown is the source of truth. Properties + Raw Audit V3 uses one session report with `index_contract: 3`; its complete frontmatter `properties` map maps 1:1 to `check-ins-v3.*`. The readable interpretation, inline OCR, and verbatim Raw Check-In preserve audit evidence but do not compete with properties. Under `all-professional-do-v1`, every valid professional plan item becomes one `6d/do` TaskNote; WIG is linked or standalone planning/closure only and never creates its own task. V2 files and `check-ins.*` indexes are frozen history; pre-contract V3 must be owner-migrated before use. `check-ins-v3.trends.md` is sanitized for Dreaming Mode and excludes raw input, OCR, attachments, private detail, lessons, and unverified sources. Check-ins and attachments are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
+Markdown is the source of truth. Properties + Raw Audit V3 uses one session report with `index_contract: 3`; its complete frontmatter `properties` map maps 1:1 to official `check-ins-v3.*`. The readable interpretation, inline OCR, and verbatim Raw Check-In preserve audit evidence but do not compete with properties. Under `all-professional-do-v1`, every valid professional plan item becomes one `6d/do` TaskNote; WIG is linked or standalone planning/closure only and never creates its own task. A one-time owner-approved migration may create an immutable V2 snapshot and archive active `check-ins.*` indexes only after a successful V3 sync; it never moves source Markdown or `.assets/`. Pre-contract V3 reports are source-only and must be recreated as native current V3. `check-ins-v3.trends.md` is sanitized native-V3-only Dreaming input and excludes raw input, OCR, attachments, private detail, lessons, and unverified sources. Check-ins and attachments are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
 
 Manual check-ins write only the daily Markdown file and optional assets. Derived indexes may be intentionally stale. Use lazy sync status before recommending a database refresh:
 
@@ -221,7 +221,7 @@ If `unsynced-check-in-count` is below `7`, sync is not required yet. If it is `7
 
 The threshold counts newly added daily files. It does not detect edits to older check-ins or reliably detect deleted daily files as a stale-index event; after editing or deleting an existing day, run owner-approved sync manually when the indexes need to be fresh.
 
-The Notion check-in importer is V2-only for owner-approved Notion CSV imports. Do not use it to refresh V3 or manual-only edits; use lazy sync from canonical Markdown instead.
+The V2 Notion check-in importer is retired. Preserve future exports as raw context and use the owner-approved V3 manual intake route; use lazy V3 sync from canonical Markdown and any validated immutable legacy snapshot.
 
 ## TaskForge Task Management
 

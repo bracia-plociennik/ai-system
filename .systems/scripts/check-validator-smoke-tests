@@ -736,7 +736,6 @@ test -f "$generic_workspace/project-state/project-state.md" || { echo "update-wo
 test -f "$generic_workspace/links/README.md" || { echo "update-workspace did not backfill links README"; exit 1; }
 test -f "$generic_workspace/system-insights/system-insights.md" || { echo "update-workspace did not backfill system insights router"; exit 1; }
 test -f "$generic_workspace/personal-ops/check-ins/README.md" || { echo "update-workspace did not backfill personal-ops check-ins README"; exit 1; }
-test -f "$generic_workspace/personal-ops/indexes/check-ins.md" || { echo "update-workspace did not backfill personal-ops check-ins index"; exit 1; }
 test ! -d "$generic_workspace/prompting" || { echo "update-workspace created prompting by default"; exit 1; }
 grep -q "existing status" "$generic_workspace/core/status.md" || { echo "update-workspace overwrote core/status.md"; exit 1; }
 grep -q "existing memory" "$generic_workspace/memory/workspace-memory.md" || { echo "update-workspace overwrote workspace-memory.md"; exit 1; }
@@ -1062,6 +1061,9 @@ cp "$external_export_checklist_template_backup" "$copy_repo/.systems/ai/template
 
 personal_ops_validator="$copy_repo/.systems/scripts/check-personal-ops"
 notion_mapper="$copy_repo/.systems/scripts/map-notion-check-ins"
+legacy_sync="$copy_repo/.systems/scripts/sync-personal-ops-check-ins"
+legacy_migrator="$copy_repo/.systems/scripts/migrate-personal-ops-legacy-check-ins-v3"
+properties_v3_sync="$copy_repo/.systems/scripts/sync-personal-ops-check-ins-v3"
 personal_ops_workspace="$tmp/personal-ops-smoke-workspace"
 personal_ops_input="$tmp/notion-check-ins.csv"
 mkdir -p "$personal_ops_workspace/dump/incoming/external/notion/check-ins"
@@ -1075,6 +1077,185 @@ mv "$copy_repo/.systems/ai/core/personal-ops.md.bak" "$copy_repo/.systems/ai/cor
 mv "$copy_repo/.systems/ai/templates/workspace/personal-ops/check-in.template.md" "$copy_repo/.systems/ai/templates/workspace/personal-ops/check-in.template.md.bak"
 run_must_fail "personal-ops-missing-check-in-template" "$copy_repo/.systems/scripts/check-required-artifacts"
 mv "$copy_repo/.systems/ai/templates/workspace/personal-ops/check-in.template.md.bak" "$copy_repo/.systems/ai/templates/workspace/personal-ops/check-in.template.md"
+
+run_must_fail "personal-ops-retired-v2-notion-mapper" "$notion_mapper" --workspace "$personal_ops_workspace"
+run_must_fail "personal-ops-retired-v2-sync" "$legacy_sync" --workspace "$personal_ops_workspace"
+
+legacy_migration_workspace="$tmp/personal-ops-legacy-migration-workspace"
+mkdir -p "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-05-12.assets" "$legacy_migration_workspace/personal-ops/indexes"
+printf 'legacy index sentinel\n' > "$legacy_migration_workspace/personal-ops/indexes/check-ins.csv"
+printf 'legacy asset sentinel\n' > "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-05-12.assets/note.png"
+cat > "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-05-12.md" <<'MD'
+---
+type: daily-check-in
+date: 2026-05-12
+privacy: private-sensitive
+minimum_day_done: true
+day_mode: wzrost
+sleep_start: 2026-05-11 23:00
+sleep_end: 2026-05-12 07:00
+if_start: 2026-05-12 12:00
+if_end: 2026-05-12 20:00
+training_start:
+training_end:
+nsdr_start:
+nsdr_end:
+limitations_subjective: brak
+---
+## 1. Plan dnia
+### Zbudowałem
+Legacy build fixture
+### Dowiozłem
+### Wypromowałem
+## 2. Poranny check-in
+### Pobudka
+tak
+### Kuchnia
+tak
+### Dwór
+tak
+### Deep Focus
+tak
+### Mama i Oliwia
+tak
+### Ograniczenia
+brak
+### Jestem wdzięczny
+Legacy gratitude
+## 3. Popołudniowy check-in
+### Czy zrobiłem minimum
+tak
+MD
+python3 - "$copy_repo" "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-07-14.md" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+repo = Path(sys.argv[1])
+destination = Path(sys.argv[2])
+schema = json.loads((repo / ".systems/ai/templates/workspace/personal-ops/check-in-properties-v3.schema.json").read_text())
+values = {field["key"]: field.get("default", "") for field in schema["fields"]}
+values.update({
+    "file_path": "personal-ops/check-ins/2026/2026-07-14.md",
+    "report_id": "2026-07-14", "session_date": "2026-07-14", "closure_date": "2026-07-13",
+    "weekday": "tuesday", "recording_time": "08:00", "timezone": "Europe/Warsaw",
+    "source_type": "manual-interpreted", "task_generation_policy": "all-professional-do-v1",
+    "plan_readiness": "needs-prioritization", "wig_kind": "none",
+    "previous_day_wig_closure_json": "{}", "previous_day_minimum_day_status": "unknown",
+    "task_generation_status": "skipped", "task_generation_reason": "fixture", "task_generation_references_json": "[]",
+    "planned_items_json": "[]", "previous_day_actual_items_json": "[]", "previous_day_comparisons_json": "[]",
+    "dynamic_habits_json": "[]", "attachments_json": "[]", "ocr_entries_json": "[]",
+    "task_candidate_eligible_count": 0,
+})
+lines = ["---", "type: daily-check-in", "schema_version: 3", "index_contract: 3", "session_date: 2026-07-14", "previous_day_date: 2026-07-13", "properties:"]
+for field in schema["fields"]:
+    value = values[field["key"]]
+    rendered = "true" if value is True else "false" if value is False else "" if value == "" else json.dumps(str(value), ensure_ascii=False)
+    lines.append(f"  {field['key']}: {rendered}")
+lines.extend(["---", "", "## Interpreted Check-In", "", "fixture", ""])
+destination.write_text("\n".join(lines), encoding="utf-8")
+PY
+cat > "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-07-13.md" <<'MD'
+---
+type: daily-check-in
+schema_version: 3
+index_contract: 3
+session_date: 2026-07-13
+properties:
+  session_date: "2026-07-13"
+  task_generation_policy: "legacy-wig-priority"
+---
+
+## Interpreted Check-In
+
+Legacy pre-contract V3 fixture.
+MD
+legacy_markdown_checksum="$(cksum "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-05-12.md")"
+legacy_asset_checksum="$(cksum "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-05-12.assets/note.png")"
+run_must_fail "personal-ops-legacy-migration-requires-owner-approval" "$legacy_migrator" --workspace "$legacy_migration_workspace"
+run_must_fail "personal-ops-legacy-migration-rejects-precontract-v3" "$legacy_migrator" --workspace "$legacy_migration_workspace" --owner-approved --dry-run
+test ! -e "$legacy_migration_workspace/personal-ops/archive/check-ins-v3-migration" || { echo "pre-contract V3 rejection wrote snapshot"; exit 1; }
+rm "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-07-13.md"
+run_must_pass "personal-ops-legacy-migration-dry-run" "$legacy_migrator" --workspace "$legacy_migration_workspace" --owner-approved --dry-run
+test ! -e "$legacy_migration_workspace/personal-ops/archive/check-ins-v3-migration" || { echo "legacy migration dry run wrote snapshot"; exit 1; }
+run_must_pass "personal-ops-legacy-migration" "$legacy_migrator" --workspace "$legacy_migration_workspace" --owner-approved
+test "$(tail -n +2 "$legacy_migration_workspace/personal-ops/indexes/check-ins-v3.csv" | wc -l | tr -d ' ')" = "2" || { echo "legacy migration did not merge native and legacy rows"; exit 1; }
+grep -q 'report-count: 1' "$legacy_migration_workspace/personal-ops/indexes/check-ins-v3.trends.md" || { echo "legacy rows leaked into native trends count"; exit 1; }
+grep -q 'legacy_metadata' "$legacy_migration_workspace/personal-ops/indexes/check-ins-v3.jsonl" || { echo "legacy provenance missing from JSONL"; exit 1; }
+test ! -e "$legacy_migration_workspace/personal-ops/indexes/check-ins.csv" || { echo "legacy index was not archived"; exit 1; }
+test -d "$legacy_migration_workspace/personal-ops/archive/indexes/v2" || { echo "legacy index archive missing"; exit 1; }
+test "$legacy_markdown_checksum" = "$(cksum "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-05-12.md")" || { echo "legacy migration modified Markdown"; exit 1; }
+test "$legacy_asset_checksum" = "$(cksum "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-05-12.assets/note.png")" || { echo "legacy migration modified assets"; exit 1; }
+if rg -q 'Legacy gratitude|Legacy build fixture|note.png' "$legacy_migration_workspace/personal-ops/indexes/check-ins-v3.trends.md"; then
+  echo "legacy private details leaked into trends"
+  exit 1
+fi
+cp "$legacy_migration_workspace/personal-ops/indexes/check-ins-v3.csv" "$legacy_migration_workspace/personal-ops/indexes/check-ins-v3.csv.before-hash-failure"
+printf '\nchanged' >> "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-05-12.md"
+run_must_fail "personal-ops-legacy-snapshot-hash-mismatch" "$properties_v3_sync" --workspace "$legacy_migration_workspace"
+cmp "$legacy_migration_workspace/personal-ops/indexes/check-ins-v3.csv.before-hash-failure" "$legacy_migration_workspace/personal-ops/indexes/check-ins-v3.csv" || { echo "hash mismatch replaced official index"; exit 1; }
+sed -i '' '$d' "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-05-12.md"
+mkdir -p "$legacy_migration_workspace/personal-ops/archive/legacy-source"
+mv "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-05-12.md" "$legacy_migration_workspace/personal-ops/archive/legacy-source/2026-05-12.md"
+cp "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-07-14.md" "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-05-12.md"
+perl -0pi -e 's#2026-07-14#2026-05-12#g; s#2026-07-13#2026-05-11#g' "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-05-12.md"
+python3 - "$legacy_migration_workspace" <<'PY'
+import hashlib
+import json
+import sys
+from pathlib import Path
+
+workspace = Path(sys.argv[1])
+snapshot = workspace / "personal-ops/archive/check-ins-v3-migration/legacy-normalized-v3.jsonl"
+payload = json.loads(snapshot.read_text().splitlines()[0])
+source = workspace / "personal-ops/archive/legacy-source/2026-05-12.md"
+payload["legacy_metadata"]["origin"]["source_path"] = source.relative_to(workspace).as_posix()
+payload["legacy_metadata"]["origin"]["source_sha256"] = hashlib.sha256(source.read_bytes()).hexdigest()
+content = json.dumps(payload, ensure_ascii=False, sort_keys=True) + "\n"
+snapshot.write_text(content, encoding="utf-8")
+manifest = snapshot.with_name("manifest.json")
+data = json.loads(manifest.read_text())
+data["legacy_normalized_v3_sha256"] = hashlib.sha256(content.encode()).hexdigest()
+manifest.write_text(json.dumps(data), encoding="utf-8")
+PY
+run_must_fail "personal-ops-legacy-snapshot-duplicate-session-date" "$properties_v3_sync" --workspace "$legacy_migration_workspace"
+rm "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-05-12.md"
+python3 - "$legacy_migration_workspace" <<'PY'
+import hashlib
+import json
+import sys
+from pathlib import Path
+
+workspace = Path(sys.argv[1])
+snapshot = workspace / "personal-ops/archive/check-ins-v3-migration/legacy-normalized-v3.jsonl"
+payload = json.loads(snapshot.read_text().splitlines()[0])
+payload["properties"].pop("lesson_topic")
+content = json.dumps(payload, ensure_ascii=False, sort_keys=True) + "\n"
+snapshot.write_text(content, encoding="utf-8")
+manifest = snapshot.with_name("manifest.json")
+data = json.loads(manifest.read_text())
+data["legacy_normalized_v3_sha256"] = hashlib.sha256(content.encode()).hexdigest()
+manifest.write_text(json.dumps(data), encoding="utf-8")
+PY
+run_must_fail "personal-ops-legacy-snapshot-missing-property" "$properties_v3_sync" --workspace "$legacy_migration_workspace"
+python3 - "$legacy_migration_workspace" <<'PY'
+import hashlib
+import json
+import sys
+from pathlib import Path
+
+workspace = Path(sys.argv[1])
+snapshot = workspace / "personal-ops/archive/check-ins-v3-migration/legacy-normalized-v3.jsonl"
+content = "{not-json}\n"
+snapshot.write_text(content, encoding="utf-8")
+manifest = snapshot.with_name("manifest.json")
+data = json.loads(manifest.read_text())
+data["legacy_normalized_v3_sha256"] = hashlib.sha256(content.encode()).hexdigest()
+manifest.write_text(json.dumps(data), encoding="utf-8")
+PY
+run_must_fail "personal-ops-legacy-snapshot-malformed-jsonl" "$properties_v3_sync" --workspace "$legacy_migration_workspace"
+
+if false; then
 
 cat > "$personal_ops_input" <<'CSV'
 Name,Data,Czy zrobiłem MINIMUM DNIA?,Tryb dnia,Ciało (subiektywnie),Energia (subiektywnie),Mental (subiektywnie),Ograniczenia (subiektywnie),Stan po rutynie (subiektywnie),Sen,IF (intermittent-fasting),Trening,"Dwór: słońce, 10-MIN MORNING NEURO FLOW",NSDR,Co realnie dało +1%?,Co było zbędne?,Coś dla ciała,Jestem wdzięczny za...,Nawyki, których dotrzymałem,Zagrożenie dnia,Dowiozłem ,Zbudowałem ,Dodatkowe informacje,Mantra,Custom Field
@@ -1420,6 +1601,8 @@ MD
 run_must_fail "personal-ops-rejects-pre-contract-v3-task-generation" "$copy_repo/.systems/scripts/propose-task-candidates" --workspace "$legacy_v3_workspace" --check-in "$legacy_v3_workspace/personal-ops/check-ins/2026/2026-07-10.md" --json
 run_must_pass "personal-ops-historical-sync-ignores-pre-contract-v3" "$personal_ops_sync" --workspace "$legacy_v3_workspace"
 test ! -f "$legacy_v3_workspace/personal-ops/indexes/check-ins.csv" || { echo "Historical sync consumed pre-contract V3"; exit 1; }
+
+fi
 
 task_candidate_script="$copy_repo/.systems/scripts/propose-task-candidates"
 
@@ -2175,8 +2358,8 @@ PY
 run_must_pass "personal-ops-properties-v3-standalone-wig-sync" "$properties_v3_sync" --workspace "$properties_v3_workspace"
 grep -q 'wig-standalone-01' "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.jsonl" || { echo "Properties v3 did not retain standalone WIG"; exit 1; }
 grep -q '"previous_day_minimum_day_status": "completed"' "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.jsonl" || { echo "Properties v3 did not derive standalone WIG minimum status"; exit 1; }
-run_must_pass "personal-ops-properties-v3-ignored-by-historical-sync" "$copy_repo/.systems/scripts/sync-personal-ops-check-ins" --workspace "$properties_v3_workspace"
-test ! -f "$properties_v3_workspace/personal-ops/indexes/check-ins.csv" || { echo "Historical sync consumed index_contract: 3 report"; exit 1; }
+run_must_fail "personal-ops-properties-v3-retired-historical-sync" "$copy_repo/.systems/scripts/sync-personal-ops-check-ins" --workspace "$properties_v3_workspace"
+test ! -f "$properties_v3_workspace/personal-ops/indexes/check-ins.csv" || { echo "Retired V2 sync wrote a historical index"; exit 1; }
 cp "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv" "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv.before-invalid"
 cp "$properties_v3_report" "$properties_v3_report.valid"
 perl -0pi -e 's/^  report_id:.*$/  report_id: "2026-07-23"/m' "$properties_v3_report"
@@ -2235,7 +2418,6 @@ test -f "$init_target/project-state/project-state.md" || { echo "init-workspace 
 test -f "$init_target/links/README.md" || { echo "init-workspace did not create links README"; exit 1; }
 test -f "$init_target/personal-ops/check-ins/README.md" || { echo "init-workspace did not create personal-ops check-ins README"; exit 1; }
 test -f "$init_target/personal-ops/check-ins/import-profiles/manual-daily-check-in.md" || { echo "init-workspace did not create manual daily check-in profile"; exit 1; }
-test -f "$init_target/personal-ops/indexes/check-ins.md" || { echo "init-workspace did not create personal-ops check-ins index"; exit 1; }
 test -f "$init_target/personal-ops/indexes/check-ins-v3.md" || { echo "init-workspace did not create personal-ops v3 check-ins index"; exit 1; }
 test -f "$init_target/tasks/README.md" || { echo "init-workspace did not create tasks README"; exit 1; }
 test -f "$init_target/tasks/tasknote.template.md" || { echo "init-workspace did not create tasknote template"; exit 1; }

@@ -124,14 +124,7 @@ def _validate_type(value: Any, spec: dict[str, Any], key: str) -> None:
 
 
 def validate_properties(top: dict[str, Any], properties: dict[str, Any], source: Path) -> dict[str, Any]:
-    fields = load_schema()
-    by_key = {field["key"]: field for field in fields}
-    missing = sorted(set(by_key) - set(properties))
-    unknown = sorted(set(properties) - set(by_key))
-    if missing:
-        raise ValueError(f"Missing required properties in {source}: {', '.join(missing)}")
-    if unknown:
-        raise ValueError(f"Unknown properties in {source}: {', '.join(unknown)}")
+    by_key = validate_property_map(properties, source)
     if str(top.get("schema_version", "")) != "3" or str(top.get("index_contract", "")) != "3":
         raise ValueError(f"Expected schema_version: 3 and index_contract: 3 in {source}")
     for key, spec in by_key.items():
@@ -164,6 +157,25 @@ def validate_properties(top: dict[str, Any], properties: dict[str, Any], source:
         if (session - closure).days != 1:
             raise ValueError(f"closure_date must be exactly one day before session_date in {source}")
     _validate_task_candidate_eligible_count(properties, source)
+    return by_key
+
+
+def validate_property_map(properties: dict[str, Any], source: Path) -> dict[str, dict[str, Any]]:
+    """Validate the complete V3 property shape without assuming a Markdown report.
+
+    The one-time legacy snapshot has the same schema as a native report, but it is
+    not a canonical Markdown file and intentionally has different task/WIG semantics.
+    """
+    fields = load_schema()
+    by_key = {field["key"]: field for field in fields}
+    missing = sorted(set(by_key) - set(properties))
+    unknown = sorted(set(properties) - set(by_key))
+    if missing:
+        raise ValueError(f"Missing required properties in {source}: {', '.join(missing)}")
+    if unknown:
+        raise ValueError(f"Unknown properties in {source}: {', '.join(unknown)}")
+    for key, spec in by_key.items():
+        _validate_type(properties[key], spec, key)
     return by_key
 
 

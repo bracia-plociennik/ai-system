@@ -7,6 +7,6 @@ This directory currently covers daily check-ins only. TODO databases and broader
 - `personal-ops-readme.template.md` -> `AI_SYSTEM_WORKSPACE_HOME/personal-ops/README.md`
 - `check-ins-readme.template.md` -> `AI_SYSTEM_WORKSPACE_HOME/personal-ops/check-ins/README.md`
 - `manual-daily-check-in.template.md` -> `AI_SYSTEM_WORKSPACE_HOME/personal-ops/check-ins/import-profiles/manual-daily-check-in.md`
-- `check-ins-index.template.md` -> `AI_SYSTEM_WORKSPACE_HOME/personal-ops/indexes/check-ins.md`
+- `check-ins-v3-index.template.md` -> `AI_SYSTEM_WORKSPACE_HOME/personal-ops/indexes/check-ins-v3.md`
 - `check-in.template.md` -> `AI_SYSTEM_WORKSPACE_HOME/personal-ops/check-ins/YYYY/YYYY-MM-DD.md`
-- `check-in-settings.local.template.md` documents the owner-created local-only timezone record; it is never copied as a populated configuration.
+- `check-in-settings.local.template.md` documents the owner-created local-only timezone record; it is never copied as a populated configuration. Legacy V2 indexes have no bootstrap template; they can be archived only through the one-time owner-approved migration.

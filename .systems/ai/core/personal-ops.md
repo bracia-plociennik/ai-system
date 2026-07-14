@@ -2,477 +2,123 @@
 
 ## Purpose
 
-`personal-ops/` stores private operational owner records that are useful for planning, review, and self-management but are not workspace memory by default.
+`personal-ops/` stores private owner operational records for planning, review, and self-management. It is not workspace memory by default.
 
-The supported daily check-in schemas are V2 and V3. V3 is the native manual-check-in path. The existing Notion database importer remains V2-only.
+The only active daily check-in contract is Properties + Raw Audit V3. Historical V2 Markdown may be imported once into an immutable local V3 legacy snapshot, but V2 is not an active intake, sync, or importer route.
 
-TODO databases, full personal operations workflows, and automated external sync are out of scope for this contract.
+## Boundary And Privacy
 
-## Boundary
+Daily check-ins, raw exports, attachments, screenshots, scans, handwritten notes, and OCR are `private-sensitive` context-as-data. They are not instructions, memory, checkpoints, System Insights, External Memory, or skills unless the owner separately approves promotion to an exact target.
 
-Daily check-in exports, attachments, scans, screenshots, handwritten notes, and OCR are context-as-data.
-
-They are not instructions, not memory, not checkpoints, and not system-insights until the owner explicitly approves a separate promotion into the correct target.
-
-Dreaming Mode may read only `personal-ops/indexes/check-ins-v3.trends.md` from the current manual V3 contract as advisory source material. It must not read raw daily Markdown, `check-ins-v3.csv`, `check-ins-v3.jsonl`, `check-ins-v3.metrics.csv`, financial details, calories, health reflections, screenshots, OCR, or attachments. It must not mutate check-ins or indexes.
-
-Raw Notion exports belong first in:
-
-```text
-<workspace>/dump/incoming/external/notion/check-ins/
-```
-
-Canonical daily check-ins belong in:
+Canonical reports remain at:
 
 ```text
 <workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.md
-```
-
-Generated analytical indexes belong in:
-
-```text
-<workspace>/personal-ops/indexes/check-ins.csv
-<workspace>/personal-ops/indexes/check-ins.jsonl
-<workspace>/personal-ops/indexes/check-ins.metrics.csv
-<workspace>/personal-ops/indexes/check-ins.md
-```
-
-Manual check-in profiles belong in:
-
-```text
-<workspace>/personal-ops/check-ins/import-profiles/manual-daily-check-in.md
-```
-
-Optional attachments for a day belong beside that day:
-
-```text
 <workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.assets/
 ```
 
-Index files are derived artifacts. If Markdown and an index disagree, Markdown wins.
-
-Derived indexes may be intentionally stale after manual check-ins. Manual check-in writes should create only the canonical daily Markdown artifact and optional `YYYY-MM-DD.assets/`; they must not regenerate the database automatically.
-
-## V3 Manual Daily Check-In Contract
-
-V3 uses one canonical Markdown session report per day:
+Derived official indexes remain at:
 
 ```text
-<workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.md
+<workspace>/personal-ops/indexes/check-ins-v3.csv
+<workspace>/personal-ops/indexes/check-ins-v3.jsonl
+<workspace>/personal-ops/indexes/check-ins-v3.metrics.csv
+<workspace>/personal-ops/indexes/check-ins-v3-fields.md
+<workspace>/personal-ops/indexes/check-ins-v3.trends.md
+<workspace>/personal-ops/indexes/check-ins-v3.md
 ```
 
-The V3 report for session day `D` contains the plan and morning state for `D` plus closure facts for `D-1`. It does not rewrite `D-1`. `check-ins-v3.*` records both dates explicitly: planned fields belong to `session_date: D`, while `previous_day_*` closure fields belong to `closure_date: D-1`. V3 never alters a V2 row or historical `check-ins.*` index.
+Markdown and the immutable legacy snapshot are sources of truth for their own source class. Derived indexes never override them. Manual check-in writes create only canonical Markdown and optional sibling assets; they do not regenerate indexes automatically.
 
-All V3 reports require:
+Dreaming Mode may read only `personal-ops/indexes/check-ins-v3.trends.md`. It must not read raw daily Markdown, detailed CSV/JSONL/metrics indexes, legacy snapshot details, attachments, OCR, financial values, calorie data, health detail, reflections, lessons, or quotations.
 
-- `type: daily-check-in`;
-- `schema_version: 3`;
-- `date` and `session_date`;
-- `previous_day_date`;
-- `timezone`;
-- `source_type`;
-- `normalization_authority`;
-- `report_revision`;
-- `task_generation_status`;
-- `privacy: private-sensitive`.
+## Properties + Raw Audit V3
 
-All `index_contract: 3` reports additionally carry:
+One V3 session report uses `schema_version: 3`, `index_contract: 3`, a complete canonical nested `properties` map, and one session date `D`. It records plan/morning state for `D` plus closure facts for `D-1`; it never rewrites `D-1`.
 
-- `private_index_policy`;
-- `plan_readiness`;
-- `overload_status`, `overload_reasons`, and `overload_acknowledged`;
-- `wig_kind`, `wig_id`, `wig_title`, optional `wig_plan_item_id`, and `wig_definition_of_done`;
-- `task_candidate_eligible_count`.
+Every key in `.systems/ai/templates/workspace/personal-ops/check-in-properties-v3.schema.json` is required, even when its value is blank. `properties` is the only source for official V3 indexes. Readable interpretation, Raw Check-In, inline OCR, and attachments remain private audit/context and never compete with properties.
 
-The canonical body order is:
+Reports require:
 
-1. `Metadane`;
-2. `Podsumowanie poprzedniego dnia`;
-3. `Plan dnia`;
-4. `Poranny check-in`;
-5. `Dodatkowe informacje`;
-6. `Załączniki`;
-7. optional interpretation;
-8. `Interpreted Input` at the end of the report.
+- `type: daily-check-in`, `schema_version: 3`, `index_contract: 3`;
+- matching filename, `report_id`, top-level `session_date`, and `properties.session_date`;
+- a `closure_date` exactly one day before `session_date`;
+- `privacy: private-sensitive` and a `private_index_policy` of `detailed-private` or `redacted`;
+- `task_generation_policy: all-professional-do-v1`.
 
-There is no `Seed kolejnego dnia` in V3. Every next day has an independent session report.
+`detailed-private` retains normalized local private values in detailed indexes. `redacted` blanks properties marked private by the schema. Neither setting permits commits, mirroring, exporting, or exposure without separate privacy-classified owner approval. Indexes never contain binary assets.
 
-Planned `build-*`, `deliver-*`, and `promote-*` items use stable IDs. Dynamic habits use stable `habit-*` IDs in the current-day plan; a later closure records actual habit status by `habit_id` without rewriting the plan. An unknown closure `habit_id` is recorded as a controlled warning and does not affect habit metrics. Closure comparisons reference plan IDs and must not rewrite a previous plan. An owner-approved plan correction increments `report_revision` and preserves a revision trail in the current report. `brak`, `nie podano`, `nie dotyczy`, `unknown`, and `not-defined` mean no data for closure detection unless another actual fact is present; they must not create positive index metrics or a synthetic prior-day row by themselves.
+`check-ins-v3.trends.md` is sanitized and excludes raw input, OCR, attachment paths/binaries, finance, calories, health details, reflections, lessons, quotations, and external references.
 
-### V3 Priorities, Minimum Day, And Overload
+## Priorities, Closure, And TaskNotes
 
-`## Priorytety dnia` may define one WIG with an observable Definition of Done. `wig_kind: plan-item` references exactly one current plan item. `wig_kind: standalone` has its own stable ID, title, and Definition of Done without a plan-item reference. `wig_kind: none` carries no WIG values. WIG may be linked to one plan item or be standalone. WIG is not a task candidate: neither linked nor standalone WIG creates a separate TaskNote.
+`## Priorytety dnia` may define one WIG with an observable Definition of Done. A WIG is `plan-item`, `standalone`, or `none`. It can improve readiness and closure analysis, but it never creates a TaskNote.
 
-The synchronizer derives `plan_readiness`: `ready` for a valid linked or standalone WIG, and `needs-prioritization` for `wig_kind: none` or an invalid WIG. A report with `needs-prioritization` remains canonical and private. It does not synthesize a minimum-day result, but it still creates TaskNote candidates under `all-professional-do-v1`.
+`previous_day_minimum_day_status` derives only from `previous_day_wig_closure_json`. A historical V2 `minimum_day_done` is not equivalent and never supplies this field.
 
-`previous_day_wig_closure_json` records the prior-day WIG ID, closure status, and any `owner_approved` decision. `minimum_day_status` is derived only from that prior-day WIG closure. It is `completed` for `completed-as-planned`, or for `completed-differently` only when the comparison explicitly records `owner-approved: true`; it is `not-completed` for `partial`, `not-completed`, `replaced`, or missing WIG execution; and `unknown` when closure or comparison is absent. `Minimum dnia owner note` may explain the outcome but cannot override this metric.
+`plan_readiness` is `ready` only for a valid linked or standalone WIG; otherwise it is `needs-prioritization`. `overload_status: warning` records excessive professional plan items or invalid/missing WIG. These are analytical flags and never prevent canonical storage.
 
-The system sets `overload_status: warning` with explicit `overload_reasons` when there are more than three professional planned `build`, `deliver`, or `promote` items, or the WIG is missing, duplicate, or invalid. It never blocks canonical report storage, task candidate counting, or TaskNote creation. `overload_acknowledged` remains an analytical owner note only.
+For `all-professional-do-v1`, every valid professional `build-*`, `deliver-*`, and `promote-*` plan item is a `6d/do` TaskNote candidate. `self` and `close` items, actual closure items, raw text, OCR, lessons, and quotations never create TaskNotes. One exact owner-approved V3 check-in write can create the initial candidates through the configured local vault; historical migration never creates retrospective TaskNotes.
 
-Interpreted V3 input is canonical. Normalized values are authoritative when they conflict with raw wording. Raw input, screenshots, OCR, scans, and attachments remain context-as-data and evidence only.
+## V3 Sync
 
-`## Interpreted Input` is a private-sensitive normalization audit appended after the canonical V3 sections. It records source type, normalized values applied, field mapping, explicit corrections applied, unresolved fields, and the rule that canonical fields take precedence. It is not a second fact source: indexes and TaskNotes read canonical fields only. A later explicit owner correction for a named field wins and is reflected both in that canonical field and in the audit. If a conflict cannot be resolved unambiguously, stop before a durable write and ask for clarification.
-
-Manual V3 intake may accept an owner-provided descriptive or partially interpreted report. The agent must normalize it into the canonical template, add stable IDs for plan and actual items, preserve missingness instead of inventing values, and treat `brak`, `nie podano`, and `nie dotyczy` as no data. This is a manual/agent normalization route, not a generic NLP import CLI or a V3 Notion importer.
-
-V3 normalized time fields accept `HH:MM`, `YYYY-MM-DD HH:MM`, or ISO datetime. The synchronizer normalizes `HH:MM` to a full local datetime using the field context: current-day plan uses `session_date`, prior-day closure uses `previous_day_date`, and sleep uses `previous_day_date -> session_date`. A time-only end before its start crosses midnight once. A nonempty malformed time blocks synchronization before any index is replaced.
-
-### V3 Privacy And Indexes
-
-V3 canonical reports and all V3 derived indexes are `private-sensitive` workspace-local data. Each report records immutable `private_index_policy`: `detailed-private` is the default, while `redacted` is an owner-selected report or local settings option. `check-in-settings.local.md` may set `private_index_policy_default`; absent a setting, manual V3 uses `detailed-private`. A later setting change does not alter historical policy.
-
-For `detailed-private`, local `check-ins-v3.csv`, `check-ins-v3.jsonl`, and `check-ins-v3.metrics.csv` retain detailed finances, budgets, calories, health, sleep, training, NSDR, IF, and attachment metadata. For `redacted`, those indexes omit values for finances, currencies, calories, health, raw fields, reflection text, and attachment paths/details; they retain only safe presence flags. Indexes never store binary attachments.
-
-V3 analytics coverage is additive. The detailed indexes include routine booleans and `routine_completion_percent`; `actual_training_performed` and `actual_nsdr_performed`; planned and actual build, deliver, promote, self, and close-people counts including `actual_self_count` and `actual_close_people_count`; detailed `reflection_plus_one`, `reflection_redundant`, threat, response, and closure notes; finance, calories, health, and attachment metadata. Actual training also records `previous_day_actual_training_doms`, `previous_day_actual_training_pain`, and `previous_day_actual_training_performance`. Approximation is explicit through `planned_training_approximate`, `previous_day_actual_training_approximate`, `planned_nsdr_approximate`, `previous_day_actual_nsdr_approximate`, `planned_if_approximate`, and `previous_day_actual_if_approximate`. `check-ins-v3.jsonl` also preserves nested plan items, actual items, comparisons, dynamic habits, attachment metadata, and the `Interpreted Input` audit. These fields are private-sensitive and must not be treated as Dreaming Mode input.
-
-Do not commit, mirror, export, promote, or expose detailed-private indexes without a separate privacy-classified owner decision. They are not memory, checkpoints, distillations, System Insights, External Memory, skills, or Dream Reports.
-
-`check-ins-v3.trends.md` is the sole Dreaming Mode input for current manual reports. It is a sanitized aggregate and excludes raw check-ins, attachments, OCR, finance, calories, health, and reflection details.
-
-### V3 Local-Only Settings
-
-Manual V3 intake may read an owner-created local-only timezone record:
+Use:
 
 ```text
-<workspace>/personal-ops/check-ins/check-in-settings.local.md
+.systems/scripts/sync-personal-ops-check-ins-v3 --workspace <workspace-path> --status-only
 ```
 
-V3 TaskNote generation may read an owner-created local-only vault record:
+The synchronizer reads native `index_contract: 3` reports and, when present, one validated immutable legacy snapshot. It produces only the six official `check-ins-v3.*` artifacts. It rejects malformed source reports, malformed snapshots, incomplete/unknown properties, hash mismatches, and duplicate effective session dates before replacing any official index.
+
+The router reports native, legacy, and total row counts separately. Lazy-sync freshness is based only on native V3 reports; imported legacy rows are immutable and do not make a newly captured day stale. The threshold remains seven new native reports. An owner may approve an earlier sync or must approve a sync after correcting an older native day.
+
+The JSONL index retains `legacy_metadata` only for legacy rows: source provenance, source hash, source range, field confidence, unmapped fields, and the legacy V2 minimum flag. It never copies Raw Check-In, OCR text, private source body text, financial details beyond normalized properties, or asset binaries.
+
+## One-Time Legacy Migration
+
+The owner-approved one-time route is:
 
 ```text
-<workspace>/tasks/taskforge-vault.local.md
+.systems/scripts/migrate-personal-ops-legacy-check-ins-v3 \
+  --workspace <workspace-path> \
+  --owner-approved \
+  --dry-run
 ```
 
-Product templates document these files but `init-workspace` and `update-workspace` must not create populated settings or private vault paths.
+After a reviewed dry run, run the same command without `--dry-run`. It creates exactly one local immutable snapshot:
 
-### V3 TaskNotes
+```text
+<workspace>/personal-ops/archive/check-ins-v3-migration/
+  legacy-normalized-v3.jsonl
+  manifest.json
+  import-report.md
+```
 
-For `task_generation_policy: all-professional-do-v1`, every valid professional `build-*`, `deliver-*`, and `promote-*` item creates one TaskNote candidate. Each new TaskNote uses `tags: [6d/do]`, `status: open`, `priority: high`, and due time `session_dateT23:59`. `self` and `close` plan items do not create TaskNotes, and actual closure items never create, complete, or update TaskNotes. There are no per-item routing exceptions in this policy. The owner manages deferral, delegation, deletion, and dumping later in TaskForge.
+The snapshot normalizes V2 daily Markdown as `legacy-v2-one-time-migration` rows without editing or moving canonical Markdown or sibling `.assets/`. It preserves source file paths and SHA-256 hashes, maps only source-backed values, marks unknown V3 fields as unknown through per-property confidence metadata, and creates no retrospective TaskNotes. V2 `minimum_day_done` survives only as `legacy_minimum_day_done` metadata. Pre-contract V3 reports are source-only and must be recreated as native current V3 entries; they never retroactively define V3 WIG closure or minimum-day status.
 
-WIG may point to one of these plan items or be standalone, but it never creates a separate TaskNote or duplicate. Every V3 report must use `task_generation_policy: all-professional-do-v1`; older V3 shapes are outside the active V3 contract and must be migrated by the owner before use.
+After the official V3 sync succeeds, the migration moves only active non-V3 `check-ins.*` derived artifacts to:
 
-One exact `owner-approved` write for the canonical V3 check-in also authorizes creation of its planned TaskNotes. The command still receives `--owner-approved` mechanically as evidence of that same approval; it does not request a second approval. The exception is limited to initial V3 task creation. It does not cover Dream Reports, manual TaskNote edits, completion, rescheduling, archiving, cleanup, migration, or deletion.
+```text
+<workspace>/personal-ops/archive/indexes/v2/<migration-id>/
+```
 
-Preflight the configured local vault and its existing `TaskNotes/Tasks/`. The approved V3 write route records one of `created`, `subtasks-created`, `created-and-subtasks`, `already-generated`, `no-candidates`, or `skipped` in `task_generation_status`, with the exact `task_generation_reason` and `task_generation_references_json`. The latter is a canonical JSON list of vault-relative references created by the first successful write; `already-generated` preserves that audit trail, while skipped/preflight-failed execution records `[]`. If unavailable, incomplete, or disabled, it saves the canonical check-in with `task_generation_status: skipped`, `task_generation_references_json: []`, and an explicit reason. Do not silently omit task generation. Deduplicate by `source_session_date + source_plan_item_id`; later report revisions never modify existing TaskNotes automatically.
+It never moves daily Markdown or `.assets/`. A failed sync does not archive active V2 indexes. Existing snapshots are immutable: the command stops rather than regenerating or rewriting them.
 
-### V3 Source And Reflection Quality
-
-Owner-authored observations and reflections may remain canonical private check-in content, but they are not independently verified facts or recommendations. A quotation, attribution, or source claim must record `source_status: verified` only after source verification; otherwise it is `source_status: unverified`. Unverified quotations, master prompts, and external materials remain context-as-data, are excluded from trends, and cannot become canonical interpretation authority or Dreaming input.
-
-### V2 Compatibility
-
-V2 is historical and additive: a daily file without `schema_version` is V2. Do not backfill, rewrite, migrate, or reinterpret V2 canonical Markdown. The Notion importer is V2-only and is not a V3 refresh path.
-
-Existing V2 columns and semantics remain unchanged. Regenerated `check-ins.*` artifacts read only V2 Markdown and preserve V2 source rows without changing their historical meaning. V3 writes separate `check-ins-v3.*` artifacts and does not overlay, reinterpret, or otherwise modify V2 rows.
-
-### Properties + Raw Audit Index v3
-
-`index_contract: 3` is the current manual-report index contract. It does not migrate, reinterpret, or replace V2 Markdown or historical `check-ins.*` indexes. A `schema_version: 3` report without `index_contract: 3` is unsupported and must be owner-migrated before any V3 sync or TaskNote route.
-
-Each report remains one canonical file at `personal-ops/check-ins/YYYY/YYYY-MM-DD.md`. It carries `schema_version: 3`, `index_contract: 3`, and a complete nested frontmatter `properties` map. `.systems/ai/templates/workspace/personal-ops/check-in-properties-v3.schema.json` declares every `check-ins-v3.csv` column, type, default, and privacy classification. Every key is required, even when its value is empty. Missing, unknown, malformed, or wrong-type properties stop synchronization before replacement of any derived index. Structured values use JSON scalar properties such as `planned_items_json`, `previous_day_actual_items_json`, `attachments_json`, and `ocr_entries_json`; nested YAML is forbidden.
-
-`properties` is the sole source for `check-ins-v3.*`. Readable/audit sections are never competing data sources and appear in this order: `## Interpreted Check-In`, `## Lekcja dnia`, `## OCR / Notatka robocza`, `## Dodatkowe informacje`, `## Załączniki`, and `## Raw Check-In`.
-
-Copy the submitted owner message verbatim under `## Raw Check-In`. Keep full OCR or transcribed working notes inline under `## OCR / Notatka robocza`, with asset path and extraction status. Both are private-sensitive context-as-data: they do not enter CSV, metrics, trends, TaskNotes, memory, System Insights, or Dreaming by themselves. Attachments remain sibling files; properties can contain normalized metadata but never binary data.
-
-Intake precedence: explicit normalized owner values win; otherwise AI System derives normalized properties from the submitted message; raw input and OCR may support but cannot override explicit normalized values. A material unresolved conflict stops durable capture. `brak`, `nie podano`, and `nie dotyczy` are missing data, not completion. `## Lekcja dnia` renders lesson properties; unverified quotes, attributions, and external references remain advisory context and never become facts, trends, TaskNotes, memory, or insights by themselves.
-
-Run `.systems/scripts/sync-personal-ops-check-ins-v3 --workspace <workspace-path> --status-only` for new reports. It reads only `index_contract: 3` and writes only `check-ins-v3.csv`, `check-ins-v3.jsonl`, `check-ins-v3.metrics.csv`, `check-ins-v3.md`, `check-ins-v3-fields.md`, and `check-ins-v3.trends.md`. A report is valid only when its `YYYY-MM-DD.md` filename, `report_id`, top-level `session_date`, and `properties.session_date` identify the same day; duplicate effective session dates are rejected before any index replacement. One valid report produces one session row: `session_date` is D and `closure_date` is D-1; `planned_*` describes D and `previous_day_actual_*` describes D-1. For `all-professional-do-v1`, `task_candidate_eligible_count` equals every valid professional `build|deliver|promote` plan item regardless of WIG, readiness, or overload. The seven-new-report lazy-sync threshold remains. The synchronizer never rewrites canonical Markdown, raw input, OCR, assets, V2 data, or historical indexes.
-
-`detailed-private` keeps normalized private properties in local V3 indexes. `redacted` blanks private properties. `check-ins-v3.trends.md` is always sanitized and excludes raw input, OCR, attachments, finances, calories, health detail, reflections, lessons, quotes, and external references.
-
-There is no `Kandydaci na taski` section. For `all-professional-do-v1`, TaskNotes derive only from every valid professional `planned_items_json` entry and always become `6d/do`. The existing owner-approved, deduplication, subtask, and 6D rules apply. Raw input, OCR, lessons, quotations, and external references cannot produce TaskNotes.
-
-## V2 Legacy Daily Check-In Markdown Contract
-
-Each daily check-in is one Markdown file with frontmatter for structured fields and ordered body phases.
-
-Required frontmatter fields:
-
-- `type: daily-check-in`;
-- `date`;
-- `source`;
-- `source_provider`;
-- `source_database`;
-- `source_row_id`;
-- `privacy`;
-- `minimum_day_done`;
-- `day_mode`;
-- `body_subjective`;
-- `energy_subjective`;
-- `mental_subjective`;
-- `routine_state_subjective`;
-- `limitations_subjective`;
-- `sleep_start`;
-- `sleep_end`;
-- `if_start`;
-- `if_end`;
-- `training_start`;
-- `training_end`;
-- `nsdr_start`;
-- `nsdr_end`.
-
-Default values:
-
-- `source: manual` for native check-ins or `notion-migration` for migrated rows;
-- `source_provider: ai-system` for native check-ins or `notion` for migrated rows;
-- `source_database: manual-daily-check-in` for native check-ins or `daily-check-in` for migrated rows;
-- `privacy: private-sensitive`.
-
-Required body phases and field order:
-
-1. `## 1. Plan dnia`
-   - `Data`
-   - `Sen od-do`
-   - `Trening od-do`
-   - `NSDR od-do`
-   - `IF od-do`
-   - `Tryb dnia`
-   - `Zbudowałem`
-   - `Dowiozłem`
-   - `Wypromowałem`
-   - `Coś dla ciała`
-   - `Coś dla ducha`
-   - `Coś dla bliskich`
-2. `## 2. Poranny check-in`
-   - `Pobudka`
-   - `Kuchnia`
-   - `Dwór`
-   - `Napiłem się`
-   - `Mantra`
-   - `Deep Focus`
-   - `Mama i Oliwia`
-   - `Insta Story`
-   - `Stan po rutynie`
-   - `Energia`
-   - `Mental`
-   - `Ciało`
-   - `Ograniczenia`
-   - `Jestem wdzięczny`
-   - `Zagrożenie dnia`
-3. `## 3. Popołudniowy check-in`
-   - `Czy zrobiłem minimum`
-   - `Nawyki`
-   - `Co dało +1%`
-   - `Co było zbędne`
-4. `## 4. Seed kolejnego dnia`
-   - same field range as Plan dnia, from `Data` to `Coś dla bliskich`
-5. `## 5. Dodatkowe informacje`
-   - `Dodatkowe informacje`
-   - `Załączniki`
-
-Empty source values may remain empty. Do not invent missing check-in values.
+`sync-personal-ops-check-ins` and `map-notion-check-ins` are retired and must end with `STOP`. Preserve future Notion exports as raw evidence and capture new days through the owner-approved V3 manual route.
 
 ## Manual Check-In Profile
 
-Use `personal-ops/check-ins/import-profiles/manual-daily-check-in.md` when the owner asks for a new day, daily check-in, or native AI System check-in.
+Use `personal-ops/check-ins/import-profiles/manual-daily-check-in-v3.md` for new manual, voice, partially structured, or already interpreted check-ins. It defines intake order and output boundaries; it is not memory and does not grant write permission.
 
-The profile is a brief workflow, not memory and not a generated check-in. It defines the question order and the output target.
+Owner-normalized values take precedence over raw wording and OCR. `brak`, `nie podano`, and `nie dotyczy` are missing data, not completion. A material unresolved conflict stops durable capture.
 
-Seed kolejnego dnia must repeat the same fields as Plan dnia, from `Data` to `Coś dla bliskich`.
+## Validation
 
-After a manual check-in write, check lazy sync state with:
-
-```text
-.systems/scripts/sync-personal-ops-check-ins --workspace <workspace-path> --status-only
-```
-
-If `unsynced-check-in-count` is less than `7`, report that derived indexes are intentionally stale and sync is not required yet. If it is `7` or more, recommend owner-approved sync.
-
-The threshold is count-based. It estimates newly added daily files by comparing current daily file count with `last-synced-check-in-count`. It does not detect edits to older already-counted days, and it does not reliably detect deleted daily files as a stale-index event. If an existing daily Markdown file is edited, corrected, backfilled, or deleted, recommend exact owner-approved sync manually, even below the threshold.
-
-## Notion Field Mapping
-
-Required mapping:
-
-| Notion column | Target |
-| --- | --- |
-| `Data` | `date`; required; controls filename |
-| `Name` | `title`; fallback `Daily check-in YYYY-MM-DD` |
-| `Czy zrobiłem MINIMUM DNIA?` | `minimum_day_done` boolean |
-| `Tryb dnia` | `day_mode`; lowercase without diacritics in indexes; preserve raw when needed |
-| `Ciało (subiektywnie)` | `body_subjective` |
-| `Energia (subiektywnie)` | `energy_subjective` |
-| `Mental (subiektywnie)` | `mental_subjective` |
-| `Ograniczenia (subiektywnie)` | `limitations_subjective` |
-| `Stan po rutynie (subiektywnie)` | `routine_state_subjective` |
-| `Sen` | `sleep_start`, `sleep_end`, `sleep_raw` |
-| `IF (intermittent-fasting)` | `if_start`, `if_end`, `if_raw` |
-| `Trening` | `training_start`, `training_end`, `training_raw` |
-| `NSDR` | `nsdr_start`, `nsdr_end`, `nsdr_raw` when it contains a time range; habit value when it is boolean-like |
-| `Co było zbędne?` | `Popołudniowy check-in` -> `Co było zbędne` |
-| `Co realnie dało +1%?` | `Popołudniowy check-in` -> `Co dało +1%` |
-| `Coś dla bliskich` | `Plan dnia` -> `Coś dla bliskich` |
-| `Coś dla ciała` | `Plan dnia` -> `Coś dla ciała` |
-| `Coś dla ducha` | `Plan dnia` -> `Coś dla ducha` |
-| `Jestem wdzięczny za...` | `Poranny check-in` -> `Jestem wdzięczny` |
-| `Nawyki, których dotrzymałem` | `Popołudniowy check-in` -> `Nawyki` |
-| `Zagrożenie dnia` | `Poranny check-in` -> `Zagrożenie dnia` |
-| `Dowiozłem ` | `Plan dnia` -> `Dowiozłem` |
-| `Wypromowałem ` | `Plan dnia` -> `Wypromowałem` |
-| `Zbudowałem ` | `Plan dnia` -> `Zbudowałem` |
-| `Dodatkowe informacje` | `Dodatkowe informacje` -> `Dodatkowe informacje` |
-| `Mantra` | `Poranny check-in` -> `Mantra` |
-
-Habit columns become `habits.<slug>` in JSONL and flat `habit_<slug>` columns in CSV.
-
-Known habit columns include:
-
-- `Dwór: słońce, 10-MIN MORNING NEURO FLOW`;
-- `NSDR`;
-- `Pobudka bez negocjacji (Mel Robbins)`;
-- `Muzyka Deep Focus (432 Hz, 528 Hz)`;
-- `Insta Story - Proste`;
-- `Mama i Oliwia - Miłego dnia`;
-- `Kuchnia: elektrolity (woda, sól, np. cytryna, np. imbir), kawaśka, 1 osiągnięcie (Momentum)`;
-- `Toaleta, zęby, zimna woda (Noradrenalina Boost)`.
-
-## Index Contract
-
-`check-ins.csv` is the default spreadsheet-like analytical index.
-
-It must contain one row per daily check-in and these required columns:
-
-- `date`;
-- `file_path`;
-- `source_provider`;
-- `source_row_id`;
-- `minimum_day_done`;
-- `day_mode`;
-- `body_subjective`;
-- `energy_subjective`;
-- `mental_subjective`;
-- `routine_state_subjective`;
-- `limitations_subjective`;
-- `sleep_start`;
-- `sleep_end`;
-- `sleep_hours`;
-- `if_start`;
-- `if_end`;
-- `if_hours`;
-- `training_start`;
-- `training_end`;
-- `training_minutes`;
-- `nsdr_start`;
-- `nsdr_end`;
-- `nsdr_minutes`;
-- `habit_count_done`;
-- `habit_count_total`;
-- `has_plus_one`;
-- `has_threat`;
-- `has_built`;
-- `has_delivered`;
-- `has_promoted`;
-- `has_body_action`;
-- `has_spirit_action`;
-- `has_close_people_action`;
-- `has_gratitude`;
-- `has_redundant`;
-- `attachment_count`;
-- `ocr_count`;
-- `screenshot_count`;
-- `note_image_count`.
-
-`check-ins.jsonl` preserves richer structures:
-
-- `phases: {day_plan, morning, afternoon, next_day_seed, additional}`;
-- `habits: [{slug, label, value, raw_value}]`;
-- `reflections: {plus_one, redundant, threat, built, delivered, promoted, gratitude, body, spirit, close_people}`;
-- `attachments: [{path, kind}]`;
-- `unmapped_fields: {source_column: value}`.
-
-`check-ins.metrics.csv` supports pattern analysis. It must contain derived metrics for:
-
-- sleep, IF, training, and NSDR durations;
-- subjective state fields;
-- habit counts;
-- built, delivered, promoted, plus-one, redundant, threat, gratitude, body, spirit, and close-people indicators;
-- attachment, OCR, screenshot, and note image counts.
-
-## Import Rules
-
-- Parse Notion date ranges like `May 13 12:00 (GMT+2) -> 20:00` when possible.
-- Also accept the Unicode arrow used by Notion exports.
-- If a range omits the end date, assume the same date as the start.
-- If parsing fails, leave normalized fields blank and preserve `*_raw`.
-- Normalize booleans from `Yes`, `No`, `true`, `false`, and empty values.
-- Preserve original Polish labels in a field dictionary or import report.
-- Preserve unmapped source columns in `check-ins.jsonl` as `unmapped_fields`.
-- Preserve attachment references in `check-ins.jsonl` as `attachments`.
-- Duplicate date handling must be explicit.
-- Same date plus same `source_row_id` may update the same generated Markdown during migration dry-run.
-- Same date plus different `source_row_id` must create a conflict report and must not overwrite silently.
-- Do not promote check-in content into memory, checkpoint, distillation, external-memory, or system-insights during schema import.
-
-## Tooling
-
-Use:
+Before claiming Personal Ops quality, run:
 
 ```text
-.systems/scripts/map-notion-check-ins --input <notion-export.csv> --workspace <workspace-path> --dry-run
+AI_SYSTEM_WORKSPACE_HOME=<workspace-path> .systems/scripts/check-personal-ops
+.systems/scripts/check-validator-smoke-tests
 ```
 
-Run without `--dry-run` only after the owner approves the exact input and workspace target.
-
-Use the explicit sync tool for owner-approved index refresh from Markdown source of truth:
-
-```text
-.systems/scripts/sync-personal-ops-check-ins --workspace <workspace-path> --dry-run
-```
-
-Run without `--dry-run` only with exact `owner-approved` sync scope.
-
-The sync tool:
-
-- reads only `personal-ops/check-ins/YYYY/YYYY-MM-DD.md`;
-- ignores `README.md`, `import-profiles/`, `*.assets/`, and non-daily Markdown;
-- regenerates only `check-ins.csv`, `check-ins.jsonl`, `check-ins.metrics.csv`, `check-ins-fields.md`, and `check-ins.md`;
-- never rewrites daily Markdown or assets;
-- preserves existing `unmapped_fields` from `check-ins.jsonl` when `date`, `file_path`, and `source_row_id` match;
-- fails before replacing indexes when daily Markdown is malformed.
-
-## Lazy Sync State
-
-`personal-ops/indexes/check-ins.md` is the sync state and evidence router.
-
-Required sync state fields:
-
-- `last-synced-at`;
-- `last-synced-check-in-count`;
-- `current-check-in-count`;
-- `unsynced-check-in-count`;
-- `sync-recommendation-threshold: 7`;
-- `last-sync-source: manual|notion-import|owner-approved-sync`;
-- latest unsynced dates evidence.
-
-Notion imports may regenerate indexes as part of batch import and should set `last-sync-source: notion-import`. The Notion importer is only for owner-approved Notion CSV imports; do not use it to refresh manual-only edits. Manual check-ins should not run database sync automatically. Exact owner-approved sync may run anytime, including below the threshold.
-
-`unsynced-check-in-count` is a lightweight counter for new daily files, not a full change detector. Edits to older check-ins and deletions of existing check-ins require manual owner-approved sync when index freshness matters.
-
-## Check-In Task Candidates
-
-Use:
-
-```text
-.systems/scripts/propose-task-candidates --workspace <workspace-path> --check-in <workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.md
-```
-
-The default mode is dry-run and performs no writes.
-
-For each non-empty `Zbudowałem`, `Dowiozłem`, and `Wypromowałem` field in `Plan dnia`, candidates use:
-
-- `tags: [6d/do]`;
-- `status: open`;
-- `priority: high`;
-- `due: YYYY-MM-DDT23:59`;
-- `source_type: check-in`;
-- `source_check_in_date`;
-- `source_check_in_field`.
-
-Write TaskNotes only after exact owner approval:
-
-```text
-.systems/scripts/propose-task-candidates --workspace <workspace-path> --check-in <check-in.md> --task-vault <taskforge-vault> --owner-approved --write
-```
-
-Client/project recognition must be conservative. Boundary-only v1 matching uses full normalized token/phrase matches only, rejects labels shorter than 3 chars, and uses no aliases. If matching is ambiguous or missing, leave mapping fields blank and record `Mapping requires review`.
+For a workspace migration, also run the V3 migration dry run, the V3 sync dry run, and the standard repository validation chain. No check-in content may be promoted to memory, checkpoints, System Insights, External Memory, skills, or TaskNotes outside the exact approved route.

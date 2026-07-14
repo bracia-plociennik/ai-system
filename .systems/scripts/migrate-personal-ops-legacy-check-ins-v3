@@ -1,0 +1,447 @@
+#!/usr/bin/env python3
+"""Create one immutable V2 snapshot, sync official V3 indexes, then archive V2 indexes."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+import shutil
+import subprocess
+import sys
+from datetime import date, datetime, timedelta
+from pathlib import Path
+from typing import Any
+
+from personal_ops_properties_v3 import load_schema, parse_frontmatter_and_properties, validate_property_map
+
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+V2_PHASES = {
+    "1. Plan dnia": "plan",
+    "2. Poranny check-in": "morning",
+    "3. Popołudniowy check-in": "afternoon",
+}
+V2_FIELDS = {
+    "plan": {"Zbudowałem", "Dowiozłem", "Wypromowałem"},
+    "morning": {"Pobudka", "Kuchnia", "Dwór", "Deep Focus", "Mama i Oliwia", "Ograniczenia", "Jestem wdzięczny"},
+    "afternoon": {"Czy zrobiłem minimum"},
+}
+RETIRED_INDEX_NAMES = {
+    "check-ins.csv", "check-ins.jsonl", "check-ins.metrics.csv", "check-ins-fields.md", "check-ins.trends.md", "check-ins.md",
+}
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def yaml_scalar(value: str) -> Any:
+    value = value.strip()
+    if value in {"true", "True"}:
+        return True
+    if value in {"false", "False"}:
+        return False
+    if value.startswith('"') and value.endswith('"'):
+        return json.loads(value)
+    return value
+
+
+def parse_v2(path: Path) -> tuple[dict[str, Any], dict[str, dict[str, str]]]:
+    text = path.read_text(encoding="utf-8")
+    if not text.startswith("---\n"):
+        raise ValueError(f"Legacy V2 report has no frontmatter: {path}")
+    end = text.find("\n---\n", 4)
+    if end == -1:
+        raise ValueError(f"Legacy V2 report has no closing frontmatter: {path}")
+    frontmatter: dict[str, Any] = {}
+    for line in text[4:end].splitlines():
+        if not line.strip() or ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        frontmatter[key.strip()] = yaml_scalar(value)
+    sections = {name: {} for name in V2_PHASES.values()}
+    phase = ""
+    field = ""
+    buffer: list[str] = []
+
+    def flush() -> None:
+        nonlocal buffer
+        if phase and field:
+            sections[phase][field] = "\n".join(buffer).strip()
+        buffer = []
+
+    for line in text[end + 5 :].splitlines():
+        if line.startswith("## "):
+            flush()
+            phase = V2_PHASES.get(line[3:].strip(), "")
+            field = ""
+        elif line.startswith("### "):
+            flush()
+            candidate = line[4:].strip()
+            field = candidate if phase and candidate in V2_FIELDS[phase] else ""
+        elif phase and field:
+            buffer.append(line)
+    flush()
+    return frontmatter, sections
+
+
+def as_bool(value: Any) -> bool | str:
+    if str(value).strip().lower() in {"true", "tak", "yes", "1"}:
+        return True
+    if str(value).strip().lower() in {"false", "nie", "no", "0"}:
+        return False
+    return ""
+
+
+def parse_datetime(value: Any) -> datetime | None:
+    for fmt in ("%Y-%m-%d %H:%M", "%Y-%m-%dT%H:%M:%S"):
+        try:
+            return datetime.strptime(str(value), fmt)
+        except ValueError:
+            continue
+    return None
+
+
+def apply_range(properties: dict[str, Any], prefix: str, start: Any, end: Any, approximate: bool = False) -> bool:
+    start_dt = parse_datetime(start)
+    end_dt = parse_datetime(end)
+    if not start_dt or not end_dt or end_dt <= start_dt:
+        return False
+    properties[f"{prefix}_start"] = start_dt.strftime("%Y-%m-%d %H:%M")
+    properties[f"{prefix}_end"] = end_dt.strftime("%Y-%m-%d %H:%M")
+    properties[f"{prefix}_minutes"] = int((end_dt - start_dt).total_seconds() // 60)
+    if f"{prefix}_approximate" in properties:
+        properties[f"{prefix}_approximate"] = approximate
+    return True
+
+
+def default_properties(session_date: str, source_path: str, source_type: str) -> dict[str, Any]:
+    values = {field["key"]: "" for field in load_schema()}
+    closure_date = (date.fromisoformat(session_date) - timedelta(days=1)).isoformat()
+    values.update({
+        "index_contract": 3,
+        "schema_version": 3,
+        "file_path": source_path,
+        "report_id": session_date,
+        "session_date": session_date,
+        "closure_date": closure_date,
+        "source_type": source_type,
+        "privacy": "private-sensitive",
+        "private_index_policy": "detailed-private",
+        "report_revision": 1,
+        "normalization_authority": "one-time-legacy-normalization",
+        "task_generation_policy": "all-professional-do-v1",
+        "task_generation_status": "skipped",
+        "task_generation_reason": "one-time legacy migration never creates retrospective TaskNotes",
+        "task_generation_references_json": "[]",
+        "previous_day_actual_items_json": "[]",
+        "previous_day_comparisons_json": "[]",
+        "previous_day_wig_closure_json": "{}",
+        "previous_day_minimum_day_status": "unknown",
+        "planned_items_json": "[]",
+        "dynamic_habits_json": "[]",
+        "attachments_json": "[]",
+        "ocr_entries_json": "[]",
+        "lesson_quote_source_status": "not-applicable",
+        "task_candidate_eligible_count": 0,
+        "attachment_count": 0,
+        "ocr_entry_count": 0,
+    })
+    return values
+
+
+def attachments_for(path: Path) -> list[dict[str, str]]:
+    directory = path.with_suffix(".assets")
+    if not directory.is_dir():
+        return []
+    def kind(item: Path) -> str:
+        if item.suffix.lower() == ".md" and ".ocr" in item.name.lower():
+            return "ocr"
+        if item.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp", ".gif"}:
+            return "screenshot" if "screen" in item.name.lower() else "note-image"
+        return "other"
+    return [{"path": item.relative_to(path.parent).as_posix(), "kind": kind(item)} for item in sorted(directory.iterdir()) if item.is_file()]
+
+
+def metadata(workspace: Path, path: Path, properties: dict[str, Any], confidence: dict[str, str], legacy_minimum: bool | str, synthetic_wig: dict[str, Any] | None = None) -> dict[str, Any]:
+    source_path = path.relative_to(workspace).as_posix()
+    result: dict[str, Any] = {
+        "origin": {
+            "source_contract": str(properties["source_type"]),
+            "source_path": source_path,
+            "source_sha256": sha256_file(path),
+            "source_range": "frontmatter and ordered daily-check-in sections",
+        },
+        "field_confidence": confidence,
+        "unmapped_fields": sorted(key for key, value in confidence.items() if value == "unknown"),
+        "legacy_minimum_day_done": legacy_minimum,
+    }
+    if synthetic_wig:
+        result["synthetic_legacy_wig"] = synthetic_wig
+    return result
+
+
+def normalize_v2(workspace: Path, path: Path) -> dict[str, Any]:
+    frontmatter, sections = parse_v2(path)
+    session_date = str(frontmatter.get("date", ""))
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", session_date):
+        raise ValueError(f"Legacy V2 report has invalid date: {path}")
+    source_path = path.relative_to(workspace).as_posix()
+    values = default_properties(session_date, source_path, "legacy-v2-one-time-migration")
+    confidence = {key: "unknown" for key in values}
+    for key in {"index_contract", "schema_version", "file_path", "report_id", "closure_date", "source_type", "private_index_policy", "report_revision", "normalization_authority", "task_generation_policy", "task_generation_status", "task_generation_reason", "task_generation_references_json", "previous_day_actual_items_json", "previous_day_comparisons_json", "previous_day_wig_closure_json", "previous_day_minimum_day_status", "task_candidate_eligible_count", "lesson_quote_source_status"}:
+        confidence[key] = "derived"
+    for key in {"session_date", "privacy"}:
+        confidence[key] = "direct"
+    values["weekday"] = str(frontmatter.get("weekday", ""))
+    values["work_mode"] = str(frontmatter.get("day_mode", ""))
+    values["limitations"] = str(frontmatter.get("limitations_subjective", ""))
+    values["gratitude"] = sections["morning"].get("Jestem wdzięczny", "")
+    for key, source_value in {"weekday": values["weekday"], "work_mode": values["work_mode"], "limitations": values["limitations"], "gratitude": values["gratitude"]}.items():
+        if source_value:
+            confidence[key] = "direct"
+    values["morning_wake_up_done"] = as_bool(sections["morning"].get("Pobudka", ""))
+    values["morning_kitchen_done"] = as_bool(sections["morning"].get("Kuchnia", ""))
+    values["morning_outdoors_done"] = as_bool(sections["morning"].get("Dwór", ""))
+    values["morning_deep_focus_done"] = as_bool(sections["morning"].get("Deep Focus", ""))
+    values["morning_close_people_wishes_done"] = as_bool(sections["morning"].get("Mama i Oliwia", ""))
+    for key in {"morning_wake_up_done", "morning_kitchen_done", "morning_outdoors_done", "morning_deep_focus_done", "morning_close_people_wishes_done"}:
+        if values[key] != "":
+            confidence[key] = "direct"
+    if session_date != "2026-05-19" and apply_range(values, "previous_day_sleep", frontmatter.get("sleep_start", ""), frontmatter.get("sleep_end", "")):
+        for key in {"previous_day_sleep_start", "previous_day_sleep_end"}:
+            confidence[key] = "direct"
+        confidence["previous_day_sleep_minutes"] = "derived"
+    if apply_range(values, "planned_training", frontmatter.get("training_start", ""), frontmatter.get("training_end", "")):
+        for key in {"planned_training_start", "planned_training_end"}:
+            confidence[key] = "direct"
+        confidence["planned_training_minutes"] = "derived"
+    if apply_range(values, "planned_nsdr", frontmatter.get("nsdr_start", ""), frontmatter.get("nsdr_end", "")):
+        for key in {"planned_nsdr_start", "planned_nsdr_end"}:
+            confidence[key] = "direct"
+        confidence["planned_nsdr_minutes"] = "derived"
+    if apply_range(values, "planned_if", frontmatter.get("if_start", ""), frontmatter.get("if_end", "")):
+        for key in {"planned_if_start", "planned_if_end"}:
+            confidence[key] = "direct"
+        confidence["planned_if_minutes"] = "derived"
+    plan_items: list[dict[str, str]] = []
+    for stream, label in (("build", "Zbudowałem"), ("deliver", "Dowiozłem"), ("promote", "Wypromowałem")):
+        title = sections["plan"].get(label, "").strip()
+        if title:
+            plan_items.append({"id": f"{stream}-legacy-01", "stream": stream, "title": title})
+    values["planned_items_json"] = json.dumps(plan_items, ensure_ascii=False, sort_keys=True)
+    if plan_items:
+        confidence["planned_items_json"] = "derived"
+    for stream in ("build", "deliver", "promote"):
+        values[f"planned_{stream}_count"] = sum(item["stream"] == stream for item in plan_items)
+        if values[f"planned_{stream}_count"]:
+            confidence[f"planned_{stream}_count"] = "derived"
+    attachments = attachments_for(path)
+    values["attachments_json"] = json.dumps(attachments, ensure_ascii=False, sort_keys=True)
+    values["attachment_count"] = len(attachments)
+    values["ocr_entry_count"] = sum(item["kind"] == "ocr" for item in attachments)
+    values["ocr_entries_json"] = json.dumps([{"path": item["path"], "status": "legacy-unreviewed"} for item in attachments if item["kind"] == "ocr"], ensure_ascii=False, sort_keys=True)
+    if attachments:
+        confidence["attachments_json"] = "direct"
+        confidence["attachment_count"] = "derived"
+    if values["ocr_entry_count"]:
+        confidence["ocr_entries_json"] = "derived"
+        confidence["ocr_entry_count"] = "derived"
+    legacy_minimum = as_bool(frontmatter.get("minimum_day_done", sections["afternoon"].get("Czy zrobiłem minimum", "")))
+    return {"properties": values, "legacy_metadata": metadata(workspace, path, values, confidence, legacy_minimum)}
+
+
+def legacy_paths(workspace: Path) -> list[Path]:
+    root = workspace / "personal-ops/check-ins"
+    return sorted(root.glob("[0-9][0-9][0-9][0-9]/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].md")) if root.is_dir() else []
+
+
+def reject_incomplete_v3_reports(workspace: Path) -> None:
+    for path in legacy_paths(workspace):
+        text = path.read_text(encoding="utf-8")
+        if not re.search(r"^index_contract:\s*3\s*$", text, re.MULTILINE):
+            continue
+        top, properties, _ = parse_frontmatter_and_properties(text, path)
+        if str(top.get("index_contract", "")) != "3":
+            continue
+        try:
+            validate_property_map(properties, path)
+        except ValueError as exc:
+            raise ValueError(
+                f"Incomplete pre-contract or invalid V3 report must be recreated as current V3 before legacy migration: {path}"
+            ) from exc
+
+
+def build_snapshot(workspace: Path) -> list[dict[str, Any]]:
+    rows = []
+    for path in legacy_paths(workspace):
+        text = path.read_text(encoding="utf-8")
+        if re.search(r"^schema_version:\s*3\s*$", text, re.MULTILINE):
+            continue
+        rows.append(normalize_v2(workspace, path))
+    dates = [str(row["properties"]["session_date"]) for row in rows]
+    if len(dates) != len(set(dates)):
+        raise ValueError("Legacy migration found duplicate session dates")
+    return sorted(rows, key=lambda row: str(row["properties"]["session_date"]))
+
+
+def validate_dry_run_rows(workspace: Path, rows: list[dict[str, Any]]) -> None:
+    legacy_dates: set[str] = set()
+    legacy_source_paths: set[str] = set()
+    for index, row in enumerate(rows, start=1):
+        properties = row["properties"]
+        validate_property_map(properties, Path(f"legacy-dry-run:{index}"))
+        session_date = str(properties["session_date"])
+        if session_date in legacy_dates:
+            raise ValueError(f"Legacy migration dry-run found duplicate session date: {session_date}")
+        legacy_dates.add(session_date)
+        origin = row["legacy_metadata"]["origin"]
+        legacy_source_paths.add(str(origin["source_path"]))
+        source = workspace / str(origin["source_path"])
+        if not source.is_file() or sha256_file(source) != origin["source_sha256"]:
+            raise ValueError(f"Legacy migration dry-run source hash mismatch: {source}")
+    native_dates: set[str] = set()
+    for path in legacy_paths(workspace):
+        if path.relative_to(workspace).as_posix() in legacy_source_paths:
+            continue
+        text = path.read_text(encoding="utf-8")
+        if not re.search(r"^index_contract:\s*3\s*$", text, re.MULTILINE):
+            continue
+        top, properties, _ = parse_frontmatter_and_properties(text, path)
+        if str(top.get("index_contract", "")) != "3":
+            continue
+        validate_property_map(properties, path)
+        native_dates.add(str(properties["session_date"]))
+    overlap = legacy_dates & native_dates
+    if overlap:
+        raise ValueError(f"Legacy migration dry-run found native/legacy session date collision: {sorted(overlap)[0]}")
+
+
+def write_atomic(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp = path.with_name(f".{path.name}.tmp")
+    temp.write_text(content, encoding="utf-8")
+    temp.replace(path)
+
+
+def write_snapshot(workspace: Path, rows: list[dict[str, Any]], dry_run: bool) -> Path:
+    root = workspace / "personal-ops/archive/check-ins-v3-migration"
+    snapshot = root / "legacy-normalized-v3.jsonl"
+    manifest = root / "manifest.json"
+    report = root / "import-report.md"
+    if root.exists():
+        raise ValueError(f"Legacy migration snapshot already exists and is immutable: {root}")
+    content = "".join(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n" for row in rows)
+    source_types = {str(row["properties"]["source_type"]) for row in rows}
+    manifest_payload = {
+        "format": "personal-ops-legacy-normalized-v3",
+        "format_version": 1,
+        "migration_id": "legacy-v2-to-official-v3",
+        "created_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+        "record_count": len(rows),
+        "source_types": sorted(source_types),
+        "legacy_normalized_v3_sha256": hashlib.sha256(content.encode("utf-8")).hexdigest(),
+    }
+    report_content = "\n".join([
+        "# Legacy Check-In V3 Migration Report", "", "- Status: snapshot-created", f"- Record count: {len(rows)}", f"- V2 records: {sum(row['properties']['source_type'] == 'legacy-v2-one-time-migration' for row in rows)}", "- Pre-contract V3 reports are source-only and must be recreated as native current V3 entries.", "- Raw source Markdown and `.assets/` remain in place.", "- This snapshot is immutable and local-only.", "- Retrospective TaskNotes: none.", "",
+    ])
+    if dry_run:
+        print(f"would write: {snapshot}")
+        print(f"would write: {manifest}")
+        print(f"would write: {report}")
+        return snapshot
+    root.mkdir(parents=True, exist_ok=False)
+    write_atomic(snapshot, content)
+    write_atomic(manifest, json.dumps(manifest_payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n")
+    write_atomic(report, report_content)
+    return snapshot
+
+
+def existing_snapshot(workspace: Path) -> tuple[Path, int] | None:
+    root = workspace / "personal-ops/archive/check-ins-v3-migration"
+    snapshot = root / "legacy-normalized-v3.jsonl"
+    manifest = root / "manifest.json"
+    report = root / "import-report.md"
+    existing = [path for path in (snapshot, manifest, report) if path.exists()]
+    if not existing:
+        return None
+    if len(existing) != 3:
+        raise ValueError("Legacy migration snapshot is incomplete; expected JSONL, manifest, and import report")
+    try:
+        payload = json.loads(manifest.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Malformed legacy migration manifest: {manifest}") from exc
+    count = payload.get("record_count")
+    if not isinstance(count, int) or count < 1:
+        raise ValueError(f"Legacy migration manifest has invalid record_count: {manifest}")
+    return snapshot, count
+
+
+def archive_v2_indexes(workspace: Path, dry_run: bool) -> list[Path]:
+    index = workspace / "personal-ops/indexes"
+    candidates = [path for path in index.glob("check-ins.*") if path.name in RETIRED_INDEX_NAMES] if index.is_dir() else []
+    if not candidates:
+        return []
+    archive = workspace / "personal-ops/archive/indexes/v2" / f"legacy-v2-to-v3-{datetime.now().strftime('%Y%m%dT%H%M%S')}"
+    if dry_run:
+        for path in candidates:
+            print(f"would archive: {path} -> {archive / path.name}")
+        return candidates
+    archive.mkdir(parents=True, exist_ok=False)
+    for path in candidates:
+        shutil.move(str(path), str(archive / path.name))
+    return candidates
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--workspace", required=True, type=Path)
+    parser.add_argument("--owner-approved", action="store_true")
+    parser.add_argument("--dry-run", action="store_true")
+    args = parser.parse_args()
+    if not args.owner_approved:
+        print("STOP: one-time legacy migration requires --owner-approved", file=sys.stderr)
+        return 1
+    try:
+        workspace = args.workspace.resolve()
+        reject_incomplete_v3_reports(workspace)
+        prior_snapshot = existing_snapshot(workspace)
+        if prior_snapshot:
+            snapshot, record_count = prior_snapshot
+            print(f"reusing-immutable-snapshot: {snapshot}")
+        else:
+            rows = build_snapshot(workspace)
+            if not rows:
+                raise ValueError("No V2 reports found for one-time migration")
+            if args.dry_run:
+                validate_dry_run_rows(workspace, rows)
+            snapshot = write_snapshot(workspace, rows, args.dry_run)
+            record_count = len(rows)
+        print(f"legacy-record-count: {record_count}")
+        sync_command = [str(SCRIPT_DIR / "sync-personal-ops-check-ins-v3"), "--workspace", str(workspace)]
+        if args.dry_run:
+            sync_command.append("--dry-run")
+        sync = subprocess.run(sync_command, text=True, capture_output=True)
+        sys.stdout.write(sync.stdout)
+        sys.stderr.write(sync.stderr)
+        if sync.returncode:
+            raise ValueError(f"Official V3 sync failed after snapshot creation; V2 indexes were not archived: {snapshot}")
+        if args.dry_run:
+            archive_v2_indexes(workspace, True)
+            return 0
+        archived = archive_v2_indexes(workspace, False)
+        print(f"archived-v2-index-count: {len(archived)}")
+    except Exception as exc:  # noqa: BLE001
+        print(f"STOP: {exc}", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

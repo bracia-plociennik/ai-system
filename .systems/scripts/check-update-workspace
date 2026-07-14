@@ -46,7 +46,6 @@ required_files=(
   ".systems/ai/templates/workspace/project-state/project-state.template.md"
   ".systems/ai/templates/workspace/personal-ops/personal-ops-readme.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-ins-readme.template.md"
-  ".systems/ai/templates/workspace/personal-ops/check-ins-index.template.md"
   ".systems/ai/templates/workspace/personal-ops/manual-daily-check-in.template.md"
   ".systems/ai/templates/workspace/tasks/task-management-readme.template.md"
   ".systems/ai/templates/workspace/tasks/tasknote.template.md"

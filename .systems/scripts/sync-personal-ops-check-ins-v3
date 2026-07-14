@@ -5,11 +5,13 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import os
 import re
 import sys
 import tempfile
+from datetime import date, timedelta
 from pathlib import Path
 
 from personal_ops_properties_v3 import (
@@ -18,6 +20,7 @@ from personal_ops_properties_v3 import (
     load_schema,
     parse_frontmatter_and_properties,
     redacted_properties,
+    validate_property_map,
     validate_properties,
 )
 
@@ -25,12 +28,15 @@ from personal_ops_properties_v3 import (
 SYNC_THRESHOLD = 7
 
 
-def daily_reports(workspace: Path) -> list[Path]:
+def daily_reports(workspace: Path, excluded_source_paths: set[str] | None = None) -> list[Path]:
     root = workspace / "personal-ops/check-ins"
     reports: list[Path] = []
+    excluded_source_paths = excluded_source_paths or set()
     if not root.is_dir():
         return reports
     for path in sorted(root.glob("[0-9][0-9][0-9][0-9]/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].md")):
+        if path.relative_to(workspace).as_posix() in excluded_source_paths:
+            continue
         text = path.read_text(encoding="utf-8")
         # Historical reports are outside this contract, even when malformed.
         if not re.search(r"^index_contract:\s*3\s*$", text, re.MULTILINE):
@@ -41,12 +47,12 @@ def daily_reports(workspace: Path) -> list[Path]:
     return reports
 
 
-def load_records(workspace: Path) -> tuple[list[dict], list[dict]]:
+def load_native_records(workspace: Path, excluded_source_paths: set[str] | None = None) -> tuple[list[dict], list[dict]]:
     records: list[dict] = []
     session_dates: dict[str, Path] = {}
     schema_fields = load_schema()
     schema = {field["key"]: field for field in schema_fields}
-    for path in daily_reports(workspace):
+    for path in daily_reports(workspace, excluded_source_paths):
         text = path.read_text(encoding="utf-8")
         top, properties, _ = parse_frontmatter_and_properties(text, path)
         validate_properties(top, properties, path)
@@ -60,8 +66,139 @@ def load_records(workspace: Path) -> tuple[list[dict], list[dict]]:
             )
         session_dates[session_date] = path
         effective = redacted_properties(properties, schema) if properties["private_index_policy"] == "redacted" else properties
-        records.append({"path": path, "properties": effective, "full_properties": properties})
+        records.append({"path": path, "properties": effective, "full_properties": properties, "record_kind": "native"})
     return records, schema_fields
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def snapshot_paths(workspace: Path) -> tuple[Path, Path, Path]:
+    root = workspace / "personal-ops/archive/check-ins-v3-migration"
+    return root / "legacy-normalized-v3.jsonl", root / "manifest.json", root / "import-report.md"
+
+
+def safe_workspace_source(workspace: Path, relative_path: str) -> Path:
+    candidate = (workspace / relative_path).resolve()
+    try:
+        candidate.relative_to(workspace)
+    except ValueError as exc:
+        raise ValueError(f"Legacy snapshot source path escapes workspace: {relative_path}") from exc
+    return candidate
+
+
+def validate_legacy_metadata(metadata: object, workspace: Path, source: Path, schema_keys: set[str]) -> str:
+    if not isinstance(metadata, dict):
+        raise ValueError(f"Legacy snapshot metadata must be an object in {source}")
+    origin = metadata.get("origin")
+    if not isinstance(origin, dict):
+        raise ValueError(f"Legacy snapshot metadata.origin must be an object in {source}")
+    source_path = origin.get("source_path")
+    source_sha = origin.get("source_sha256")
+    if not isinstance(source_path, str) or not source_path:
+        raise ValueError(f"Legacy snapshot source path is required in {source}")
+    if not isinstance(source_sha, str) or not re.fullmatch(r"[0-9a-f]{64}", source_sha):
+        raise ValueError(f"Legacy snapshot source SHA-256 is invalid in {source}")
+    current_source = safe_workspace_source(workspace, source_path)
+    if not current_source.is_file():
+        raise ValueError(f"Legacy snapshot source is missing: {current_source}")
+    if sha256_file(current_source) != source_sha:
+        raise ValueError(f"Legacy snapshot source hash mismatch: {current_source}")
+    confidence = metadata.get("field_confidence")
+    if not isinstance(confidence, dict) or set(confidence) != schema_keys:
+        raise ValueError(f"Legacy snapshot must provide confidence for every V3 property in {source}")
+    if any(value not in {"direct", "derived", "unknown"} for value in confidence.values()):
+        raise ValueError(f"Legacy snapshot confidence values must be direct, derived, or unknown in {source}")
+    if not isinstance(metadata.get("unmapped_fields"), list):
+        raise ValueError(f"Legacy snapshot unmapped_fields must be an array in {source}")
+    legacy_minimum = metadata.get("legacy_minimum_day_done", "")
+    if legacy_minimum not in {"", True, False}:
+        raise ValueError(f"Legacy snapshot legacy_minimum_day_done must be boolean or empty in {source}")
+    return source_path
+
+
+def load_legacy_snapshot(workspace: Path, schema_fields: list[dict]) -> list[dict]:
+    snapshot, manifest_path, report_path = snapshot_paths(workspace)
+    existing = [path for path in (snapshot, manifest_path, report_path) if path.exists()]
+    if not existing:
+        return []
+    if len(existing) != 3:
+        raise ValueError("Legacy V3 migration snapshot is incomplete; expected JSONL, manifest, and import report")
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Malformed legacy snapshot manifest: {manifest_path}") from exc
+    if manifest.get("format") != "personal-ops-legacy-normalized-v3" or manifest.get("format_version") != 1:
+        raise ValueError(f"Unsupported legacy snapshot manifest: {manifest_path}")
+    snapshot_hash = sha256_file(snapshot)
+    if manifest.get("legacy_normalized_v3_sha256") != snapshot_hash:
+        raise ValueError(f"Legacy snapshot hash mismatch: {snapshot}")
+
+    schema_keys = {field["key"] for field in schema_fields}
+    records: list[dict] = []
+    dates: set[str] = set()
+    for line_number, line in enumerate(snapshot.read_text(encoding="utf-8").splitlines(), start=1):
+        if not line.strip():
+            continue
+        source = snapshot.with_name(f"{snapshot.name}:{line_number}")
+        try:
+            payload = json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"Malformed legacy snapshot JSONL at line {line_number}") from exc
+        if not isinstance(payload, dict) or set(payload) != {"properties", "legacy_metadata"}:
+            raise ValueError(f"Legacy snapshot row must contain only properties and legacy_metadata at line {line_number}")
+        properties = payload["properties"]
+        if not isinstance(properties, dict):
+            raise ValueError(f"Legacy snapshot properties must be an object at line {line_number}")
+        validate_property_map(properties, source)
+        if str(properties.get("index_contract")) != "3" or str(properties.get("schema_version")) != "3":
+            raise ValueError(f"Legacy snapshot properties must use V3 at line {line_number}")
+        source_type = str(properties.get("source_type", ""))
+        if source_type != "legacy-v2-one-time-migration":
+            raise ValueError(f"Unsupported legacy snapshot source_type at line {line_number}")
+        session_date = str(properties.get("session_date", ""))
+        if not session_date or session_date in dates:
+            raise ValueError(f"Duplicate or missing legacy snapshot session_date at line {line_number}")
+        if str(properties.get("report_id", "")) != session_date:
+            raise ValueError(f"Legacy snapshot report_id must equal session_date at line {line_number}")
+        try:
+            expected_closure_date = (date.fromisoformat(session_date) - timedelta(days=1)).isoformat()
+        except ValueError as exc:
+            raise ValueError(f"Legacy snapshot session_date is invalid at line {line_number}") from exc
+        if str(properties.get("closure_date", "")) != expected_closure_date:
+            raise ValueError(f"Legacy snapshot closure_date must be the prior calendar day at line {line_number}")
+        source_path = validate_legacy_metadata(payload["legacy_metadata"], workspace, source, schema_keys)
+        if str(properties.get("file_path", "")) != source_path:
+            raise ValueError(f"Legacy snapshot properties.file_path must equal origin source_path at line {line_number}")
+        dates.add(session_date)
+        effective = redacted_properties(properties, {field["key"]: field for field in schema_fields}) if properties["private_index_policy"] == "redacted" else properties
+        records.append({"path": snapshot, "properties": effective, "full_properties": properties, "legacy_metadata": payload["legacy_metadata"], "record_kind": "legacy"})
+    expected_count = manifest.get("record_count")
+    if expected_count != len(records):
+        raise ValueError(f"Legacy snapshot manifest record_count mismatch: expected {expected_count}, got {len(records)}")
+    return records
+
+
+def load_records(workspace: Path) -> tuple[list[dict], list[dict]]:
+    schema_fields = load_schema()
+    legacy_records = load_legacy_snapshot(workspace, schema_fields)
+    legacy_source_paths = {
+        str(record["legacy_metadata"]["origin"]["source_path"])
+        for record in legacy_records
+    }
+    native_records, _ = load_native_records(workspace, legacy_source_paths)
+    seen = {str(record["full_properties"]["session_date"]): record["path"] for record in native_records}
+    for record in legacy_records:
+        session_date = str(record["full_properties"]["session_date"])
+        if session_date in seen:
+            raise ValueError(f"Duplicate effective session_date {session_date} in legacy snapshot and {seen[session_date]}")
+        seen[session_date] = record["path"]
+    return sorted(native_records + legacy_records, key=lambda record: str(record["properties"]["session_date"])), schema_fields
 
 
 def write_atomic(path: Path, content: str) -> None:
@@ -90,7 +227,10 @@ def render_csv(records: list[dict], fields: list[dict], metrics_only: bool = Fal
 def render_jsonl(records: list[dict]) -> str:
     rows = []
     for record in records:
-        rows.append(json.dumps({"properties": decoded_json_properties(record["properties"])}, ensure_ascii=False, sort_keys=True))
+        payload = {"properties": decoded_json_properties(record["properties"])}
+        if record["record_kind"] == "legacy":
+            payload["legacy_metadata"] = record["legacy_metadata"]
+        rows.append(json.dumps(payload, ensure_ascii=False, sort_keys=True))
     return "\n".join(rows) + ("\n" if rows else "")
 
 
@@ -102,6 +242,7 @@ def render_fields(fields: list[dict]) -> str:
 
 
 def render_trends(records: list[dict], fields: list[dict]) -> str:
+    records = [record for record in records if record["record_kind"] == "native"]
     trend_keys = [field["key"] for field in fields if field.get("trend")]
     dates = [str(record["properties"]["session_date"]) for record in records if record["properties"]["session_date"]]
     lines = ["# Check-Ins v3 Trends", "", "Sanitized derived summary for Dreaming Mode. It contains no raw input, OCR, finance, calories, health detail, attachment paths, reflections, lessons, or quotations.", "", f"report-count: {len(records)}", f"latest-session-date: {max(dates) if dates else ''}"]
@@ -123,11 +264,14 @@ def read_last_count(router: Path) -> int:
     return 0
 
 
-def render_router(current: int, source: str) -> str:
+def render_router(records: list[dict], source: str) -> str:
+    native_count = sum(record["record_kind"] == "native" for record in records)
+    legacy_count = sum(record["record_kind"] == "legacy" for record in records)
+    current = len(records)
     return "\n".join([
-        "# Check-Ins v3 Index", "", "Derived index router for reports with `index_contract: 3` only. Current `check-ins.*` files remain V2 history.", "",
+        "# Check-Ins v3 Index", "", "Derived official V3 index. Native V3 reports and an owner-created immutable legacy snapshot may contribute rows; active V2 indexes are retired.", "",
         f"last-synced-at: {__import__('datetime').datetime.now().astimezone().isoformat(timespec='seconds')}",
-        f"last-synced-check-in-count: {current}", f"current-check-in-count: {current}", "unsynced-check-in-count: 0",
+        f"last-synced-check-in-count: {current}", f"last-synced-native-check-in-count: {native_count}", f"current-check-in-count: {current}", f"current-native-check-in-count: {native_count}", f"current-legacy-check-in-count: {legacy_count}", "unsynced-check-in-count: 0",
         f"sync-recommendation-threshold: {SYNC_THRESHOLD}", f"last-sync-source: {source}",
         "", "- CSV: `check-ins-v3.csv`", "- JSONL: `check-ins-v3.jsonl`", "- Metrics: `check-ins-v3.metrics.csv`", "- Fields: `check-ins-v3-fields.md`", "- Sanitized trends: `check-ins-v3.trends.md`", "",
     ])
@@ -141,7 +285,7 @@ def write_indexes(records: list[dict], fields: list[dict], workspace: Path, dry_
         index / "check-ins-v3.metrics.csv": render_csv(records, fields, metrics_only=True),
         index / "check-ins-v3-fields.md": render_fields(fields),
         index / "check-ins-v3.trends.md": render_trends(records, fields),
-        index / "check-ins-v3.md": render_router(len(records), "owner-approved-sync"),
+        index / "check-ins-v3.md": render_router(records, "owner-approved-sync"),
     }
     if dry_run:
         for path in outputs:
@@ -153,10 +297,11 @@ def write_indexes(records: list[dict], fields: list[dict], workspace: Path, dry_
 
 def print_status(records: list[dict], workspace: Path) -> None:
     router = workspace / "personal-ops/indexes/check-ins-v3.md"
-    current = len(records)
+    current = sum(record["record_kind"] == "native" for record in records)
     last = read_last_count(router)
     unsynced = max(0, current - last)
     print(f"current-check-in-count: {current}")
+    print(f"current-legacy-check-in-count: {sum(record['record_kind'] == 'legacy' for record in records)}")
     print(f"last-synced-check-in-count: {last}")
     print(f"unsynced-check-in-count: {unsynced}")
     print(f"sync-recommendation-threshold: {SYNC_THRESHOLD}")

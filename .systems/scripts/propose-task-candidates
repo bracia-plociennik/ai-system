@@ -585,7 +585,7 @@ def update_v3_task_generation_status(path: Path, status: str, reason: str, refer
         return
     if frontmatter.get("index_contract") == "3":
         def set_property(content: str, key: str, value: str) -> str:
-            pattern = re.compile(rf"^(  {re.escape(key)}:)\s*.*$", re.MULTILINE)
+            pattern = re.compile(rf"^(  {re.escape(key)}:)[^\n]*$", re.MULTILINE)
             line = f'{key}: {quote_yaml(value)}'
             updated, count = pattern.subn(f"  {line}", content, count=1)
             if count != 1:

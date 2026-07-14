@@ -133,7 +133,6 @@ required=(
   ".systems/ai/templates/workspace/personal-ops/README.md"
   ".systems/ai/templates/workspace/personal-ops/personal-ops-readme.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-ins-readme.template.md"
-  ".systems/ai/templates/workspace/personal-ops/check-ins-index.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-ins-v3-index.template.md"
   ".systems/ai/templates/workspace/personal-ops/manual-daily-check-in.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-in.template.md"
@@ -172,6 +171,7 @@ required=(
   ".systems/scripts/map-notion-check-ins"
   ".systems/scripts/sync-personal-ops-check-ins"
   ".systems/scripts/sync-personal-ops-check-ins-v3"
+  ".systems/scripts/migrate-personal-ops-legacy-check-ins-v3"
   ".systems/scripts/personal_ops_properties_v3.py"
   ".systems/scripts/propose-task-candidates"
 )

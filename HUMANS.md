@@ -211,7 +211,7 @@ Zrób destylację pamięci klienta/projektu <slug>. Wypisz co zostaje, co jest p
 
 ## Personal Ops Check-Ins
 
-Use V3 for native manual daily check-ins. The Notion CSV importer remains V2-only and historical V2 check-ins are not rewritten or backfilled.
+Use V3 for native manual daily check-ins. The V2 Notion CSV importer and V2 sync are retired. Historical V2 Markdown may be normalized only once into an immutable local snapshot; source Markdown and `.assets/` are not rewritten or moved. Pre-contract V3 reports are source-only and should be recreated as current native V3.
 
 For a new manual day, use:
 
@@ -225,16 +225,16 @@ Place the raw CSV export in:
 <workspace>/dump/incoming/external/notion/check-ins/
 ```
 
-Run mapping only after selecting the workspace and confirming the exact input file:
+The old mapping command is intentionally retired and will STOP. Preserve raw CSV evidence until an owner-approved manual V3 capture or one-time legacy migration is selected:
 
 ```text
-.systems/scripts/map-notion-check-ins --input <workspace>/dump/incoming/external/notion/check-ins/check-ins.csv --workspace <workspace> --dry-run
+.systems/scripts/migrate-personal-ops-legacy-check-ins-v3 --workspace <workspace> --owner-approved --dry-run
 ```
 
 If the dry-run is correct:
 
 ```text
-owner-approved: mapuj Notion check-in CSV <input-path> do personal-ops w workspace <workspace-path>. Markdown jest canonical, indeksy są derived, nie promuj tego do memory.
+owner-approved: wykonaj jednorazową migrację legacy Personal Ops V3 w workspace <workspace-path>. Nie zmieniaj Markdownów ani assets; po udanym sync archiwizuj tylko stare check-ins.* indexes.
 ```
 
 Expected outputs:
@@ -242,11 +242,11 @@ Expected outputs:
 - `<workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.md`;
 - `<workspace>/personal-ops/check-ins/YYYY/YYYY-MM-DD.assets/` for optional attachments;
 - `<workspace>/personal-ops/indexes/check-ins-v3.csv`;
-- `<workspace>/personal-ops/indexes/check-ins.jsonl`;
-- `<workspace>/personal-ops/indexes/check-ins.metrics.csv`;
-- `<workspace>/personal-ops/indexes/check-ins.md`.
+- `<workspace>/personal-ops/indexes/check-ins-v3.jsonl`;
+- `<workspace>/personal-ops/indexes/check-ins-v3.metrics.csv`;
+- `<workspace>/personal-ops/indexes/check-ins-v3.md`.
 
-Properties + Raw Audit V3 session `D` records day `D` plan/morning state plus day `D-1` closure without editing the prior-day Markdown. Its complete YAML `properties` map is the only input for `check-ins-v3.*`; readable interpretation, full inline OCR, and verbatim Raw Check-In are private-sensitive audit context. A WIG may reference one plan item or be standalone, with an observable Definition of Done. Under `all-professional-do-v1`, every valid professional plan item becomes a `6d/do` TaskNote; WIG itself never creates a task. V2 Markdown and `check-ins.*` remain historical; pre-contract V3 must be owner-migrated before use. Per-report index policy is `detailed-private` by default or `redacted` when selected; Dreaming Mode may use only sanitized `check-ins-v3.trends.md`. Check-ins and attachments are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
+Properties + Raw Audit V3 session `D` records day `D` plan/morning state plus day `D-1` closure without editing the prior-day Markdown. Its complete YAML `properties` map is the only input for official `check-ins-v3.*`; readable interpretation, full inline OCR, and verbatim Raw Check-In are private-sensitive audit context. A WIG may reference one plan item or be standalone, with an observable Definition of Done. Under `all-professional-do-v1`, every valid professional plan item becomes a `6d/do` TaskNote; WIG itself never creates a task. The V2 importer is retired; one exact owner-approved migration may add immutable legacy rows, then archive only the active old `check-ins.*` derived indexes. Per-report index policy is `detailed-private` by default or `redacted` when selected; Dreaming Mode may use only sanitized native `check-ins-v3.trends.md`. Check-ins and attachments are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
 
 Manual check-ins do not refresh the derived database automatically. After writing a manual check-in, ask for lazy sync status:
 
@@ -262,7 +262,7 @@ owner-approved: synchronizuj bazę check-inów w workspace <workspace-path>. Od�
 
 The threshold counts newly added daily files. It does not detect edits to older check-ins or reliably detect deleted daily files as a stale-index event; after editing or deleting an existing day, run owner-approved sync manually when the indexes need to be fresh.
 
-The Notion check-in importer is only for owner-approved Notion CSV imports. Do not use it to refresh manual-only edits; use lazy sync from canonical Markdown instead.
+The Notion check-in importer is retired. Do not use it for new or manual-only edits; use the V3 manual route and lazy V3 sync from canonical Markdown instead.
 
 ## TaskForge Task Management
 

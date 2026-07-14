@@ -4,7 +4,7 @@
 
 Private operational owner records for planning, review, and self-management.
 
-This workspace supports V3 manual daily check-ins and historical V2 check-ins. TODO databases and broader personal operations workflows require a later contract.
+This workspace supports native V3 manual daily check-ins. Historical V2 reports may enter official V3 indexes solely through the one-time immutable legacy snapshot migration. Pre-contract V3 reports remain source evidence only and must be recreated as current native V3. TODO databases and broader personal operations workflows require a later contract.
 
 ## Boundaries
 
@@ -19,7 +19,7 @@ This workspace supports V3 manual daily check-ins and historical V2 check-ins. T
 - `check-ins/import-profiles/` - manual and source-specific check-in intake profiles.
 - `indexes/` - generated analytical indexes and routers.
 
-V3 detailed indexes are `private-sensitive` local runtime data. Dreaming Mode may use only `indexes/check-ins.trends.md`, which is sanitized.
+V3 detailed indexes are `private-sensitive` local runtime data. Dreaming Mode may use only `indexes/check-ins-v3.trends.md`, which is sanitized and contains native V3 trends only.
 
 ## Raw Imports
 

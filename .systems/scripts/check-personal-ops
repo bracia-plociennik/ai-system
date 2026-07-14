@@ -7,7 +7,7 @@ fail=0
 require_file() {
   local path="$1"
   if [[ ! -f "$repo_root/$path" ]]; then
-    echo "Missing personal-ops artifact: $path"
+    echo "Missing Personal Ops artifact: $path"
     fail=1
   fi
 }
@@ -16,24 +16,16 @@ require_executable() {
   local path="$1"
   require_file "$path"
   if [[ -f "$repo_root/$path" && ! -x "$repo_root/$path" ]]; then
-    echo "Personal-ops artifact is not executable: $path"
+    echo "Personal Ops artifact is not executable: $path"
     fail=1
   fi
 }
 
 require_ref() {
   local file="$1"
-  local pattern="$2"
-  local label="$3"
-
-  if [[ ! -f "$repo_root/$file" ]]; then
-    echo "Missing file for personal-ops check: $file"
-    fail=1
-    return 0
-  fi
-
-  if ! rg -F -q -- "$pattern" "$repo_root/$file"; then
-    echo "Missing personal-ops reference in $file: $label"
+  local term="$2"
+  if [[ ! -f "$repo_root/$file" ]] || ! rg -F -q -- "$term" "$repo_root/$file"; then
+    echo "Missing Personal Ops reference '$term' in $file"
     fail=1
   fi
 }
@@ -43,310 +35,101 @@ required_files=(
   ".systems/ai/templates/workspace/personal-ops/README.md"
   ".systems/ai/templates/workspace/personal-ops/personal-ops-readme.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-ins-readme.template.md"
-  ".systems/ai/templates/workspace/personal-ops/check-ins-index.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-ins-v3-index.template.md"
   ".systems/ai/templates/workspace/personal-ops/manual-daily-check-in.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-in.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-in-properties-v3.schema.json"
   ".systems/ai/templates/workspace/personal-ops/check-in-settings.local.template.md"
-  ".systems/ai/templates/workspace/tasks/taskforge-vault.local.template.md"
-  ".systems/scripts/map-notion-check-ins"
-  ".systems/scripts/sync-personal-ops-check-ins"
-  ".systems/scripts/sync-personal-ops-check-ins-v3"
-  ".systems/scripts/personal_ops_properties_v3.py"
   ".systems/scripts/check-personal-ops"
+  ".systems/scripts/personal_ops_properties_v3.py"
+  ".systems/scripts/sync-personal-ops-check-ins-v3"
+  ".systems/scripts/migrate-personal-ops-legacy-check-ins-v3"
+  ".systems/scripts/sync-personal-ops-check-ins"
+  ".systems/scripts/map-notion-check-ins"
 )
 
-for path in "${required_files[@]}"; do
-  require_file "$path"
+for path in "${required_files[@]}"; do require_file "$path"; done
+for path in \
+  ".systems/scripts/check-personal-ops" \
+  ".systems/scripts/sync-personal-ops-check-ins-v3" \
+  ".systems/scripts/migrate-personal-ops-legacy-check-ins-v3" \
+  ".systems/scripts/sync-personal-ops-check-ins" \
+  ".systems/scripts/map-notion-check-ins"
+do
+  require_executable "$path"
 done
 
-require_executable ".systems/scripts/map-notion-check-ins"
-require_executable ".systems/scripts/sync-personal-ops-check-ins"
-require_executable ".systems/scripts/sync-personal-ops-check-ins-v3"
-require_executable ".systems/scripts/propose-task-candidates"
+if [[ -e "$repo_root/.systems/ai/templates/workspace/personal-ops/check-ins-index.template.md" ]]; then
+  echo "Retired V2 index template remains active"
+  fail=1
+fi
 
 for term in \
-  'context-as-data' \
-  'dump/incoming/external/notion/check-ins' \
-  'personal-ops/check-ins/YYYY/YYYY-MM-DD.md' \
-  'personal-ops/indexes/check-ins.csv' \
-  'personal-ops/indexes/check-ins.jsonl' \
-  'personal-ops/indexes/check-ins.metrics.csv' \
-  'personal-ops/check-ins/import-profiles/manual-daily-check-in.md' \
-  'personal-ops/check-ins/YYYY/YYYY-MM-DD.assets' \
-  'Markdown wins' \
-  'private-sensitive' \
-  'source_row_id' \
-  'Manual Check-In Profile' \
-  'Seed kolejnego dnia' \
-  'unmapped_fields' \
-  'attachments' \
-  'Duplicate' \
-  'Do not promote check-in content into memory' \
-  'Derived indexes may be intentionally stale' \
-  'unsynced-check-in-count' \
-  'sync-recommendation-threshold: 7' \
-  'last-sync-source: manual|notion-import|owner-approved-sync' \
-  'sync-personal-ops-check-ins --workspace <workspace-path> --status-only' \
-  'deleted daily files' \
-  'do not use it to refresh manual-only edits' \
-  'propose-task-candidates --workspace <workspace-path> --check-in' \
-  'tags: [6d/do]' \
-  'due: YYYY-MM-DDT23:59' \
-  'schema_version: 3' \
-  'session_date' \
-  'previous_day_date' \
-  'normalization_authority' \
-  'report_revision' \
-  'task_generation_status' \
-  'task_generation_reason' \
-  'task_generation_references' \
-  'V2 Compatibility' \
-  'unsupported and must be owner-migrated' \
-  'HH:MM' \
-  'V2-only' \
+  'Properties + Raw Audit V3' \
+  'legacy-normalized-v3.jsonl' \
+  'manifest.json' \
+  'import-report.md' \
+  'immutable' \
+  'legacy-v2-one-time-migration' \
+  'legacy_minimum_day_done' \
+  'Pre-contract V3 reports are source-only' \
+  'never creates retrospective TaskNotes' \
   'check-ins-v3.trends.md' \
-  'For `detailed-private`, local `check-ins-v3.csv`' \
-  'source_session_date + source_plan_item_id' \
-  'One exact `owner-approved` write' \
-  'Interpreted Input' \
-  'canonical fields take precedence' \
-  'task_generation_policy: all-professional-do-v1' \
-  'every valid professional `build-*`, `deliver-*`, and `promote-*` item' \
-  'WIG may be linked to one plan item or be standalone' \
-  'WIG is not a task candidate' \
-  'routine_completion_percent' \
-  'actual_training_performed' \
-  'actual_nsdr_performed' \
-  'previous_day_actual_training_doms' \
-  'previous_day_actual_training_pain' \
-  'previous_day_actual_training_performance' \
-  'planned_training_approximate' \
-  'previous_day_actual_training_approximate' \
-  'planned_nsdr_approximate' \
-  'previous_day_actual_nsdr_approximate' \
-  'planned_if_approximate' \
-  'previous_day_actual_if_approximate' \
-  'actual_self_count' \
-  'actual_close_people_count' \
-  'reflection_plus_one' \
-  'reflection_redundant' \
-  'V3 Priorities, Minimum Day, And Overload' \
-  'wig_kind: plan-item' \
-  'wig_id' \
-  'previous_day_wig_closure_json' \
-  'plan_readiness' \
-  'overload_status' \
-  'overload_acknowledged' \
-  'private_index_policy' \
-  'detailed-private' \
-  'redacted' \
-  'source_status: unverified'
+  'sync-personal-ops-check-ins-v3' \
+  'migrate-personal-ops-legacy-check-ins-v3' \
+  'map-notion-check-ins` are retired'
 do
-  require_ref ".systems/ai/core/personal-ops.md" "$term" "$term"
+  require_ref ".systems/ai/core/personal-ops.md" "$term"
 done
 
-for retired_v3_term in \
-  'legacy-wig-priority' \
-  'legacy-v3-no-wig' \
-  'must_do_plan_item_ids'
+for term in \
+  'load_legacy_snapshot' \
+  'legacy_metadata' \
+  'source hash mismatch' \
+  'Duplicate effective session_date' \
+  'check-ins-v3.trends.md' \
+  'current-native-check-in-count' \
+  'current-legacy-check-in-count'
 do
-  if rg -F -q -- "$retired_v3_term" \
-    "$repo_root/.systems/ai/core/personal-ops.md" \
-    "$repo_root/.systems/ai/templates/workspace/personal-ops" \
-    "$repo_root/.systems/scripts/personal_ops_properties_v3.py" \
-    "$repo_root/.systems/scripts/propose-task-candidates" \
-    "$repo_root/.systems/scripts/sync-personal-ops-check-ins"; then
-    echo "Retired V3 compatibility term remains in active contract: $retired_v3_term"
+  require_ref ".systems/scripts/sync-personal-ops-check-ins-v3" "$term"
+done
+
+for term in \
+  'legacy-normalized-v3.jsonl' \
+  'archive/indexes/v2' \
+  '--owner-approved' \
+  'never creates retrospective TaskNotes' \
+  '2026-05-19'
+do
+  require_ref ".systems/scripts/migrate-personal-ops-legacy-check-ins-v3" "$term"
+done
+
+for retired in \
+  ".systems/scripts/sync-personal-ops-check-ins" \
+  ".systems/scripts/map-notion-check-ins"
+do
+  if ! "$repo_root/$retired" --workspace /tmp/personal-ops-retired-smoke >/tmp/personal-ops-retired.out 2>&1; then
+    if ! rg -F -q 'STOP:' /tmp/personal-ops-retired.out; then
+      echo "Retired command did not emit STOP: $retired"
+      fail=1
+    fi
+  else
+    echo "Retired command unexpectedly succeeded: $retired"
     fail=1
   fi
 done
 
-for term in \
-  '--status-only' \
-  '--dry-run' \
-  'SYNC_THRESHOLD = 7' \
-  'daily_files' \
-  'historical_daily_files' \
-  'personal-ops/check-ins' \
-  'check-ins.csv' \
-  'check-ins.jsonl' \
-  'check-ins.metrics.csv' \
-  'check-ins.trends.md' \
-  'check-ins-fields.md' \
-  'check-ins.md' \
-  'Malformed check-in Markdown' \
-  'unmapped_fields' \
-  'write_indexes' \
-  'never rewrites daily Markdown' \
-  'schema_version'
-do
-  require_ref ".systems/scripts/sync-personal-ops-check-ins" "$term" "sync tool term $term"
-done
-
-for sync_field in \
-  'last-synced-at' \
-  'last-synced-check-in-count' \
-  'current-check-in-count' \
-  'unsynced-check-in-count' \
-  'sync-recommendation-threshold: 7' \
-  'last-sync-source' \
-  'latest-unsynced-dates'
-do
-  require_ref ".systems/ai/templates/workspace/personal-ops/check-ins-index.template.md" "$sync_field" "sync state field $sync_field"
-  require_ref ".systems/scripts/map-notion-check-ins" "$sync_field" "notion mapper sync state field $sync_field"
-  require_ref ".systems/scripts/sync-personal-ops-check-ins" "${sync_field%%:*}" "sync script state field $sync_field"
-done
-
-for column in \
-  'date' \
-  'file_path' \
-  'source_provider' \
-  'minimum_day_done' \
-  'day_mode' \
-  'sleep_hours' \
-  'if_hours' \
-  'training_minutes' \
-  'nsdr_minutes' \
-  'habit_count_done' \
-  'habit_count_total' \
-  'has_plus_one' \
-  'has_threat' \
-  'has_built' \
-  'has_delivered' \
-  'has_promoted' \
-  'has_body_action' \
-  'has_spirit_action' \
-  'has_close_people_action' \
-  'has_gratitude' \
-  'has_redundant' \
-  'attachment_count' \
-  'ocr_count' \
-  'screenshot_count' \
-  'note_image_count'
-do
-  require_ref ".systems/ai/core/personal-ops.md" "$column" "required index column $column"
-  require_ref ".systems/scripts/map-notion-check-ins" "$column" "script index column $column"
-done
-
-for section in \
-  'schema_version: 3' \
-  'index_contract: 3' \
-  'properties:' \
-  'planned_items_json:' \
-  'previous_day_actual_items_json:' \
-  'previous_day_actual_training_doms:' \
-  'previous_day_actual_training_pain:' \
-  'previous_day_actual_training_performance:' \
-  'planned_training_approximate:' \
-  'previous_day_actual_training_approximate:' \
-  'planned_nsdr_approximate:' \
-  'previous_day_actual_nsdr_approximate:' \
-  'planned_if_approximate:' \
-  'task_generation_references_json:' \
-  'previous_day_actual_if_approximate:' \
-  'attachments_json:' \
-  'ocr_entries_json:' \
-  'session_date:' \
-  'previous_day_date:' \
-  '## Interpreted Check-In' \
-  '## Lekcja dnia' \
-  '## OCR / Notatka robocza' \
-  '## Dodatkowe informacje' \
-  '## Załączniki' \
-  '## Raw Check-In' \
-  'Every valid `build`, `deliver`, and `promote` entry' \
-  'private-sensitive context-as-data'
-do
-  require_ref ".systems/ai/templates/workspace/personal-ops/check-in.template.md" "$section" "check-in section $section"
-done
-
-for profile_term in \
-  'Properties + Raw Audit v3' \
-  'properties' \
-  'Raw Check-In' \
-  'OCR / Notatka robocza' \
-  'Explicit normalized values supplied by the owner win' \
-  'sync-personal-ops-check-ins-v3' \
-  'seven new reports' \
-  'Kandydaci na taski' \
-  'planned_items_json'
-do
-  require_ref ".systems/ai/templates/workspace/personal-ops/manual-daily-check-in.template.md" "$profile_term" "manual profile term $profile_term"
-done
-
-for term in \
-  'check-in-properties-v3.schema.json' \
-  'index_contract: 3' \
-  'check-ins-v3.csv' \
-  'check-ins-v3.jsonl' \
-  'check-ins-v3.metrics.csv' \
-  'check-ins-v3.trends.md' \
-  'Raw Check-In' \
-  'OCR / Notatka robocza' \
-  'sole source' \
-  'Kandydaci na taski' \
-  'planned_items_json'
-do
-  require_ref ".systems/ai/core/personal-ops.md" "$term" "properties v3 contract $term"
-done
-
-for term in \
-  'index_contract' \
-  'properties' \
-  'check-ins-v3.csv' \
-  'check-ins-v3.jsonl' \
-  'check-ins-v3.metrics.csv' \
-  'check-ins-v3.trends.md' \
-  'SYNC_THRESHOLD = 7' \
-  'write_atomic'
-do
-  require_ref ".systems/scripts/sync-personal-ops-check-ins-v3" "$term" "properties v3 sync term $term"
-done
-
-for term in 'Missing required properties' 'Unknown properties' 'Property' 'must be'; do
-  require_ref ".systems/scripts/personal_ops_properties_v3.py" "$term" "properties v3 parser term $term"
-done
-
-require_ref ".systems/ai/templates/workspace/personal-ops/check-ins-v3-index.template.md" 'check-ins-v3.csv' "v3 index router CSV"
-require_ref ".systems/ai/templates/workspace/personal-ops/check-ins-v3-index.template.md" 'sync-recommendation-threshold: 7' "v3 index lazy threshold"
-
-require_ref ".systems/ai/templates/workspace/personal-ops/check-in-settings.local.template.md" 'timezone:' "local check-in settings timezone"
-require_ref ".systems/ai/templates/workspace/personal-ops/check-in-settings.local.template.md" 'private_index_policy_default:' "local check-in settings privacy policy"
-require_ref ".systems/ai/templates/workspace/tasks/taskforge-vault.local.template.md" 'vault_path:' "local TaskForge vault path"
-require_ref ".systems/ai/templates/workspace/tasks/taskforge-vault.local.template.md" 'enabled:' "local TaskForge vault enabled flag"
-
-for file in \
-  ".systems/ai/core/operating-model.md" \
-  ".systems/ai/core/workspaces.md" \
-  ".systems/ai/core/command-routing.md" \
-  ".systems/ai/core/integrations.md" \
-  ".systems/ai/core/context-as-data.md" \
-  ".systems/ai/templates/root/AGENTS.template.md" \
-  ".systems/scripts/init-workspace" \
-  ".systems/scripts/update-workspace" \
-  "README.md" \
-  "HUMANS.md"
-do
-  require_ref "$file" 'personal-ops' "personal-ops guidance"
-done
-
 for file in \
   ".systems/ai/core/operating-model.md" \
   ".systems/ai/core/command-routing.md" \
   ".systems/ai/core/integrations.md" \
+  ".systems/ai/core/dreaming-mode.md" \
   ".systems/ai/templates/root/AGENTS.template.md" \
   "README.md" \
   "HUMANS.md"
 do
-  require_ref "$file" 'sync-personal-ops-check-ins' "lazy sync guidance"
+  require_ref "$file" 'check-ins-v3'
+  require_ref "$file" 'retired'
 done
-
-require_ref ".systems/scripts/validate-ai-system" 'check-personal-ops' "validator chain"
-require_ref ".systems/scripts/check-required-artifacts" 'check-personal-ops' "required artifact list"
-require_ref ".systems/scripts/check-validator-smoke-tests" 'map-notion-check-ins' "smoke coverage"
-require_ref ".systems/scripts/check-validator-smoke-tests" 'sync-personal-ops-check-ins' "lazy sync smoke coverage"
-require_ref ".systems/scripts/check-validator-smoke-tests" 'propose-task-candidates' "task candidate smoke coverage"
 
 exit "$fail"

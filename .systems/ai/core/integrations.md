@@ -47,13 +47,13 @@ This does not implement connectors, OAuth, token storage, live sync, or write-ba
 
 Daily check-in exports from Notion are manual, local inputs in v1.
 
-Use `.systems/ai/core/personal-ops.md` for manual daily check-ins and `.systems/scripts/map-notion-check-ins` to map owner-approved CSV exports into canonical Markdown under `personal-ops/check-ins/` and derived indexes under `personal-ops/indexes/`.
+Use `.systems/ai/core/personal-ops.md` for manual daily check-ins. The V2 `map-notion-check-ins` importer is retired and must STOP; preserve Notion CSV exports as raw context until an owner-approved V3 intake or one-time legacy migration is selected.
 
 The mapping does not write back to Notion and does not promote check-in content into memory, checkpoint, distillation, external-memory, or system-insights.
 
-The Notion check-in mapper is not a refresh path for manual-only edits. Use `.systems/scripts/sync-personal-ops-check-ins` for derived index refresh from canonical Markdown.
+New manual V3 reports are not a refresh path for raw exports. Use `.systems/scripts/sync-personal-ops-check-ins-v3` for official derived index refresh from canonical V3 Markdown plus any validated immutable legacy snapshot.
 
-Manual check-ins do not regenerate derived indexes automatically. Use `.systems/scripts/sync-personal-ops-check-ins --workspace <workspace> --status-only` for lazy sync state and exact owner-approved sync for regeneration.
+Manual check-ins do not regenerate derived indexes automatically. Use `.systems/scripts/sync-personal-ops-check-ins-v3 --workspace <workspace> --status-only` for lazy sync state and exact owner-approved sync for regeneration.
 
 ## External Export Imports
 

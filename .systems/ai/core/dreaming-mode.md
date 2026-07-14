@@ -20,9 +20,9 @@ AI_SYSTEM_WORKSPACE_HOME/dreams/
 
 ## Variants
 
-`workspace-artifacts-only` is the default variant. It may inspect selected workspace runtime artifacts such as `core/`, `dump/`, `memory/`, `project-state/`, `system-insights/`, `external-memory/`, `links/`, `personal-ops/indexes/check-ins.trends.md`, `micro-projects/`, `skills/`, client routers, owned-asset routers, distillations, checkpoints, decisions, and status evidence.
+`workspace-artifacts-only` is the default variant. It may inspect selected workspace runtime artifacts such as `core/`, `dump/`, `memory/`, `project-state/`, `system-insights/`, `external-memory/`, `links/`, `personal-ops/indexes/check-ins-v3.trends.md`, `micro-projects/`, `skills/`, client routers, owned-asset routers, distillations, checkpoints, decisions, and status evidence.
 
-For historical Personal Ops V2, Dreaming Mode may read only the sanitized `personal-ops/indexes/check-ins.trends.md`. For Properties + Raw Audit Index v3, it may read only `personal-ops/indexes/check-ins-v3.trends.md`. It must not read daily check-in Markdown, detailed CSV/JSONL/metrics indexes or redacted projections, attachments, OCR, finances, calories, health details, owner reflections, lessons, or unverified quotations/sources.
+Personal Ops V2 indexes are retired. Dreaming Mode may read only `personal-ops/indexes/check-ins-v3.trends.md`, whose aggregate is native-V3-only even when the official V3 indexes also contain a legacy snapshot. It must not read daily check-in Markdown, detailed CSV/JSONL/metrics indexes or redacted projections, legacy snapshot files, attachments, OCR, finances, calories, health details, owner reflections, lessons, or unverified quotations/sources.
 
 `full-repo` is explicit owner-requested only. It may inspect selected workspace artifacts plus one owner-specified project or source path for review candidates, repeated patterns, useful practices, missing capabilities, weak areas, and removal candidates.
 
