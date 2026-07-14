@@ -203,18 +203,18 @@ Canonical check-ins live as Markdown:
 Generated analytical indexes live in:
 
 ```text
-<workspace>/personal-ops/indexes/check-ins.csv
+<workspace>/personal-ops/indexes/check-ins-v3.csv
 <workspace>/personal-ops/indexes/check-ins.jsonl
 <workspace>/personal-ops/indexes/check-ins.metrics.csv
-<workspace>/personal-ops/indexes/check-ins.trends.md
+<workspace>/personal-ops/indexes/check-ins-v3.trends.md
 ```
 
-Markdown is the source of truth. V3.1 session `D` captures day `D` plan/morning state and day `D-1` closure without modifying the old file. It requires one WIG plus observable Definition of Done and supports up to two must-do items; minimum-day status is derived only from WIG closure comparison. Missing priorities and overload warnings do not block canonical storage but block TaskNotes until acknowledged. AI System may append `## Interpreted Input` at the end as a private-sensitive normalization audit; canonical fields remain authoritative. V3.1 indexes are `private-sensitive`: `detailed-private` is the default local detail policy and `redacted` retains safe presence flags only. `check-ins.trends.md` is a sanitized aggregate for Dreaming Mode; it excludes raw private fields, reflections, unverified sources, and attachments. Check-ins and attachments are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
+Markdown is the source of truth. Properties + Raw Audit V3 uses one session report with `index_contract: 3`; its complete frontmatter `properties` map maps 1:1 to `check-ins-v3.*`. The readable interpretation, inline OCR, and verbatim Raw Check-In preserve audit evidence but do not compete with properties. WIG/must-do professional items become `6d/do` TaskNotes; remaining professional plan items become `6d/dump` unless marked `Task: skip`. V2/V3.1 files and `check-ins.*` indexes are frozen history. `check-ins-v3.trends.md` is sanitized for Dreaming Mode and excludes raw input, OCR, attachments, private detail, lessons, and unverified sources. Check-ins and attachments are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
 
 Manual check-ins write only the daily Markdown file and optional assets. Derived indexes may be intentionally stale. Use lazy sync status before recommending a database refresh:
 
 ```text
-.systems/scripts/sync-personal-ops-check-ins --workspace <workspace-path> --status-only
+.systems/scripts/sync-personal-ops-check-ins-v3 --workspace <workspace-path> --status-only
 ```
 
 If `unsynced-check-in-count` is below `7`, sync is not required yet. If it is `7` or more, recommend exact owner-approved sync. The owner can approve sync earlier.
@@ -259,7 +259,7 @@ Use dry-run first:
 .systems/scripts/propose-task-candidates --workspace <workspace-path> --dream-report <workspace>/dreams/runs/<run>/dream-report.md
 ```
 
-V3 check-in candidates come one-per-item from planned `build-*`, `deliver-*`, and `promote-*` items, use `tags: [6d/do]`, and default to session-day end-of-day due date `YYYY-MM-DDT23:59`. `Task: skip` suppresses an item and `Task title` can override its generated TaskNote title. Actual closure items never create TaskNotes.
+V3 check-in candidates come one-per-item from planned professional `build-*`, `deliver-*`, and `promote-*` items and use session-day end-of-day due date `YYYY-MM-DDT23:59`. WIG/must-do items default to `tags: [6d/do]`; remaining professional planned items default to `tags: [6d/dump]`. `Task: skip` suppresses an item and `Task title` can override its generated TaskNote title. Actual closure items never create TaskNotes.
 
 An explicit legacy `5d/*` source bucket is normalized to the matching `6d/*` output; new TaskNotes never write `5d/*`. Dry-run reads `<workspace>/tasks/taskforge-vault.local.md` when available to discover TaskForge project links. Missing, disabled, or invalid configuration produces a warning and leaves the proposal read-only.
 
@@ -275,7 +275,7 @@ Write TaskNotes only with exact owner approval:
 .systems/scripts/propose-task-candidates --workspace <workspace-path> --check-in <check-in.md> --task-vault <taskforge-vault> --owner-approved --write
 ```
 
-For an owner-approved V3 canonical check-in write, that same approval also authorizes its initial planned TaskNotes once. It uses the local-only `<workspace>/tasks/taskforge-vault.local.md` record with `--task-vault-config`; missing or invalid vault preflight records `task_generation_status: skipped` in the check-in and writes no task.
+For an owner-approved V3 canonical check-in write, that same approval also authorizes its initial planned TaskNotes once. It uses the local-only `<workspace>/tasks/taskforge-vault.local.md` record with `--task-vault-config`; missing or invalid vault preflight records `task_generation_status: skipped`, an exact reason, and `task_generation_references_json: []` in the check-in and writes no task.
 
 Before creating a V3 TaskNote, AI System checks open TaskNotes for one strong, unambiguous match in the same mapped project or client. Such a match is extended with a marked Markdown subtask in the parent file; weak or ambiguous similarity creates a separate task.
 

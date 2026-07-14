@@ -1,0 +1,188 @@
+#!/usr/bin/env python3
+"""Synchronize index_contract: 3 Personal Ops reports into check-ins-v3.* only."""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import json
+import os
+import re
+import sys
+import tempfile
+from pathlib import Path
+
+from personal_ops_properties_v3 import (
+    csv_value,
+    decoded_json_properties,
+    load_schema,
+    parse_frontmatter_and_properties,
+    redacted_properties,
+    validate_properties,
+)
+
+
+SYNC_THRESHOLD = 7
+
+
+def daily_reports(workspace: Path) -> list[Path]:
+    root = workspace / "personal-ops/check-ins"
+    reports: list[Path] = []
+    if not root.is_dir():
+        return reports
+    for path in sorted(root.glob("[0-9][0-9][0-9][0-9]/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].md")):
+        text = path.read_text(encoding="utf-8")
+        # Historical reports are outside this contract, even when malformed.
+        if not re.search(r"^index_contract:\s*3\s*$", text, re.MULTILINE):
+            continue
+        top, _, _ = parse_frontmatter_and_properties(text, path)
+        if str(top.get("index_contract", "")) == "3":
+            reports.append(path)
+    return reports
+
+
+def load_records(workspace: Path) -> tuple[list[dict], list[dict]]:
+    records: list[dict] = []
+    session_dates: dict[str, Path] = {}
+    schema_fields = load_schema()
+    schema = {field["key"]: field for field in schema_fields}
+    for path in daily_reports(workspace):
+        text = path.read_text(encoding="utf-8")
+        top, properties, _ = parse_frontmatter_and_properties(text, path)
+        validate_properties(top, properties, path)
+        expected_path = path.relative_to(workspace).as_posix()
+        if properties["file_path"] != expected_path:
+            raise ValueError(f"properties.file_path must equal {expected_path} in {path}")
+        session_date = str(properties["session_date"])
+        if session_date in session_dates:
+            raise ValueError(
+                f"Duplicate effective session_date {session_date} in {path} and {session_dates[session_date]}"
+            )
+        session_dates[session_date] = path
+        effective = redacted_properties(properties, schema) if properties["private_index_policy"] == "redacted" else properties
+        records.append({"path": path, "properties": effective, "full_properties": properties})
+    return records, schema_fields
+
+
+def write_atomic(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    handle, temp_name = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
+    try:
+        with os.fdopen(handle, "w", encoding="utf-8", newline="") as out:
+            out.write(content)
+        Path(temp_name).replace(path)
+    except Exception:
+        Path(temp_name).unlink(missing_ok=True)
+        raise
+
+
+def render_csv(records: list[dict], fields: list[dict], metrics_only: bool = False) -> str:
+    selected = [field for field in fields if not metrics_only or field.get("metric")]
+    import io
+    buffer = io.StringIO(newline="")
+    writer = csv.DictWriter(buffer, fieldnames=[field["key"] for field in selected])
+    writer.writeheader()
+    for record in records:
+        writer.writerow({field["key"]: csv_value(record["properties"][field["key"]]) for field in selected})
+    return buffer.getvalue()
+
+
+def render_jsonl(records: list[dict]) -> str:
+    rows = []
+    for record in records:
+        rows.append(json.dumps({"properties": decoded_json_properties(record["properties"])}, ensure_ascii=False, sort_keys=True))
+    return "\n".join(rows) + ("\n" if rows else "")
+
+
+def render_fields(fields: list[dict]) -> str:
+    lines = ["# Check-Ins v3 Field Dictionary", "", "`check-ins-v3.csv` is generated directly from the canonical `properties` map. Do not edit it manually.", "", "| Column | Type | Default | Private | Metrics | Trends |", "| --- | --- | --- | --- | --- | --- |"]
+    for field in fields:
+        lines.append(f"| `{field['key']}` | `{field['type']}` | `{field.get('default', '')}` | `{str(bool(field.get('private'))).lower()}` | `{str(bool(field.get('metric'))).lower()}` | `{str(bool(field.get('trend'))).lower()}` |")
+    return "\n".join(lines) + "\n"
+
+
+def render_trends(records: list[dict], fields: list[dict]) -> str:
+    trend_keys = [field["key"] for field in fields if field.get("trend")]
+    dates = [str(record["properties"]["session_date"]) for record in records if record["properties"]["session_date"]]
+    lines = ["# Check-Ins v3 Trends", "", "Sanitized derived summary for Dreaming Mode. It contains no raw input, OCR, finance, calories, health detail, attachment paths, reflections, lessons, or quotations.", "", f"report-count: {len(records)}", f"latest-session-date: {max(dates) if dates else ''}"]
+    for key in trend_keys:
+        values = [str(record["properties"][key]) for record in records if record["properties"][key] != ""]
+        lines.append(f"{key}-observed-count: {len(values)}")
+    return "\n".join(lines) + "\n"
+
+
+def read_last_count(router: Path) -> int:
+    if not router.is_file():
+        return 0
+    for line in router.read_text(encoding="utf-8").splitlines():
+        if line.startswith("last-synced-check-in-count:"):
+            try:
+                return int(line.split(":", 1)[1].strip())
+            except ValueError:
+                return 0
+    return 0
+
+
+def render_router(current: int, source: str) -> str:
+    return "\n".join([
+        "# Check-Ins v3 Index", "", "Derived index router for reports with `index_contract: 3` only. Current `check-ins.*` files remain V2/V3.1 history.", "",
+        f"last-synced-at: {__import__('datetime').datetime.now().astimezone().isoformat(timespec='seconds')}",
+        f"last-synced-check-in-count: {current}", f"current-check-in-count: {current}", "unsynced-check-in-count: 0",
+        f"sync-recommendation-threshold: {SYNC_THRESHOLD}", f"last-sync-source: {source}",
+        "", "- CSV: `check-ins-v3.csv`", "- JSONL: `check-ins-v3.jsonl`", "- Metrics: `check-ins-v3.metrics.csv`", "- Fields: `check-ins-v3-fields.md`", "- Sanitized trends: `check-ins-v3.trends.md`", "",
+    ])
+
+
+def write_indexes(records: list[dict], fields: list[dict], workspace: Path, dry_run: bool) -> None:
+    index = workspace / "personal-ops/indexes"
+    outputs = {
+        index / "check-ins-v3.csv": render_csv(records, fields),
+        index / "check-ins-v3.jsonl": render_jsonl(records),
+        index / "check-ins-v3.metrics.csv": render_csv(records, fields, metrics_only=True),
+        index / "check-ins-v3-fields.md": render_fields(fields),
+        index / "check-ins-v3.trends.md": render_trends(records, fields),
+        index / "check-ins-v3.md": render_router(len(records), "owner-approved-sync"),
+    }
+    if dry_run:
+        for path in outputs:
+            print(f"would write: {path}")
+        return
+    for path, content in outputs.items():
+        write_atomic(path, content)
+
+
+def print_status(records: list[dict], workspace: Path) -> None:
+    router = workspace / "personal-ops/indexes/check-ins-v3.md"
+    current = len(records)
+    last = read_last_count(router)
+    unsynced = max(0, current - last)
+    print(f"current-check-in-count: {current}")
+    print(f"last-synced-check-in-count: {last}")
+    print(f"unsynced-check-in-count: {unsynced}")
+    print(f"sync-recommendation-threshold: {SYNC_THRESHOLD}")
+    print("sync-recommendation: recommend sync" if unsynced >= SYNC_THRESHOLD else "sync-recommendation: not required yet")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--workspace", required=True, type=Path)
+    parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--status-only", action="store_true")
+    args = parser.parse_args()
+    try:
+        records, fields = load_records(args.workspace.resolve())
+        if args.status_only:
+            print_status(records, args.workspace.resolve())
+        elif args.dry_run:
+            print_status(records, args.workspace.resolve())
+            write_indexes(records, fields, args.workspace.resolve(), True)
+        else:
+            write_indexes(records, fields, args.workspace.resolve(), False)
+    except Exception as exc:  # noqa: BLE001
+        print(f"STOP: {exc}", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

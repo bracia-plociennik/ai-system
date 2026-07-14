@@ -256,8 +256,8 @@ for term in \
   'reads only frontmatter `projects:` wiki links' \
   'does not initialize TaskForge vault structure' \
   'Personal Ops V3 Initial Task Creation' \
-  'V3.1 eligibility is limited to professional WIG and must-do' \
-  'Optional items are suppressed by default' \
+  'WIG/must-do `build-*`, `deliver-*`, and `promote-*` items default to `6d/do`' \
+  'other professional planned items default to `6d/dump`' \
   'no overload warning remains unacknowledged' \
   'source_session_date + source_plan_item_id' \
   'mechanical flag records the same approval' \
@@ -267,7 +267,7 @@ for term in \
   'legacy `5d/*` input is read-compatible and normalizes to the matching `6d/*` tag' \
   'warns without failing when project discovery cannot run' \
   'task_generation_status: skipped' \
-  'task_generation_references' \
+  'task_generation_references_json' \
   'Project matching reads AI System `project:` plus TaskForge frontmatter `projects:` wiki links only' \
   'strong title-token match' \
   '## Subtasks' \

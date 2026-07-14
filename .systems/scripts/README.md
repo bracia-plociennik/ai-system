@@ -26,7 +26,7 @@ Validation scripts for AI System live here.
 
 `check-system-insights` validates System Insights templates, entry structure, privacy checks, and External Memory scope separation.
 
-`check-personal-ops` validates V2/V3.1 daily check-in contracts, WIG/must-do and overload rules, per-report private index policy, lazy sync, templates, mapper compatibility, routing, docs, and smoke coverage.
+`check-personal-ops` validates V2/V3.1 history plus Properties + Raw Audit Index v3: complete typed `properties`, raw/OCR audit boundaries, WIG/must-do and overload rules, private index policy, lazy sync, templates, mapper compatibility, routing, docs, and smoke coverage.
 
 `check-task-management` validates the TaskForge/TaskNotes task-management contract, templates, routing docs, safe write boundaries, app setup runbook, and smoke coverage.
 
@@ -34,7 +34,7 @@ Validation scripts for AI System live here.
 
 `map-notion-check-ins` maps an owner-approved Notion daily check-in CSV export into canonical Markdown files and derived CSV/JSONL/metrics indexes.
 
-`sync-personal-ops-check-ins` reports lazy sync status or regenerates V2/V3.1 Personal Ops derived indexes plus sanitized `check-ins.trends.md` from canonical Markdown after exact owner approval. It applies each report's `detailed-private` or `redacted` index policy.
+`sync-personal-ops-check-ins` preserves the V2/V3.1 historical index path. `sync-personal-ops-check-ins-v3` reports lazy sync status or regenerates only `check-ins-v3.*` from complete `index_contract: 3` properties after exact owner approval. It applies each report's `detailed-private` or `redacted` index policy.
 
 `propose-task-candidates` converts daily check-ins or Dream Reports into TaskForge TaskNote proposals. V3.1 restricts check-in candidates to eligible professional WIG/must-do items and blocks them for missing priorities or unacknowledged overload. Eligible V3.1 items may create or extend one strongly matched TaskNote with the same owner approval that writes the V3 check-in; all other task writes require exact owner approval, `--write`, and a configured vault.
 

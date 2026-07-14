@@ -534,6 +534,16 @@ def daily_files(workspace: Path) -> list[Path]:
     )
 
 
+def historical_daily_files(workspace: Path) -> list[Path]:
+    """Exclude Properties + Raw Audit reports from the V2/V3.1 index contract."""
+    historical: list[Path] = []
+    for path in daily_files(workspace):
+        frontmatter, _ = parse_frontmatter(path.read_text(encoding="utf-8"), path)
+        if str(frontmatter.get("index_contract", "")).strip() != "3":
+            historical.append(path)
+    return historical
+
+
 def build_record(workspace: Path, markdown_path: Path, existing_unmapped: dict[tuple[str, str, str], dict]) -> dict:
     frontmatter, body = parse_frontmatter(markdown_path.read_text(encoding="utf-8"), markdown_path)
     phases = extract_sections(body)
@@ -1690,7 +1700,7 @@ def load_records(workspace: Path) -> list[dict]:
     existing_unmapped = load_existing_unmapped(index_dir)
     v2_records: list[dict] = []
     v3_sessions: list[dict] = []
-    for path in daily_files(workspace):
+    for path in historical_daily_files(workspace):
         frontmatter, _ = parse_frontmatter(path.read_text(encoding="utf-8"), path)
         if str(frontmatter.get("schema_version", "")).strip() == "3":
             v3_sessions.append(build_v3_session(workspace, path))
@@ -1725,8 +1735,12 @@ def main() -> int:
     try:
         workspace = args.workspace
         records = load_records(workspace)
-        source_files = daily_files(workspace)
+        source_files = historical_daily_files(workspace)
         router_path = workspace / "personal-ops" / "indexes" / "check-ins.md"
+        historical_csv = workspace / "personal-ops" / "indexes" / "check-ins.csv"
+        if not source_files and not historical_csv.exists() and not args.status_only and not args.dry_run:
+            print("No V2/V3.1 reports found; historical check-ins.* indexes left unchanged.")
+            return 0
         if args.status_only:
             print_status(records, router_path, source_files)
             return 0

@@ -2834,6 +2834,145 @@ write_dream_report "$bad_dream_report" "workspace-artifacts-only" '| `not-applic
 printf '%s\n' 'api_key: sk_test_12345678901234567890' >> "$bad_dream_report"
 run_must_fail "dreaming-mode-secret-marker-report" "$dreaming_validator" --workspace "$bad_dream_workspace"
 
+properties_v3_workspace="$tmp/personal-ops-properties-v3-workspace"
+mkdir -p "$properties_v3_workspace/personal-ops/check-ins/2026"
+python3 - "$copy_repo" "$properties_v3_workspace/personal-ops/check-ins/2026/2026-07-22.md" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+repo, destination = map(Path, sys.argv[1:])
+schema = json.loads((repo / ".systems/ai/templates/workspace/personal-ops/check-in-properties-v3.schema.json").read_text())
+values = {field["key"]: field.get("default", "") for field in schema["fields"]}
+values.update({
+    "file_path": "personal-ops/check-ins/2026/2026-07-22.md",
+    "report_id": "2026-07-22",
+    "session_date": "2026-07-22",
+    "closure_date": "2026-07-21",
+    "weekday": "wednesday",
+    "recording_time": "08:00",
+    "timezone": "Europe/Warsaw",
+    "plan_readiness": "ready",
+    "wig_plan_item_id": "build-01",
+    "wig_definition_of_done": "A complete fixture exists.",
+    "must_do_plan_item_ids_json": json.dumps(["deliver-01"]),
+    "task_candidate_eligible_count": 2,
+    "planned_build_count": 1,
+    "planned_deliver_count": 1,
+    "planned_promote_count": 1,
+    "planned_items_json": json.dumps([
+        {"id": "build-01", "stream": "build", "title": "Demo Project analytics fixture", "task": "create", "task_bucket": "6d/do"},
+        {"id": "deliver-01", "stream": "deliver", "title": "Deliver analytics fixture", "task": "skip"},
+        {"id": "promote-01", "stream": "promote", "title": "Triage analytics fixture"},
+    ]),
+    "previous_day_actual_items_json": json.dumps([{ "id": "actual-build-01", "stream": "build", "title": "Closed fixture" }]),
+    "previous_day_actual_build_count": 1,
+    "previous_day_actual_training_doms": True,
+    "previous_day_actual_training_pain": False,
+    "previous_day_actual_training_performance": "100kg x 6",
+    "previous_day_actual_training_approximate": True,
+    "previous_day_actual_nsdr_approximate": True,
+    "previous_day_actual_if_approximate": True,
+    "planned_training_approximate": False,
+    "planned_nsdr_approximate": True,
+    "planned_if_approximate": True,
+    "attachments_json": json.dumps([{ "path": "2026-07-22.assets/note.png", "kind": "note-image" }]),
+    "ocr_entries_json": json.dumps([{ "path": "2026-07-22.assets/note.ocr.md", "status": "completed" }]),
+    "attachment_count": 1,
+    "ocr_entry_count": 1,
+    "lesson_topic": "Fixture lesson",
+    "lesson_quote_source_status": "unverified",
+})
+lines = ["---", "type: daily-check-in", "schema_version: 3", "index_contract: 3", "session_date: 2026-07-22", "previous_day_date: 2026-07-21", "properties:"]
+for field in schema["fields"]:
+    key = field["key"]
+    value = values[key]
+    if isinstance(value, bool):
+        rendered = "true" if value else "false"
+    elif value == "":
+        rendered = ""
+    elif isinstance(value, (int, float)):
+        rendered = str(value)
+    else:
+        rendered = json.dumps(str(value), ensure_ascii=False)
+    lines.append(f"  {key}: {rendered}")
+lines.extend(["---", "", "## Interpreted Check-In", "", "Readable projection only.", "", "## Lekcja dnia", "", "- Topic: Fixture lesson", "", "## OCR / Notatka robocza", "", "- Full OCR raw-ocr-sentinel", "", "## Dodatkowe informacje", "", "- none", "", "## Załączniki", "", "- 2026-07-22.assets/note.png", "", "## Raw Check-In", "", "raw-check-in-sentinel: preserve verbatim", ""])
+destination.write_text("\n".join(lines), encoding="utf-8")
+PY
+properties_v3_sync="$copy_repo/.systems/scripts/sync-personal-ops-check-ins-v3"
+properties_v3_report="$properties_v3_workspace/personal-ops/check-ins/2026/2026-07-22.md"
+run_must_pass "personal-ops-properties-v3-sync" "$properties_v3_sync" --workspace "$properties_v3_workspace"
+test "$(tail -n +2 "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv" | wc -l | tr -d ' ')" = "1" || { echo "Properties v3 did not emit exactly one CSV row"; exit 1; }
+grep -q '2026-07-22,2026-07-21' "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv" || { echo "Properties v3 lost session/closure dates"; exit 1; }
+head -n 1 "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv" | grep -q 'previous_day_actual_training_doms' || { echo "Properties v3 omitted DOMS analytics column"; exit 1; }
+head -n 1 "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv" | grep -q 'planned_if_approximate' || { echo "Properties v3 omitted IF approximation analytics column"; exit 1; }
+grep -q '100kg x 6' "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv" || { echo "Properties v3 omitted training performance"; exit 1; }
+if rg -q 'raw-check-in-sentinel|raw-ocr-sentinel' "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv" "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.jsonl" "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.metrics.csv" "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.trends.md"; then
+  echo "Properties v3 leaked raw/OCR audit text into indexes"
+  exit 1
+fi
+mkdir -p "$properties_v3_workspace/project-state/demo-project"
+properties_v3_vault="$tmp/personal-ops-properties-v3-vault"
+mkdir -p "$properties_v3_vault/TaskNotes/Tasks"
+cat > "$properties_v3_vault/TaskNotes/Tasks/demo-project-parent.md" <<'MD'
+---
+title: Demo Project analytics implementation
+status: open
+priority: normal
+project: demo-project
+---
+
+# Demo Project analytics implementation
+MD
+"$copy_repo/.systems/scripts/propose-task-candidates" --workspace "$properties_v3_workspace" --check-in "$properties_v3_report" --task-vault "$properties_v3_vault" --json > "$tmp/personal-ops-properties-v3-candidates.json"
+grep -q 'Demo Project analytics fixture' "$tmp/personal-ops-properties-v3-candidates.json" || { echo "Properties v3 did not derive TaskNote candidate from planned_items_json"; exit 1; }
+grep -q 'Triage analytics fixture' "$tmp/personal-ops-properties-v3-candidates.json" || { echo "Properties v3 did not derive optional professional TaskNote candidate"; exit 1; }
+grep -q '"6d/dump"' "$tmp/personal-ops-properties-v3-candidates.json" || { echo "Properties v3 did not route optional professional work to 6D DUMP"; exit 1; }
+run_must_pass "personal-ops-properties-v3-ignored-by-historical-sync" "$copy_repo/.systems/scripts/sync-personal-ops-check-ins" --workspace "$properties_v3_workspace"
+test ! -f "$properties_v3_workspace/personal-ops/indexes/check-ins.csv" || { echo "Historical sync consumed index_contract: 3 report"; exit 1; }
+cp "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv" "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv.before-invalid"
+cp "$properties_v3_report" "$properties_v3_report.valid"
+perl -0pi -e 's/^  report_id:.*$/  report_id: "2026-07-23"/m' "$properties_v3_report"
+run_must_fail "personal-ops-properties-v3-report-id-mismatch" "$properties_v3_sync" --workspace "$properties_v3_workspace"
+cmp "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv.before-invalid" "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv" || { echo "Report ID mismatch replaced v3 index"; exit 1; }
+cp "$properties_v3_report.valid" "$properties_v3_report"
+perl -0pi -e 's/^session_date:.*$/session_date: 2026-07-23/m' "$properties_v3_report"
+run_must_fail "personal-ops-properties-v3-top-session-date-mismatch" "$properties_v3_sync" --workspace "$properties_v3_workspace"
+cmp "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv.before-invalid" "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv" || { echo "Session date mismatch replaced v3 index"; exit 1; }
+cp "$properties_v3_report.valid" "$properties_v3_report"
+perl -0pi -e 's/^  task_candidate_eligible_count:.*$/  task_candidate_eligible_count: 3/m' "$properties_v3_report"
+run_must_fail "personal-ops-properties-v3-eligible-count-mismatch" "$properties_v3_sync" --workspace "$properties_v3_workspace"
+cmp "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv.before-invalid" "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv" || { echo "Eligible count mismatch replaced v3 index"; exit 1; }
+cp "$properties_v3_report.valid" "$properties_v3_report"
+perl -0pi -e 's/^  lesson_topic:.*\n//m' "$properties_v3_report"
+run_must_fail "personal-ops-properties-v3-missing-property" "$properties_v3_sync" --workspace "$properties_v3_workspace"
+cmp "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv.before-invalid" "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv" || { echo "Invalid properties replaced v3 index"; exit 1; }
+cp "$properties_v3_report.valid" "$properties_v3_report"
+perl -0pi -e 's/(  lesson_topic:.*\n)/$1  unknown_property: nope\n/' "$properties_v3_report"
+run_must_fail "personal-ops-properties-v3-unknown-property" "$properties_v3_sync" --workspace "$properties_v3_workspace"
+cp "$properties_v3_report.valid" "$properties_v3_report"
+perl -0pi -e 's/^  routine_total_count:.*$/  routine_total_count: wrong/m' "$properties_v3_report"
+run_must_fail "personal-ops-properties-v3-wrong-type" "$properties_v3_sync" --workspace "$properties_v3_workspace"
+cp "$properties_v3_report.valid" "$properties_v3_report"
+
+run_must_pass "personal-ops-properties-v3-write-tasknotes" "$copy_repo/.systems/scripts/propose-task-candidates" --workspace "$properties_v3_workspace" --check-in "$properties_v3_report" --task-vault "$properties_v3_vault" --owner-approved --write
+grep -q 'ai-system:v3:2026-07-22:build-01' "$properties_v3_vault/TaskNotes/Tasks/demo-project-parent.md" || { echo "Properties v3 did not extend the matching TaskNote with a subtask"; exit 1; }
+grep -q '^  task_generation_status: "created-and-subtasks"$' "$properties_v3_report" || { echo "Properties v3 did not record created-and-subtasks status"; exit 1; }
+grep -q '^  task_generation_references_json: .*TaskNotes/Tasks/' "$properties_v3_report" || { echo "Properties v3 did not record TaskNote references"; exit 1; }
+run_must_pass "personal-ops-properties-v3-write-tasknotes-deduplicates" "$copy_repo/.systems/scripts/propose-task-candidates" --workspace "$properties_v3_workspace" --check-in "$properties_v3_report" --task-vault "$properties_v3_vault" --owner-approved --write
+test "$(rg -c 'ai-system:v3:2026-07-22:build-01' "$properties_v3_vault/TaskNotes/Tasks/demo-project-parent.md")" = "1" || { echo "Properties v3 duplicated a subtask on repeat write"; exit 1; }
+grep -q '^  task_generation_status: "already-generated"$' "$properties_v3_report" || { echo "Properties v3 did not record deduplicated status"; exit 1; }
+grep -q '^  task_generation_references_json: .*TaskNotes/Tasks/' "$properties_v3_report" || { echo "Properties v3 lost recorded references after deduplication"; exit 1; }
+run_must_pass "personal-ops-properties-v3-sync-tasknote-references" "$properties_v3_sync" --workspace "$properties_v3_workspace"
+grep -q 'TaskNotes/Tasks/' "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.jsonl" || { echo "Properties v3 did not emit TaskNote references to JSONL"; exit 1; }
+
+properties_v3_skipped_report="$properties_v3_workspace/personal-ops/check-ins/2026/2026-07-23.md"
+cp "$properties_v3_report" "$properties_v3_skipped_report"
+perl -0pi -e 's/2026-07-22/2026-07-23/g; s/2026-07-21/2026-07-22/g' "$properties_v3_skipped_report"
+run_must_pass "personal-ops-properties-v3-missing-vault-skips" "$copy_repo/.systems/scripts/propose-task-candidates" --workspace "$properties_v3_workspace" --check-in "$properties_v3_skipped_report" --task-vault "$tmp/missing-personal-ops-v3-vault" --owner-approved --write
+grep -q '^  task_generation_status: "skipped"$' "$properties_v3_skipped_report" || { echo "Properties v3 did not record skipped preflight status"; exit 1; }
+grep -q '^  task_generation_references_json: "\[\]"$' "$properties_v3_skipped_report" || { echo "Properties v3 skipped preflight did not clear TaskNote references"; exit 1; }
+
 init_target="$tmp/init-system-insights-workspace"
 run_must_pass "init-workspace-system-insights" "$copy_repo/.systems/scripts/init-workspace" --workspace "$init_target" --workspace-id smoke --workspace-profile primary-entity
 test -f "$init_target/system-insights/system-insights.md" || { echo "init-workspace did not create system insights router"; exit 1; }
@@ -2844,6 +2983,7 @@ test -f "$init_target/links/README.md" || { echo "init-workspace did not create 
 test -f "$init_target/personal-ops/check-ins/README.md" || { echo "init-workspace did not create personal-ops check-ins README"; exit 1; }
 test -f "$init_target/personal-ops/check-ins/import-profiles/manual-daily-check-in.md" || { echo "init-workspace did not create manual daily check-in profile"; exit 1; }
 test -f "$init_target/personal-ops/indexes/check-ins.md" || { echo "init-workspace did not create personal-ops check-ins index"; exit 1; }
+test -f "$init_target/personal-ops/indexes/check-ins-v3.md" || { echo "init-workspace did not create personal-ops v3 check-ins index"; exit 1; }
 test -f "$init_target/tasks/README.md" || { echo "init-workspace did not create tasks README"; exit 1; }
 test -f "$init_target/tasks/tasknote.template.md" || { echo "init-workspace did not create tasknote template"; exit 1; }
 test -f "$init_target/tasks/taskforge-vault-setup.template.md" || { echo "init-workspace did not create taskforge setup template"; exit 1; }

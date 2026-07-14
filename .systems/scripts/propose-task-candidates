@@ -11,6 +11,8 @@ import sys
 import unicodedata
 from pathlib import Path
 
+from personal_ops_properties_v3 import parse_frontmatter_and_properties, validate_properties
+
 
 CHECK_IN_FIELDS = {
     "Zbudowałem": "built",
@@ -228,6 +230,8 @@ def apply_mapping(candidate: dict[str, object], labels: dict[str, list[tuple[str
 def candidates_from_check_in(path: Path, workspace: Path, labels: dict[str, list[tuple[str, str]]]) -> list[dict[str, object]]:
     text = read_text(path)
     fm = parse_frontmatter(text)
+    if fm.get("index_contract") == "3":
+        return candidates_from_index_v3_check_in(path, workspace, labels, text)
     if fm.get("schema_version") == "3":
         return candidates_from_v3_check_in(path, workspace, labels, text, fm)
     check_date = fm.get("date") or path.stem
@@ -263,6 +267,85 @@ def candidates_from_check_in(path: Path, workspace: Path, labels: dict[str, list
             "candidate_key": source_key,
         }
         apply_execution_classification(candidate, "do")
+        apply_mapping(candidate, labels)
+        candidates.append(candidate)
+    return candidates
+
+
+def candidates_from_index_v3_check_in(path: Path, workspace: Path, labels: dict[str, list[tuple[str, str]]], text: str) -> list[dict[str, object]]:
+    """Create candidates from canonical properties only, never audit sections."""
+    top, properties, _ = parse_frontmatter_and_properties(text, path)
+    validate_properties(top, properties, path)
+    session_date = str(properties["session_date"])
+    try:
+        dt.date.fromisoformat(session_date)
+    except ValueError as exc:
+        raise SystemExit(f"V3 session_date is missing or invalid for {path}") from exc
+    if properties["plan_readiness"] != "ready":
+        return []
+    if properties["overload_status"] == "warning" and properties["overload_acknowledged"] is not True:
+        return []
+    try:
+        items = json.loads(str(properties["planned_items_json"]))
+        must_do = json.loads(str(properties["must_do_plan_item_ids_json"]))
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"Malformed V3 planned item JSON in {path}: {exc}") from exc
+    if not isinstance(items, list) or not isinstance(must_do, list):
+        raise SystemExit(f"V3 planned_items_json and must_do_plan_item_ids_json must be JSON arrays in {path}")
+    item_ids = [str(item.get("id", "")).strip() for item in items if isinstance(item, dict)]
+    wig = str(properties["wig_plan_item_id"]).strip()
+    must_ids = [str(value).strip() for value in must_do]
+    if not wig or wig not in item_ids or len(must_ids) > 2 or len(set(must_ids)) != len(must_ids) or wig in must_ids or any(item_id not in item_ids for item_id in must_ids):
+        raise SystemExit(f"V3 WIG/must-do properties are inconsistent with planned_items_json in {path}")
+    if len(item_ids) != len(set(item_ids)):
+        raise SystemExit(f"V3 planned_items_json has duplicate item IDs in {path}")
+    eligible_ids = {wig, *must_ids}
+    candidates: list[dict[str, object]] = []
+    for item in items:
+        if not isinstance(item, dict):
+            raise SystemExit(f"V3 planned_items_json contains a non-object item in {path}")
+        item_id = str(item.get("id", "")).strip()
+        stream = str(item.get("stream", "")).strip().lower()
+        title = str(item.get("title", "")).strip()
+        if not item_id or not title:
+            raise SystemExit(f"V3 planned item requires id and title in {path}")
+        if stream not in {"build", "deliver", "promote"}:
+            continue
+        policy = str(item.get("task", "create")).strip().lower() or "create"
+        if policy not in {"create", "skip"}:
+            raise SystemExit(f"Unsupported V3 Task policy for {item_id}: {policy}")
+        if policy == "skip":
+            continue
+        raw_bucket = str(item.get("task_bucket", "")).strip().lower()
+        match = re.fullmatch(r"(?:5d|6d)/(?P<bucket>do|defer|delegate|delete|dump)", raw_bucket)
+        if raw_bucket and not match:
+            raise SystemExit(f"Unsupported V3 Task bucket for {item_id}: {raw_bucket}")
+        candidate: dict[str, object] = {
+            "type": "task",
+            "title": normalize_title(str(item.get("task_title", "")) or title),
+            "due": f"{session_date}T23:59",
+            "scheduled": session_date,
+            "contexts": [f"workspace/{workspace.name}"],
+            "workspace": workspace.name,
+            "owner_scope": "workspace",
+            "client": "",
+            "owned_asset": "",
+            "project": "",
+            "project_state": "",
+            "source_system": "ai-system",
+            "source_type": "check-in-v3-properties",
+            "source_session_date": session_date,
+            "source_check_in_date": session_date,
+            "source_check_in_field": stream,
+            "source_plan_item_id": item_id,
+            "source_path": str(path),
+            "raw_value": title,
+            "candidate_key": f"{session_date}:{item_id}",
+        }
+        # WIG/must-do items are the priority execution queue. All other professional
+        # planned work remains visible as triage work in 6D DUMP unless explicitly routed.
+        default_bucket = "do" if item_id in eligible_ids else "dump"
+        apply_execution_classification(candidate, match.group("bucket") if match else default_bucket, raw_bucket)
         apply_mapping(candidate, labels)
         candidates.append(candidate)
     return candidates
@@ -575,11 +658,11 @@ def find_similar_parent(candidate: dict[str, object], task_dir: Path) -> Path | 
     return matches[0] if len(matches) == 1 else None
 
 
-def append_subtask(parent_path: Path, candidate: dict[str, object]) -> None:
+def append_subtask(parent_path: Path, candidate: dict[str, object]) -> bool:
     marker = f"ai-system:v3:{candidate['source_session_date']}:{candidate['source_plan_item_id']}"
     text = read_text(parent_path)
     if marker in text:
-        return
+        return False
     line = f"- [ ] {candidate['title']} <!-- {marker} -->"
     heading = re.search(r"^##\s+Subtasks\s*$", text, re.MULTILINE | re.IGNORECASE)
     if heading:
@@ -588,6 +671,7 @@ def append_subtask(parent_path: Path, candidate: dict[str, object]) -> None:
     else:
         text = text.rstrip() + "\n\n## Subtasks\n\n" + line + "\n"
     parent_path.write_text(text, encoding="utf-8")
+    return True
 
 
 def write_candidates(candidates: list[dict[str, object]], task_vault: Path) -> tuple[list[Path], int, list[Path]]:
@@ -607,8 +691,10 @@ def write_candidates(candidates: list[dict[str, object]], task_vault: Path) -> t
             continue
         parent = find_similar_parent(candidate, task_dir)
         if parent:
-            append_subtask(parent, candidate)
-            extended.append(parent)
+            if append_subtask(parent, candidate):
+                extended.append(parent)
+            else:
+                skipped += 1
             if all(key):
                 existing.add(key)
             continue
@@ -668,6 +754,33 @@ def update_v3_task_generation_status(path: Path, status: str, reason: str, refer
     frontmatter = parse_frontmatter(text)
     if frontmatter.get("schema_version") != "3":
         return
+    if frontmatter.get("index_contract") == "3":
+        def set_property(content: str, key: str, value: str) -> str:
+            pattern = re.compile(rf"^(  {re.escape(key)}:)\s*.*$", re.MULTILINE)
+            line = f'{key}: {quote_yaml(value)}'
+            updated, count = pattern.subn(f"  {line}", content, count=1)
+            if count != 1:
+                raise ValueError(f"Missing V3 properties.{key} in {path}")
+            return updated
+        _, existing_properties, _ = parse_frontmatter_and_properties(text, path)
+        text = set_property(text, "task_generation_status", status)
+        text = set_property(text, "task_generation_reason", reason)
+        reference_values: list[str] = []
+        for reference in references:
+            if task_vault:
+                try:
+                    reference_values.append(reference.relative_to(task_vault).as_posix())
+                    continue
+                except ValueError:
+                    pass
+            reference_values.append(str(reference))
+        if status == "already-generated" and not reference_values:
+            references_json = str(existing_properties["task_generation_references_json"])
+        else:
+            references_json = json.dumps(reference_values, ensure_ascii=False)
+        text = set_property(text, "task_generation_references_json", references_json)
+        path.write_text(text, encoding="utf-8")
+        return
     reference_values: list[str] = []
     for reference in references:
         if task_vault:
@@ -699,6 +812,14 @@ def task_preflight(args: argparse.Namespace, config_path: Path) -> tuple[Path | 
 def v3_task_generation_gate(path: Path) -> str:
     text = read_text(path)
     frontmatter = parse_frontmatter(text)
+    if frontmatter.get("index_contract") == "3":
+        top, properties, _ = parse_frontmatter_and_properties(text, path)
+        validate_properties(top, properties, path)
+        if properties["plan_readiness"] != "ready":
+            return "V3 properties plan requires WIG prioritization"
+        if properties["overload_status"] == "warning" and properties["overload_acknowledged"] is not True:
+            return "V3 properties overload warning is not acknowledged"
+        return ""
     if frontmatter.get("schema_version") != "3":
         return ""
     plan = v3_section(text, "Plan dnia")

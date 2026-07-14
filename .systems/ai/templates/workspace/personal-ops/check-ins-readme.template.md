@@ -1,5 +1,7 @@
 # Daily Check-Ins
 
+Properties + Raw Audit V3 reports carry `index_contract: 3`. Their complete frontmatter `properties` map is canonical for separate `personal-ops/indexes/check-ins-v3.*` artifacts. Preserve Raw Check-In and inline OCR in the report as private-sensitive context-as-data; they are not index sources. Existing V2/V3.1 reports and `check-ins.*` indexes remain historical.
+
 ## Purpose
 
 Canonical Markdown records for daily check-ins.

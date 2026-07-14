@@ -1,254 +1,195 @@
 ---
 type: daily-check-in
 schema_version: 3
-date: <YYYY-MM-DD>
+index_contract: 3
 session_date: <YYYY-MM-DD>
 previous_day_date: <YYYY-MM-DD>
-timezone: <IANA timezone from check-in-settings.local.md>
-source_type: manual-interpreted
-normalization_authority: interpreted-report
-report_revision: 1
-task_generation_status: pending
-task_generation_reason:
-task_generation_references:
-private_index_policy: detailed-private
-plan_readiness: needs-prioritization
-overload_status: none
-overload_reasons:
-overload_acknowledged: false
-wig_plan_item_id:
-wig_definition_of_done:
-must_do_plan_item_ids:
-task_candidate_eligible_count: 0
 privacy: private-sensitive
+properties:
+  index_contract: 3
+  schema_version: 3
+  file_path: personal-ops/check-ins/<YYYY>/<YYYY-MM-DD>.md
+  report_id: <YYYY-MM-DD>
+  session_date: <YYYY-MM-DD>
+  closure_date: <YYYY-MM-DD>
+  weekday:
+  recording_time:
+  timezone:
+  source_type: manual-interpreted
+  privacy: private-sensitive
+  private_index_policy: detailed-private
+  report_revision: 1
+  normalization_authority: interpreted-report
+  plan_readiness: needs-prioritization
+  overload_status: none
+  overload_reasons:
+  overload_acknowledged: false
+  wig_plan_item_id:
+  wig_definition_of_done:
+  must_do_plan_item_ids_json: "[]"
+  task_candidate_eligible_count: 0
+  task_generation_status: pending
+  task_generation_reason:
+  task_generation_references_json: "[]"
+  work_mode:
+  organism_mode:
+  morning_wake_up_done:
+  morning_hygiene_mantra_done:
+  morning_kitchen_done:
+  morning_outdoors_done:
+  morning_deep_focus_done:
+  morning_close_people_wishes_done:
+  routine_completion_count:
+  routine_total_count: 6
+  routine_completion_percent:
+  mental_clarity_score:
+  body_readiness_score:
+  limitations:
+  gratitude:
+  previous_day_sleep_start:
+  previous_day_sleep_end:
+  previous_day_sleep_minutes:
+  previous_day_sleep_quality_score:
+  previous_day_sleep_awakenings:
+  previous_day_sleep_approximate:
+  previous_day_actual_training_performed:
+  previous_day_actual_training_type:
+  previous_day_actual_training_start:
+  previous_day_actual_training_end:
+  previous_day_actual_training_minutes:
+  previous_day_actual_training_rpe:
+  previous_day_actual_training_doms:
+  previous_day_actual_training_pain:
+  previous_day_actual_training_performance:
+  previous_day_actual_training_approximate:
+  previous_day_actual_nsdr_performed:
+  previous_day_actual_nsdr_start:
+  previous_day_actual_nsdr_end:
+  previous_day_actual_nsdr_minutes:
+  previous_day_actual_nsdr_effect:
+  previous_day_actual_nsdr_approximate:
+  previous_day_actual_if_start:
+  previous_day_actual_if_end:
+  previous_day_actual_if_minutes:
+  previous_day_actual_if_approximate:
+  previous_day_actual_calories_min:
+  previous_day_actual_calories_max:
+  previous_day_actual_calories_representative:
+  previous_day_finance_amount:
+  previous_day_finance_currency:
+  previous_day_actual_build_count: 0
+  previous_day_actual_deliver_count: 0
+  previous_day_actual_promote_count: 0
+  previous_day_actual_self_count: 0
+  previous_day_actual_close_people_count: 0
+  previous_day_actual_items_json: "[]"
+  previous_day_comparisons_json: "[]"
+  previous_day_minimum_day_status: unknown
+  reflection_plus_one:
+  reflection_redundant:
+  reflection_threat_occurred:
+  reflection_response:
+  planned_training_start:
+  planned_training_end:
+  planned_training_minutes:
+  planned_training_type:
+  planned_training_approximate:
+  planned_nsdr_start:
+  planned_nsdr_end:
+  planned_nsdr_minutes:
+  planned_nsdr_approximate:
+  planned_if_start:
+  planned_if_end:
+  planned_if_minutes:
+  planned_if_approximate:
+  planned_calories_min:
+  planned_calories_max:
+  planned_calories_representative:
+  planned_budget_max:
+  planned_budget_currency:
+  planned_build_count: 0
+  planned_deliver_count: 0
+  planned_promote_count: 0
+  planned_self_count: 0
+  planned_close_people_count: 0
+  planned_items_json: "[]"
+  dynamic_habits_json: "[]"
+  dynamic_habit_count: 0
+  dynamic_habit_completed_count: 0
+  attachments_json: "[]"
+  ocr_entries_json: "[]"
+  attachment_count: 0
+  ocr_entry_count: 0
+  lesson_topic:
+  lesson_todays_one_percent:
+  lesson_original_quote:
+  lesson_nlp_communication_technique:
+  lesson_conversation_episode_topic:
+  lesson_quote_source_status: not-applicable
 ---
 
 # Daily Check-In <YYYY-MM-DD>
 
-Normalized time fields accept `<HH:MM>`, `<YYYY-MM-DD HH:MM>`, or an ISO datetime. `HH:MM` is resolved from the section context: plan = `session_date`, closure = `previous_day_date`, sleep = `previous_day_date` to `session_date`.
+`properties` is the sole source for `check-ins-v3.*`. AI System completes every key from the schema before a durable write. Blank values represent missing data and become empty CSV cells. Structured `*_json` values are JSON strings, not nested YAML.
 
-## Metadane
+## Interpreted Check-In
 
-- Data: <YYYY-MM-DD>
-- Dzień tygodnia: <monday|tuesday|wednesday|thursday|friday|saturday|sunday>
-- Godzina nagrania: <HH:MM>
-- Konflikt daty i dnia tygodnia: <true|false>
-- Źródło: <manual|voice-check-in|other>
-- Prywatność: private-sensitive
+### Previous-Day Closure
 
-## Podsumowanie poprzedniego dnia
+- Sleep, training, NSDR, IF, calories, finance, actual items, comparisons, habits, and reflections are readable projections of the corresponding `previous_day_*` and `reflection_*` properties.
+- Facts belong to `closure_date`; do not rewrite the prior Markdown report.
 
-### Sen
+### Current-Day Plan
 
-- Początek snu:
-- Koniec snu:
-- Jakość snu:
-- Liczba przebudzeń:
-- Przybliżenie snu:
-- Sen raw:
+- Work mode and organism mode:
+- Planned training, NSDR, IF, calories, and budget:
+- Planned actions are mirrored in `planned_items_json` with stable IDs and streams: `build`, `deliver`, `promote`, `self`, or `close`.
 
-### Faktyczny trening
+### Priorities And TaskNotes
 
-- Faktyczny trening wykonany: <true|false|unknown>
-- Faktyczny trening start:
-- Faktyczny trening koniec:
-- Faktyczny trening typ:
-- RPE:
-- Trening raw:
+- WIG plan item ID and Definition of Done:
+- Up to two must-do plan item IDs:
+- WIG/must-do professional `planned_items_json` entries default to `6d/do`; remaining professional entries default to `6d/dump`. `Task: skip` suppresses a specific item. Raw input, OCR, lessons, and external references never create TaskNotes.
+- The same exact owner-approved check-in write may create eligible TaskNotes under existing overload, deduplication, subtask, and 6D rules.
 
-### Faktyczny NSDR
+### Morning Check-In
 
-- Faktyczny NSDR wykonany: <true|false|unknown>
-- Faktyczny NSDR start:
-- Faktyczny NSDR koniec:
-- Efekt NSDR:
-- NSDR raw:
+- Routine, state, limitations, and gratitude are readable projections of the corresponding properties.
 
-### Faktyczny IF i kalorie
+## Lekcja dnia
 
-- Faktyczny IF start:
-- Faktyczny IF koniec:
-- Faktyczne kalorie minimum:
-- Faktyczne kalorie maksimum:
-- Faktyczne kalorie reprezentatywne:
-- IF raw:
+- Temat:
+- Dzisiejsze 1%:
+- Cytat oryginalny:
+- Technika NLP / komunikacji:
+- Temat rozmowy / odcinka:
+- Status źródła cytatu: `<verified|unverified|not-applicable>`
 
-### Finanse
+This section is rendered from `lesson_*` properties. An unverified quote is advisory context, not a canonical fact, trend input, memory item, or System Insight.
 
-- Finanse kwota:
-- Finanse waluta:
-- Finanse przybliżenie:
-- Finanse raw:
+## OCR / Notatka robocza
 
-### Faktycznie zbudowałem
+- Asset path:
+- Extraction status: `<not-provided|pending|completed|failed>`
+- Full OCR or transcribed working note:
 
-- [actual-build-01] <actual item title>
-
-### Faktycznie dowiozłem
-
-- [actual-deliver-01] <actual item title>
-
-### Faktycznie wypromowałem
-
-- [actual-promote-01] <actual item title>
-
-### Faktycznie zrobiłem coś dla siebie
-
-- [actual-self-01] <actual item title>
-
-### Faktycznie zrobiłem coś dla bliskich
-
-- [actual-close-01] <actual item title>
-
-### Faktyczne nawyki
-
-- Habit ID: <habit-01>
-  - Status: <completed|partial|not-completed|unknown>
-  - Note:
-
-### Porównanie plan-fakt
-
-- plan_item_id:
-  - status: <completed-as-planned|partial|not-completed|completed-differently|replaced|consciously-replanned|unknown|not-applicable>
-  - actual_item_ids:
-  - owner-approved: <true|false; required for completed-differently>
-  - note:
-
-### Minimum i refleksja
-
-- Minimum dnia wyprowadzone: <completed|not-completed|unknown|not-defined; derived only from WIG comparison>
-- Minimum dnia owner note: <optional explanation; does not override the derived value>
-- Co realnie dało +1%:
-- Co było zbędne:
-- Zagrożenie dnia wystąpiło:
-- Czy odpowiednio zareagowałem:
-
-## Plan dnia
-
-- Tryb pracy: <wzrost|obrona-reputacji|normalny|nie-podano>
-- Tryb organizmu: <pelna-moc|normalny|regeneracja|nie-podano>
-
-### Planowany trening
-
-- Planowany trening start:
-- Planowany trening koniec:
-- Planowany trening typ:
-- Trening raw:
-
-### Planowany NSDR
-
-- Planowany NSDR start:
-- Planowany NSDR koniec:
-- NSDR raw:
-
-### Planowany IF i kalorie
-
-- Planowany IF start:
-- Planowany IF koniec:
-- Planowane kalorie minimum:
-- Planowane kalorie maksimum:
-- Planowane kalorie reprezentatywne:
-- IF raw:
-
-### Budżet
-
-- Budżet maksimum:
-- Budżet waluta:
-- Budżet raw:
-
-### Planuję zbudować
-
-- [build-01] <planned item title>
-  - Task: <create|skip>
-  - Task title: <optional TaskNote title>
-  - Task bucket: <6d/do|6d/defer|6d/delegate|6d/delete|6d/dump>
-
-### Planuję dowieźć
-
-- [deliver-01] <planned item title>
-  - Task: <create|skip>
-  - Task title: <optional TaskNote title>
-  - Task bucket: <6d/do|6d/defer|6d/delegate|6d/delete|6d/dump>
-
-### Planuję wypromować
-
-- [promote-01] <planned item title>
-  - Task: <create|skip>
-  - Task title: <optional TaskNote title>
-  - Task bucket: <6d/do|6d/defer|6d/delegate|6d/delete|6d/dump>
-
-### Planuję zrobić coś dla siebie
-
-- [self-01] <planned item title>
-
-### Planuję zrobić coś dla bliskich
-
-- [close-01] <planned item title>
-
-### Priorytety dnia
-
-- WIG plan_item_id: <existing plan item ID>
-- WIG definition of done: <observable completion condition>
-- Must-do plan_item_ids: <comma-separated existing plan item IDs; maximum two; do not repeat WIG>
-- Overload acknowledged: <true|false; owner-approved acknowledgement only>
-- Priority owner note:
-
-Items not named by WIG or Must-do are optional. WIG may be from any plan stream. Only professional WIG or must-do items from build, deliver, and promote are eligible for default TaskNotes.
-
-### Planowane nawyki
-
-- Habit ID: <habit-01>
-  - Nazwa:
-  - Trigger:
-  - Kryterium:
-  - Status: planned
-
-## Poranny check-in
-
-### Rutyna
-
-- Pobudka bez negocjacji:
-- Toaleta + mantra:
-- Kuchnia:
-- Dwór:
-- Deep Focus:
-- Życzenia dla bliskich:
-
-### Aktualny stan
-
-- Klarowność mentalna:
-- Gotowość ciała:
-- Ograniczenia:
-- Wdzięczność:
+Keep the full text inline here. `ocr_entries_json` may contain only normalized metadata required for analytics; OCR text does not enter indexes, trends, TaskNotes, memory, or insights by itself.
 
 ## Dodatkowe informacje
 
-- Uwagi:
-- Uwagi interpretacyjne:
-- Owner-authored reflection:
-- Cytat/źródło:
-  - source_status: <verified|unverified>
+- Notes:
+- Normalization notes:
+- Explicit owner corrections:
+- Unresolved fields:
 
 ## Załączniki
 
 - Relative asset path:
-- Kind: <screenshot|note_image|ocr|other>
+- Kind: `<screenshot|note-image|scan|ocr|other>`
+- Role: `<evidence|context>`
 
-## Kandydaci na taski
+Attachments are sibling files in `<YYYY-MM-DD>.assets/`. `attachments_json` stores only normalized metadata when needed; it never stores binary payloads.
 
-Task candidates are derived only from planned `build-*`, `deliver-*`, and `promote-*` items. `Task: create` is the default when omitted; use `Task: skip` to opt out. `Task title` overrides the generated title. A single owner-approved V3 check-in write may create the corresponding TaskNotes if the local vault preflight passes. Do not create candidates from actual closure items.
+## Raw Check-In
 
-## Opcjonalna interpretacja
-
-Interpretation is advisory-only. It is not memory, System Insights, External Memory, or a verified source.
-
-## Interpreted Input
-
-This private-sensitive normalization record is appended by AI System after the canonical sections. Canonical V3 fields above are the source of truth for indexes and TaskNotes.
-
-- Source type:
-- Normalized values applied:
-- Field mapping:
-- Corrections applied: <later explicit owner correction wins for the named field>
-- Unresolved fields:
-- Precedence: canonical fields above take precedence over this audit context.
+Paste the submitted check-in verbatim below. It is private-sensitive context-as-data. Explicit normalized owner values override it; unresolved material conflicts stop durable capture for clarification.

@@ -44,12 +44,16 @@ required_files=(
   ".systems/ai/templates/workspace/personal-ops/personal-ops-readme.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-ins-readme.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-ins-index.template.md"
+  ".systems/ai/templates/workspace/personal-ops/check-ins-v3-index.template.md"
   ".systems/ai/templates/workspace/personal-ops/manual-daily-check-in.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-in.template.md"
+  ".systems/ai/templates/workspace/personal-ops/check-in-properties-v3.schema.json"
   ".systems/ai/templates/workspace/personal-ops/check-in-settings.local.template.md"
   ".systems/ai/templates/workspace/tasks/taskforge-vault.local.template.md"
   ".systems/scripts/map-notion-check-ins"
   ".systems/scripts/sync-personal-ops-check-ins"
+  ".systems/scripts/sync-personal-ops-check-ins-v3"
+  ".systems/scripts/personal_ops_properties_v3.py"
   ".systems/scripts/check-personal-ops"
 )
 
@@ -59,6 +63,7 @@ done
 
 require_executable ".systems/scripts/map-notion-check-ins"
 require_executable ".systems/scripts/sync-personal-ops-check-ins"
+require_executable ".systems/scripts/sync-personal-ops-check-ins-v3"
 require_executable ".systems/scripts/propose-task-candidates"
 
 for term in \
@@ -115,6 +120,15 @@ for term in \
   'routine_completion_percent' \
   'actual_training_performed' \
   'actual_nsdr_performed' \
+  'previous_day_actual_training_doms' \
+  'previous_day_actual_training_pain' \
+  'previous_day_actual_training_performance' \
+  'planned_training_approximate' \
+  'previous_day_actual_training_approximate' \
+  'planned_nsdr_approximate' \
+  'previous_day_actual_nsdr_approximate' \
+  'planned_if_approximate' \
+  'previous_day_actual_if_approximate' \
   'actual_self_count' \
   'actual_close_people_count' \
   'reflection_plus_one' \
@@ -164,7 +178,8 @@ for term in \
   'v3_priority_state' \
   'v3_minimum_day_status' \
   'private_index_policy' \
-  'redacted_v3_payload'
+  'redacted_v3_payload' \
+  'index_contract'
 do
   require_ref ".systems/scripts/sync-personal-ops-check-ins" "$term" "sync tool term $term"
 done
@@ -216,58 +231,85 @@ done
 
 for section in \
   'schema_version: 3' \
+  'index_contract: 3' \
+  'properties:' \
+  'planned_items_json:' \
+  'previous_day_actual_items_json:' \
+  'previous_day_actual_training_doms:' \
+  'previous_day_actual_training_pain:' \
+  'previous_day_actual_training_performance:' \
+  'planned_training_approximate:' \
+  'previous_day_actual_training_approximate:' \
+  'planned_nsdr_approximate:' \
+  'previous_day_actual_nsdr_approximate:' \
+  'planned_if_approximate:' \
+  'task_generation_references_json:' \
+  'previous_day_actual_if_approximate:' \
+  'attachments_json:' \
+  'ocr_entries_json:' \
   'session_date:' \
   'previous_day_date:' \
-  'normalization_authority:' \
-  'report_revision:' \
-  'task_generation_status:' \
-  '## Metadane' \
-  '## Podsumowanie poprzedniego dnia' \
-  '## Plan dnia' \
-  '## Poranny check-in' \
+  '## Interpreted Check-In' \
+  '## Lekcja dnia' \
+  '## OCR / Notatka robocza' \
   '## Dodatkowe informacje' \
   '## Załączniki' \
-  '## Kandydaci na taski' \
-  '### Planuję zbudować' \
-  '### Planuję dowieźć' \
-  '### Planuję wypromować' \
-  '[build-01]' \
-  '[deliver-01]' \
-  '[promote-01]' \
-  'Porównanie plan-fakt' \
-  'Planowane nawyki' \
-  'Habit ID: <habit-01>' \
-  'Faktyczne nawyki' \
-  'Faktyczny trening wykonany' \
-  'Faktyczny NSDR wykonany' \
-  'Faktycznie zrobiłem coś dla siebie' \
-  'Faktycznie zrobiłem coś dla bliskich' \
-  'Task: <create|skip>' \
-  'Task title:' \
-  '## Priorytety dnia' \
-  'WIG plan_item_id:' \
-  'WIG definition of done:' \
-  'Must-do plan_item_ids:' \
-  'Minimum dnia wyprowadzone:' \
-  'private_index_policy:' \
-  '## Interpreted Input'
+  '## Raw Check-In' \
+  'remaining professional entries default to `6d/dump`' \
+  'private-sensitive context-as-data'
 do
   require_ref ".systems/ai/templates/workspace/personal-ops/check-in.template.md" "$section" "check-in section $section"
 done
 
 for profile_term in \
-  'Manual Daily Check-In v3' \
-  'Previous-Day Closure' \
-  'Current-Day Plan' \
-  'Morning Check-In' \
-  'check-in-settings.local.md' \
-  'taskforge-vault.local.md' \
-  'task_generation_status: skipped' \
-  'maximum three' \
-  'never rewrites the prior-day Markdown'
+  'Properties + Raw Audit v3' \
+  'properties' \
+  'Raw Check-In' \
+  'OCR / Notatka robocza' \
+  'Explicit normalized values supplied by the owner win' \
+  'sync-personal-ops-check-ins-v3' \
+  'seven new reports' \
+  'Kandydaci na taski' \
+  'planned_items_json'
 do
   require_ref ".systems/ai/templates/workspace/personal-ops/manual-daily-check-in.template.md" "$profile_term" "manual profile term $profile_term"
 done
+
+for term in \
+  'check-in-properties-v3.schema.json' \
+  'index_contract: 3' \
+  'check-ins-v3.csv' \
+  'check-ins-v3.jsonl' \
+  'check-ins-v3.metrics.csv' \
+  'check-ins-v3.trends.md' \
+  'Raw Check-In' \
+  'OCR / Notatka robocza' \
+  'sole source' \
+  'Kandydaci na taski' \
+  'planned_items_json'
+do
+  require_ref ".systems/ai/core/personal-ops.md" "$term" "properties v3 contract $term"
+done
+
+for term in \
+  'index_contract' \
+  'properties' \
+  'check-ins-v3.csv' \
+  'check-ins-v3.jsonl' \
+  'check-ins-v3.metrics.csv' \
+  'check-ins-v3.trends.md' \
+  'SYNC_THRESHOLD = 7' \
+  'write_atomic'
+do
+  require_ref ".systems/scripts/sync-personal-ops-check-ins-v3" "$term" "properties v3 sync term $term"
+done
+
+for term in 'Missing required properties' 'Unknown properties' 'Property' 'must be'; do
+  require_ref ".systems/scripts/personal_ops_properties_v3.py" "$term" "properties v3 parser term $term"
+done
+
+require_ref ".systems/ai/templates/workspace/personal-ops/check-ins-v3-index.template.md" 'check-ins-v3.csv' "v3 index router CSV"
+require_ref ".systems/ai/templates/workspace/personal-ops/check-ins-v3-index.template.md" 'sync-recommendation-threshold: 7' "v3 index lazy threshold"
 
 require_ref ".systems/ai/templates/workspace/personal-ops/check-in-settings.local.template.md" 'timezone:' "local check-in settings timezone"
 require_ref ".systems/ai/templates/workspace/personal-ops/check-in-settings.local.template.md" 'private_index_policy_default:' "local check-in settings privacy policy"
