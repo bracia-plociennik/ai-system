@@ -209,7 +209,7 @@ Generated analytical indexes live in:
 <workspace>/personal-ops/indexes/check-ins-v3.trends.md
 ```
 
-Markdown is the source of truth. Properties + Raw Audit V3 uses one session report with `index_contract: 3`; its complete frontmatter `properties` map maps 1:1 to `check-ins-v3.*`. The readable interpretation, inline OCR, and verbatim Raw Check-In preserve audit evidence but do not compete with properties. WIG/must-do professional items become `6d/do` TaskNotes; remaining professional plan items become `6d/dump` unless marked `Task: skip`. V2/V3.1 files and `check-ins.*` indexes are frozen history. `check-ins-v3.trends.md` is sanitized for Dreaming Mode and excludes raw input, OCR, attachments, private detail, lessons, and unverified sources. Check-ins and attachments are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
+Markdown is the source of truth. Properties + Raw Audit V3 uses one session report with `index_contract: 3`; its complete frontmatter `properties` map maps 1:1 to `check-ins-v3.*`. The readable interpretation, inline OCR, and verbatim Raw Check-In preserve audit evidence but do not compete with properties. Under `all-professional-do-v1`, every valid professional plan item becomes one `6d/do` TaskNote; WIG is linked or standalone planning/closure only and never creates its own task. V2/V3.1 files and `check-ins.*` indexes are frozen history. `check-ins-v3.trends.md` is sanitized for Dreaming Mode and excludes raw input, OCR, attachments, private detail, lessons, and unverified sources. Check-ins and attachments are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
 
 Manual check-ins write only the daily Markdown file and optional assets. Derived indexes may be intentionally stale. Use lazy sync status before recommending a database refresh:
 
@@ -259,7 +259,7 @@ Use dry-run first:
 .systems/scripts/propose-task-candidates --workspace <workspace-path> --dream-report <workspace>/dreams/runs/<run>/dream-report.md
 ```
 
-V3 check-in candidates come one-per-item from planned professional `build-*`, `deliver-*`, and `promote-*` items and use session-day end-of-day due date `YYYY-MM-DDT23:59`. WIG/must-do items default to `tags: [6d/do]`; remaining professional planned items default to `tags: [6d/dump]`. `Task: skip` suppresses an item and `Task title` can override its generated TaskNote title. Actual closure items never create TaskNotes.
+Under `all-professional-do-v1`, V3 check-in candidates come one-per-item from every valid planned professional `build-*`, `deliver-*`, and `promote-*` item and use `tags: [6d/do]`, `status: open`, `priority: high`, and session-day end-of-day due date `YYYY-MM-DDT23:59`. WIG may be linked to one item or standalone, but never creates a task or changes this candidate set. Actual closure items never create TaskNotes.
 
 An explicit legacy `5d/*` source bucket is normalized to the matching `6d/*` output; new TaskNotes never write `5d/*`. Dry-run reads `<workspace>/tasks/taskforge-vault.local.md` when available to discover TaskForge project links. Missing, disabled, or invalid configuration produces a warning and leaves the proposal read-only.
 

@@ -41,4 +41,4 @@ personal-ops/check-ins/import-profiles/manual-daily-check-in.md
 
 for native AI System daily check-ins.
 
-V3.1 uses one session report per day: current plan/morning state plus previous-day closure. It does not rewrite historical daily Markdown. New reports use one WIG, up to two must-do items, derived overload/minimum state, and a `detailed-private` or `redacted` index policy.
+V3 uses one session report per day: current plan/morning state plus previous-day closure. It does not rewrite historical daily Markdown. New `all-professional-do-v1` reports use linked or standalone WIG for closure, informational overload state, and a `detailed-private` or `redacted` index policy. Every valid professional plan item becomes a `6d/do` TaskNote candidate; WIG itself never creates a task.

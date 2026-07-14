@@ -281,10 +281,6 @@ def candidates_from_index_v3_check_in(path: Path, workspace: Path, labels: dict[
         dt.date.fromisoformat(session_date)
     except ValueError as exc:
         raise SystemExit(f"V3 session_date is missing or invalid for {path}") from exc
-    if properties["plan_readiness"] != "ready":
-        return []
-    if properties["overload_status"] == "warning" and properties["overload_acknowledged"] is not True:
-        return []
     try:
         items = json.loads(str(properties["planned_items_json"]))
         must_do = json.loads(str(properties["must_do_plan_item_ids_json"]))
@@ -293,13 +289,24 @@ def candidates_from_index_v3_check_in(path: Path, workspace: Path, labels: dict[
     if not isinstance(items, list) or not isinstance(must_do, list):
         raise SystemExit(f"V3 planned_items_json and must_do_plan_item_ids_json must be JSON arrays in {path}")
     item_ids = [str(item.get("id", "")).strip() for item in items if isinstance(item, dict)]
-    wig = str(properties["wig_plan_item_id"]).strip()
-    must_ids = [str(value).strip() for value in must_do]
-    if not wig or wig not in item_ids or len(must_ids) > 2 or len(set(must_ids)) != len(must_ids) or wig in must_ids or any(item_id not in item_ids for item_id in must_ids):
-        raise SystemExit(f"V3 WIG/must-do properties are inconsistent with planned_items_json in {path}")
     if len(item_ids) != len(set(item_ids)):
         raise SystemExit(f"V3 planned_items_json has duplicate item IDs in {path}")
-    eligible_ids = {wig, *must_ids}
+    policy = str(properties["task_generation_policy"])
+    if policy == "legacy-wig-priority":
+        if properties["plan_readiness"] != "ready":
+            return []
+        if properties["overload_status"] == "warning" and properties["overload_acknowledged"] is not True:
+            return []
+        wig = str(properties["wig_plan_item_id"]).strip()
+        must_ids = [str(value).strip() for value in must_do]
+        if not wig or wig not in item_ids or len(must_ids) > 2 or len(set(must_ids)) != len(must_ids) or wig in must_ids or any(item_id not in item_ids for item_id in must_ids):
+            raise SystemExit(f"V3 WIG/must-do properties are inconsistent with planned_items_json in {path}")
+        priority_ids = {wig, *must_ids}
+    elif policy == "all-professional-do-v1":
+        priority_ids = set()
+    else:
+        raise SystemExit(f"Unsupported V3 task generation policy in {path}: {policy}")
+
     candidates: list[dict[str, object]] = []
     for item in items:
         if not isinstance(item, dict):
@@ -311,15 +318,18 @@ def candidates_from_index_v3_check_in(path: Path, workspace: Path, labels: dict[
             raise SystemExit(f"V3 planned item requires id and title in {path}")
         if stream not in {"build", "deliver", "promote"}:
             continue
-        policy = str(item.get("task", "create")).strip().lower() or "create"
-        if policy not in {"create", "skip"}:
-            raise SystemExit(f"Unsupported V3 Task policy for {item_id}: {policy}")
-        if policy == "skip":
-            continue
-        raw_bucket = str(item.get("task_bucket", "")).strip().lower()
-        match = re.fullmatch(r"(?:5d|6d)/(?P<bucket>do|defer|delegate|delete|dump)", raw_bucket)
-        if raw_bucket and not match:
-            raise SystemExit(f"Unsupported V3 Task bucket for {item_id}: {raw_bucket}")
+        raw_bucket = ""
+        match = None
+        if policy == "legacy-wig-priority":
+            task_policy = str(item.get("task", "create")).strip().lower() or "create"
+            if task_policy not in {"create", "skip"}:
+                raise SystemExit(f"Unsupported V3 Task policy for {item_id}: {task_policy}")
+            if task_policy == "skip":
+                continue
+            raw_bucket = str(item.get("task_bucket", "")).strip().lower()
+            match = re.fullmatch(r"(?:5d|6d)/(?P<bucket>do|defer|delegate|delete|dump)", raw_bucket)
+            if raw_bucket and not match:
+                raise SystemExit(f"Unsupported V3 Task bucket for {item_id}: {raw_bucket}")
         candidate: dict[str, object] = {
             "type": "task",
             "title": normalize_title(str(item.get("task_title", "")) or title),
@@ -342,9 +352,9 @@ def candidates_from_index_v3_check_in(path: Path, workspace: Path, labels: dict[
             "raw_value": title,
             "candidate_key": f"{session_date}:{item_id}",
         }
-        # WIG/must-do items are the priority execution queue. All other professional
-        # planned work remains visible as triage work in 6D DUMP unless explicitly routed.
-        default_bucket = "do" if item_id in eligible_ids else "dump"
+        # New reports route every professional plan item to DO. Legacy reports
+        # retain their historical WIG/must-do classification behavior.
+        default_bucket = "do" if policy == "all-professional-do-v1" or item_id in priority_ids else "dump"
         apply_execution_classification(candidate, match.group("bucket") if match else default_bucket, raw_bucket)
         apply_mapping(candidate, labels)
         candidates.append(candidate)
@@ -815,10 +825,11 @@ def v3_task_generation_gate(path: Path) -> str:
     if frontmatter.get("index_contract") == "3":
         top, properties, _ = parse_frontmatter_and_properties(text, path)
         validate_properties(top, properties, path)
-        if properties["plan_readiness"] != "ready":
-            return "V3 properties plan requires WIG prioritization"
-        if properties["overload_status"] == "warning" and properties["overload_acknowledged"] is not True:
-            return "V3 properties overload warning is not acknowledged"
+        if properties["task_generation_policy"] == "legacy-wig-priority":
+            if properties["plan_readiness"] != "ready":
+                return "V3 properties plan requires WIG prioritization"
+            if properties["overload_status"] == "warning" and properties["overload_acknowledged"] is not True:
+                return "V3 properties overload warning is not acknowledged"
         return ""
     if frontmatter.get("schema_version") != "3":
         return ""

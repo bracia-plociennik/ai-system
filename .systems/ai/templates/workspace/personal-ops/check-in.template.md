@@ -20,13 +20,17 @@ properties:
   private_index_policy: detailed-private
   report_revision: 1
   normalization_authority: interpreted-report
+  task_generation_policy: all-professional-do-v1
   plan_readiness: needs-prioritization
   overload_status: none
   overload_reasons:
   overload_acknowledged: false
+  wig_kind: none
+  wig_id:
+  wig_title:
   wig_plan_item_id:
   wig_definition_of_done:
-  must_do_plan_item_ids_json: "[]"
+  must_do_plan_item_ids_json: "[]" # legacy compatibility only; new reports keep this empty
   task_candidate_eligible_count: 0
   task_generation_status: pending
   task_generation_reason:
@@ -84,6 +88,7 @@ properties:
   previous_day_actual_close_people_count: 0
   previous_day_actual_items_json: "[]"
   previous_day_comparisons_json: "[]"
+  previous_day_wig_closure_json: "{}"
   previous_day_minimum_day_status: unknown
   reflection_plus_one:
   reflection_redundant:
@@ -147,10 +152,10 @@ properties:
 
 ### Priorities And TaskNotes
 
-- WIG plan item ID and Definition of Done:
-- Up to two must-do plan item IDs:
-- WIG/must-do professional `planned_items_json` entries default to `6d/do`; remaining professional entries default to `6d/dump`. `Task: skip` suppresses a specific item. Raw input, OCR, lessons, and external references never create TaskNotes.
-- The same exact owner-approved check-in write may create eligible TaskNotes under existing overload, deduplication, subtask, and 6D rules.
+- WIG kind: `<plan-item|standalone|none>`; stable WIG ID; title; optional linked plan item ID; and Definition of Done:
+- The prior-day WIG closure is stored in `previous_day_wig_closure_json`; it is the sole input for `previous_day_minimum_day_status`.
+- Every valid `build`, `deliver`, and `promote` entry in `planned_items_json` creates one `6d/do`, `open`, `high` TaskNote. WIG never creates a separate TaskNote, even when it is standalone. Raw input, OCR, lessons, and external references never create TaskNotes.
+- The same exact owner-approved check-in write may create all professional TaskNotes under existing vault, deduplication, subtask, and 6D rules. Overload is informational only.
 
 ### Morning Check-In
 

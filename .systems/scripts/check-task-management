@@ -256,14 +256,12 @@ for term in \
   'reads only frontmatter `projects:` wiki links' \
   'does not initialize TaskForge vault structure' \
   'Personal Ops V3 Initial Task Creation' \
-  'WIG/must-do `build-*`, `deliver-*`, and `promote-*` items default to `6d/do`' \
-  'other professional planned items default to `6d/dump`' \
-  'no overload warning remains unacknowledged' \
+  'task_generation_policy: all-professional-do-v1' \
+  'every valid `build-*`, `deliver-*`, and `promote-*` item becomes one `6d/do`' \
+  'Missing WIG or overload warning does not suppress candidates' \
   'source_session_date + source_plan_item_id' \
   'mechanical flag records the same approval' \
-  'Task: create' \
-  'Task: skip' \
-  'Task title' \
+  'WIG may be linked to one plan item or standalone' \
   'legacy `5d/*` input is read-compatible and normalizes to the matching `6d/*` tag' \
   'warns without failing when project discovery cannot run' \
   'task_generation_status: skipped' \

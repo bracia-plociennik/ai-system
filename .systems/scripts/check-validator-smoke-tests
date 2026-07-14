@@ -2852,17 +2852,22 @@ values.update({
     "weekday": "wednesday",
     "recording_time": "08:00",
     "timezone": "Europe/Warsaw",
+    "task_generation_policy": "all-professional-do-v1",
     "plan_readiness": "ready",
+    "wig_kind": "plan-item",
+    "wig_id": "wig-build-01",
+    "wig_title": "Demo Project analytics fixture",
     "wig_plan_item_id": "build-01",
     "wig_definition_of_done": "A complete fixture exists.",
-    "must_do_plan_item_ids_json": json.dumps(["deliver-01"]),
-    "task_candidate_eligible_count": 2,
+    "must_do_plan_item_ids_json": json.dumps([]),
+    "previous_day_wig_closure_json": json.dumps({}),
+    "task_candidate_eligible_count": 3,
     "planned_build_count": 1,
     "planned_deliver_count": 1,
     "planned_promote_count": 1,
     "planned_items_json": json.dumps([
-        {"id": "build-01", "stream": "build", "title": "Demo Project analytics fixture", "task": "create", "task_bucket": "6d/do"},
-        {"id": "deliver-01", "stream": "deliver", "title": "Deliver analytics fixture", "task": "skip"},
+        {"id": "build-01", "stream": "build", "title": "Demo Project analytics fixture"},
+        {"id": "deliver-01", "stream": "deliver", "title": "Deliver analytics fixture"},
         {"id": "promote-01", "stream": "promote", "title": "Triage analytics fixture"},
     ]),
     "previous_day_actual_items_json": json.dumps([{ "id": "actual-build-01", "stream": "build", "title": "Closed fixture" }]),
@@ -2927,7 +2932,77 @@ MD
 "$copy_repo/.systems/scripts/propose-task-candidates" --workspace "$properties_v3_workspace" --check-in "$properties_v3_report" --task-vault "$properties_v3_vault" --json > "$tmp/personal-ops-properties-v3-candidates.json"
 grep -q 'Demo Project analytics fixture' "$tmp/personal-ops-properties-v3-candidates.json" || { echo "Properties v3 did not derive TaskNote candidate from planned_items_json"; exit 1; }
 grep -q 'Triage analytics fixture' "$tmp/personal-ops-properties-v3-candidates.json" || { echo "Properties v3 did not derive optional professional TaskNote candidate"; exit 1; }
-grep -q '"6d/dump"' "$tmp/personal-ops-properties-v3-candidates.json" || { echo "Properties v3 did not route optional professional work to 6D DUMP"; exit 1; }
+python3 - "$tmp/personal-ops-properties-v3-candidates.json" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as handle:
+    candidates = json.load(handle)
+assert {candidate["source_plan_item_id"] for candidate in candidates} == {"build-01", "deliver-01", "promote-01"}, candidates
+assert all(candidate["tags"] == ["6d/do"] for candidate in candidates), candidates
+assert all(candidate["status"] == "open" and candidate["priority"] == "high" for candidate in candidates), candidates
+assert "wig-build-01" not in {candidate["source_plan_item_id"] for candidate in candidates}, candidates
+PY
+properties_v3_no_wig_report="$properties_v3_workspace/personal-ops/check-ins/2026/2026-07-24.md"
+cp "$properties_v3_report" "$properties_v3_no_wig_report"
+python3 - "$properties_v3_no_wig_report" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+text = text.replace("2026-07-21", "2026-07-23").replace("2026-07-22", "2026-07-24")
+replacements = {
+    "plan_readiness": '"needs-prioritization"',
+    "overload_status": '"warning"',
+    "overload_acknowledged": "false",
+    "wig_kind": '"none"',
+    "wig_id": '""',
+    "wig_title": '""',
+    "wig_plan_item_id": '""',
+    "wig_definition_of_done": '""',
+}
+for key, value in replacements.items():
+    text = re.sub(rf"^  {key}:.*$", f"  {key}: {value}", text, flags=re.MULTILINE)
+path.write_text(text, encoding="utf-8")
+PY
+"$copy_repo/.systems/scripts/propose-task-candidates" --workspace "$properties_v3_workspace" --check-in "$properties_v3_no_wig_report" --task-vault "$properties_v3_vault" --json > "$tmp/personal-ops-properties-v3-no-wig.json"
+python3 - "$tmp/personal-ops-properties-v3-no-wig.json" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as handle:
+    candidates = json.load(handle)
+assert {candidate["source_plan_item_id"] for candidate in candidates} == {"build-01", "deliver-01", "promote-01"}, candidates
+assert all(candidate["tags"] == ["6d/do"] for candidate in candidates), candidates
+PY
+properties_v3_standalone_wig_report="$properties_v3_workspace/personal-ops/check-ins/2026/2026-07-25.md"
+cp "$properties_v3_report" "$properties_v3_standalone_wig_report"
+python3 - "$properties_v3_standalone_wig_report" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+text = text.replace("2026-07-21", "2026-07-24").replace("2026-07-22", "2026-07-25")
+replacements = {
+    "wig_kind": '"standalone"',
+    "wig_id": '"wig-standalone-01"',
+    "wig_title": '"Protect recovery"',
+    "wig_plan_item_id": '""',
+    "wig_definition_of_done": '"Rest without work after 20:00."',
+    "previous_day_wig_closure_json": '"{\\\"wig_id\\\": \\\"wig-prior-01\\\", \\\"status\\\": \\\"completed-as-planned\\\", \\\"owner_approved\\\": false}"',
+    "previous_day_minimum_day_status": '"completed"',
+}
+for key, value in replacements.items():
+    text = re.sub(rf"^  {key}:.*$", f"  {key}: {value}", text, flags=re.MULTILINE)
+path.write_text(text, encoding="utf-8")
+PY
+run_must_pass "personal-ops-properties-v3-standalone-wig-sync" "$properties_v3_sync" --workspace "$properties_v3_workspace"
+grep -q 'wig-standalone-01' "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.jsonl" || { echo "Properties v3 did not retain standalone WIG"; exit 1; }
+grep -q '"previous_day_minimum_day_status": "completed"' "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.jsonl" || { echo "Properties v3 did not derive standalone WIG minimum status"; exit 1; }
 run_must_pass "personal-ops-properties-v3-ignored-by-historical-sync" "$copy_repo/.systems/scripts/sync-personal-ops-check-ins" --workspace "$properties_v3_workspace"
 test ! -f "$properties_v3_workspace/personal-ops/indexes/check-ins.csv" || { echo "Historical sync consumed index_contract: 3 report"; exit 1; }
 cp "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv" "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv.before-invalid"
@@ -2940,7 +3015,7 @@ perl -0pi -e 's/^session_date:.*$/session_date: 2026-07-23/m' "$properties_v3_re
 run_must_fail "personal-ops-properties-v3-top-session-date-mismatch" "$properties_v3_sync" --workspace "$properties_v3_workspace"
 cmp "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv.before-invalid" "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv" || { echo "Session date mismatch replaced v3 index"; exit 1; }
 cp "$properties_v3_report.valid" "$properties_v3_report"
-perl -0pi -e 's/^  task_candidate_eligible_count:.*$/  task_candidate_eligible_count: 3/m' "$properties_v3_report"
+perl -0pi -e 's/^  task_candidate_eligible_count:.*$/  task_candidate_eligible_count: 2/m' "$properties_v3_report"
 run_must_fail "personal-ops-properties-v3-eligible-count-mismatch" "$properties_v3_sync" --workspace "$properties_v3_workspace"
 cmp "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv.before-invalid" "$properties_v3_workspace/personal-ops/indexes/check-ins-v3.csv" || { echo "Eligible count mismatch replaced v3 index"; exit 1; }
 cp "$properties_v3_report.valid" "$properties_v3_report"

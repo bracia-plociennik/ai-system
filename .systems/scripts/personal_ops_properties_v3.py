@@ -13,7 +13,6 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCHEMA_PATH = REPO_ROOT / ".systems/ai/templates/workspace/personal-ops/check-in-properties-v3.schema.json"
 
-
 def load_schema() -> list[dict[str, Any]]:
     raw = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
     fields = raw.get("fields")
@@ -127,6 +126,15 @@ def _validate_type(value: Any, spec: dict[str, Any], key: str) -> None:
 def validate_properties(top: dict[str, Any], properties: dict[str, Any], source: Path) -> dict[str, Any]:
     fields = load_schema()
     by_key = {field["key"]: field for field in fields}
+    # Existing index-contract: 3 reports remain immutable. Hydrate only the new
+    # in-memory fields so their legacy task policy stays readable and indexable.
+    if "task_generation_policy" not in properties:
+        legacy_wig = str(properties.get("wig_plan_item_id", "")).strip()
+        properties.setdefault("task_generation_policy", "legacy-wig-priority")
+        properties.setdefault("wig_kind", "plan-item" if legacy_wig else "none")
+        properties.setdefault("wig_id", f"legacy-{legacy_wig}" if legacy_wig else "")
+        properties.setdefault("wig_title", "")
+        properties.setdefault("previous_day_wig_closure_json", "{}")
     missing = sorted(set(by_key) - set(properties))
     unknown = sorted(set(properties) - set(by_key))
     if missing:
@@ -178,6 +186,34 @@ def _json_array(value: Any, key: str, source: Path) -> list[Any]:
     return decoded
 
 
+def _json_object(value: Any, key: str, source: Path) -> dict[str, Any]:
+    try:
+        decoded = json.loads(str(value))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Property {key} must be a JSON object in {source}") from exc
+    if not isinstance(decoded, dict):
+        raise ValueError(f"Property {key} must be a JSON object in {source}")
+    return decoded
+
+
+def _minimum_day_status_from_wig_closure(closure: dict[str, Any], source: Path) -> str:
+    if not closure:
+        return "unknown"
+    wig_id = str(closure.get("wig_id", "")).strip()
+    status = str(closure.get("status", "")).strip()
+    if not wig_id:
+        raise ValueError(f"previous_day_wig_closure_json requires wig_id in {source}")
+    if status == "completed-as-planned":
+        return "completed"
+    if status == "completed-differently":
+        return "completed" if closure.get("owner_approved") is True else "not-completed"
+    if status in {"partial", "not-completed", "replaced"}:
+        return "not-completed"
+    if status == "unknown":
+        return "unknown"
+    raise ValueError(f"Unsupported prior-day WIG closure status '{status}' in {source}")
+
+
 def _validate_task_candidate_eligible_count(properties: dict[str, Any], source: Path) -> None:
     """Keep the source properties metric aligned with V3 TaskNote candidate policy."""
     items = _json_array(properties["planned_items_json"], "planned_items_json", source)
@@ -190,6 +226,61 @@ def _validate_task_candidate_eligible_count(properties: dict[str, Any], source: 
     must_ids = [str(value).strip() for value in must_do]
     if any(not item_id for item_id in must_ids) or len(must_ids) > 2 or len(must_ids) != len(set(must_ids)):
         raise ValueError(f"must_do_plan_item_ids_json must contain at most two unique non-empty IDs in {source}")
+
+    policy = str(properties["task_generation_policy"])
+    if policy == "all-professional-do-v1":
+        if must_ids:
+            raise ValueError(f"all-professional-do-v1 does not allow must_do_plan_item_ids_json in {source}")
+        wig_kind = str(properties["wig_kind"])
+        wig_id = str(properties["wig_id"]).strip()
+        wig_title = str(properties["wig_title"]).strip()
+        wig_plan_item_id = str(properties["wig_plan_item_id"]).strip()
+        wig_definition = str(properties["wig_definition_of_done"]).strip()
+        if wig_kind == "plan-item":
+            if not wig_id or not wig_title or not wig_definition or wig_plan_item_id not in item_ids:
+                raise ValueError(f"plan-item WIG requires ID, title, Definition of Done, and a valid plan item in {source}")
+        elif wig_kind == "standalone":
+            if not wig_id or not wig_title or not wig_definition or wig_plan_item_id:
+                raise ValueError(f"standalone WIG requires ID, title, Definition of Done, and no plan item in {source}")
+        elif wig_kind == "none":
+            if wig_id or wig_title or wig_plan_item_id or wig_definition:
+                raise ValueError(f"none WIG must not carry WIG values in {source}")
+        else:
+            raise ValueError(f"Unsupported WIG kind '{wig_kind}' in {source}")
+
+        expected_readiness = "ready" if wig_kind in {"plan-item", "standalone"} else "needs-prioritization"
+        if str(properties["plan_readiness"]) != expected_readiness:
+            raise ValueError(f"plan_readiness must be {expected_readiness} for WIG kind {wig_kind} in {source}")
+        closure = _json_object(properties["previous_day_wig_closure_json"], "previous_day_wig_closure_json", source)
+        expected_minimum = _minimum_day_status_from_wig_closure(closure, source)
+        if str(properties["previous_day_minimum_day_status"]) != expected_minimum:
+            raise ValueError(
+                f"previous_day_minimum_day_status must equal {expected_minimum} from prior-day WIG closure in {source}"
+            )
+        expected = 0
+        for item in items:
+            stream = str(item.get("stream", "")).strip().lower()
+            if "task" in item or "task_bucket" in item:
+                raise ValueError(f"all-professional-do-v1 does not allow per-item task routing in {source}")
+            if stream in {"build", "deliver", "promote"}:
+                expected += 1
+    else:
+        expected = _legacy_task_candidate_count(properties, items, must_ids, item_ids, source)
+
+    try:
+        actual = int(str(properties["task_candidate_eligible_count"]))
+    except ValueError as exc:
+        raise ValueError(f"task_candidate_eligible_count must be an integer in {source}") from exc
+    if actual != expected:
+        raise ValueError(
+            f"task_candidate_eligible_count must equal {expected} from eligible planned items in {source}; got {actual}"
+        )
+
+
+def _legacy_task_candidate_count(
+    properties: dict[str, Any], items: list[Any], must_ids: list[str], item_ids: list[str], source: Path
+) -> int:
+    """Preserve the old WIG/must-do policy for reports written before all-professional-do-v1."""
 
     readiness = str(properties["plan_readiness"])
     overload = str(properties["overload_status"])
@@ -207,14 +298,7 @@ def _validate_task_candidate_eligible_count(properties: dict[str, Any], source: 
                     raise ValueError(f"Unsupported V3 Task policy for {item.get('id', '')} in {source}")
                 if stream in {"build", "deliver", "promote"} and policy == "create":
                     expected += 1
-    try:
-        actual = int(str(properties["task_candidate_eligible_count"]))
-    except ValueError as exc:
-        raise ValueError(f"task_candidate_eligible_count must be an integer in {source}") from exc
-    if actual != expected:
-        raise ValueError(
-            f"task_candidate_eligible_count must equal {expected} from eligible planned items in {source}; got {actual}"
-        )
+    return expected
 
 
 def csv_value(value: Any) -> str:

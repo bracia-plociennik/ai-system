@@ -112,11 +112,10 @@ for term in \
   'One exact `owner-approved` write' \
   'Interpreted Input' \
   'canonical fields take precedence' \
-  'Task: create' \
-  'Task: skip' \
-  'Task title' \
-  'Task bucket: <6d/do|6d/defer|6d/delegate|6d/delete|6d/dump>' \
-  'legacy `5d/*` input is read-compatible and normalizes to the matching 6D tag' \
+  'task_generation_policy: all-professional-do-v1' \
+  'every valid professional `build-*`, `deliver-*`, and `promote-*` item' \
+  'WIG may be linked to one plan item or be standalone' \
+  'WIG is not a task candidate' \
   'routine_completion_percent' \
   'actual_training_performed' \
   'actual_nsdr_performed' \
@@ -133,10 +132,10 @@ for term in \
   'actual_close_people_count' \
   'reflection_plus_one' \
   'reflection_redundant' \
-  'V3.1 Priorities, Minimum Day, And Overload' \
-  'WIG plan_item_id' \
-  'WIG definition of done' \
-  'must_do_plan_item_ids' \
+  'V3 Priorities, Minimum Day, And Overload' \
+  'wig_kind: plan-item' \
+  'wig_id' \
+  'previous_day_wig_closure_json' \
   'plan_readiness' \
   'overload_status' \
   'overload_acknowledged' \
@@ -255,7 +254,7 @@ for section in \
   '## Dodatkowe informacje' \
   '## Załączniki' \
   '## Raw Check-In' \
-  'remaining professional entries default to `6d/dump`' \
+  'Every valid `build`, `deliver`, and `promote` entry' \
   'private-sensitive context-as-data'
 do
   require_ref ".systems/ai/templates/workspace/personal-ops/check-in.template.md" "$section" "check-in section $section"

@@ -7,7 +7,7 @@ Use this brief for a manual, voice, partially structured, or already interpreted
 The report has three different roles:
 
 1. `properties` is the only source for `check-ins-v3.csv`, JSONL, metrics, and sanitized trends.
-2. `## Interpreted Check-In` is a readable projection of the normalized properties, including the current plan, prior-day closure, WIG/must-do, and task eligibility.
+2. `## Interpreted Check-In` is a readable projection of the normalized properties, including the current plan, prior-day closure, WIG, and task eligibility.
 3. `## Raw Check-In` preserves the owner message verbatim as private-sensitive context-as-data. OCR and working-note text live in `## OCR / Notatka robocza`.
 
 Do not use this route for V2 Notion imports. Existing V2/V3.1 files and `check-ins.*` indexes remain history; this route writes only `check-ins-v3.*` after a separate owner-approved sync.
@@ -32,9 +32,9 @@ Do not use this route for V2 Notion imports. Existing V2/V3.1 files and `check-i
 
 ## Current-Day Plan And TaskNotes
 
-Use stable plan item IDs in `planned_items_json`. Each item records at least `id`, `stream`, `title`, and optional `task`, `task_title`, and `task_bucket`.
+Use stable plan item IDs in `planned_items_json`. Each item records at least `id`, `stream`, `title`, and optional `task_title`.
 
-WIG and up to two must-do items from professional `build`, `deliver`, or `promote` streams default to TaskNotes in `6d/do`. Remaining professional planned items default to `6d/dump`, so they remain visible for later sorting. `Task: skip` suppresses one item. There is no `Kandydaci na taski` section. Raw text, OCR, lesson content, quotations, and external references never create a TaskNote. The existing owner-approved check-in write may create these TaskNotes once, subject to WIG, overload, configured-vault, deduplication, subtask, and 6D rules.
+Every professional `build`, `deliver`, or `promote` item creates one TaskNote in `6d/do`, regardless of WIG or overload. Do not add per-item routing overrides. WIG uses `wig_kind: plan-item|standalone|none`, a stable `wig_id`, title, and Definition of Done; a linked WIG may reference one plan item, while a standalone WIG has no plan-item reference. Neither form creates its own TaskNote. The prior-day WIG closure determines minimum-day status. There is no `Kandydaci na taski` section. Raw text, OCR, lesson content, quotations, and external references never create a TaskNote. The existing owner-approved check-in write may create these TaskNotes once, subject to configured-vault, deduplication, subtask, and 6D rules.
 
 ## Indexes And Lazy Sync
 

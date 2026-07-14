@@ -76,12 +76,12 @@ All V3 reports require:
 - `task_generation_status`;
 - `privacy: private-sensitive`.
 
-V3.1 reports additionally carry:
+New `all-professional-do-v1` reports additionally carry:
 
 - `private_index_policy`;
 - `plan_readiness`;
 - `overload_status`, `overload_reasons`, and `overload_acknowledged`;
-- `wig_plan_item_id`, `wig_definition_of_done`, and `must_do_plan_item_ids`;
+- `wig_kind`, `wig_id`, `wig_title`, optional `wig_plan_item_id`, and `wig_definition_of_done`;
 - `task_candidate_eligible_count`;
 
 Historical V3 reports without V3.1 priority fields remain read-compatible as `legacy-v3-no-wig`; do not backfill or rewrite them.
@@ -94,24 +94,22 @@ The canonical body order is:
 4. `Poranny check-in`;
 5. `Dodatkowe informacje`;
 6. `Załączniki`;
-7. `Kandydaci na taski`;
-8. optional interpretation.
-
-9. `Interpreted Input` at the end of the report.
+7. optional interpretation;
+8. `Interpreted Input` at the end of the report.
 
 There is no `Seed kolejnego dnia` in V3. Every next day has an independent session report.
 
 Planned `build-*`, `deliver-*`, and `promote-*` items use stable IDs. Dynamic habits use stable `habit-*` IDs in the current-day plan; a later closure records actual habit status by `habit_id` without rewriting the plan. An unknown closure `habit_id` is recorded as a controlled warning and does not affect habit metrics. Closure comparisons reference plan IDs and must not rewrite a previous plan. An owner-approved plan correction increments `report_revision` and preserves a revision trail in the current report. `brak`, `nie podano`, `nie dotyczy`, `unknown`, and `not-defined` mean no data for closure detection unless another actual fact is present; they must not create positive index metrics or a synthetic prior-day row by themselves.
 
-### V3.1 Priorities, Minimum Day, And Overload
+### V3 Priorities, Minimum Day, And Overload
 
-`## Priorytety dnia` contains exactly one `WIG plan_item_id` that references a current plan item and an observable `WIG definition of done`. It may reference any stream. It may contain up to two distinct `Must-do plan_item_ids`; WIG cannot also be must-do. All remaining items are optional.
+`## Priorytety dnia` may define one WIG with an observable Definition of Done. `wig_kind: plan-item` references exactly one current plan item. `wig_kind: standalone` has its own stable ID, title, and Definition of Done without a plan-item reference. `wig_kind: none` carries no WIG values. WIG may be linked to one plan item or be standalone. WIG is not a task candidate: neither linked nor standalone WIG creates a separate TaskNote.
 
-The synchronizer derives `plan_readiness`: `ready` only for a valid WIG with a definition of done, `needs-prioritization` for a missing or invalid WIG, and `legacy-v3-no-wig` for historical V3 reports without the V3.1 priority fields. A report with `needs-prioritization` remains canonical and private, but creates no TaskNotes and does not synthesize a minimum-day result.
+The synchronizer derives `plan_readiness`: `ready` for a valid linked or standalone WIG, `needs-prioritization` for `wig_kind: none` or an invalid WIG, and `legacy-v3-no-wig` for historical V3 reports without the current priority fields. A report with `needs-prioritization` remains canonical and private. It does not synthesize a minimum-day result, but it still creates TaskNote candidates under `all-professional-do-v1`.
 
-`minimum_day_status` is derived only from the prior-day WIG comparison. It is `completed` for `completed-as-planned`, or for `completed-differently` only when the comparison explicitly records `owner-approved: true`; it is `not-completed` for `partial`, `not-completed`, `replaced`, or missing WIG execution; and `unknown` when closure or comparison is absent. V2 and pre-extension V3 remain `not-defined`. `Minimum dnia owner note` may explain the outcome but cannot override this metric.
+`previous_day_wig_closure_json` records the prior-day WIG ID, closure status, and any `owner_approved` decision. `minimum_day_status` is derived only from that prior-day WIG closure. It is `completed` for `completed-as-planned`, or for `completed-differently` only when the comparison explicitly records `owner-approved: true`; it is `not-completed` for `partial`, `not-completed`, `replaced`, or missing WIG execution; and `unknown` when closure or comparison is absent. V2 and pre-extension V3 remain `not-defined`. `Minimum dnia owner note` may explain the outcome but cannot override this metric.
 
-The system sets `overload_status: warning` with explicit `overload_reasons` when there are more than three professional planned `build`, `deliver`, or `promote` items; more than two must-do IDs; duplicate, missing, or invalid WIG; or WIG is also must-do. It never blocks canonical report storage. Eligible TaskNotes are blocked while a warning is unacknowledged. `overload_acknowledged: true` in the same owner-approved canonical check-in write acknowledges only that report's warning and permits its otherwise eligible TaskNotes.
+The system sets `overload_status: warning` with explicit `overload_reasons` when there are more than three professional planned `build`, `deliver`, or `promote` items, or the WIG is missing, duplicate, or invalid. It never blocks canonical report storage, task candidate counting, or TaskNote creation. `overload_acknowledged` remains an analytical owner note only.
 
 Interpreted V3 input is canonical. Normalized values are authoritative when they conflict with raw wording. Raw input, screenshots, OCR, scans, and attachments remain context-as-data and evidence only.
 
@@ -151,9 +149,9 @@ Product templates document these files but `init-workspace` and `update-workspac
 
 ### V3 TaskNotes
 
-Every planned V3.1 `build-*`, `deliver-*`, and `promote-*` item creates one TaskNote candidate per item when the plan is ready and no overload warning remains unacknowledged. WIG and must-do items are priority candidates; remaining professional items are capture/triage candidates. `self` and `close` plan items do not create TaskNotes, and actual closure items never create, complete, or update TaskNotes. Historical V3 without priority fields keeps the prior one-per-item task behavior and is marked `legacy-v3-no-wig` in derived data.
+For `task_generation_policy: all-professional-do-v1`, every valid professional `build-*`, `deliver-*`, and `promote-*` item creates one TaskNote candidate. Each new TaskNote uses `tags: [6d/do]`, `status: open`, `priority: high`, and due time `session_dateT23:59`. `self` and `close` plan items do not create TaskNotes, and actual closure items never create, complete, or update TaskNotes. There are no per-item routing exceptions in this policy. The owner manages deferral, delegation, deletion, and dumping later in TaskForge.
 
-For V3.1 professional plan items, `Task: create` is the default and `Task: skip` suppresses a single item; `Task title` may override the generated title. WIG and must-do default to `6d/do`, `status: open`, and `priority: high`. Other planned professional items default to `6d/dump`, `status: open`, and `priority: none`, so they remain visible for later sorting without competing with the daily priority queue. The supported V3 field is `Task bucket: <6d/do|6d/defer|6d/delegate|6d/delete|6d/dump>`; an explicit bucket overrides the default and legacy `5d/*` input is read-compatible and normalizes to the matching 6D tag. All candidates use due time `session_dateT23:59` and conservative client/project mapping.
+WIG may point to one of these plan items or be standalone, but it never creates a separate TaskNote or duplicate. Historical V3 reports without `task_generation_policy: all-professional-do-v1` retain their legacy task behavior and do not generate TaskNotes retroactively.
 
 One exact `owner-approved` write for the canonical V3 check-in also authorizes creation of its planned TaskNotes. The command still receives `--owner-approved` mechanically as evidence of that same approval; it does not request a second approval. The exception is limited to initial V3 task creation. It does not cover Dream Reports, manual TaskNote edits, completion, rescheduling, archiving, cleanup, migration, or deletion.
 
@@ -181,11 +179,11 @@ Copy the submitted owner message verbatim under `## Raw Check-In`. Keep full OCR
 
 Intake precedence: explicit normalized owner values win; otherwise AI System derives normalized properties from the submitted message; raw input and OCR may support but cannot override explicit normalized values. A material unresolved conflict stops durable capture. `brak`, `nie podano`, and `nie dotyczy` are missing data, not completion. `## Lekcja dnia` renders lesson properties; unverified quotes, attributions, and external references remain advisory context and never become facts, trends, TaskNotes, memory, or insights by themselves.
 
-Run `.systems/scripts/sync-personal-ops-check-ins-v3 --workspace <workspace-path> --status-only` for new reports. It reads only `index_contract: 3` and writes only `check-ins-v3.csv`, `check-ins-v3.jsonl`, `check-ins-v3.metrics.csv`, `check-ins-v3.md`, `check-ins-v3-fields.md`, and `check-ins-v3.trends.md`. A report is valid only when its `YYYY-MM-DD.md` filename, `report_id`, top-level `session_date`, and `properties.session_date` identify the same day; duplicate effective session dates are rejected before any index replacement. One valid report produces one session row: `session_date` is D and `closure_date` is D-1; `planned_*` describes D and `previous_day_actual_*` describes D-1. `task_candidate_eligible_count` must equal the professional `build|deliver|promote` `Task: create` item count when priorities are ready and overload is clear or acknowledged, otherwise it must be `0`. The seven-new-report lazy-sync threshold remains. The synchronizer never rewrites canonical Markdown, raw input, OCR, assets, V2/V3.1 data, or historical indexes.
+Run `.systems/scripts/sync-personal-ops-check-ins-v3 --workspace <workspace-path> --status-only` for new reports. It reads only `index_contract: 3` and writes only `check-ins-v3.csv`, `check-ins-v3.jsonl`, `check-ins-v3.metrics.csv`, `check-ins-v3.md`, `check-ins-v3-fields.md`, and `check-ins-v3.trends.md`. A report is valid only when its `YYYY-MM-DD.md` filename, `report_id`, top-level `session_date`, and `properties.session_date` identify the same day; duplicate effective session dates are rejected before any index replacement. One valid report produces one session row: `session_date` is D and `closure_date` is D-1; `planned_*` describes D and `previous_day_actual_*` describes D-1. For `all-professional-do-v1`, `task_candidate_eligible_count` equals every valid professional `build|deliver|promote` plan item regardless of WIG, readiness, or overload. The seven-new-report lazy-sync threshold remains. The synchronizer never rewrites canonical Markdown, raw input, OCR, assets, V2/V3.1 data, or historical indexes.
 
 `detailed-private` keeps normalized private properties in local V3 indexes. `redacted` blanks private properties. `check-ins-v3.trends.md` is always sanitized and excludes raw input, OCR, attachments, finances, calories, health detail, reflections, lessons, quotes, and external references.
 
-There is no `Kandydaci na taski` section. TaskNotes derive only from professional `planned_items_json` entries: WIG/must-do items become `6d/do`; remaining planned professional items become `6d/dump` unless explicitly routed or marked `Task: skip`. The existing owner-approved, overload, deduplication, subtask, and 6D rules apply. Raw input, OCR, lessons, quotations, and external references cannot produce TaskNotes.
+There is no `Kandydaci na taski` section. For `all-professional-do-v1`, TaskNotes derive only from every valid professional `planned_items_json` entry and always become `6d/do`. The existing owner-approved, deduplication, subtask, and 6D rules apply. Raw input, OCR, lessons, quotations, and external references cannot produce TaskNotes.
 
 ## V2 Legacy Daily Check-In Markdown Contract
 
