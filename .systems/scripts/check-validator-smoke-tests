@@ -46,6 +46,18 @@ run_must_pass() {
   fi
 }
 
+run_must_pass_capture() {
+  local name="$1"
+  local out="$2"
+  shift 2
+
+  if ! (cd "$copy_repo" && "$@") >"$out" 2>&1; then
+    echo "Smoke test failed: $name should have passed"
+    cat "$out"
+    exit 1
+  fi
+}
+
 validator="$copy_repo/.systems/scripts/check-prompt-composition"
 
 run_must_pass "prompt-composition-baseline" "$validator"
@@ -2563,8 +2575,8 @@ v3_freshness_csv="$v3_native_freshness_workspace/personal-ops/indexes/check-ins-
 v3_freshness_router_before="$(shasum -a 256 "$v3_freshness_router")"
 v3_freshness_csv_before="$(shasum -a 256 "$v3_freshness_csv")"
 v3_freshness_status="$tmp/personal-ops-v3-native-freshness-status.out"
-run_must_pass "personal-ops-v3-native-freshness-status" \
-  "$properties_v3_sync" --workspace "$v3_native_freshness_workspace" --status-only >"$v3_freshness_status"
+run_must_pass_capture "personal-ops-v3-native-freshness-status" "$v3_freshness_status" \
+  "$properties_v3_sync" --workspace "$v3_native_freshness_workspace" --status-only
 grep -Fqx 'current-check-in-count: 49' "$v3_freshness_status"
 grep -Fqx 'current-native-check-in-count: 3' "$v3_freshness_status"
 grep -Fqx 'current-legacy-check-in-count: 46' "$v3_freshness_status"
@@ -2584,8 +2596,12 @@ test "$v3_freshness_csv_before" = "$(shasum -a 256 "$v3_freshness_csv")"
 v3_freshness_router_saved="$tmp/check-ins-v3-native-freshness-router.md"
 cp "$v3_freshness_router" "$v3_freshness_router_saved"
 grep -v 'last-synced-native-check-in-count' "$v3_freshness_router_saved" >"$v3_freshness_router"
-run_must_pass "personal-ops-v3-native-freshness-missing-baseline" \
-  "$properties_v3_sync" --workspace "$v3_native_freshness_workspace" --status-only >"$v3_freshness_status"
+if grep -Fq 'last-synced-native-check-in-count' "$v3_freshness_router"; then
+  echo "native freshness fallback fixture still contains a native baseline"
+  exit 1
+fi
+run_must_pass_capture "personal-ops-v3-native-freshness-missing-baseline" "$v3_freshness_status" \
+  "$properties_v3_sync" --workspace "$v3_native_freshness_workspace" --status-only
 grep -Fqx 'last-synced-native-check-in-count: 0' "$v3_freshness_status"
 grep -Fqx 'unsynced-native-check-in-count: 3' "$v3_freshness_status"
 grep -Fqx 'unsynced-check-in-count: 3' "$v3_freshness_status"
@@ -2593,12 +2609,12 @@ cp "$v3_freshness_router_saved" "$v3_freshness_router"
 
 run_must_pass "personal-ops-v3-native-freshness-sync" \
   "$properties_v3_sync" --workspace "$v3_native_freshness_workspace"
-grep -Fqx -- '- last-synced-check-in-count: 49' "$v3_freshness_router"
-grep -Fqx -- '- last-synced-native-check-in-count: 3' "$v3_freshness_router"
-grep -Fqx -- '- unsynced-native-check-in-count: 0' "$v3_freshness_router"
-grep -Fqx -- '- unsynced-check-in-count: 0' "$v3_freshness_router"
-run_must_pass "personal-ops-v3-native-freshness-post-sync-status" \
-  "$properties_v3_sync" --workspace "$v3_native_freshness_workspace" --status-only >"$v3_freshness_status"
+grep -Fqx 'last-synced-check-in-count: 49' "$v3_freshness_router"
+grep -Fqx 'last-synced-native-check-in-count: 3' "$v3_freshness_router"
+grep -Fqx 'unsynced-native-check-in-count: 0' "$v3_freshness_router"
+grep -Fqx 'unsynced-check-in-count: 0' "$v3_freshness_router"
+run_must_pass_capture "personal-ops-v3-native-freshness-post-sync-status" "$v3_freshness_status" \
+  "$properties_v3_sync" --workspace "$v3_native_freshness_workspace" --status-only
 grep -Fqx 'unsynced-native-check-in-count: 0' "$v3_freshness_status"
 grep -Fqx 'unsynced-check-in-count: 0' "$v3_freshness_status"
 
