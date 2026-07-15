@@ -2409,6 +2409,199 @@ run_must_pass "personal-ops-properties-v3-missing-vault-skips" "$copy_repo/.syst
 grep -q '^  task_generation_status: "skipped"$' "$properties_v3_skipped_report" || { echo "Properties v3 did not record skipped preflight status"; exit 1; }
 grep -q '^  task_generation_references_json: "\[\]"$' "$properties_v3_skipped_report" || { echo "Properties v3 skipped preflight did not clear TaskNote references"; exit 1; }
 
+v3_native_freshness_workspace="$tmp/personal-ops-v3-native-freshness-workspace"
+python3 - "$copy_repo" "$v3_native_freshness_workspace" <<'PY'
+import hashlib
+import json
+import sys
+from datetime import date, timedelta
+from pathlib import Path
+
+repo = Path(sys.argv[1])
+workspace = Path(sys.argv[2])
+schema = json.loads(
+    (repo / ".systems/ai/templates/workspace/personal-ops/check-in-properties-v3.schema.json").read_text(
+        encoding="utf-8"
+    )
+)
+fields = schema["fields"]
+
+
+def yaml_value(value):
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if value is None:
+        return ""
+    if isinstance(value, (int, float)):
+        return str(value)
+    return json.dumps(str(value), ensure_ascii=False)
+
+
+def properties_for(day, source_type, file_path):
+    values = {field["key"]: field["default"] for field in fields}
+    previous_day = day - timedelta(days=1)
+    values.update(
+        {
+            "file_path": file_path,
+            "report_id": day.isoformat(),
+            "session_date": day.isoformat(),
+            "closure_date": previous_day.isoformat(),
+            "weekday": day.strftime("%A").lower(),
+            "timezone": "Europe/Warsaw",
+            "source_type": source_type,
+            "task_generation_policy": "all-professional-do-v1",
+            "plan_readiness": "needs-prioritization",
+            "wig_kind": "none",
+            "previous_day_wig_closure_json": "{}",
+            "previous_day_minimum_day_status": "unknown",
+            "task_generation_status": "skipped",
+            "task_generation_reason": "fixture",
+            "task_generation_references_json": "[]",
+            "planned_items_json": "[]",
+            "previous_day_actual_items_json": "[]",
+            "previous_day_comparisons_json": "[]",
+            "dynamic_habits_json": "[]",
+            "attachments_json": "[]",
+            "ocr_entries_json": "[]",
+            "task_candidate_eligible_count": 0,
+        }
+    )
+    return values
+
+
+def write_native(day):
+    relative = f"personal-ops/check-ins/{day.year}/{day.isoformat()}.md"
+    properties = properties_for(day, "manual-interpreted", relative)
+    report = workspace / relative
+    report.parent.mkdir(parents=True, exist_ok=True)
+    lines = [
+        "---",
+        "type: daily-check-in",
+        "schema_version: 3",
+        "index_contract: 3",
+        f"session_date: {day.isoformat()}",
+        f"previous_day_date: {(day - timedelta(days=1)).isoformat()}",
+        "properties:",
+    ]
+    lines.extend(f"  {field['key']}: {yaml_value(properties[field['key']])}" for field in fields)
+    lines.extend(["---", "", "## Interpreted Check-In", "", "Native freshness fixture.", ""])
+    report.write_text("\n".join(lines), encoding="utf-8")
+
+
+for native_day in (date(2026, 7, 10), date(2026, 7, 11), date(2026, 7, 12)):
+    write_native(native_day)
+
+snapshot_root = workspace / "personal-ops/archive/check-ins-v3-migration"
+snapshot_root.mkdir(parents=True, exist_ok=True)
+legacy_rows = []
+for offset in range(46):
+    legacy_day = date(2026, 1, 1) + timedelta(days=offset)
+    source_relative = f"personal-ops/archive/legacy-source/{legacy_day.year}/{legacy_day.isoformat()}.md"
+    source = workspace / source_relative
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text(f"Legacy source {legacy_day.isoformat()}\n", encoding="utf-8")
+    properties = properties_for(legacy_day, "legacy-v2-one-time-migration", source_relative)
+    legacy_rows.append(
+        {
+            "properties": properties,
+            "legacy_metadata": {
+                "origin": {
+                    "source_path": source_relative,
+                    "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+                },
+                "field_confidence": {field["key"]: "derived" for field in fields},
+                "unmapped_fields": [],
+                "legacy_minimum_day_done": False,
+            },
+        }
+    )
+
+snapshot = snapshot_root / "legacy-normalized-v3.jsonl"
+snapshot.write_text(
+    "".join(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n" for row in legacy_rows),
+    encoding="utf-8",
+)
+(snapshot_root / "import-report.md").write_text("# Legacy fixture\n", encoding="utf-8")
+(snapshot_root / "manifest.json").write_text(
+    json.dumps(
+        {
+            "format": "personal-ops-legacy-normalized-v3",
+            "format_version": 1,
+            "legacy_normalized_v3_sha256": hashlib.sha256(snapshot.read_bytes()).hexdigest(),
+            "record_count": len(legacy_rows),
+        },
+        sort_keys=True,
+    )
+    + "\n",
+    encoding="utf-8",
+)
+
+indexes = workspace / "personal-ops/indexes"
+indexes.mkdir(parents=True, exist_ok=True)
+(indexes / "check-ins-v3.md").write_text(
+    "\n".join(
+        [
+            "# Check-Ins V3 Index",
+            "",
+            "- last-synced-check-in-count: 48",
+            "- last-synced-native-check-in-count: 2",
+            "- current-check-in-count: 48",
+            "- current-native-check-in-count: 2",
+            "- current-legacy-check-in-count: 46",
+            "- unsynced-native-check-in-count: 0",
+            "- unsynced-check-in-count: 0",
+            "",
+        ]
+    ),
+    encoding="utf-8",
+)
+(indexes / "check-ins-v3.csv").write_text("official index sentinel\n", encoding="utf-8")
+PY
+
+v3_freshness_router="$v3_native_freshness_workspace/personal-ops/indexes/check-ins-v3.md"
+v3_freshness_csv="$v3_native_freshness_workspace/personal-ops/indexes/check-ins-v3.csv"
+v3_freshness_router_before="$(shasum -a 256 "$v3_freshness_router")"
+v3_freshness_csv_before="$(shasum -a 256 "$v3_freshness_csv")"
+v3_freshness_status="$tmp/personal-ops-v3-native-freshness-status.out"
+run_must_pass "personal-ops-v3-native-freshness-status" \
+  "$properties_v3_sync" --workspace "$v3_native_freshness_workspace" --status-only >"$v3_freshness_status"
+grep -Fqx 'current-check-in-count: 49' "$v3_freshness_status"
+grep -Fqx 'current-native-check-in-count: 3' "$v3_freshness_status"
+grep -Fqx 'current-legacy-check-in-count: 46' "$v3_freshness_status"
+grep -Fqx 'last-synced-check-in-count: 48' "$v3_freshness_status"
+grep -Fqx 'last-synced-native-check-in-count: 2' "$v3_freshness_status"
+grep -Fqx 'unsynced-native-check-in-count: 1' "$v3_freshness_status"
+grep -Fqx 'unsynced-check-in-count: 1' "$v3_freshness_status"
+grep -Fqx 'sync-recommendation: not required yet' "$v3_freshness_status"
+test "$v3_freshness_router_before" = "$(shasum -a 256 "$v3_freshness_router")"
+test "$v3_freshness_csv_before" = "$(shasum -a 256 "$v3_freshness_csv")"
+
+run_must_pass "personal-ops-v3-native-freshness-dry-run" \
+  "$properties_v3_sync" --workspace "$v3_native_freshness_workspace" --dry-run
+test "$v3_freshness_router_before" = "$(shasum -a 256 "$v3_freshness_router")"
+test "$v3_freshness_csv_before" = "$(shasum -a 256 "$v3_freshness_csv")"
+
+v3_freshness_router_saved="$tmp/check-ins-v3-native-freshness-router.md"
+cp "$v3_freshness_router" "$v3_freshness_router_saved"
+grep -v 'last-synced-native-check-in-count' "$v3_freshness_router_saved" >"$v3_freshness_router"
+run_must_pass "personal-ops-v3-native-freshness-missing-baseline" \
+  "$properties_v3_sync" --workspace "$v3_native_freshness_workspace" --status-only >"$v3_freshness_status"
+grep -Fqx 'last-synced-native-check-in-count: 0' "$v3_freshness_status"
+grep -Fqx 'unsynced-native-check-in-count: 3' "$v3_freshness_status"
+grep -Fqx 'unsynced-check-in-count: 3' "$v3_freshness_status"
+cp "$v3_freshness_router_saved" "$v3_freshness_router"
+
+run_must_pass "personal-ops-v3-native-freshness-sync" \
+  "$properties_v3_sync" --workspace "$v3_native_freshness_workspace"
+grep -Fqx -- '- last-synced-check-in-count: 49' "$v3_freshness_router"
+grep -Fqx -- '- last-synced-native-check-in-count: 3' "$v3_freshness_router"
+grep -Fqx -- '- unsynced-native-check-in-count: 0' "$v3_freshness_router"
+grep -Fqx -- '- unsynced-check-in-count: 0' "$v3_freshness_router"
+run_must_pass "personal-ops-v3-native-freshness-post-sync-status" \
+  "$properties_v3_sync" --workspace "$v3_native_freshness_workspace" --status-only >"$v3_freshness_status"
+grep -Fqx 'unsynced-native-check-in-count: 0' "$v3_freshness_status"
+grep -Fqx 'unsynced-check-in-count: 0' "$v3_freshness_status"
+
 init_target="$tmp/init-system-insights-workspace"
 run_must_pass "init-workspace-system-insights" "$copy_repo/.systems/scripts/init-workspace" --workspace "$init_target" --workspace-id smoke --workspace-profile primary-entity
 test -f "$init_target/system-insights/system-insights.md" || { echo "init-workspace did not create system insights router"; exit 1; }

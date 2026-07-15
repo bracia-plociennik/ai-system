@@ -252,16 +252,24 @@ def render_trends(records: list[dict], fields: list[dict]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def read_last_count(router: Path) -> int:
+def read_router_counts(router: Path) -> dict[str, int]:
+    """Read total and native freshness baselines from the last official V3 sync."""
+    counts = {
+        "last-synced-check-in-count": 0,
+        "last-synced-native-check-in-count": 0,
+    }
     if not router.is_file():
-        return 0
+        return counts
     for line in router.read_text(encoding="utf-8").splitlines():
-        if line.startswith("last-synced-check-in-count:"):
+        for key in counts:
+            match = re.match(rf"^\s*(?:-\s+)?{re.escape(key)}:\s*(.*?)\s*$", line)
+            if not match:
+                continue
             try:
-                return int(line.split(":", 1)[1].strip())
+                counts[key] = int(match.group(1))
             except ValueError:
-                return 0
-    return 0
+                counts[key] = 0
+    return counts
 
 
 def render_router(records: list[dict], source: str) -> str:
@@ -271,7 +279,7 @@ def render_router(records: list[dict], source: str) -> str:
     return "\n".join([
         "# Check-Ins v3 Index", "", "Derived official V3 index. Native V3 reports and an owner-created immutable legacy snapshot may contribute rows; active V2 indexes are retired.", "",
         f"last-synced-at: {__import__('datetime').datetime.now().astimezone().isoformat(timespec='seconds')}",
-        f"last-synced-check-in-count: {current}", f"last-synced-native-check-in-count: {native_count}", f"current-check-in-count: {current}", f"current-native-check-in-count: {native_count}", f"current-legacy-check-in-count: {legacy_count}", "unsynced-check-in-count: 0",
+        f"last-synced-check-in-count: {current}", f"last-synced-native-check-in-count: {native_count}", f"current-check-in-count: {current}", f"current-native-check-in-count: {native_count}", f"current-legacy-check-in-count: {legacy_count}", "unsynced-native-check-in-count: 0", "unsynced-check-in-count: 0",
         f"sync-recommendation-threshold: {SYNC_THRESHOLD}", f"last-sync-source: {source}",
         "", "- CSV: `check-ins-v3.csv`", "- JSONL: `check-ins-v3.jsonl`", "- Metrics: `check-ins-v3.metrics.csv`", "- Fields: `check-ins-v3-fields.md`", "- Sanitized trends: `check-ins-v3.trends.md`", "",
     ])
@@ -297,15 +305,21 @@ def write_indexes(records: list[dict], fields: list[dict], workspace: Path, dry_
 
 def print_status(records: list[dict], workspace: Path) -> None:
     router = workspace / "personal-ops/indexes/check-ins-v3.md"
-    current = sum(record["record_kind"] == "native" for record in records)
-    last = read_last_count(router)
-    unsynced = max(0, current - last)
-    print(f"current-check-in-count: {current}")
-    print(f"current-legacy-check-in-count: {sum(record['record_kind'] == 'legacy' for record in records)}")
-    print(f"last-synced-check-in-count: {last}")
-    print(f"unsynced-check-in-count: {unsynced}")
+    native_count = sum(record["record_kind"] == "native" for record in records)
+    legacy_count = sum(record["record_kind"] == "legacy" for record in records)
+    counts = read_router_counts(router)
+    last_total = counts["last-synced-check-in-count"]
+    last_native = counts["last-synced-native-check-in-count"]
+    unsynced_native = max(0, native_count - last_native)
+    print(f"current-check-in-count: {native_count + legacy_count}")
+    print(f"current-native-check-in-count: {native_count}")
+    print(f"current-legacy-check-in-count: {legacy_count}")
+    print(f"last-synced-check-in-count: {last_total}")
+    print(f"last-synced-native-check-in-count: {last_native}")
+    print(f"unsynced-native-check-in-count: {unsynced_native}")
+    print(f"unsynced-check-in-count: {unsynced_native}")
     print(f"sync-recommendation-threshold: {SYNC_THRESHOLD}")
-    print("sync-recommendation: recommend sync" if unsynced >= SYNC_THRESHOLD else "sync-recommendation: not required yet")
+    print("sync-recommendation: recommend sync" if unsynced_native >= SYNC_THRESHOLD else "sync-recommendation: not required yet")
 
 
 def main() -> int:

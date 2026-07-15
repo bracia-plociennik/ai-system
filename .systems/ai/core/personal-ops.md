@@ -70,7 +70,7 @@ Use:
 
 The synchronizer reads native `index_contract: 3` reports and, when present, one validated immutable legacy snapshot. It produces only the six official `check-ins-v3.*` artifacts. It rejects malformed source reports, malformed snapshots, incomplete/unknown properties, hash mismatches, and duplicate effective session dates before replacing any official index.
 
-The router reports native, legacy, and total row counts separately. Lazy-sync freshness is based only on native V3 reports; imported legacy rows are immutable and do not make a newly captured day stale. The threshold remains seven new native reports. An owner may approve an earlier sync or must approve a sync after correcting an older native day.
+The router and `--status-only` report native, legacy, and total row counts separately. Lazy-sync freshness is `unsynced-native-check-in-count`: `max(0, current-native-check-in-count - last-synced-native-check-in-count)`. `unsynced-check-in-count` is a compatibility alias of that native value. Imported legacy rows are immutable and do not make a newly captured day stale; `last-synced-check-in-count` remains total-reporting evidence only. If a router has no native baseline, `last-synced-native-check-in-count` is `0`, so every native report is unsynced until the first owner-approved sync. The threshold remains seven new native reports. An owner may approve an earlier sync or must approve a sync after correcting an older native day.
 
 The JSONL index retains `legacy_metadata` only for legacy rows: source provenance, source hash, source range, field confidence, unmapped fields, and the legacy V2 minimum flag. It never copies Raw Check-In, OCR text, private source body text, financial details beyond normalized properties, or asset binaries.
 

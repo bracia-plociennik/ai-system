@@ -89,7 +89,9 @@ for term in \
   'Duplicate effective session_date' \
   'check-ins-v3.trends.md' \
   'current-native-check-in-count' \
-  'current-legacy-check-in-count'
+  'current-legacy-check-in-count' \
+  'last-synced-native-check-in-count' \
+  'unsynced-native-check-in-count'
 do
   require_ref ".systems/scripts/sync-personal-ops-check-ins-v3" "$term"
 done
@@ -102,6 +104,14 @@ for term in \
   '2026-05-19'
 do
   require_ref ".systems/scripts/migrate-personal-ops-legacy-check-ins-v3" "$term"
+done
+
+for term in \
+  'last-synced-native-check-in-count' \
+  'unsynced-native-check-in-count' \
+  'compatibility alias'
+do
+  require_ref ".systems/ai/templates/workspace/personal-ops/check-ins-v3-index.template.md" "$term"
 done
 
 for retired in \
