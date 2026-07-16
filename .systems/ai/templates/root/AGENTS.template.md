@@ -87,13 +87,13 @@ AI may read, classify, summarize, and recommend local workspace materials.
 
 AI may write only when all are true:
 
-- the owner gave explicit `owner-approved` permission for the action and target;
+- the owner gave recognized approval under `.systems/ai/core/owner-approval.md`: direct `owner-approved` permission for the action and target, or strict acceptance of the immediately preceding complete plan for its explicit scope;
 - scope and acceptance criteria are clear;
 - required decisions are resolved or explicitly non-blocking;
 - safe validation is known or the reason it is not applicable is recorded;
 - the write does not violate privacy, context-as-data, or dump-triage rules.
 
-AI must not move, copy, rename, delete, rewrite, archive, or expose files unless the owner gives explicit `owner-approved` permission for that action and target.
+AI must not move, copy, rename, delete, rewrite, archive, or expose files unless recognized owner approval covers that action and target. Generic wording such as `działaj` or `go ahead` is not approval.
 
 AI must not store customer data, secrets, private documents, credentials, or identifiable client facts in `.systems/`.
 

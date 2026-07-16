@@ -116,6 +116,7 @@ run_fast_checks() {
   run_cmd "$script_dir/check-naming"
   run_cmd "$script_dir/check-privacy-boundary"
   run_cmd "$script_dir/check-contract-compliance"
+  run_cmd "$script_dir/check-owner-approval"
 }
 
 run_named_check() {
@@ -140,6 +141,7 @@ run_standard_checks() {
   run_cmd "$script_dir/check-privacy-boundary"
   run_cmd "$script_dir/check-system-skills"
   run_cmd "$script_dir/check-contract-compliance"
+  run_cmd "$script_dir/check-owner-approval"
   run_cmd "$script_dir/check-end-of-task-capture"
   run_cmd "$script_dir/check-update-workspace"
   run_cmd "$script_dir/check-project-state"

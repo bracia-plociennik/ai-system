@@ -191,6 +191,33 @@ mutate_contract_and_expect_fail "contract-compliance-missing-not-required" "not-
 mutate_contract_and_expect_fail "contract-compliance-missing-checkpoint-target" "checkpoint"
 mutate_contract_and_expect_fail "contract-compliance-missing-advisory-only" "advisory-only"
 
+owner_approval_validator="$copy_repo/.systems/scripts/check-owner-approval"
+owner_approval_core="$copy_repo/.systems/ai/core/owner-approval.md"
+
+run_must_pass "owner-approval-baseline" "$owner_approval_validator"
+
+mv "$owner_approval_core" "$owner_approval_core.bak"
+run_must_fail "missing-owner-approval-contract" "$copy_repo/.systems/scripts/check-required-artifacts"
+mv "$owner_approval_core.bak" "$owner_approval_core"
+
+cp "$owner_approval_core" "$owner_approval_core.bak"
+perl -0pi -e 's/PLEASE IMPLEMENT THIS PLAN/PLAN ACCEPTANCE REMOVED/g' "$owner_approval_core"
+run_must_fail "owner-approval-requires-English-plan-acceptance" "$owner_approval_validator"
+mv "$owner_approval_core.bak" "$owner_approval_core"
+
+cp "$owner_approval_core" "$owner_approval_core.bak"
+perl -0pi -e 's/immediately preceding complete plan/previous plan/g' "$owner_approval_core"
+run_must_fail "owner-approval-requires-current-plan-binding" "$owner_approval_validator"
+mv "$owner_approval_core.bak" "$owner_approval_core"
+
+cat > "$copy_repo/.systems/ai/core/owner-approval-unsafe-smoke.md" <<'MD'
+# Unsafe Owner Approval Smoke
+
+Plan acceptance may bypass validation.
+MD
+run_must_fail "owner-approval-blocks-validation-bypass" "$owner_approval_validator"
+rm "$copy_repo/.systems/ai/core/owner-approval-unsafe-smoke.md"
+
 end_of_task_validator="$copy_repo/.systems/scripts/check-end-of-task-capture"
 end_of_task_core="$copy_repo/.systems/ai/core/end-of-task-capture.md"
 end_of_task_template="$copy_repo/.systems/ai/templates/capture/end-of-task-capture.template.md"

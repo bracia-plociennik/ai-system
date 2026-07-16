@@ -6,6 +6,8 @@ Task intake is the mandatory pre-routing lens for new work in AI System.
 
 It is not a phase and does not grant write permission. It decides whether the request is clear, safe, complete, and ready for planning or implementation.
 
+Use `.systems/ai/core/owner-approval.md` to determine whether direct approval or strict acceptance of the immediately preceding complete plan supplies recognized owner approval. Task intake still requires resolvable target, scope, acceptance criteria, decisions, and evidence.
+
 ## When To Use
 
 Use task intake before:
@@ -73,7 +75,7 @@ Stop before planning or implementation when:
 - acceptance criteria are missing and cannot be inferred safely;
 - material may contain secrets, legal content, private customer data, or production data;
 - real external effects are possible;
-- requested writes lack `owner-approved`;
+- requested writes lack recognized owner approval;
 - prompt composition would change scope, risk, permissions, evidence, owner approvals, or client commitments;
 - the request would bypass validation, evidence, privacy, or stop conditions.
 

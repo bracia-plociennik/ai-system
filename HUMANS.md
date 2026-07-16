@@ -38,7 +38,7 @@ For multiple registered workspaces:
 
 Use AI to read, classify, summarize, and recommend first.
 
-Only approve writes after the proposed action and target are explicit. Use the words `owner-approved` when you want the AI to write, move, copy, rename, delete, archive, rewrite, or expose files.
+Only approve writes after the proposed action and target are explicit. Use `owner-approved: <action + target>`, or accept the immediately preceding complete plan with `PLEASE IMPLEMENT THIS PLAN`, `Yes, implement this plan`, `wdroż ten plan`, or `zrealizuj ten plan`. Plan acceptance covers only the plan's explicit scope and does not bypass privacy, validation, evidence, or stricter target-specific rules. See `.systems/ai/core/owner-approval.md`.
 
 ## Daily Start
 

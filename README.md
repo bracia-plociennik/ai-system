@@ -80,6 +80,10 @@ Use `--refresh-agents` only when you explicitly want to overwrite local `AGENTS.
 
 In the `ai-system-dev` product checkout, the local root `AGENTS.md` may intentionally be governed by the product-development workflow instead of this management template. Do not refresh it from the management template unless that is the explicit task.
 
+## Owner Approval
+
+Use `owner-approved: <action + target>`, or accept the immediately preceding complete plan with a strict phrase such as `PLEASE IMPLEMENT THIS PLAN`, `Yes, implement this plan`, `wdroż ten plan`, or `zrealizuj ten plan`. Plan acceptance covers only that plan's explicit scope and never bypasses privacy, validation, evidence, risk, workspace selection, stop conditions, or stricter target-specific rules. Generic `działaj` or `go ahead` wording does not grant approval. See `.systems/ai/core/owner-approval.md`.
+
 ## Prompt Composition
 
 AI System supports advisory prompt composition for roles, variable packs, modules, client collaboration profiles, project prompting, workspace prompting, and AI System operation roles.

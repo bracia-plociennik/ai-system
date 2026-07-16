@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+fail=0
+
+require_file() {
+  local path="$1"
+  if [[ ! -f "$repo_root/$path" ]]; then
+    echo "Missing owner approval artifact: $path"
+    fail=1
+  fi
+}
+
+require_ref() {
+  local file="$1"
+  local pattern="$2"
+  local label="$3"
+  if [[ ! -f "$repo_root/$file" ]]; then
+    echo "Missing file for owner approval check: $file"
+    fail=1
+    return 0
+  fi
+  if ! rg -q -i -- "$pattern" "$repo_root/$file"; then
+    echo "Missing owner approval reference in $file: $label"
+    fail=1
+  fi
+}
+
+contract=".systems/ai/core/owner-approval.md"
+
+require_file "$contract"
+require_file ".systems/scripts/check-owner-approval"
+
+require_ref "$contract" '^# Owner Approval$' "contract title"
+require_ref "$contract" '## Direct Approval' "direct approval section"
+require_ref "$contract" 'owner-approved: <action \+ target>' "direct approval grammar"
+require_ref "$contract" '## Plan Acceptance Grammar' "plan acceptance grammar"
+require_ref "$contract" 'immediately preceding complete plan' "current plan binding"
+require_ref "$contract" "owner's current conversation message" "owner-message boundary"
+require_ref "$contract" 'PLEASE IMPLEMENT THIS PLAN' "English acceptance phrase"
+require_ref "$contract" 'Yes, implement this plan' "English acceptance phrase"
+require_ref "$contract" 'implement this plan' "English acceptance phrase"
+require_ref "$contract" 'wdroż ten plan' "Polish acceptance phrase"
+require_ref "$contract" 'zrealizuj ten plan' "Polish acceptance phrase"
+require_ref "$contract" 'tak, wdroż ten plan' "Polish acceptance phrase"
+require_ref "$contract" 'tak, zrealizuj ten plan' "Polish acceptance phrase"
+require_ref "$contract" '## Scope Binding' "scope binding"
+require_ref "$contract" 'actions and targets' "explicit action and target"
+require_ref "$contract" 'commits, pushes, or external effects' "explicit external scope"
+require_ref "$contract" 'ambiguous, stale, superseded, incomplete' "approval rejection cases"
+require_ref "$contract" 'działaj' "generic command rejection"
+require_ref "$contract" 'go ahead' "generic command rejection"
+require_ref "$contract" 'must not bypass privacy checks, validation, evidence, risk classification, workspace selection, stop conditions, or final acceptance' "hard-gate preservation"
+require_ref "$contract" 'Destructive, production, credential, permission, billing, migration, and external actions require explicit scope' "high-risk scope boundary"
+
+for file in \
+  ".systems/ai/templates/root/AGENTS.template.md" \
+  ".systems/ai/core/operating-model.md" \
+  ".systems/ai/core/command-routing.md" \
+  ".systems/ai/core/task-intake.md" \
+  "README.md" \
+  "HUMANS.md" \
+  ".systems/scripts/README.md"
+do
+  require_ref "$file" 'owner-approval\.md|recognized owner approval|plan[ -]acceptance' "owner approval routing"
+done
+
+require_ref ".systems/scripts/validate-ai-system" 'check-owner-approval' "validator chain"
+require_ref ".systems/scripts/check-required-artifacts" 'check-owner-approval' "required artifact list"
+require_ref ".systems/scripts/check-validator-smoke-tests" 'owner-approval' "smoke coverage"
+
+unsafe_patterns=(
+  'plan acceptance may bypass validation'
+  'plan acceptance may bypass privacy'
+  'plan acceptance authorizes unstated'
+  'generic execution wording grants approval'
+)
+
+for pattern in "${unsafe_patterns[@]}"; do
+  if rg -n -i --no-filename -- "$pattern" \
+    "$repo_root/.systems/ai/core" \
+    "$repo_root/.systems/ai/templates" \
+    "$repo_root/README.md" \
+    "$repo_root/HUMANS.md" \
+    | rg -v -i 'must not|does not|do not|never|reject|not recognize|unsafe|fails|fail'; then
+    echo "Unsafe owner approval wording found: $pattern"
+    fail=1
+  fi
+done
+
+exit "$fail"

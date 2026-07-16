@@ -23,6 +23,10 @@ Root `AGENTS.md` is a local-only generated file. Create it with `.systems/script
 
 In management checkouts, system-owned files are upstream-owned. Do not implement local product changes to `.systems/**`, validators, templates, root contract files, update scripts, or validation scripts there. Route those changes to the upstream `ai-system-dev` product project, then update the management checkout with `.systems/scripts/update-from-upstream`.
 
+## Owner Approval
+
+Use `.systems/ai/core/owner-approval.md` for recognized write approval. Direct `owner-approved: <action + target>` and strict acceptance of the immediately preceding complete plan are equivalent only for that plan's explicit scope. Neither form bypasses target-specific write rules, privacy, validation, evidence, risk, workspace selection, stop conditions, or final acceptance.
+
 ## Workspace-Owned
 
 - `<workspace>/core/`

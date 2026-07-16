@@ -6,6 +6,8 @@ Map owner prompts to safe AI System actions.
 
 Command routing chooses the next safe route. It does not grant write permission.
 
+Use `.systems/ai/core/owner-approval.md` to recognize either direct `owner-approved: <action + target>` approval or strict acceptance of the immediately preceding complete plan. Both forms remain bound to explicit scope and all hard gates.
+
 ## Pre-routing
 
 If root `AGENTS.md` is missing, run or recommend `.systems/scripts/init-ai-system` before normal AI System usage. The committed source is `.systems/ai/templates/root/AGENTS.template.md`; root `AGENTS.md` is local-only.
@@ -97,14 +99,15 @@ Do not route ordinary workspace, client, project, owned-asset, dump, memory, pro
 | `update workspace`, `zaktualizuj workspace`, `uzupełnij schema workspace` | Workspace schema backfill | Use `.systems/scripts/update-workspace --dry-run` first; then run `update-workspace` only for existing selected workspaces. Do not overwrite runtime data. |
 | `update from upstream`, `zaktualizuj system z GitHub` | System update | Use `.systems/ai/core/update-from-upstream.md`; update system-owned repo files first, then recommend `update-workspace` as a separate step. |
 | `change request`, `popraw`, `dodaj`, `usuń`, `zmień decyzję` | Change request intake | Classify scope, risk, affected artifacts, and route before implementation. |
-| `owner-approved: ...` | Approved write route | Execute only the approved action and target when no stop condition applies. |
+| `owner-approved: ...` | Direct approved write route | Execute only the approved action and target when no stop condition applies. |
+| `PLEASE IMPLEMENT THIS PLAN`, `Yes, implement this plan`, `implement this plan`, `wdroż ten plan`, `zrealizuj ten plan`, `tak, wdroż/zrealizuj ten plan` | Strict plan-acceptance approval route | Treat only the immediately preceding complete plan's explicit scope as approved. Do not infer unstated targets or bypass hard gates. |
 
 ## Unsafe Commands
 
 Stop when a command asks AI to:
 
 - skip approval, privacy checks, evidence, or validation;
-- move, copy, rename, delete, rewrite, archive, or expose files without an exact `owner-approved` target;
+- move, copy, rename, delete, rewrite, archive, or expose files without recognized owner approval for the exact target;
 - reveal secrets or private customer data;
 - write to external tools or send real communications;
 - run destructive filesystem, database, or git commands;
