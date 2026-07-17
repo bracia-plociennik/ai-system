@@ -256,8 +256,11 @@ for term in \
   'reads only frontmatter `projects:` wiki links' \
   'does not initialize TaskForge vault structure' \
   'Personal Ops V3 Initial Task Creation' \
-  'task_generation_policy: all-professional-do-v1' \
-  'every valid `build-*`, `deliver-*`, and `promote-*` item becomes one `6d/do`' \
+  'task_generation_policy: deadline-aware-6d-v1' \
+  'explicit `task_bucket` wins' \
+  'deadline defaults to `6d/do`' \
+  'no deadline defaults to `6d/defer`' \
+  '`definition_of_done` is preserved' \
   'Missing WIG or overload warning does not suppress candidates' \
   'source_session_date + source_plan_item_id' \
   'mechanical flag records the same approval' \
@@ -294,6 +297,7 @@ for field in \
   'source_plan_item_id:' \
   'source_dream_report:' \
   '## Outcome' \
+  '## Definition Of Done' \
   '## Context' \
   '## Next Action' \
   '## Subtasks' \

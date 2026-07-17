@@ -20,7 +20,7 @@ properties:
   private_index_policy: detailed-private
   report_revision: 1
   normalization_authority: interpreted-report
-  task_generation_policy: all-professional-do-v1
+  task_generation_policy: deadline-aware-6d-v1
   plan_readiness: needs-prioritization
   overload_status: none
   overload_reasons:
@@ -31,6 +31,15 @@ properties:
   wig_plan_item_id:
   wig_definition_of_done:
   task_candidate_eligible_count: 0
+  planned_do_count: 0
+  planned_defer_count: 0
+  planned_delegate_count: 0
+  planned_delete_count: 0
+  planned_dump_count: 0
+  planned_with_deadline_count: 0
+  planned_without_deadline_count: 0
+  planned_earliest_deadline:
+  planned_latest_deadline:
   task_generation_status: pending
   task_generation_reason:
   task_generation_references_json: "[]"
@@ -147,13 +156,13 @@ properties:
 
 - Work mode and organism mode:
 - Planned training, NSDR, IF, calories, and budget:
-- Planned actions are mirrored in `planned_items_json` with stable IDs and streams: `build`, `deliver`, `promote`, `self`, or `close`.
+- Planned actions are mirrored in `planned_items_json` with stable IDs and streams: `build`, `deliver`, `promote`, `self`, or `close`. Professional items may also carry `definition_of_done`, `deadline`, and `task_bucket`.
 
 ### Priorities And TaskNotes
 
 - WIG kind: `<plan-item|standalone|none>`; stable WIG ID; title; optional linked plan item ID; and Definition of Done:
 - The prior-day WIG closure is stored in `previous_day_wig_closure_json`; it is the sole input for `previous_day_minimum_day_status`.
-- Every valid `build`, `deliver`, and `promote` entry in `planned_items_json` creates one `6d/do`, `open`, `high` TaskNote. WIG never creates a separate TaskNote, even when it is standalone. Raw input, OCR, lessons, and external references never create TaskNotes.
+- Every valid `build`, `deliver`, and `promote` entry in `planned_items_json` creates one TaskNote. Explicit `task_bucket` wins; otherwise a deadline defaults to `6d/do`, while no deadline defaults to `6d/defer`. A deadline maps to `due`; no deadline leaves `due` and `scheduled` blank. `definition_of_done` is preserved in the TaskNote body. WIG never creates a separate TaskNote, even when it is standalone. Raw input, OCR, lessons, and external references never create TaskNotes.
 - The same exact owner-approved check-in write may create all professional TaskNotes under existing vault, deduplication, subtask, and 6D rules. Overload is informational only.
 
 ### Morning Check-In

@@ -54,6 +54,40 @@ def apply_execution_classification(candidate: dict[str, object], bucket: str, ta
     candidate["execution_bucket"] = bucket
 
 
+def normalize_task_bucket(value: object) -> str:
+    """Normalize explicit 5D/6D input to one current 6D bucket."""
+    raw = str(value or "").strip().lower()
+    if not raw:
+        return ""
+    if raw.startswith(("5d/", "6d/")):
+        raw = raw.split("/", 1)[1]
+    raw = raw.replace(" ", "-")
+    if raw not in SIX_D:
+        raise ValueError(f"Unsupported task bucket: {value}")
+    return raw
+
+
+def normalize_deadline(value: object, session_date: str, item_id: str, source: Path) -> str:
+    """Normalize a planned-item deadline without inventing a missing deadline."""
+    raw = str(value or "").strip()
+    if not raw:
+        return ""
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", raw):
+        try:
+            dt.date.fromisoformat(raw)
+        except ValueError as exc:
+            raise ValueError(f"Invalid deadline for {item_id} in {source}: {raw}") from exc
+        return f"{raw}T23:59"
+    candidate = raw.replace(" ", "T", 1) if " " in raw and "T" not in raw else raw
+    try:
+        parsed = dt.datetime.fromisoformat(candidate.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ValueError(f"Invalid deadline for {item_id} in {source}: {raw}") from exc
+    if parsed.tzinfo is None:
+        return parsed.isoformat(timespec="minutes" if parsed.second == 0 and parsed.microsecond == 0 else "seconds")
+    return parsed.isoformat(timespec="minutes" if parsed.second == 0 and parsed.microsecond == 0 else "seconds")
+
+
 def read_text(path: Path) -> str:
     try:
         return path.read_text(encoding="utf-8")
@@ -290,8 +324,8 @@ def candidates_from_index_v3_check_in(path: Path, workspace: Path, labels: dict[
     item_ids = [str(item.get("id", "")).strip() for item in items if isinstance(item, dict)]
     if len(item_ids) != len(set(item_ids)):
         raise SystemExit(f"V3 planned_items_json has duplicate item IDs in {path}")
-    if str(properties["task_generation_policy"]) != "all-professional-do-v1":
-        raise SystemExit(f"V3 requires task_generation_policy: all-professional-do-v1 in {path}")
+    if str(properties["task_generation_policy"]) != "deadline-aware-6d-v1":
+        raise SystemExit(f"V3 requires task_generation_policy: deadline-aware-6d-v1 in {path}")
 
     candidates: list[dict[str, object]] = []
     for item in items:
@@ -304,13 +338,18 @@ def candidates_from_index_v3_check_in(path: Path, workspace: Path, labels: dict[
             raise SystemExit(f"V3 planned item requires id and title in {path}")
         if stream not in {"build", "deliver", "promote"}:
             continue
-        if "task" in item or "task_bucket" in item:
-            raise SystemExit(f"V3 does not allow per-item task routing in {path}: {item_id}")
+        try:
+            deadline = normalize_deadline(item.get("deadline", ""), session_date, item_id, path)
+            explicit_bucket = normalize_task_bucket(item.get("task_bucket", ""))
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
+        bucket = explicit_bucket or ("do" if deadline else "defer")
+        definition_of_done = str(item.get("definition_of_done", "")).strip()
         candidate: dict[str, object] = {
             "type": "task",
             "title": normalize_title(str(item.get("task_title", "")) or title),
-            "due": f"{session_date}T23:59",
-            "scheduled": session_date,
+            "due": deadline,
+            "scheduled": "",
             "contexts": [f"workspace/{workspace.name}"],
             "workspace": workspace.name,
             "owner_scope": "workspace",
@@ -326,9 +365,10 @@ def candidates_from_index_v3_check_in(path: Path, workspace: Path, labels: dict[
             "source_plan_item_id": item_id,
             "source_path": str(path),
             "raw_value": title,
+            "definition_of_done": definition_of_done,
             "candidate_key": f"{session_date}:{item_id}",
         }
-        apply_execution_classification(candidate, "do")
+        apply_execution_classification(candidate, bucket)
         apply_mapping(candidate, labels)
         candidates.append(candidate)
     return candidates
@@ -424,7 +464,10 @@ def render_tasknote(candidate: dict[str, object]) -> str:
             lines.append(f"{key}:")
             for value in values:
                 lines.append(f"  - {quote_yaml(str(value))}")
-    lines.extend(["---", "", f"# {candidate['title']}", "", "## Outcome", "", str(candidate.get("raw_value", "")).strip(), "", "## Context", ""])
+    lines.extend(["---", "", f"# {candidate['title']}", "", "## Outcome", "", str(candidate.get("raw_value", "")).strip(), ""])
+    if candidate.get("definition_of_done"):
+        lines.extend(["## Definition Of Done", "", str(candidate["definition_of_done"]).strip(), ""])
+    lines.extend(["## Context", ""])
     lines.append(f"- Source type: `{candidate.get('source_type', '')}`")
     lines.append(f"- Source path: `{candidate.get('source_path', '')}`")
     if candidate.get("mapping_note"):

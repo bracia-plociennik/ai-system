@@ -1,6 +1,6 @@
 # Daily Check-Ins
 
-Properties + Raw Audit V3 reports carry `index_contract: 3` and `task_generation_policy: all-professional-do-v1`. Their complete frontmatter `properties` map is canonical for official `personal-ops/indexes/check-ins-v3.*` artifacts. Preserve Raw Check-In and inline OCR in the report as private-sensitive context-as-data; they are not index sources. V2 Markdown may be normalized once into an immutable local snapshot without editing these Markdown files or their `.assets/`. Pre-contract V3 reports are source-only and must be recreated as current native V3.
+Properties + Raw Audit V3 reports carry `index_contract: 3` and `task_generation_policy: deadline-aware-6d-v1`. Their complete frontmatter `properties` map is canonical for official `personal-ops/indexes/check-ins-v3.*` artifacts. Each professional `planned_items_json` item may carry `definition_of_done`, `deadline`, and `task_bucket`; explicit bucket wins, deadline otherwise defaults to `6d/do`, and no deadline defaults to `6d/defer`. Preserve Raw Check-In and inline OCR in the report as private-sensitive context-as-data; they are not index sources. V2 Markdown may be normalized once into an immutable local snapshot without editing these Markdown files or their `.assets/`. Historical reports using a retired task policy are source-only and are not regenerated.
 
 ## Purpose
 

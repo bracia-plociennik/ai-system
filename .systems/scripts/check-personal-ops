@@ -66,6 +66,11 @@ fi
 
 for term in \
   'Properties + Raw Audit V3' \
+  'task_generation_policy: deadline-aware-6d-v1' \
+  'definition_of_done' \
+  'task_bucket' \
+  'deadline defaults to `6d/do`' \
+  'no deadline defaults to `6d/defer`' \
   'legacy-normalized-v3.jsonl' \
   'manifest.json' \
   'import-report.md' \

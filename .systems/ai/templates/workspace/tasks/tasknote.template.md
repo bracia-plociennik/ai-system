@@ -40,6 +40,10 @@ source_dream_report:
 
 <desired result>
 
+## Definition Of Done
+
+<observable completion condition when supplied by a planned check-in item>
+
 ## Context
 
 <workspace/client/owned-asset/project links and source references>

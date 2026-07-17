@@ -32,9 +32,9 @@ Do not use this route for the retired V2 Notion importer. Historical V2 files re
 
 ## Current-Day Plan And TaskNotes
 
-Use stable plan item IDs in `planned_items_json`. Each item records at least `id`, `stream`, `title`, and optional `task_title`.
+Use stable plan item IDs in `planned_items_json`. Each professional item records at least `id`, `stream`, `title`, and may include `task_title`, `definition_of_done`, `deadline`, and `task_bucket`.
 
-Every professional `build`, `deliver`, or `promote` item creates one TaskNote in `6d/do`, regardless of WIG or overload. Do not add per-item routing overrides. WIG uses `wig_kind: plan-item|standalone|none`, a stable `wig_id`, title, and Definition of Done; a linked WIG may reference one plan item, while a standalone WIG has no plan-item reference. Neither form creates its own TaskNote. The prior-day WIG closure determines minimum-day status. There is no `Kandydaci na taski` section. Raw text, OCR, lesson content, quotations, and external references never create a TaskNote. The existing owner-approved check-in write may create these TaskNotes once, subject to configured-vault, deduplication, subtask, and 6D rules.
+Every professional `build`, `deliver`, or `promote` item creates one TaskNote under `deadline-aware-6d-v1`. Explicit `task_bucket` wins; otherwise a deadline defaults to `6d/do`, and no deadline defaults to `6d/defer`. A deadline maps to `due`; no deadline leaves `due` and `scheduled` blank. `definition_of_done` is preserved in the TaskNote body. WIG uses `wig_kind: plan-item|standalone|none`, a stable `wig_id`, title, and Definition of Done; a linked WIG may reference one plan item, while a standalone WIG has no plan-item reference. Neither form creates its own TaskNote. The prior-day WIG closure determines minimum-day status. There is no `Kandydaci na taski` section. Raw text, OCR, lesson content, quotations, and external references never create a TaskNote. The existing owner-approved check-in write may create these TaskNotes once, subject to configured-vault, deduplication, subtask, and 6D rules.
 
 ## Indexes And Lazy Sync
 

@@ -1178,7 +1178,7 @@ values.update({
     "file_path": "personal-ops/check-ins/2026/2026-07-14.md",
     "report_id": "2026-07-14", "session_date": "2026-07-14", "closure_date": "2026-07-13",
     "weekday": "tuesday", "recording_time": "08:00", "timezone": "Europe/Warsaw",
-    "source_type": "manual-interpreted", "task_generation_policy": "all-professional-do-v1",
+    "source_type": "manual-interpreted", "task_generation_policy": "deadline-aware-6d-v1",
     "plan_readiness": "needs-prioritization", "wig_kind": "none",
     "previous_day_wig_closure_json": "{}", "previous_day_minimum_day_status": "unknown",
     "task_generation_status": "skipped", "task_generation_reason": "fixture", "task_generation_references_json": "[]",
@@ -2247,7 +2247,7 @@ values.update({
     "weekday": "wednesday",
     "recording_time": "08:00",
     "timezone": "Europe/Warsaw",
-    "task_generation_policy": "all-professional-do-v1",
+    "task_generation_policy": "deadline-aware-6d-v1",
     "plan_readiness": "ready",
     "wig_kind": "plan-item",
     "wig_id": "wig-build-01",
@@ -2256,13 +2256,22 @@ values.update({
     "wig_definition_of_done": "A complete fixture exists.",
     "previous_day_wig_closure_json": json.dumps({}),
     "task_candidate_eligible_count": 3,
+    "planned_do_count": 3,
+    "planned_defer_count": 0,
+    "planned_delegate_count": 0,
+    "planned_delete_count": 0,
+    "planned_dump_count": 0,
+    "planned_with_deadline_count": 3,
+    "planned_without_deadline_count": 0,
+    "planned_earliest_deadline": "2026-07-22T18:00",
+    "planned_latest_deadline": "2026-07-22T23:59",
     "planned_build_count": 1,
     "planned_deliver_count": 1,
     "planned_promote_count": 1,
     "planned_items_json": json.dumps([
-        {"id": "build-01", "stream": "build", "title": "Demo Project analytics fixture"},
-        {"id": "deliver-01", "stream": "deliver", "title": "Deliver analytics fixture"},
-        {"id": "promote-01", "stream": "promote", "title": "Triage analytics fixture"},
+        {"id": "build-01", "stream": "build", "title": "Demo Project analytics fixture", "definition_of_done": "Fixture is implemented.", "deadline": "2026-07-22T18:00"},
+        {"id": "deliver-01", "stream": "deliver", "title": "Deliver analytics fixture", "definition_of_done": "Fixture is delivered.", "deadline": "2026-07-22"},
+        {"id": "promote-01", "stream": "promote", "title": "Triage analytics fixture", "definition_of_done": "Fixture is promoted.", "deadline": "2026-07-22T20:00", "task_bucket": "do"},
     ]),
     "previous_day_actual_items_json": json.dumps([{ "id": "actual-build-01", "stream": "build", "title": "Closed fixture" }]),
     "previous_day_actual_build_count": 1,
@@ -2310,6 +2319,30 @@ if rg -q 'raw-check-in-sentinel|raw-ocr-sentinel' "$properties_v3_workspace/pers
   echo "Properties v3 leaked raw/OCR audit text into indexes"
   exit 1
 fi
+metrics_mismatch_report="$properties_v3_workspace/personal-ops/check-ins/2026/2026-07-30.md"
+cp "$properties_v3_report" "$metrics_mismatch_report"
+perl -0pi -e 's/2026-07-22/2026-07-30/g; s/2026-07-21/2026-07-29/g; s/^  planned_do_count:.*$/  planned_do_count: 99/m' "$metrics_mismatch_report"
+run_must_fail "personal-ops-properties-v3-rejects-stale-planned-metrics" "$properties_v3_sync" --workspace "$properties_v3_workspace"
+rm "$metrics_mismatch_report"
+missing_title_report="$properties_v3_workspace/personal-ops/check-ins/2026/2026-07-31.md"
+cp "$properties_v3_report" "$missing_title_report"
+python3 - "$missing_title_report" <<'PY'
+import json
+import re
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8").replace("2026-07-22", "2026-07-31").replace("2026-07-21", "2026-07-30")
+match = re.search(r"^(  planned_items_json:\s+)(.*)$", text, flags=re.MULTILINE)
+assert match
+items = json.loads(json.loads(match.group(2)))
+items[0]["title"] = ""
+replacement = match.group(1) + json.dumps(json.dumps(items, ensure_ascii=False))
+path.write_text(text[:match.start()] + replacement + text[match.end():], encoding="utf-8")
+PY
+run_must_fail "personal-ops-properties-v3-rejects-missing-professional-title" "$properties_v3_sync" --workspace "$properties_v3_workspace"
+rm "$missing_title_report"
 mkdir -p "$properties_v3_workspace/project-state/demo-project"
 properties_v3_vault="$tmp/personal-ops-properties-v3-vault"
 mkdir -p "$properties_v3_vault/TaskNotes/Tasks"
@@ -2337,6 +2370,58 @@ assert all(candidate["tags"] == ["6d/do"] for candidate in candidates), candidat
 assert all(candidate["status"] == "open" and candidate["priority"] == "high" for candidate in candidates), candidates
 assert "wig-build-01" not in {candidate["source_plan_item_id"] for candidate in candidates}, candidates
 PY
+
+deadline_policy_report="$properties_v3_workspace/personal-ops/check-ins/2026/2026-07-26.md"
+cp "$properties_v3_report" "$deadline_policy_report"
+python3 - "$deadline_policy_report" <<'PY'
+import json
+import re
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8").replace("2026-07-22", "2026-07-26").replace("2026-07-21", "2026-07-25")
+items = [
+    {"id": "build-01", "stream": "build", "title": "Deadline defaults to DO", "definition_of_done": "Delivered result", "deadline": "2026-07-26T18:00"},
+    {"id": "deliver-01", "stream": "deliver", "title": "No deadline defaults to DEFER", "definition_of_done": "Reviewed result"},
+    {"id": "promote-01", "stream": "promote", "title": "Explicit DO without deadline", "definition_of_done": "Published result", "task_bucket": "6d/do"},
+    {"id": "build-02", "stream": "build", "title": "Explicit DUMP with deadline", "definition_of_done": "Captured result", "task_bucket": "dump", "deadline": "2026-07-27"},
+]
+encoded = json.dumps(json.dumps(items, ensure_ascii=False))
+text = re.sub(r"^  planned_items_json:.*$", f"  planned_items_json: {encoded}", text, flags=re.MULTILINE)
+text = re.sub(r"^  task_candidate_eligible_count:.*$", "  task_candidate_eligible_count: 4", text, flags=re.MULTILINE)
+text = re.sub(r"^  planned_do_count:.*$", "  planned_do_count: 2", text, flags=re.MULTILINE)
+text = re.sub(r"^  planned_defer_count:.*$", "  planned_defer_count: 1", text, flags=re.MULTILINE)
+text = re.sub(r"^  planned_delegate_count:.*$", "  planned_delegate_count: 0", text, flags=re.MULTILINE)
+text = re.sub(r"^  planned_delete_count:.*$", "  planned_delete_count: 0", text, flags=re.MULTILINE)
+text = re.sub(r"^  planned_dump_count:.*$", "  planned_dump_count: 1", text, flags=re.MULTILINE)
+text = re.sub(r"^  planned_with_deadline_count:.*$", "  planned_with_deadline_count: 2", text, flags=re.MULTILINE)
+text = re.sub(r"^  planned_without_deadline_count:.*$", "  planned_without_deadline_count: 2", text, flags=re.MULTILINE)
+text = re.sub(r"^  planned_earliest_deadline:.*$", "  planned_earliest_deadline: \"2026-07-26T18:00\"", text, flags=re.MULTILINE)
+text = re.sub(r"^  planned_latest_deadline:.*$", "  planned_latest_deadline: \"2026-07-27T23:59\"", text, flags=re.MULTILINE)
+path.write_text(text, encoding="utf-8")
+PY
+"$copy_repo/.systems/scripts/propose-task-candidates" --workspace "$properties_v3_workspace" --check-in "$deadline_policy_report" --task-vault "$properties_v3_vault" --json > "$tmp/personal-ops-deadline-policy-candidates.json"
+python3 - "$tmp/personal-ops-deadline-policy-candidates.json" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as handle:
+    candidates = json.load(handle)
+actual = [(candidate["execution_bucket"], candidate["due"], candidate["scheduled"], candidate["tags"]) for candidate in candidates]
+expected = [
+    ("do", "2026-07-26T18:00", "", ["6d/do"]),
+    ("defer", "", "", ["6d/defer"]),
+    ("do", "", "", ["6d/do"]),
+    ("dump", "2026-07-27T23:59", "", ["6d/dump"]),
+]
+assert actual == expected, actual
+assert candidates[0]["definition_of_done"] == "Delivered result", candidates
+PY
+cp "$deadline_policy_report" "$deadline_policy_report.valid"
+perl -0pi -e 's/2026-07-26T18:00/not-a-deadline/' "$deadline_policy_report"
+run_must_fail "personal-ops-deadline-policy-rejects-invalid-deadline" "$copy_repo/.systems/scripts/propose-task-candidates" --workspace "$properties_v3_workspace" --check-in "$deadline_policy_report" --task-vault "$properties_v3_vault" --json
+mv "$deadline_policy_report.valid" "$deadline_policy_report"
 properties_v3_no_wig_report="$properties_v3_workspace/personal-ops/check-ins/2026/2026-07-24.md"
 cp "$properties_v3_report" "$properties_v3_no_wig_report"
 python3 - "$properties_v3_no_wig_report" <<'PY'
@@ -2488,7 +2573,7 @@ def properties_for(day, source_type, file_path):
             "weekday": day.strftime("%A").lower(),
             "timezone": "Europe/Warsaw",
             "source_type": source_type,
-            "task_generation_policy": "all-professional-do-v1",
+            "task_generation_policy": "deadline-aware-6d-v1",
             "plan_readiness": "needs-prioritization",
             "wig_kind": "none",
             "previous_day_wig_closure_json": "{}",

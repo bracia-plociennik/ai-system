@@ -136,7 +136,7 @@ def default_properties(session_date: str, source_path: str, source_type: str) ->
         "private_index_policy": "detailed-private",
         "report_revision": 1,
         "normalization_authority": "one-time-legacy-normalization",
-        "task_generation_policy": "all-professional-do-v1",
+        "task_generation_policy": "deadline-aware-6d-v1",
         "task_generation_status": "skipped",
         "task_generation_reason": "one-time legacy migration never creates retrospective TaskNotes",
         "task_generation_references_json": "[]",

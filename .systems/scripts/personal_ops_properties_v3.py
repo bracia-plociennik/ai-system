@@ -199,6 +199,105 @@ def _json_object(value: Any, key: str, source: Path) -> dict[str, Any]:
     return decoded
 
 
+TASK_BUCKETS = {"do", "defer", "delegate", "delete", "dump"}
+
+
+def _normalize_task_bucket(value: Any, source: Path, item_id: str) -> str:
+    raw = str(value or "").strip().lower()
+    if not raw:
+        return ""
+    if raw.startswith(("5d/", "6d/")):
+        raw = raw.split("/", 1)[1]
+    if raw not in TASK_BUCKETS:
+        raise ValueError(f"Unsupported task_bucket '{value}' for {item_id} in {source}")
+    return raw
+
+
+def _validate_planned_item(item: dict[str, Any], source: Path) -> None:
+    item_id = str(item.get("id", "")).strip()
+    stream = str(item.get("stream", "")).strip().lower()
+    if stream in {"build", "deliver", "promote"} and not str(item.get("title", "")).strip():
+        raise ValueError(f"Professional planned item requires a non-empty title for {item_id} in {source}")
+    deadline = str(item.get("deadline", "")).strip()
+    if deadline:
+        normalized = deadline.replace(" ", "T", 1) if " " in deadline and "T" not in deadline else deadline
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", deadline):
+            try:
+                date.fromisoformat(deadline)
+            except ValueError as exc:
+                raise ValueError(f"Invalid deadline '{deadline}' for {item_id} in {source}") from exc
+        else:
+            try:
+                datetime.fromisoformat(normalized.replace("Z", "+00:00"))
+            except ValueError as exc:
+                raise ValueError(f"Invalid deadline '{deadline}' for {item_id} in {source}") from exc
+    _normalize_task_bucket(item.get("task_bucket", ""), source, item_id)
+    for key in ("title", "task_title", "definition_of_done"):
+        if key in item and not isinstance(item[key], str):
+            raise ValueError(f"Planned item {key} must be a string for {item_id} in {source}")
+
+
+def _normalize_deadline(value: Any, source: Path, item_id: str) -> str:
+    raw = str(value or "").strip()
+    if not raw:
+        return ""
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", raw):
+        try:
+            date.fromisoformat(raw)
+        except ValueError as exc:
+            raise ValueError(f"Invalid deadline '{raw}' for {item_id} in {source}") from exc
+        return f"{raw}T23:59"
+    normalized = raw.replace(" ", "T", 1) if " " in raw and "T" not in raw else raw
+    try:
+        parsed = datetime.fromisoformat(normalized.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ValueError(f"Invalid deadline '{raw}' for {item_id} in {source}") from exc
+    timespec = "minutes" if parsed.second == 0 and parsed.microsecond == 0 else "seconds"
+    return parsed.isoformat(timespec=timespec)
+
+
+def _planned_task_metrics(items: list[dict[str, Any]], source: Path) -> dict[str, Any]:
+    metrics: dict[str, Any] = {
+        "planned_do_count": 0,
+        "planned_defer_count": 0,
+        "planned_delegate_count": 0,
+        "planned_delete_count": 0,
+        "planned_dump_count": 0,
+        "planned_with_deadline_count": 0,
+        "planned_without_deadline_count": 0,
+        "planned_earliest_deadline": "",
+        "planned_latest_deadline": "",
+    }
+    deadlines: list[str] = []
+    for item in items:
+        stream = str(item.get("stream", "")).strip().lower()
+        if stream not in {"build", "deliver", "promote"}:
+            continue
+        item_id = str(item.get("id", "")).strip()
+        deadline = _normalize_deadline(item.get("deadline", ""), source, item_id)
+        bucket = _normalize_task_bucket(item.get("task_bucket", ""), source, item_id)
+        bucket = bucket or ("do" if deadline else "defer")
+        metrics[f"planned_{bucket}_count"] += 1
+        if deadline:
+            metrics["planned_with_deadline_count"] += 1
+            deadlines.append(deadline)
+        else:
+            metrics["planned_without_deadline_count"] += 1
+    if deadlines:
+        metrics["planned_earliest_deadline"] = min(deadlines)
+        metrics["planned_latest_deadline"] = max(deadlines)
+    return metrics
+
+
+def _validate_planned_task_metrics(properties: dict[str, Any], items: list[dict[str, Any]], source: Path) -> None:
+    expected = _planned_task_metrics(items, source)
+    for key, value in expected.items():
+        actual = str(properties[key])
+        expected_value = str(value)
+        if actual != expected_value:
+            raise ValueError(f"{key} must equal {expected_value} from planned_items_json in {source}; got {actual}")
+
+
 def _minimum_day_status_from_wig_closure(closure: dict[str, Any], source: Path) -> str:
     if not closure:
         return "unknown"
@@ -226,7 +325,7 @@ def _validate_task_candidate_eligible_count(properties: dict[str, Any], source: 
     if any(not item_id for item_id in item_ids) or len(item_ids) != len(set(item_ids)):
         raise ValueError(f"planned_items_json requires unique non-empty item IDs in {source}")
     policy = str(properties["task_generation_policy"])
-    if policy != "all-professional-do-v1":
+    if policy != "deadline-aware-6d-v1":
         raise ValueError(f"Unsupported V3 task_generation_policy in {source}: {policy}")
     wig_kind = str(properties["wig_kind"])
     wig_id = str(properties["wig_id"]).strip()
@@ -257,10 +356,11 @@ def _validate_task_candidate_eligible_count(properties: dict[str, Any], source: 
     expected = 0
     for item in items:
         stream = str(item.get("stream", "")).strip().lower()
-        if "task" in item or "task_bucket" in item:
-            raise ValueError(f"all-professional-do-v1 does not allow per-item task routing in {source}")
+        _validate_planned_item(item, source)
         if stream in {"build", "deliver", "promote"}:
             expected += 1
+
+    _validate_planned_task_metrics(properties, items, source)
 
     try:
         actual = int(str(properties["task_candidate_eligible_count"]))
