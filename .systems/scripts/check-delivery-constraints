@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+fail=0
+
+require_ref() {
+  local file="$1" pattern="$2" label="$3"
+  if [[ ! -f "$repo_root/$file" ]]; then
+    echo "Missing Delivery Constraints file: $file"
+    fail=1
+    return
+  fi
+  if ! rg -qi -- "$pattern" "$repo_root/$file"; then
+    echo "Missing Delivery Constraints reference in $file: $label"
+    fail=1
+  fi
+}
+
+contract=".systems/ai/core/delivery-constraints.md"
+template=".systems/ai/templates/delivery/delivery-constraints.template.md"
+
+require_ref "$contract" '^# Delivery Constraints$' 'core contract'
+for section in '## Default Rule' '## Delivery Constraints Block' '## Scope Adaptation' '## Overrun And Opt-Out' '## Routing And Evidence'; do
+  require_ref "$contract" "^${section}$" "$section"
+done
+
+for field in 'Mode:' 'Deadline:' 'Timezone:' 'Time budget:' 'Must-have outcome:' 'Should-have scope:' 'Stretch scope:' 'Explicitly deferred scope:' 'Quality floor:' 'Cutline rule:' 'Overrun checkpoint:' 'Owner override:'; do
+  require_ref "$contract" "$field" "contract field $field"
+  require_ref "$template" "$field" "template field $field"
+done
+
+for phrase in 'at most `1-3` questions' 'do not invent one' 'deadline pressure never authorizes skipping QA' "bez deadline'u" 'no deadline' 'bez timeboxu' 'no timebox' 'Do not silently extend'; do
+  require_ref "$contract" "$phrase" "boundary $phrase"
+done
+
+for integration in \
+  '.systems/ai/templates/root/AGENTS.template.md:delivery-constraints.md' \
+  '.systems/ai/core/task-intake.md:delivery-constraints.md' \
+  '.systems/ai/core/operating-model.md:delivery-constraints.md' \
+  '.systems/ai/core/command-routing.md:delivery-constraints.md' \
+  '.systems/ai/core/contract-compliance.md:Delivery Constraints' \
+  '.systems/ai/core/response-contract.md:Delivery Constraints' \
+  '.systems/ai/templates/workspace/clients/client-brief.template.md:Delivery Constraints' \
+  '.systems/ai/templates/workspace/projects/checkpoint.template.md:Delivery Constraints' \
+  '.systems/ai/templates/workspace/projects/distillation.template.md:Delivery Constraints' \
+  'README.md:Delivery Constraints' \
+  'HUMANS.md:Delivery Constraints' \
+  '.systems/scripts/README.md:check-delivery-constraints' \
+  '.systems/scripts/validate-ai-system:check-delivery-constraints' \
+  '.systems/scripts/check-required-artifacts:delivery-constraints.md'; do
+  file="${integration%%:*}"
+  pattern="${integration#*:}"
+  require_ref "$file" "$pattern" "integration $pattern"
+done
+
+if rg -n -i -- 'deadline[^.\n]{0,100}(may|can|allows?|permits?)[^.\n]{0,80}(skip|bypass|omit|ignore)[^.\n]{0,80}(QA|DoD|privacy|permission|approval|evidence|security|risk)' \
+  "$repo_root/README.md" "$repo_root/HUMANS.md" "$repo_root/.systems/ai/core" "$repo_root/.systems/ai/templates"; then
+  echo "Unsafe deadline bypass wording found"
+  fail=1
+fi
+
+exit "$fail"

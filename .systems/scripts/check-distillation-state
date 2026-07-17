@@ -1,0 +1,183 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+workspace=""
+fail=0
+
+usage() {
+  cat <<'EOF'
+Usage: .systems/scripts/check-distillation-state [--workspace <path>]
+
+Without --workspace, validates product contracts, templates, docs, and wiring.
+With --workspace, also validates nearest-owner capture-state records and reports unresolved counts.
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --workspace)
+      workspace="${2:-}"
+      [[ -n "$workspace" ]] || { echo "Missing value for --workspace"; exit 2; }
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1"
+      usage
+      exit 2
+      ;;
+  esac
+done
+
+require_ref() {
+  local file="$1" pattern="$2" label="$3"
+  if [[ ! -f "$repo_root/$file" ]]; then
+    echo "Missing Distillation State file: $file"
+    fail=1
+    return
+  fi
+  if ! rg -qi -- "$pattern" "$repo_root/$file"; then
+    echo "Missing Distillation State reference in $file: $label"
+    fail=1
+  fi
+}
+
+contract=".systems/ai/core/distillation-state.md"
+template=".systems/ai/templates/capture/distillation-state.template.md"
+
+require_ref "$contract" '^# Distillation State$' 'core contract'
+require_ref "$contract" 'Every implementation-class write must create or update' 'mandatory producer rule'
+require_ref "$contract" '`is_distilled` is compatibility output only' 'derived boolean rule'
+require_ref "$contract" 'Dreaming reports counts by state' 'Dreaming queue counts'
+require_ref "$contract" 'does not change state, create distillation' 'advisory Dreaming boundary'
+
+for section in '## State Record' '## State Semantics And Transitions' '## Producers And Consumers' '## Dreaming Boundary' '## Bootstrap And History' '## Privacy And Scope'; do
+  require_ref "$contract" "^${section}$" "$section"
+done
+
+for state in pending-quality ready completed deferred owner-skipped blocked not-applicable; do
+  require_ref "$contract" "$state" "state $state"
+done
+
+for field in 'Work ID:' 'Work mode:' 'Owner scope:' 'Scope path:' 'Source artifacts:' 'Quality evidence:' 'State:' 'Distillation artifact:' 'Last reminder:' 'Owner disposition:' 'Privacy/scope check:' 'Residual risk:'; do
+  require_ref "$contract" "$field" "contract field $field"
+  require_ref "$template" "$field" "template field $field"
+done
+require_ref "$template" '`is_distilled` derived value:' 'derived boolean template field'
+
+for integration in \
+  '.systems/ai/templates/root/AGENTS.template.md:distillation-state.md' \
+  '.systems/ai/core/task-intake.md:Distillation State' \
+  '.systems/ai/core/operating-model.md:Distillation State' \
+  '.systems/ai/core/command-routing.md:distillation-state.md' \
+  '.systems/ai/core/contract-compliance.md:Distillation State' \
+  '.systems/ai/core/end-of-task-capture.md:Distillation State' \
+  '.systems/ai/core/dreaming-mode.md:Undistilled Work Queue' \
+  '.systems/ai/templates/dreaming/dream-report.template.md:Undistilled Work Queue' \
+  '.systems/ai/templates/workspace/projects/checkpoint.template.md:Distillation State' \
+  '.systems/ai/templates/workspace/projects/distillation.template.md:Distillation State' \
+  '.systems/scripts/init-workspace:capture-state/capture-state.md' \
+  '.systems/scripts/update-workspace:capture-state/capture-state.md' \
+  '.systems/scripts/validate-ai-system:check-distillation-state' \
+  '.systems/scripts/check-required-artifacts:distillation-state.md'; do
+  file="${integration%%:*}"
+  pattern="${integration#*:}"
+  require_ref "$file" "$pattern" "integration $pattern"
+done
+
+if rg -n -i -- 'Dreaming[^.\n]{0,100}(automatically|must|will)[^.\n]{0,80}(distill|create distillation|change state)' \
+  "$repo_root/README.md" "$repo_root/HUMANS.md" "$repo_root/.systems/ai/core" "$repo_root/.systems/ai/templates"; then
+  echo "Unsafe automatic Dreaming distillation wording found"
+  fail=1
+fi
+
+if rg -n -i -- 'is_distilled[^.\n]{0,100}(authori[sz]e|permit|grant|allow)[^.\n]{0,80}(write|push|commit|promote|close)' \
+  "$repo_root/README.md" "$repo_root/HUMANS.md" "$repo_root/.systems/ai/core" "$repo_root/.systems/ai/templates"; then
+  echo "Unsafe is_distilled authority wording found"
+  fail=1
+fi
+
+if [[ -n "$workspace" ]]; then
+  [[ -d "$workspace" ]] || { echo "Workspace does not exist: $workspace"; exit 2; }
+  workspace="$(cd "$workspace" && pwd -P)"
+
+  if find "$workspace/projects" -type d -name capture-state -print -quit 2>/dev/null | grep -q .; then
+    echo "Repo pollution: capture-state directory found under workspace projects/"
+    fail=1
+  fi
+
+  count_pending_quality=0
+  count_ready=0
+  count_deferred=0
+  count_owner_skipped=0
+  count_blocked=0
+  count_completed=0
+  count_not_applicable=0
+  total=0
+  while IFS= read -r -d '' record; do
+    case "$(basename "$record")" in
+      README.md|capture-state.md) continue ;;
+    esac
+
+    total=$((total + 1))
+    state="$(sed -n 's/^- State:[[:space:]]*//p' "$record" | head -1)"
+    work_id="$(sed -n 's/^- Work ID:[[:space:]]*//p' "$record" | head -1)"
+    privacy="$(sed -n 's|^- Privacy/scope check:[[:space:]]*||p' "$record" | head -1)"
+    derived="$(sed -n 's/^- `is_distilled` derived value:[[:space:]]*//p' "$record" | head -1)"
+    distillation="$(sed -n 's/^- Distillation artifact:[[:space:]]*//p' "$record" | head -1)"
+
+    [[ -n "$work_id" ]] || { echo "Capture-state record missing Work ID: $record"; fail=1; }
+    case "$state" in
+      pending-quality|ready|completed|deferred|owner-skipped|blocked|not-applicable) ;;
+      *) echo "Capture-state record has invalid State: $record ($state)"; fail=1; continue ;;
+    esac
+    case "$state" in
+      pending-quality) count_pending_quality=$((count_pending_quality + 1)) ;;
+      ready) count_ready=$((count_ready + 1)) ;;
+      deferred) count_deferred=$((count_deferred + 1)) ;;
+      owner-skipped) count_owner_skipped=$((count_owner_skipped + 1)) ;;
+      blocked) count_blocked=$((count_blocked + 1)) ;;
+      completed) count_completed=$((count_completed + 1)) ;;
+      not-applicable) count_not_applicable=$((count_not_applicable + 1)) ;;
+    esac
+
+    expected=false
+    [[ "$state" == "completed" ]] && expected=true
+    if [[ "$derived" != "$expected" ]]; then
+      echo "Capture-state derived is_distilled mismatch: $record (expected $expected)"
+      fail=1
+    fi
+    if [[ "$state" == "completed" && ( -z "$distillation" || "$distillation" == "none" ) ]]; then
+      echo "Completed capture-state record missing Distillation artifact: $record"
+      fail=1
+    fi
+    if [[ "$state" == "completed" && -n "$distillation" && "$distillation" != "none" ]]; then
+      case "$distillation" in
+        /*) distillation_path="$distillation" ;;
+        *) distillation_path="$workspace/$distillation" ;;
+      esac
+      if [[ ! -e "$distillation_path" ]]; then
+        echo "Completed capture-state record points to missing Distillation artifact: $record ($distillation)"
+        fail=1
+      fi
+    fi
+    case "$privacy" in pass|fail|unknown) ;; *) echo "Capture-state record has invalid Privacy/scope check: $record"; fail=1 ;; esac
+  done < <(find "$workspace" -type f -path '*/capture-state/*.md' -print0 2>/dev/null)
+
+  unresolved=$((count_pending_quality + count_ready + count_deferred + count_owner_skipped + count_blocked))
+  echo "Distillation State records: $total"
+  echo "Unresolved records: $unresolved"
+  echo "pending-quality: $count_pending_quality"
+  echo "ready: $count_ready"
+  echo "deferred: $count_deferred"
+  echo "owner-skipped: $count_owner_skipped"
+  echo "blocked: $count_blocked"
+  echo "completed: $count_completed"
+  echo "not-applicable: $count_not_applicable"
+fi
+
+exit "$fail"

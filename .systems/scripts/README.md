@@ -12,6 +12,10 @@ Validation scripts for AI System live here.
 
 `check-contract-compliance` validates the AI System Contract Compliance and Knowledge Capture Gate policy, docs, templates, and validator wiring.
 
+`check-delivery-constraints` validates deadline/timebox discovery, scope cutline, quality-floor protection, docs, templates, and validation wiring.
+
+`check-distillation-state` validates per-work state semantics, nearest-owner paths, derived `is_distilled`, Dreaming queue boundaries, and optional workspace state records.
+
 `check-owner-approval` validates recognized direct and strict plan-acceptance approval grammar, explicit-scope binding, hard-gate preservation, routing docs, and smoke coverage.
 
 `check-validation-profiles` validates the `fast`, `scoped`, `standard`, and `full` validation-profile contract, explicit full CI/upstream validation, and boundaries around smoke tests and residual risk.

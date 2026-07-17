@@ -86,3 +86,15 @@ Task intake may live in the response or in the artifact already being created.
 Do not create a separate task-intake artifact unless the routed work already needs one.
 
 Never store private client details in `.systems/`.
+
+## Delivery Constraint Discovery
+
+For new implementation work that will create or change system, project, client, or owned-asset artifacts, apply `.systems/ai/core/delivery-constraints.md` after discoverable repository and workspace facts are known.
+
+Resolve an existing deadline, time budget, must-have outcome, quality floor, and cutline from the current owner message, accepted plan, or active work artifact. Ask only material missing questions, grouped into at most `1-3` questions. Do not repeat deadline or time-budget questions when the answer is already present.
+
+A missing constraint is not permission to invent one. Stop before dependent implementation unless the owner supplies the missing constraint or explicitly opts out for the current work.
+
+## Undistilled Work Reminder
+
+When a selected workspace and scope are known, inspect applicable Distillation State records from `.systems/ai/core/distillation-state.md` before switching to an unrelated implementation unit. Report unresolved counts and owner actions without blocking the new task automatically or changing any state.

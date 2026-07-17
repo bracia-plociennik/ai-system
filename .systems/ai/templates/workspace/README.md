@@ -11,6 +11,6 @@ Generated workspace directories must include README guidance explaining purpose,
 - `generic` - a general workspace root that may contain `clients/`, `owned-assets/`, projects, project-state, memory, dump, and operating artifacts.
 - `primary-entity` - a workspace root where the main company, brand, or owner-controlled entity lives directly at the root.
 
-Client and owned-asset workspaces use the same base directory structure for their nested scopes, including `documents/`, `contracts/`, `assets/`, `contacts/`, `dump/`, `memory/`, `projects/`, `project-state/`, `decisions/`, `tasks/`, and `archive/`.
+Client and owned-asset workspaces use the same base directory structure for their nested scopes, including `documents/`, `contracts/`, `assets/`, `contacts/`, `dump/`, `memory/`, `projects/`, `project-state/`, `capture-state/`, `decisions/`, `tasks/`, and `archive/`.
 
 TaskForge and TaskNotes task-management templates live under `tasks/` where that namespace exists. See `.systems/ai/core/task-management.md`.

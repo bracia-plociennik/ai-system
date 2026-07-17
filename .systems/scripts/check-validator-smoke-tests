@@ -2096,6 +2096,11 @@ grep -v 'Privacy/Scope Check' "$dreaming_template.bak" > "$dreaming_template"
 run_must_fail "dreaming-mode-template-missing-privacy-check" "$dreaming_validator"
 mv "$dreaming_template.bak" "$dreaming_template"
 
+cp "$dreaming_template" "$dreaming_template.bak"
+perl -0pi -e 's/## Undistilled Work Queue/## Missing Undistilled Queue/' "$dreaming_template"
+run_must_fail "dreaming-mode-template-missing-undistilled-queue" "$dreaming_validator"
+mv "$dreaming_template.bak" "$dreaming_template"
+
 cat > "$copy_repo/.systems/ai/core/dreaming-mode-unsafe-smoke.md" <<'MD'
 # Unsafe Dreaming Mode Smoke
 
@@ -2186,6 +2191,20 @@ $repo_row
 | Source path | Finding | Target | Reason | Risk/privacy note | Owner action |
 | --- | --- | --- | --- | --- | --- |
 | \`core/status.md\` | No missing capability. | \`none\` | No action. | \`safe\` | \`reject\` |
+
+## Undistilled Work Queue
+
+- Total state records reviewed: \`1\`
+- Pending quality: \`0\`
+- Ready: \`1\`
+- Deferred: \`0\`
+- Blocked: \`0\`
+- Owner skipped: \`0\`
+- Completed/not-applicable: \`0\`
+
+| Work ID | State | State record path | Source artifact path | Quality evidence | Proposed distillation target | Blocker/missing decision | Privacy/scope | Owner action | Residual risk |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| \`work-001\` | \`ready\` | \`capture-state/work-001.md\` | \`core/status.md\` | \`check-status\` | \`distillations/work-001.md\` | \`none\` | \`pass\` | \`distill\` | \`none\` |
 
 ## Rejected As Noise
 
@@ -2760,6 +2779,89 @@ run_must_pass "update-workspace-task-management-backfill" "$copy_repo/.systems/s
 grep -q 'existing tasks readme sentinel' "$task_update_workspace/tasks/README.md" || { echo "update-workspace overwrote existing tasks README"; exit 1; }
 test -f "$task_update_workspace/tasks/tasknote.template.md" || { echo "update-workspace did not create tasknote template"; exit 1; }
 test -f "$task_update_workspace/tasks/taskforge-vault-setup.template.md" || { echo "update-workspace did not create taskforge setup template"; exit 1; }
+
+delivery_validator="$copy_repo/.systems/scripts/check-delivery-constraints"
+distillation_state_validator="$copy_repo/.systems/scripts/check-distillation-state"
+
+run_must_pass "delivery-constraints-baseline" "$delivery_validator"
+run_must_pass "distillation-state-baseline" "$distillation_state_validator"
+
+mv "$copy_repo/.systems/ai/core/delivery-constraints.md" "$copy_repo/.systems/ai/core/delivery-constraints.md.bak"
+run_must_fail "delivery-constraints-missing-core" "$delivery_validator"
+mv "$copy_repo/.systems/ai/core/delivery-constraints.md.bak" "$copy_repo/.systems/ai/core/delivery-constraints.md"
+
+cp "$copy_repo/.systems/ai/core/delivery-constraints.md" "$copy_repo/.systems/ai/core/delivery-constraints.md.bak"
+perl -0pi -e 's/at most `1-3` questions/at most several questions/' "$copy_repo/.systems/ai/core/delivery-constraints.md"
+run_must_fail "delivery-constraints-missing-question-limit" "$delivery_validator"
+mv "$copy_repo/.systems/ai/core/delivery-constraints.md.bak" "$copy_repo/.systems/ai/core/delivery-constraints.md"
+
+cat > "$copy_repo/.systems/ai/core/delivery-constraints-unsafe-smoke.md" <<'MD'
+# Unsafe Deadline
+
+A deadline may allow teams to skip QA and evidence.
+MD
+run_must_fail "delivery-constraints-blocks-deadline-bypass" "$delivery_validator"
+rm "$copy_repo/.systems/ai/core/delivery-constraints-unsafe-smoke.md"
+
+mv "$copy_repo/.systems/ai/templates/capture/distillation-state.template.md" "$copy_repo/.systems/ai/templates/capture/distillation-state.template.md.bak"
+run_must_fail "distillation-state-missing-template" "$distillation_state_validator"
+mv "$copy_repo/.systems/ai/templates/capture/distillation-state.template.md.bak" "$copy_repo/.systems/ai/templates/capture/distillation-state.template.md"
+
+distillation_workspace="$tmp/distillation-state-workspace"
+mkdir -p "$distillation_workspace/capture-state" "$distillation_workspace/projects"
+cat > "$distillation_workspace/capture-state/work-001.md" <<'MD'
+# Distillation State
+
+- Work ID: work-001
+- Work mode: system-maintenance
+- Owner scope: workspace
+- Scope path: .systems/
+- Source artifacts: .systems/ai/core/example.md
+- Quality evidence: check-example
+- State: ready
+- Distillation artifact: none
+- Last reminder: none
+- Owner disposition: not-requested
+- Privacy/scope check: pass
+- Residual risk: none
+- `is_distilled` derived value: false
+MD
+run_must_pass "distillation-state-valid-workspace-record" "$distillation_state_validator" --workspace "$distillation_workspace"
+
+cp "$distillation_workspace/capture-state/work-001.md" "$distillation_workspace/capture-state/work-001.md.bak"
+perl -0pi -e 's/State: ready/State: completed/' "$distillation_workspace/capture-state/work-001.md"
+perl -0pi -e 's/derived value: false/derived value: true/' "$distillation_workspace/capture-state/work-001.md"
+run_must_fail "distillation-state-completed-requires-artifact" "$distillation_state_validator" --workspace "$distillation_workspace"
+mv "$distillation_workspace/capture-state/work-001.md.bak" "$distillation_workspace/capture-state/work-001.md"
+
+cp "$distillation_workspace/capture-state/work-001.md" "$distillation_workspace/capture-state/work-001.md.bak"
+perl -0pi -e 's/State: ready/State: completed/' "$distillation_workspace/capture-state/work-001.md"
+perl -0pi -e 's/Distillation artifact: none/Distillation artifact: distillations\/work-001.md/' "$distillation_workspace/capture-state/work-001.md"
+perl -0pi -e 's/derived value: false/derived value: true/' "$distillation_workspace/capture-state/work-001.md"
+run_must_fail "distillation-state-missing-artifact-path" "$distillation_state_validator" --workspace "$distillation_workspace"
+mkdir -p "$distillation_workspace/distillations"
+printf '%s\n' '# Accepted distillation' > "$distillation_workspace/distillations/work-001.md"
+run_must_pass "distillation-state-existing-artifact-path" "$distillation_state_validator" --workspace "$distillation_workspace"
+mv "$distillation_workspace/capture-state/work-001.md.bak" "$distillation_workspace/capture-state/work-001.md"
+
+cp "$distillation_workspace/capture-state/work-001.md" "$distillation_workspace/capture-state/work-001.md.bak"
+perl -0pi -e 's/derived value: false/derived value: true/' "$distillation_workspace/capture-state/work-001.md"
+run_must_fail "distillation-state-derived-value-mismatch" "$distillation_state_validator" --workspace "$distillation_workspace"
+mv "$distillation_workspace/capture-state/work-001.md.bak" "$distillation_workspace/capture-state/work-001.md"
+
+mkdir -p "$distillation_workspace/projects/demo/capture-state"
+run_must_fail "distillation-state-detects-project-repo-pollution" "$distillation_state_validator" --workspace "$distillation_workspace"
+rm -rf "$distillation_workspace/projects/demo"
+
+capture_state_update_workspace="$tmp/capture-state-update-workspace"
+mkdir -p "$capture_state_update_workspace/capture-state"
+printf '%s\n' 'existing capture-state sentinel' > "$capture_state_update_workspace/capture-state/capture-state.md"
+run_must_pass "update-workspace-capture-state-backfill" "$copy_repo/.systems/scripts/update-workspace" --workspace "$capture_state_update_workspace"
+test -f "$capture_state_update_workspace/capture-state/README.md" || { echo "update-workspace did not create capture-state README"; exit 1; }
+grep -q 'existing capture-state sentinel' "$capture_state_update_workspace/capture-state/capture-state.md" || { echo "update-workspace overwrote existing capture-state router"; exit 1; }
+
+test -f "$init_target/capture-state/README.md" || { echo "init-workspace did not create capture-state README"; exit 1; }
+test -f "$init_target/capture-state/capture-state.md" || { echo "init-workspace did not create capture-state router"; exit 1; }
 
 validation_profiles_validator="$copy_repo/.systems/scripts/check-validation-profiles"
 validation_profiles_script="$copy_repo/.systems/scripts/validate-ai-system"

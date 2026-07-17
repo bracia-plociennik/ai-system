@@ -116,6 +116,8 @@ run_fast_checks() {
   run_cmd "$script_dir/check-naming"
   run_cmd "$script_dir/check-privacy-boundary"
   run_cmd "$script_dir/check-contract-compliance"
+  run_cmd "$script_dir/check-delivery-constraints"
+  run_cmd "$script_dir/check-distillation-state"
   run_cmd "$script_dir/check-owner-approval"
 }
 
@@ -141,6 +143,8 @@ run_standard_checks() {
   run_cmd "$script_dir/check-privacy-boundary"
   run_cmd "$script_dir/check-system-skills"
   run_cmd "$script_dir/check-contract-compliance"
+  run_cmd "$script_dir/check-delivery-constraints"
+  run_cmd "$script_dir/check-distillation-state"
   run_cmd "$script_dir/check-owner-approval"
   run_cmd "$script_dir/check-end-of-task-capture"
   run_cmd "$script_dir/check-update-workspace"

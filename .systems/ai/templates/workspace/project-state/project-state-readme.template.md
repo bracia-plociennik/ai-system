@@ -12,6 +12,7 @@ Use this namespace for projects whose source lives under `projects/`, client rep
 ## Rules
 
 - Keep real repositories and source folders in `projects/` or the owner-approved source path.
-- Store AI System project status, memory, checkpoints, distillations, decisions, and links here.
+- Store AI System project status, memory, checkpoints, distillations, Distillation State, decisions, and links here.
+- Use `<project>/capture-state/` for per-work implementation capture disposition; do not add `is_distilled` to project source files.
 - If a project source path is a git worktree, ask before colocating runtime files there.
 - Do not auto-edit `.gitignore` or `.git/info/exclude`.

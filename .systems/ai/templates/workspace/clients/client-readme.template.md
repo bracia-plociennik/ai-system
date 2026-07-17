@@ -11,6 +11,7 @@ Client workspace for `<Client>`.
 - `memory/`
 - `checkpoints/`
 - `distillations/`
+- `capture-state/`
 - `contacts/`
 - `projects/`
 - `project-state/`
@@ -34,5 +35,7 @@ Use `dump/incoming/` for files already known to belong to this client.
 Files in client dump still require classification before movement into `documents/`, `assets/`, `projects/`, `contracts/`, `memory/`, or `archive/`.
 
 Use `project-state/<project>/` for AI System client-project status, memory, checkpoints, distillations, decisions, and source links when `projects/<project>/` is a git repo or source-material folder.
+
+Use `capture-state/` for client-level implementation Distillation State and `project-state/<project>/capture-state/` for project work. State records contain paths and disposition only, never raw client data.
 
 Use `.systems/ai/core/task-management.md` before routing client tasks into TaskForge or TaskNotes. Task files are action records and do not replace client memory, project-state, decisions, or owner approvals.

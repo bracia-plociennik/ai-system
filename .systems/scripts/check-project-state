@@ -98,6 +98,7 @@ done
 require_ref ".systems/ai/core/project-state.md" 'git worktree' "git worktree guard"
 require_ref ".systems/ai/core/project-state.md" '\.git/info/exclude' "local exclude option"
 require_ref ".systems/ai/core/project-state.md" 'Do not automatically edit' "no automatic git ignore edits"
+require_ref ".systems/ai/core/project-state.md" 'project-state/<project>/capture-state/' "repo-safe project capture state"
 require_ref ".systems/scripts/init-workspace" 'project-state/project-state\.template\.md' "init-workspace creates project-state router"
 require_ref ".systems/scripts/update-workspace" 'project-state/project-state\.template\.md' "update-workspace creates project-state router"
 require_ref ".systems/scripts/validate-ai-system" 'check-project-state' "validator chain"
@@ -120,7 +121,7 @@ scan_workspace() {
 
   while IFS= read -r -d '' project_path; do
     if git -C "$project_path" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-      for marker in status.md memory.md checkpoints distillations decisions; do
+      for marker in status.md memory.md checkpoints distillations capture-state decisions; do
         if [[ -e "$project_path/$marker" ]]; then
           echo "Project repo contains AI System runtime artifact: ${project_path#"$workspace_home/"}${marker:+/$marker}"
           fail=1

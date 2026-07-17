@@ -10,6 +10,8 @@
 - Writes allowed:
 - Owner approval:
 - Privacy/scope check:
+- Distillation State: `<state-record path and state|none>`
+- `is_distilled` derived value: `<true|false|not-applicable>`
 - Distillation needed:
 - Checkpoint needed:
 - Memory/status updates:

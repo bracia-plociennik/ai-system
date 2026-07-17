@@ -37,6 +37,7 @@ Workspace home: `<WORKSPACE_HOME>`.
 - `contacts/` - contact notes and relationship context.
 - `projects/` - primary entity project repositories or source materials.
 - `project-state/` - AI System runtime state for primary entity projects.
+- `capture-state/` - workspace-level Distillation State records; narrower work uses nearest client, asset, or project state.
 - `documents/` - owner-approved primary entity documents.
 - `contracts/` - owner-approved primary entity contracts.
 - `assets/` - reusable entity assets.

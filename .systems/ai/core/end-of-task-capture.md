@@ -46,6 +46,8 @@ If a command contains both completion wording and explicit procedure wording, ro
 
 ## Required Output
 
+When a scoped Distillation State record exists, include its state, derived `is_distilled` value, source artifacts, quality evidence, owner disposition, and recommended next route. Chat completion wording alone cannot set `completed`.
+
 Use this output block when the matched route is End-of-Task Capture or when a higher-precedence route includes it as supporting output:
 
 ```text
@@ -120,6 +122,10 @@ End-of-Task Capture must not:
 - write frontend, backend, SEO, ads, smart-contract, product, or client-work lessons into `external-memory/`.
 
 If scope, target, privacy, evidence, selected workspace, status, or write permission is unclear, stop with proposal-only capture and ask for the missing decision.
+
+## Distillation State
+
+End-of-Task Capture may propose a transition or a formal distillation/checkpoint route for an existing state record. It does not create distillation or change the state automatically. A `completed` state requires the accepted distillation artifact and normal capture permissions.
 
 ## Response And Trace
 

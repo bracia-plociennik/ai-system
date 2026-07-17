@@ -33,6 +33,22 @@
 - Next checkpoint needed: `<yes|no; trigger>`
 - System insight candidate: `<yes|no; target if yes>`
 
+## Delivery Constraints
+
+- Deadline/timebox status: `<met|at-risk|missed|owner-opt-out|not-applicable>`
+- Delivered scope: `<must-have and completed should-have>`
+- Deferred scope: `<reported cutline items or none>`
+- Quality floor preserved: `<yes|no; evidence>`
+- Overrun decision: `<none|owner decision>`
+
+## Distillation State
+
+- State record: `<nearest-owner capture-state path>`
+- Previous state: `<ready|deferred|blocked>`
+- New state: `<completed|blocked>`
+- Distillation artifact: `<this file path>`
+- `is_distilled` derived value: `<true only when completed>`
+
 ## Risks And Watch Items
 
 - `<risk or watch item>`

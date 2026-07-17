@@ -42,6 +42,17 @@ Wypelniony brief moze zawierac prywatne dane klienta. Nie zapisuj wypelnionego b
 - Terminy:
 - Definicja sukcesu:
 
+### Delivery Constraints Dla Nowej Implementacji
+
+- Deadline albo jawny opt-out:
+- Time budget albo jawny opt-out:
+- Must-have outcome:
+- Should-have scope:
+- Stretch scope:
+- Quality floor:
+- Cutline rule:
+- Overrun checkpoint:
+
 ## 5. Kontakty
 
 - Osoby i role:

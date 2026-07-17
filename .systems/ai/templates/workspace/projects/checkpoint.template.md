@@ -26,6 +26,21 @@
 - Checkpoint reason: `<major decision|long pause|final closure|stale state|substantial triage|owner-approved capture|other>`
 - System insight candidate: `<yes|no; target if yes>`
 
+## Delivery Constraints
+
+- Deadline/timebox status: `<met|at-risk|missed|owner-opt-out|not-applicable>`
+- Delivered scope: `<must-have and completed should-have>`
+- Deferred scope: `<reported cutline items or none>`
+- Quality floor preserved: `<yes|no; evidence>`
+- Overrun decision: `<none|owner decision>`
+
+## Distillation State
+
+- State record: `<nearest-owner capture-state path|none>`
+- State: `<pending-quality|ready|completed|deferred|owner-skipped|blocked|not-applicable>`
+- `is_distilled` derived value: `<true|false>`
+- Owner action: `<distill|defer|skip|unblock|none>`
+
 ## Files Or Artifacts Reviewed
 
 - `<path>`

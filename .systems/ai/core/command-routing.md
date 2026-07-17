@@ -14,6 +14,8 @@ If root `AGENTS.md` is missing, run or recommend `.systems/scripts/init-ai-syste
 
 Before planning or implementing new work, apply `.systems/ai/core/task-intake.md`.
 
+Before new implementation-class writes, apply `.systems/ai/core/delivery-constraints.md`. Ask only for missing deadline/time budget, must-have, quality-floor, cutline, or overrun decisions; do not repeat constraints already present in the owner request or accepted plan.
+
 If the request is only orientation or status, use guide mode.
 
 Before reading or writing runtime artifacts, select exactly one workspace using `.systems/ai/core/workspaces.md`.
@@ -39,6 +41,8 @@ Task management requests route through `.systems/ai/core/task-management.md`. Se
 Task candidates from check-ins or Dream Reports route through `.systems/scripts/propose-task-candidates`. The default route is dry-run proposal only. Under V3 `deadline-aware-6d-v1`, every valid planned professional `build-*`, `deliver-*`, and `promote-*` item accepts `definition_of_done`, optional `deadline`, and optional `task_bucket`. Explicit bucket wins; otherwise deadline defaults to `6d/do`, and no deadline defaults to `6d/defer`. A deadline maps only to `due`; no deadline creates no automatic `due` or `scheduled`. WIG may be linked or standalone, but creates no TaskNote and does not change this candidate set. Missing/invalid WIG and overload warnings do not suppress candidates. Invalid non-empty deadline or bucket stops TaskNote generation instead of silently defaulting. Actual closure items create no TaskNotes. Dry-run reads the local vault configuration when available to discover TaskForge projects and warns without failing when discovery is unavailable. The same exact owner-approved canonical V3 check-in write authorizes initial resulting TaskNotes once via `--owner-approved --write --task-vault-config <workspace>/tasks/taskforge-vault.local.md`. Dream Report candidates come from the owner decision queue and default to `tags: [6d/defer]`; they retain the normal separate approval route. Existing `5d/*` tags remain read-compatible only and normalize to 6D output; `status: done` derives the `DONE` bucket.
 
 Dreaming Mode requests route through `.systems/ai/core/dreaming-mode.md`. Select exactly one workspace first. The default variant is `workspace-artifacts-only` and writes only an advisory Dream Report under `dreams/runs/**`. `full-repo` requires an explicit owner-provided project or source path. Dreaming Mode must not automatically promote findings into memory, project-state, System Insights, External Memory, skills, status, personal-ops, source files, commits, GitHub mirrors, or scheduler automation.
+
+Implementation capture state routes through `.systems/ai/core/distillation-state.md`. Create or update one nearest-owner state record for each approved implementation work unit. Dreaming may report an Undistilled Work Queue with counts, states, safe paths, and proposed distillation actions, but must not distill or change state automatically.
 
 Before `AI_SYSTEM_WORK_CLOSURE`, apply `.systems/ai/core/contract-compliance.md`. The gate is advisory-only and requires an explicit `Knowledge capture: required|not-required` decision before final closure, handoff, accepted change, commit-ready or push-ready product-development work, or switching to another work unit.
 
@@ -80,6 +84,8 @@ Do not route ordinary workspace, client, project, owned-asset, dump, memory, pro
 | `zapisz status projektu`, `zapisz checkpoint projektu`, `project state` | Project state capture | Use `.systems/ai/core/project-state.md`; if the project path is a git worktree, ask whether to use `project-state/` or colocated local-only state. |
 | `zapisz memory` | Memory capture | Select workspace first; store in the appropriate workspace, client, owned-asset, or project memory location. |
 | `zrób destylację` | Distillation workflow | Compress raw memory and identify stale facts, decisions, risks, and checkpoint needs. |
+| `jaki deadline`, `ile czasu na task`, `do kiedy`, `bez deadline'u`, `no timebox` | Delivery Constraints | Use `.systems/ai/core/delivery-constraints.md`; reuse existing constraints, ask only for missing material decisions, and preserve the quality floor. |
+| `co jest niezdestylowane`, `is_distilled`, `capture state`, `undistilled work` | Distillation State review | Use `.systems/ai/core/distillation-state.md`; report state and owner action without writing distillation automatically. |
 | `zamknij task`, `handoff`, `final check`, `przed commitem`, `przed pushem` | Contract compliance and Knowledge Capture Gate | Use `.systems/ai/core/contract-compliance.md`; decide work mode, compliance, capture target, and reason before closure. |
 | `to koniec zadania`, `koniec taska`, `kończymy ten task`, `dziękuję, utrwal wiedzę`, `utrwal wiedzę z tej rozmowy`, `end task and capture knowledge`, `done, capture learnings` | End-of-Task Capture | Use `.systems/ai/core/end-of-task-capture.md`; produce capture review/proposal by default; durable writes require explicit owner-approved target and privacy-safe scope. |
 | `zaproponuj system-insights` | System Insights candidate | Select workspace first; use `.systems/ai/core/system-insights.md`; produce an anonymized candidate only, with no durable write unless exact `owner-approved` capture or checkpoint routing permits it. |

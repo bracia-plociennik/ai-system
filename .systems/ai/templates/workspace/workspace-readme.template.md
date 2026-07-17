@@ -14,6 +14,7 @@ Workspace home: `<WORKSPACE_HOME>`.
 - `owned-assets/` - owner-controlled companies, brands, and commercial assets when they are not the primary entity of this workspace.
 - `projects/` - standalone project repositories or source materials.
 - `project-state/` - AI System status, memory, checkpoints, distillations, decisions, and source links for projects.
+- `capture-state/` - workspace-level Distillation State records and unresolved capture routing.
 - `micro-projects/` - small standalone work.
 - `humans/` - owner-facing summaries.
 - `links/` - provider-agnostic external source registry records and references.

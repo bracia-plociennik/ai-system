@@ -103,6 +103,14 @@ Every recommendation or candidate must include:
 - `risk/privacy note`;
 - `owner action`.
 
+## Undistilled Work Queue
+
+Dreaming may read nearest-owner Distillation State records and add an `Undistilled Work Queue` to the Dream Report. It reports total records, counts by state, privacy-safe workspace-relative state/source paths, quality evidence, proposed distillation target, blocker or missing decision, owner action, privacy state, and residual risk.
+
+The queue includes unresolved `pending-quality`, `ready`, `deferred`, `blocked`, and `owner-skipped` records. `pending-quality` remains visibly incomplete quality work; it is not promoted to a distillation proposal until quality evidence supports `ready`.
+
+Dreaming is advisory-only: it does not change state, create distillation, write memory, External Memory or System Insights, create TaskNotes, update status, commit, push, or run scheduler automation. For sensitive scopes, use the safe state-record path and omit or anonymize private source path components.
+
 ## Privacy Rules
 
 Dream Reports must not copy raw client data, client names, private company names, personal names, emails, phone numbers, wallet addresses, account IDs, ticket IDs, exact private domains, repository names, project names, production identifiers, personal check-in content, financial details, `.env` content, credentials, API keys, private keys, seed phrases, access tokens, internal URLs, or security-sensitive operational details.

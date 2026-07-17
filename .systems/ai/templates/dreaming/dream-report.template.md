@@ -80,6 +80,24 @@ External Memory is only for AI System product improvement proposals.
 | --- | --- | --- | --- | --- | --- |
 | `<path>` | `<gap>` | `<AI System|workspace|project|skill|none>` | `<why it is missing>` | `<safe|needs owner review|blocked>` | `<plan|reject|defer>` |
 
+## Undistilled Work Queue
+
+- Total state records reviewed: `<count>`
+- Pending quality: `<count>`
+- Ready: `<count>`
+- Deferred: `<count>`
+- Blocked: `<count>`
+- Owner skipped: `<count>`
+- Completed/not-applicable: `<count>`
+
+Use privacy-safe workspace-relative paths. For sensitive work, list the safe state-record path and omit private source path components.
+
+| Work ID | State | State record path | Source artifact path | Quality evidence | Proposed distillation target | Blocker/missing decision | Privacy/scope | Owner action | Residual risk |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `<work-id>` | `<pending-quality|ready|deferred|blocked|owner-skipped>` | `<workspace-relative path>` | `<safe path|withheld-sensitive>` | `<path/check/none>` | `<distillation path|none pending quality>` | `<decision or none>` | `<pass|fail|unknown>` | `<run quality|distill|defer|skip|unblock>` | `<risk or none>` |
+
+Dreaming proposes distillation only. It performs no state transition or durable capture.
+
 ## Rejected As Noise
 
 | Source path | Finding | Reason rejected |

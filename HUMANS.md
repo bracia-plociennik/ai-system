@@ -414,6 +414,26 @@ Expected targets:
 
 The gate is advisory-only. It requires a decision, not automatic writes. Durable capture still needs exact `owner-approved` scope and the correct target.
 
+## Delivery Constraints
+
+Before implementation or client delivery that creates files, provide a deadline/timebox and protected outcome. AI System should ask only when these are missing:
+
+```text
+Deadline: 2026-07-20 EOD Europe/Warsaw. Time budget: 6 hours. Must-have: <result>. Cut stretch first; keep the agreed QA floor.
+```
+
+Use `bez deadline'u` or `no timebox` only as a scoped opt-out. Deadline pressure does not weaken QA, privacy, evidence, approvals, or stop conditions.
+
+## Distillation State
+
+Implementation work stores one repo-safe state record under the nearest `capture-state/` namespace. `pending-quality` means QA is incomplete, `ready` means distillation is recommended, and `completed` requires a linked accepted distillation. The derived `is_distilled` value is `true` only for `completed`.
+
+To review unresolved work without writing capture:
+
+```text
+Sprawdź Distillation State w wybranym workspace. Podaj liczbę, stany, bezpieczne ścieżki i rekomendowany owner action. Niczego nie destyluj ani nie zmieniaj.
+```
+
 ## End-of-Task Capture
 
 Use this when the task or chat is done and you want AI System to review what should be preserved:

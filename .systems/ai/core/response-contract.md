@@ -38,6 +38,12 @@ This gate is advisory-only. It records the Knowledge capture decision before `AI
 
 If End-of-Task Capture is used, apply `.systems/ai/core/end-of-task-capture.md` and include the required `End-of-Task Capture` block before the `Contract compliance` block when both apply. The trace must state whether End-of-Task Capture was the matched route or supporting output, source scope reviewed, durable writes performed or skipped, and residual risk.
 
+## Delivery And Distillation Trace
+
+When Delivery Constraints apply, report the agreed deadline/timebox, delivered and deferred scope, overrun status, cutline use, and whether the quality floor was preserved.
+
+When a Distillation State record applies, report its state, derived `is_distilled` value, source/quality evidence, owner disposition, and next consumer. These fields are evidence only and do not grant writes, promotion, commit, push, or work closure.
+
 ## Required Footer
 
 Use this exact shape:

@@ -27,6 +27,10 @@ In management checkouts, system-owned files are upstream-owned. Do not implement
 
 Use `.systems/ai/core/owner-approval.md` for recognized write approval. Direct `owner-approved: <action + target>` and strict acceptance of the immediately preceding complete plan are equivalent only for that plan's explicit scope. Neither form bypasses target-specific write rules, privacy, validation, evidence, risk, workspace selection, stop conditions, or final acceptance.
 
+Before new implementation-class work creates or changes system, project, client, or owned-asset artifacts, use `.systems/ai/core/delivery-constraints.md`. Reuse constraints already present in the owner request or accepted plan; ask only for material missing deadline/time-budget decisions. Scope may be reduced through the agreed cutline, but the must-have outcome and quality floor remain protected.
+
+Every implementation-class write also creates or updates one nearest-owner Distillation State record under `.systems/ai/core/distillation-state.md`. The record tracks the coherent work unit and its artifact paths; it does not inject `is_distilled` into source files or project repositories.
+
 ## Workspace-Owned
 
 - `<workspace>/core/`
@@ -35,6 +39,7 @@ Use `.systems/ai/core/owner-approval.md` for recognized write approval. Direct `
 - `<workspace>/owned-assets/` for generic workspace owned assets or explicit sub-assets
 - `<workspace>/projects/` for repositories or project source materials
 - `<workspace>/project-state/` for AI System project status, memory, checkpoints, distillations, decisions, and source links
+- `<workspace>/capture-state/` for workspace-level Distillation State records and unresolved capture routing
 - `<workspace>/micro-projects/`
 - `<workspace>/humans/`
 - `<workspace>/links/`
@@ -86,6 +91,8 @@ Task management routes through `.systems/ai/core/task-management.md`. TaskForge/
 Check-in and Dream Report task candidates route through `.systems/scripts/propose-task-candidates`. Candidate generation may inspect canonical daily check-ins and Dream Report owner decision queues, but default output is proposal-only. Under V3 `deadline-aware-6d-v1`, each valid professional `build`, `deliver`, and `promote` plan item resolves an explicit 6D bucket first, then deadline to `do`, otherwise `defer`; its DoD is preserved. WIG and overload do not block or expand that set. No deadline produces no automatic `due` or `scheduled`. Dream Report candidates default to `tags: [6d/defer]`. Existing `5d/*` is read-compatible only and normalizes to current 6D output, while `status: done` derives `DONE`. Dry-run may read the configured local vault for TaskForge project discovery and warns without failing when it is unavailable. A single owner-approved V3 check-in write also authorizes the initial resulting TaskNotes through the local-only vault configuration. All other TaskNote writes retain exact owner approval.
 
 Dreaming Mode routes through `.systems/ai/core/dreaming-mode.md`. It is advisory-only and writes only Dream Reports under the selected workspace `dreams/runs/**`. The default variant is `workspace-artifacts-only`; `full-repo` requires an explicit owner-provided project or source path. Dream Reports are recommendation queues and cannot automatically mutate memory, project-state, System Insights, External Memory, skills, status, personal-ops, source files, Git, GitHub mirrors, or scheduler automation.
+
+Dream Reports include an advisory Undistilled Work Queue when capture-state records exist. The queue reports counts, states, safe paths, evidence, and proposed distillation actions; it never performs the distillation or changes state.
 
 ## Default Behavior
 

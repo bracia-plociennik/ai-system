@@ -147,6 +147,14 @@ The agent must decide:
 
 Durable capture still needs the correct workspace target, privacy-safe content, and explicit owner-approved write scope unless an existing checkpoint or final-check route authorizes that exact capture.
 
+## Delivery Constraints And Distillation State
+
+Before new implementation work creates or changes system, project, client, or owned-asset artifacts, AI System resolves deadline or timebox, must-have outcome, quality floor, cutline, and overrun checkpoint. It reuses constraints already present in the owner request or accepted plan and asks only for material missing decisions. Explicit `bez deadline'u` or `no timebox` opt-out is scoped to the current work.
+
+Every implementation work unit has one nearest-owner `capture-state/<work-id>.md` record. The state moves from `pending-quality` to `ready`, `completed`, or an explicit disposition. `is_distilled` is a derived compatibility value, not a field injected into source artifacts.
+
+Dreaming reports unresolved state counts and privacy-safe paths in an Undistilled Work Queue. It proposes distillation but does not execute it.
+
 ## End-of-Task Capture
 
 For chat-end task closure prompts such as `to koniec zadania`, `koniec taska`, `dziękuję, utrwal wiedzę`, or `end task and capture knowledge`, AI System uses `.systems/ai/core/end-of-task-capture.md`.
@@ -170,6 +178,8 @@ Use:
 ```
 
 for project status, memory, memory entries, checkpoints, distillations, decisions, and `links.md`.
+
+Project implementation capture state belongs in `<workspace>/project-state/<project-slug>/capture-state/`, outside the project repository.
 
 Use:
 

@@ -113,6 +113,7 @@ require_ref ".systems/ai/core/command-routing.md" 'Dreaming Mode' "command routi
 require_ref ".systems/ai/core/memory.md" 'Dream Reports' "memory boundary"
 require_ref ".systems/ai/core/system-insights.md" 'Dream Report' "system insights boundary"
 require_ref ".systems/ai/core/project-state.md" 'Dream Reports' "project-state boundary"
+require_ref ".systems/ai/core/distillation-state.md" 'Dreaming reports counts by state' "Distillation State Dreaming boundary"
 require_ref ".systems/ai/core/personal-ops.md" 'Dreaming Mode' "personal-ops privacy boundary"
 require_ref ".systems/ai/core/personal-ops.md" 'check-ins-v3.trends.md' "sanitized Personal Ops trends boundary"
 require_ref ".systems/ai/core/external-memory.md" 'Dream Reports' "external memory boundary"
@@ -166,6 +167,7 @@ for required in \
   '^## Personal Ops Candidates$' \
   '^## Things To Improve Or Remove$' \
   '^## Missing Capabilities$' \
+  '^## Undistilled Work Queue$' \
   '^## Rejected As Noise$' \
   '^## Privacy/Scope Check$' \
   '^## Owner Decision Queue$' \
@@ -180,6 +182,8 @@ do
     fail=1
   fi
 done
+
+require_section_table_columns "$dream_template" "Undistilled Work Queue" "Work ID" "State" "State record path" "Source artifact path" "Quality evidence" "Proposed distillation target" "Blocker/missing decision" "Privacy/scope" "Owner action" "Residual risk"
 
 recommendation_sections=(
   "Workspace Artifact Findings"
@@ -242,6 +246,7 @@ check_dream_report() {
     '^## Personal Ops Candidates$' \
     '^## Things To Improve Or Remove$' \
     '^## Missing Capabilities$' \
+    '^## Undistilled Work Queue$' \
     '^## Rejected As Noise$' \
     '^## Privacy/Scope Check$' \
     '^## Owner Decision Queue$' \
@@ -265,6 +270,7 @@ check_dream_report() {
   done
 
   require_section_table_columns "$file" "Owner Decision Queue" "Priority" "Source path" "Finding" "Proposed target" "Owner action"
+  require_section_table_columns "$file" "Undistilled Work Queue" "Work ID" "State" "State record path" "Source artifact path" "Quality evidence" "Proposed distillation target" "Blocker/missing decision" "Privacy/scope" "Owner action" "Residual risk"
 
   if rg -q 'Dream variant:[[:space:]]*`?full-repo`?' "$file"; then
     if rg -A8 '^## Project/Repo Review Findings$' "$file" | rg -q 'not-applicable'; then
