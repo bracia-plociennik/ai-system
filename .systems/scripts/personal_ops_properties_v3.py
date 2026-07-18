@@ -13,6 +13,21 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCHEMA_PATH = REPO_ROOT / ".systems/ai/templates/workspace/personal-ops/check-in-properties-v3.schema.json"
 
+CURRENT_TASK_GENERATION_POLICY = "deadline-aware-6d-v1"
+HISTORICAL_TASK_GENERATION_POLICY = "all-professional-do-v1"
+HISTORICAL_NATIVE_CUTOFF = date(2026, 7, 17)
+LEGACY_ADDITIVE_PROPERTY_KEYS = frozenset({
+    "planned_do_count",
+    "planned_defer_count",
+    "planned_delegate_count",
+    "planned_delete_count",
+    "planned_dump_count",
+    "planned_with_deadline_count",
+    "planned_without_deadline_count",
+    "planned_earliest_deadline",
+    "planned_latest_deadline",
+})
+
 def load_schema() -> list[dict[str, Any]]:
     raw = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
     fields = raw.get("fields")
@@ -78,7 +93,7 @@ def parse_frontmatter_and_properties(text: str, source: Path) -> tuple[dict[str,
     return top, properties, body
 
 
-def _validate_type(value: Any, spec: dict[str, Any], key: str) -> None:
+def _validate_type(value: Any, spec: dict[str, Any], key: str, historical: bool = False) -> None:
     if value == "":
         return
     kind = spec["type"]
@@ -117,18 +132,21 @@ def _validate_type(value: Any, spec: dict[str, Any], key: str) -> None:
         except json.JSONDecodeError as exc:
             raise ValueError(f"Property {key} must be a JSON scalar string") from exc
     elif kind == "enum":
-        if str(value) not in spec.get("values", []):
+        allowed = spec.get("values", [])
+        if historical and key == "task_generation_policy":
+            allowed = [*allowed, HISTORICAL_TASK_GENERATION_POLICY]
+        if str(value) not in allowed:
             raise ValueError(f"Property {key} has unsupported value: {value}")
     else:
         raise ValueError(f"Unsupported schema type for {key}: {kind}")
 
 
-def validate_properties(top: dict[str, Any], properties: dict[str, Any], source: Path) -> dict[str, Any]:
-    by_key = validate_property_map(properties, source)
+def validate_properties(top: dict[str, Any], properties: dict[str, Any], source: Path, historical: bool = False) -> dict[str, Any]:
+    by_key = validate_property_map(properties, source, historical=historical)
     if str(top.get("schema_version", "")) != "3" or str(top.get("index_contract", "")) != "3":
         raise ValueError(f"Expected schema_version: 3 and index_contract: 3 in {source}")
     for key, spec in by_key.items():
-        _validate_type(properties[key], spec, key)
+        _validate_type(properties[key], spec, key, historical=historical)
     if str(properties["index_contract"]) != "3" or str(properties["schema_version"]) != "3":
         raise ValueError(f"Properties must repeat schema_version: 3 and index_contract: 3 in {source}")
     if top.get("type") != "daily-check-in":
@@ -156,11 +174,11 @@ def validate_properties(top: dict[str, Any], properties: dict[str, Any], source:
         closure = date.fromisoformat(str(properties["closure_date"]))
         if (session - closure).days != 1:
             raise ValueError(f"closure_date must be exactly one day before session_date in {source}")
-    _validate_task_candidate_eligible_count(properties, source)
+    _validate_task_candidate_eligible_count(properties, source, historical=historical)
     return by_key
 
 
-def validate_property_map(properties: dict[str, Any], source: Path) -> dict[str, dict[str, Any]]:
+def validate_property_map(properties: dict[str, Any], source: Path, historical: bool = False) -> dict[str, dict[str, Any]]:
     """Validate the complete V3 property shape without assuming a Markdown report.
 
     The one-time legacy snapshot has the same schema as a native report, but it is
@@ -175,8 +193,27 @@ def validate_property_map(properties: dict[str, Any], source: Path) -> dict[str,
     if unknown:
         raise ValueError(f"Unknown properties in {source}: {', '.join(unknown)}")
     for key, spec in by_key.items():
-        _validate_type(properties[key], spec, key)
+        _validate_type(properties[key], spec, key, historical=historical)
     return by_key
+
+
+def project_historical_properties(properties: dict[str, Any], source: Path) -> dict[str, Any]:
+    """Project additive fields for a retired report without changing its source."""
+    missing = set(load_schema_field_keys()) - set(properties)
+    if missing - LEGACY_ADDITIVE_PROPERTY_KEYS:
+        raise ValueError(
+            f"Historical report has non-additive missing properties in {source}: "
+            f"{', '.join(sorted(missing - LEGACY_ADDITIVE_PROPERTY_KEYS))}"
+        )
+    projected = dict(properties)
+    for key in missing:
+        projected[key] = ""
+    validate_property_map(projected, source, historical=True)
+    return projected
+
+
+def load_schema_field_keys() -> set[str]:
+    return {field["key"] for field in load_schema()}
 
 
 def _json_array(value: Any, key: str, source: Path) -> list[Any]:
@@ -316,7 +353,7 @@ def _minimum_day_status_from_wig_closure(closure: dict[str, Any], source: Path) 
     raise ValueError(f"Unsupported prior-day WIG closure status '{status}' in {source}")
 
 
-def _validate_task_candidate_eligible_count(properties: dict[str, Any], source: Path) -> None:
+def _validate_task_candidate_eligible_count(properties: dict[str, Any], source: Path, historical: bool = False) -> None:
     """Keep the source properties metric aligned with V3 TaskNote candidate policy."""
     items = _json_array(properties["planned_items_json"], "planned_items_json", source)
     if not all(isinstance(item, dict) for item in items):
@@ -325,7 +362,7 @@ def _validate_task_candidate_eligible_count(properties: dict[str, Any], source: 
     if any(not item_id for item_id in item_ids) or len(item_ids) != len(set(item_ids)):
         raise ValueError(f"planned_items_json requires unique non-empty item IDs in {source}")
     policy = str(properties["task_generation_policy"])
-    if policy != "deadline-aware-6d-v1":
+    if policy != CURRENT_TASK_GENERATION_POLICY and not (historical and policy == HISTORICAL_TASK_GENERATION_POLICY):
         raise ValueError(f"Unsupported V3 task_generation_policy in {source}: {policy}")
     wig_kind = str(properties["wig_kind"])
     wig_id = str(properties["wig_id"]).strip()
@@ -360,7 +397,8 @@ def _validate_task_candidate_eligible_count(properties: dict[str, Any], source: 
         if stream in {"build", "deliver", "promote"}:
             expected += 1
 
-    _validate_planned_task_metrics(properties, items, source)
+    if not historical:
+        _validate_planned_task_metrics(properties, items, source)
 
     try:
         actual = int(str(properties["task_candidate_eligible_count"]))

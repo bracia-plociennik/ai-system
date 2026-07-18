@@ -2644,6 +2644,22 @@ for offset in range(46):
     source.parent.mkdir(parents=True, exist_ok=True)
     source.write_text(f"Legacy source {legacy_day.isoformat()}\n", encoding="utf-8")
     properties = properties_for(legacy_day, "legacy-v2-one-time-migration", source_relative)
+    properties["task_generation_policy"] = "all-professional-do-v1"
+    for key in (
+        "planned_do_count", "planned_defer_count", "planned_delegate_count", "planned_delete_count",
+        "planned_dump_count", "planned_with_deadline_count", "planned_without_deadline_count",
+        "planned_earliest_deadline", "planned_latest_deadline",
+    ):
+        properties.pop(key)
+    confidence = {
+        field["key"]: "derived"
+        for field in fields
+        if field["key"] not in {
+            "planned_do_count", "planned_defer_count", "planned_delegate_count", "planned_delete_count",
+            "planned_dump_count", "planned_with_deadline_count", "planned_without_deadline_count",
+            "planned_earliest_deadline", "planned_latest_deadline",
+        }
+    }
     legacy_rows.append(
         {
             "properties": properties,
@@ -2652,7 +2668,7 @@ for offset in range(46):
                     "source_path": source_relative,
                     "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
                 },
-                "field_confidence": {field["key"]: "derived" for field in fields},
+                "field_confidence": confidence,
                 "unmapped_fields": [],
                 "legacy_minimum_day_done": False,
             },
@@ -2748,6 +2764,11 @@ run_must_pass_capture "personal-ops-v3-native-freshness-post-sync-status" "$v3_f
   "$properties_v3_sync" --workspace "$v3_native_freshness_workspace" --status-only
 grep -Fqx 'unsynced-native-check-in-count: 0' "$v3_freshness_status"
 grep -Fqx 'unsynced-check-in-count: 0' "$v3_freshness_status"
+
+cp "$v3_native_freshness_workspace/personal-ops/check-ins/2026/2026-07-10.md" "$v3_native_freshness_workspace/personal-ops/check-ins/2026/2026-07-18.md"
+perl -0pi -e 's/2026-07-10/2026-07-18/g; s/2026-07-09/2026-07-17/g; s/deadline-aware-6d-v1/all-professional-do-v1/g' "$v3_native_freshness_workspace/personal-ops/check-ins/2026/2026-07-18.md"
+run_must_fail "personal-ops-v3-retired-policy-after-cutover" "$properties_v3_sync" --workspace "$v3_native_freshness_workspace" --status-only
+rm "$v3_native_freshness_workspace/personal-ops/check-ins/2026/2026-07-18.md"
 
 init_target="$tmp/init-system-insights-workspace"
 run_must_pass "init-workspace-system-insights" "$copy_repo/.systems/scripts/init-workspace" --workspace "$init_target" --workspace-id smoke --workspace-profile primary-entity

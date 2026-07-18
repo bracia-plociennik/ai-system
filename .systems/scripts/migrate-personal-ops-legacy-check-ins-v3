@@ -341,7 +341,7 @@ def write_snapshot(workspace: Path, rows: list[dict[str, Any]], dry_run: bool) -
     source_types = {str(row["properties"]["source_type"]) for row in rows}
     manifest_payload = {
         "format": "personal-ops-legacy-normalized-v3",
-        "format_version": 1,
+        "format_version": 2,
         "migration_id": "legacy-v2-to-official-v3",
         "created_at": datetime.now().astimezone().isoformat(timespec="seconds"),
         "record_count": len(rows),

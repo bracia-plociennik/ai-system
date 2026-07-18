@@ -15,10 +15,14 @@ from datetime import date, timedelta
 from pathlib import Path
 
 from personal_ops_properties_v3 import (
+    CURRENT_TASK_GENERATION_POLICY,
+    HISTORICAL_NATIVE_CUTOFF,
+    HISTORICAL_TASK_GENERATION_POLICY,
     csv_value,
     decoded_json_properties,
     load_schema,
     parse_frontmatter_and_properties,
+    project_historical_properties,
     redacted_properties,
     validate_property_map,
     validate_properties,
@@ -55,7 +59,20 @@ def load_native_records(workspace: Path, excluded_source_paths: set[str] | None 
     for path in daily_reports(workspace, excluded_source_paths):
         text = path.read_text(encoding="utf-8")
         top, properties, _ = parse_frontmatter_and_properties(text, path)
-        validate_properties(top, properties, path)
+        policy = str(properties.get("task_generation_policy", ""))
+        if policy == CURRENT_TASK_GENERATION_POLICY:
+            validate_properties(top, properties, path)
+        elif policy == HISTORICAL_TASK_GENERATION_POLICY:
+            try:
+                session_date = date.fromisoformat(str(properties.get("session_date", "")))
+            except ValueError as exc:
+                raise ValueError(f"Historical native report has invalid session_date in {path}") from exc
+            if session_date > HISTORICAL_NATIVE_CUTOFF:
+                raise ValueError(f"Retired task_generation_policy is not allowed after {HISTORICAL_NATIVE_CUTOFF}: {path}")
+            properties = project_historical_properties(properties, path)
+            validate_properties(top, properties, path, historical=True)
+        else:
+            validate_properties(top, properties, path)
         expected_path = path.relative_to(workspace).as_posix()
         if properties["file_path"] != expected_path:
             raise ValueError(f"properties.file_path must equal {expected_path} in {path}")
@@ -92,7 +109,7 @@ def safe_workspace_source(workspace: Path, relative_path: str) -> Path:
     return candidate
 
 
-def validate_legacy_metadata(metadata: object, workspace: Path, source: Path, schema_keys: set[str]) -> str:
+def validate_legacy_metadata(metadata: object, workspace: Path, source: Path, schema_keys: set[str]) -> tuple[str, dict]:
     if not isinstance(metadata, dict):
         raise ValueError(f"Legacy snapshot metadata must be an object in {source}")
     origin = metadata.get("origin")
@@ -110,8 +127,21 @@ def validate_legacy_metadata(metadata: object, workspace: Path, source: Path, sc
     if sha256_file(current_source) != source_sha:
         raise ValueError(f"Legacy snapshot source hash mismatch: {current_source}")
     confidence = metadata.get("field_confidence")
-    if not isinstance(confidence, dict) or set(confidence) != schema_keys:
+    if not isinstance(confidence, dict):
         raise ValueError(f"Legacy snapshot must provide confidence for every V3 property in {source}")
+    extra_confidence = set(confidence) - schema_keys
+    missing_confidence = schema_keys - set(confidence)
+    if extra_confidence or missing_confidence - {"planned_do_count", "planned_defer_count", "planned_delegate_count", "planned_delete_count", "planned_dump_count", "planned_with_deadline_count", "planned_without_deadline_count", "planned_earliest_deadline", "planned_latest_deadline"}:
+        raise ValueError(f"Legacy snapshot confidence keys drifted in {source}")
+    projected_metadata = dict(metadata)
+    projected_confidence = dict(confidence)
+    for key in missing_confidence:
+        projected_confidence[key] = "unknown"
+    projected_metadata["field_confidence"] = projected_confidence
+    projected_metadata["compatibility_projection"] = {
+        "source_format_version": 1,
+        "unknown_properties": sorted(missing_confidence),
+    }
     if any(value not in {"direct", "derived", "unknown"} for value in confidence.values()):
         raise ValueError(f"Legacy snapshot confidence values must be direct, derived, or unknown in {source}")
     if not isinstance(metadata.get("unmapped_fields"), list):
@@ -119,7 +149,7 @@ def validate_legacy_metadata(metadata: object, workspace: Path, source: Path, sc
     legacy_minimum = metadata.get("legacy_minimum_day_done", "")
     if legacy_minimum not in {"", True, False}:
         raise ValueError(f"Legacy snapshot legacy_minimum_day_done must be boolean or empty in {source}")
-    return source_path
+    return source_path, projected_metadata
 
 
 def load_legacy_snapshot(workspace: Path, schema_fields: list[dict]) -> list[dict]:
@@ -133,7 +163,8 @@ def load_legacy_snapshot(workspace: Path, schema_fields: list[dict]) -> list[dic
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
         raise ValueError(f"Malformed legacy snapshot manifest: {manifest_path}") from exc
-    if manifest.get("format") != "personal-ops-legacy-normalized-v3" or manifest.get("format_version") != 1:
+    format_version = manifest.get("format_version")
+    if manifest.get("format") != "personal-ops-legacy-normalized-v3" or format_version not in {1, 2}:
         raise ValueError(f"Unsupported legacy snapshot manifest: {manifest_path}")
     snapshot_hash = sha256_file(snapshot)
     if manifest.get("legacy_normalized_v3_sha256") != snapshot_hash:
@@ -155,7 +186,10 @@ def load_legacy_snapshot(workspace: Path, schema_fields: list[dict]) -> list[dic
         properties = payload["properties"]
         if not isinstance(properties, dict):
             raise ValueError(f"Legacy snapshot properties must be an object at line {line_number}")
-        validate_property_map(properties, source)
+        if format_version == 1:
+            properties = project_historical_properties(properties, source)
+        else:
+            validate_property_map(properties, source)
         if str(properties.get("index_contract")) != "3" or str(properties.get("schema_version")) != "3":
             raise ValueError(f"Legacy snapshot properties must use V3 at line {line_number}")
         source_type = str(properties.get("source_type", ""))
@@ -172,12 +206,12 @@ def load_legacy_snapshot(workspace: Path, schema_fields: list[dict]) -> list[dic
             raise ValueError(f"Legacy snapshot session_date is invalid at line {line_number}") from exc
         if str(properties.get("closure_date", "")) != expected_closure_date:
             raise ValueError(f"Legacy snapshot closure_date must be the prior calendar day at line {line_number}")
-        source_path = validate_legacy_metadata(payload["legacy_metadata"], workspace, source, schema_keys)
+        source_path, metadata = validate_legacy_metadata(payload["legacy_metadata"], workspace, source, schema_keys)
         if str(properties.get("file_path", "")) != source_path:
             raise ValueError(f"Legacy snapshot properties.file_path must equal origin source_path at line {line_number}")
         dates.add(session_date)
         effective = redacted_properties(properties, {field["key"]: field for field in schema_fields}) if properties["private_index_policy"] == "redacted" else properties
-        records.append({"path": snapshot, "properties": effective, "full_properties": properties, "legacy_metadata": payload["legacy_metadata"], "record_kind": "legacy"})
+        records.append({"path": snapshot, "properties": effective, "full_properties": properties, "legacy_metadata": metadata, "record_kind": "legacy"})
     expected_count = manifest.get("record_count")
     if expected_count != len(records):
         raise ValueError(f"Legacy snapshot manifest record_count mismatch: expected {expected_count}, got {len(records)}")
