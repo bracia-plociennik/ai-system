@@ -20,6 +20,12 @@ Validation scripts for AI System live here.
 
 `check-validation-profiles` validates the `fast`, `scoped`, `standard`, and `full` validation-profile contract, explicit full CI/upstream validation, and boundaries around smoke tests and residual risk.
 
+`check-validation-routing` validates semantic and product QA before applicable AI System scripts, supporting-only script evidence, work-type routing, and the ban on `green scripts = PASS`.
+
+`check-model-selection-guidance` validates Luna/Sol classification, required advisory output, `Blocking: no`, and the model authority boundary.
+
+`check-cross-system-upgrade-handoff` validates the required `yes|no|pending` decision, privacy-safe handoff contract, selected-workspace path, commit/handoff stop conditions, and optional decision records.
+
 `check-end-of-task-capture` validates the chat-end End-of-Task Capture contract, trigger grammar, precedence rules, output template, routing docs, and unsafe automatic-capture wording.
 
 `check-update-workspace` validates the workspace backfill script, update contract, docs, templates, and smoke coverage.
@@ -36,13 +42,15 @@ Validation scripts for AI System live here.
 
 `check-task-management` validates the TaskForge/TaskNotes task-management contract, templates, routing docs, safe write boundaries, app setup runbook, and smoke coverage.
 
+`check-weekly-planning` validates the Saturday Monday-Friday weekly plan contract, four daily blocks, WIG/capacity rules, weekly TaskNote routing, and optional workspace plan records.
+
 `check-system-skills` validates active system skill contracts, context intake plans, legacy boundaries, offline resources, and generated Python runtime artifact exclusions.
 
 `map-notion-check-ins` and `sync-personal-ops-check-ins` are retired V2 commands and always end with `STOP` without writing active indexes. `migrate-personal-ops-legacy-check-ins-v3` is the single owner-approved route that creates an immutable normalized legacy snapshot, validates it through V3 sync, and then archives retired `check-ins.*` index artifacts.
 
 `sync-personal-ops-check-ins-v3` reports lazy sync status or regenerates only official `check-ins-v3.*` from strict current native `index_contract: 3` properties plus a validated immutable legacy snapshot when present. Historical native reports through the `2026-07-17` cutover and legacy snapshot `format_version: 1` are read through an additive compatibility projection; missing later 6D/deadline fields remain blank/unknown and sources are never rewritten. New snapshots use `format_version: 2`. It applies each row's `detailed-private` or `redacted` index policy; trends include native V3 rows only.
 
-`propose-task-candidates` converts daily check-ins or Dream Reports into TaskForge TaskNote proposals. Under V3 `deadline-aware-6d-v1`, every valid professional planned item becomes one candidate. Explicit `task_bucket` wins; otherwise a deadline defaults to `6d/do` and no deadline defaults to `6d/defer`. `definition_of_done` is preserved in the TaskNote body, and only an explicit deadline sets `due`; no deadline sets no automatic `due` or `scheduled`. WIG never creates a task. Eligible V3 items may create or extend one strongly matched TaskNote with the same owner approval that writes the V3 check-in; all other task writes require exact owner approval, `--write`, and a configured vault.
+`propose-task-candidates` converts daily check-ins, Dream Reports, or weekly plans into TaskForge TaskNote proposals. Weekly plans use `--weekly-plan`, stable `source_week_id + source_week_item_id` identity, block allocations, and revision-safe updates. Under V3 `deadline-aware-6d-v1`, every valid professional planned item becomes one candidate. Explicit `task_bucket` wins; otherwise a deadline defaults to `6d/do` and no deadline defaults to `6d/defer`. `definition_of_done` is preserved in the TaskNote body, and only an explicit deadline sets `due`; no deadline sets no automatic `due` or `scheduled`. WIG never creates a task. All writes require the configured vault and recognized owner approval.
 
 `check-dreaming-mode` validates the advisory-only Dreaming Mode contract, templates, docs, and optional workspace Dream Reports.
 

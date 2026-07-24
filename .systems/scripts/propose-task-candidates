@@ -374,6 +374,118 @@ def candidates_from_index_v3_check_in(path: Path, workspace: Path, labels: dict[
     return candidates
 
 
+def json_frontmatter_value(frontmatter: dict[str, str], key: str, source: Path) -> object:
+    raw = str(frontmatter.get(key, "")).strip()
+    if not raw:
+        return []
+    try:
+        value = json.loads(raw)
+    except json.JSONDecodeError:
+        try:
+            value = json.loads(json.loads(raw))
+        except (json.JSONDecodeError, TypeError) as exc:
+            raise SystemExit(f"Malformed {key} JSON in {source}: {raw}") from exc
+    return value
+
+
+def weekly_allocations(item: dict[str, object]) -> list[dict[str, object]]:
+    allocations = item.get("planned_allocations", [])
+    if not isinstance(allocations, list):
+        return []
+    return [allocation for allocation in allocations if isinstance(allocation, dict)]
+
+
+def first_weekly_date(item: dict[str, object]) -> str:
+    allocations = weekly_allocations(item)
+    for allocation in allocations:
+        value = str(allocation.get("date", "")).strip()
+        if value:
+            return value
+    return str(item.get("planned_date", "")).strip()
+
+
+def candidates_from_weekly_plan(path: Path, workspace: Path, labels: dict[str, list[tuple[str, str]]]) -> list[dict[str, object]]:
+    """Create TaskNotes from the machine-readable weekly plan only."""
+    text = read_text(path)
+    fm = parse_frontmatter(text)
+    if fm.get("type") != "weekly-plan":
+        raise SystemExit(f"Weekly plan requires type: weekly-plan in {path}")
+    week_id = str(fm.get("week_id", "")).strip()
+    week_start = str(fm.get("week_start", "")).strip()
+    if not week_id or not week_start:
+        raise SystemExit(f"Weekly plan requires week_id and week_start in {path}")
+    try:
+        dt.date.fromisoformat(week_start)
+    except ValueError as exc:
+        raise SystemExit(f"Weekly plan week_start is invalid in {path}: {week_start}") from exc
+    readiness = str(fm.get("plan_readiness", "")).strip().lower()
+    overload_acknowledged = str(fm.get("overload_acknowledged", "")).strip().lower() in {"true", "yes"}
+    overload_status = str(fm.get("overload_status", "")).strip().lower()
+    overload_acknowledges_review = readiness == "needs-review" and overload_status in {"warning", "blocked"} and overload_acknowledged
+    if readiness != "ready" and not overload_acknowledges_review:
+        raise SystemExit(f"Weekly plan is not ready for TaskNote generation: {readiness or 'missing'}")
+    if overload_status in {"warning", "blocked"} and not overload_acknowledged:
+        raise SystemExit("Weekly plan overload is blocked; owner acknowledgement is required before TaskNote generation")
+    items = json_frontmatter_value(fm, "weekly_plan_items_json", path)
+    if not isinstance(items, list):
+        raise SystemExit(f"weekly_plan_items_json must be a JSON array in {path}")
+    item_ids = [str(item.get("id", "")).strip() for item in items if isinstance(item, dict)]
+    if any(not item_id for item_id in item_ids) or len(item_ids) != len(set(item_ids)):
+        raise SystemExit(f"Weekly plan has missing or duplicate item IDs in {path}")
+
+    candidates: list[dict[str, object]] = []
+    for item in items:
+        if not isinstance(item, dict):
+            raise SystemExit(f"weekly_plan_items_json contains a non-object item in {path}")
+        item_id = str(item.get("id", "")).strip()
+        stream = str(item.get("stream", "")).strip().lower()
+        title = normalize_title(str(item.get("task_title", "")) or str(item.get("title", "")))
+        if stream not in {"build", "deliver", "promote"}:
+            continue
+        if not title:
+            raise SystemExit(f"Weekly plan item {item_id} has no title in {path}")
+        try:
+            deadline = normalize_deadline(item.get("deadline", ""), week_start, item_id, path)
+            explicit_bucket = normalize_task_bucket(item.get("task_bucket", ""))
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
+        bucket = explicit_bucket or ("do" if deadline else "defer")
+        planned_date = first_weekly_date(item)
+        if planned_date:
+            try:
+                dt.date.fromisoformat(planned_date)
+            except ValueError as exc:
+                raise SystemExit(f"Invalid planned_date for {item_id} in {path}: {planned_date}") from exc
+        definition_of_done = str(item.get("definition_of_done", "")).strip()
+        candidate: dict[str, object] = {
+            "type": "task",
+            "title": title,
+            "due": deadline,
+            "scheduled": planned_date,
+            "contexts": [f"workspace/{workspace.name}"],
+            "workspace": workspace.name,
+            "owner_scope": "workspace",
+            "client": "",
+            "owned_asset": "",
+            "project": "",
+            "project_state": "",
+            "source_system": "ai-system",
+            "source_type": "weekly-plan",
+            "source_week_id": week_id,
+            "source_week_item_id": item_id,
+            "source_week_plan": str(path),
+            "source_path": str(path),
+            "raw_value": str(item.get("title", title)),
+            "definition_of_done": definition_of_done,
+            "estimated_minutes": str(item.get("estimated_minutes", "")),
+            "weekly_allocations_json": json.dumps(weekly_allocations(item), ensure_ascii=False),
+        }
+        apply_execution_classification(candidate, bucket)
+        apply_mapping(candidate, labels)
+        candidates.append(candidate)
+    return candidates
+
+
 def execution_bucket_from_text(text: str) -> str:
     """Read legacy/new explicit tags but always emit a new 6D tag."""
     matches = {
@@ -451,6 +563,11 @@ def render_tasknote(candidate: dict[str, object]) -> str:
         "source_check_in_field",
         "source_session_date",
         "source_plan_item_id",
+        "source_week_id",
+        "source_week_item_id",
+        "source_week_plan",
+        "estimated_minutes",
+        "weekly_allocations_json",
         "source_dream_report",
         "source_dream_priority",
     ]
@@ -476,11 +593,21 @@ def render_tasknote(candidate: dict[str, object]) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
-def existing_task_keys(task_dir: Path) -> set[tuple[str, str]]:
-    keys: set[tuple[str, str]] = set()
+def source_identity(values: dict[str, object] | dict[str, str]) -> tuple[str, str, str]:
+    week_key = (str(values.get("source_week_id", "")), str(values.get("source_week_item_id", "")))
+    if all(week_key):
+        return ("weekly", *week_key)
+    session_key = (str(values.get("source_session_date", "")), str(values.get("source_plan_item_id", "")))
+    if all(session_key):
+        return ("check-in", *session_key)
+    return ("", "", "")
+
+
+def existing_task_keys(task_dir: Path) -> set[tuple[str, str, str]]:
+    keys: set[tuple[str, str, str]] = set()
     for path in task_dir.glob("*.md"):
         frontmatter = parse_frontmatter(read_text(path))
-        key = (frontmatter.get("source_session_date", ""), frontmatter.get("source_plan_item_id", ""))
+        key = source_identity(frontmatter)
         if all(key):
             keys.add(key)
     return keys
@@ -531,7 +658,11 @@ def find_similar_parent(candidate: dict[str, object], task_dir: Path) -> Path | 
 
 
 def append_subtask(parent_path: Path, candidate: dict[str, object]) -> bool:
-    marker = f"ai-system:v3:{candidate['source_session_date']}:{candidate['source_plan_item_id']}"
+    kind, first, second = source_identity(candidate)
+    if kind == "check-in":
+        marker = f"ai-system:v3:{first}:{second}"
+    else:
+        marker = f"ai-system:{kind}:{first}:{second}"
     text = read_text(parent_path)
     if marker in text:
         return False
@@ -546,7 +677,94 @@ def append_subtask(parent_path: Path, candidate: dict[str, object]) -> bool:
     return True
 
 
-def write_candidates(candidates: list[dict[str, object]], task_vault: Path) -> tuple[list[Path], int, list[Path]]:
+def replace_frontmatter_fields(text: str, candidate: dict[str, object]) -> str:
+    if not text.startswith("---\n"):
+        raise ValueError("Existing TaskNote has no YAML frontmatter")
+    end = text.find("\n---", 4)
+    if end == -1:
+        raise ValueError("Existing TaskNote frontmatter is unterminated")
+    lines = text[4:end].splitlines()
+    scalar_updates = {
+        "title": str(candidate.get("title", "")),
+        "status": str(candidate.get("status", "")),
+        "priority": str(candidate.get("priority", "")),
+        "due": str(candidate.get("due", "")),
+        "scheduled": str(candidate.get("scheduled", "")),
+        "estimated_minutes": str(candidate.get("estimated_minutes", "")),
+        "weekly_allocations_json": str(candidate.get("weekly_allocations_json", "")),
+    }
+    list_updates = {
+        "tags": [str(value) for value in candidate.get("tags", [])],
+        "contexts": [str(value) for value in candidate.get("contexts", [])],
+        "projects": [str(value) for value in candidate.get("projects", [])],
+    }
+    output: list[str] = []
+    index = 0
+    while index < len(lines):
+        line = lines[index]
+        match = re.match(r"^([A-Za-z0-9_-]+):(?:.*)$", line)
+        if not match:
+            output.append(line)
+            index += 1
+            continue
+        key = match.group(1)
+        if key in scalar_updates:
+            value = scalar_updates[key]
+            output.append(f"{key}: {quote_yaml(value) if value else ''}")
+            index += 1
+            continue
+        if key in list_updates:
+            output.append(f"{key}:")
+            output.extend(f"  - {quote_yaml(value)}" for value in list_updates[key])
+            index += 1
+            while index < len(lines) and re.match(r"^\s+-\s+", lines[index]):
+                index += 1
+            continue
+        output.append(line)
+        index += 1
+    known_keys = set(scalar_updates) | set(list_updates)
+    present_keys = {match.group(1) for line in lines if (match := re.match(r"^([A-Za-z0-9_-]+):", line))}
+    for key, value in scalar_updates.items():
+        if key not in present_keys:
+            output.append(f"{key}: {quote_yaml(value) if value else ''}")
+    for key, values in list_updates.items():
+        if key not in present_keys:
+            output.append(f"{key}:")
+            output.extend(f"  - {quote_yaml(value)}" for value in values)
+    return "---\n" + "\n".join(output) + text[end:]
+
+
+def replace_body_section(text: str, heading: str, value: str) -> str:
+    pattern = re.compile(rf"^##\s+{re.escape(heading)}\s*$", re.MULTILINE)
+    match = pattern.search(text)
+    rendered = f"## {heading}\n\n{value.strip()}\n"
+    if not match:
+        return text.rstrip() + "\n\n" + rendered
+    rest = text[match.end():]
+    next_heading = re.search(r"^##\s+", rest, re.MULTILINE)
+    end = match.end() + (next_heading.start() if next_heading else len(rest))
+    return text[:match.start()] + rendered + text[end:]
+
+
+def update_weekly_task(parent_path: Path, candidate: dict[str, object]) -> bool:
+    text = read_text(parent_path)
+    frontmatter = parse_frontmatter(text)
+    if frontmatter.get("status") in {"done", "cancelled"}:
+        return False
+    updated = replace_frontmatter_fields(text, candidate)
+    allocation_lines = ["- Source weekly plan: `" + str(candidate.get("source_week_plan", "")) + "`"]
+    allocations = str(candidate.get("weekly_allocations_json", "[]"))
+    allocation_lines.append(f"- Planned allocations: `{allocations}`")
+    if candidate.get("definition_of_done"):
+        updated = replace_body_section(updated, "Definition Of Done", str(candidate["definition_of_done"]))
+    updated = replace_body_section(updated, "Weekly Allocation", "\n".join(allocation_lines))
+    if updated == text:
+        return False
+    parent_path.write_text(updated, encoding="utf-8")
+    return True
+
+
+def write_candidates(candidates: list[dict[str, object]], task_vault: Path) -> tuple[list[Path], int, list[Path], list[Path]]:
     task_dir = task_vault / "TaskNotes" / "Tasks"
     if not task_vault.is_dir():
         raise ValueError(f"--task-vault does not exist or is not a directory: {task_vault}")
@@ -555,11 +773,20 @@ def write_candidates(candidates: list[dict[str, object]], task_vault: Path) -> t
     written: list[Path] = []
     skipped = 0
     extended: list[Path] = []
+    updated: list[Path] = []
     existing = existing_task_keys(task_dir)
+    existing_paths: dict[tuple[str, str, str], Path] = {}
+    for path in task_dir.glob("*.md"):
+        identity = source_identity(parse_frontmatter(read_text(path)))
+        if all(identity):
+            existing_paths[identity] = path
     for candidate in candidates:
-        key = (str(candidate.get("source_session_date", "")), str(candidate.get("source_plan_item_id", "")))
+        key = source_identity(candidate)
         if all(key) and key in existing:
-            skipped += 1
+            if key[0] == "weekly" and update_weekly_task(existing_paths[key], candidate):
+                updated.append(existing_paths[key])
+            else:
+                skipped += 1
             continue
         parent = find_similar_parent(candidate, task_dir)
         if parent:
@@ -581,7 +808,7 @@ def write_candidates(candidates: list[dict[str, object]], task_vault: Path) -> t
         written.append(path)
         if all(key):
             existing.add(key)
-    return written, skipped, extended
+    return written, skipped, extended, updated
 
 
 def task_vault_from_config(path: Path) -> Path:
@@ -698,6 +925,7 @@ def main() -> int:
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument("--check-in", type=Path, help="Canonical daily check-in Markdown file")
     source.add_argument("--dream-report", type=Path, help="Dream Report Markdown file")
+    source.add_argument("--weekly-plan", type=Path, help="Canonical weekly planning Markdown file")
     parser.add_argument("--workspace", type=Path, required=True, help="AI System workspace path")
     parser.add_argument("--task-vault", type=Path, help="TaskForge vault path")
     parser.add_argument("--task-vault-config", type=Path, help="Local-only TaskForge vault configuration")
@@ -749,12 +977,14 @@ def main() -> int:
     labels = discover_labels(workspace, task_vault)
     if args.check_in:
         candidates = candidates_from_check_in(args.check_in.resolve(), workspace, labels)
-    else:
+    elif args.dream_report:
         candidates = candidates_from_dream_report(args.dream_report.resolve(), workspace, labels)
+    else:
+        candidates = candidates_from_weekly_plan(args.weekly_plan.resolve(), workspace, labels)
 
     if args.write:
         try:
-            written, skipped, extended = write_candidates(candidates, task_vault)
+            written, skipped, extended, updated = write_candidates(candidates, task_vault)
         except ValueError as exc:
             if args.check_in and is_v3_check_in:
                 update_v3_task_generation_status(args.check_in.resolve(), "skipped", str(exc), [], task_vault)
@@ -786,6 +1016,9 @@ def main() -> int:
         print("Extended existing TaskNotes with subtasks:")
         for path in extended:
             print(path)
+        print("Updated existing weekly TaskNotes:")
+        for path in updated:
+            print(path)
         return 0
 
     if args.json:
@@ -809,6 +1042,8 @@ def main() -> int:
             print(f"- contexts: `{', '.join(candidate.get('contexts', []))}`")
             print(f"- due: `{candidate.get('due', '')}`")
             print(f"- source: `{candidate.get('source_type', '')}` / `{candidate.get('source_path', '')}`")
+            if candidate.get("source_week_id"):
+                print(f"- weekly source: `{candidate['source_week_id']} / {candidate['source_week_item_id']}`")
             if candidate.get("mapping_note"):
                 print(f"- mapping: `{candidate['mapping_note']}`")
             print()

@@ -10,11 +10,11 @@ It exists to make knowledge capture explicit before work closure without creatin
 
 This gate is advisory-only. It does not replace `AGENTS.md`, privacy rules, workspace selection, owner-approved write gates, validation, required evidence, stop conditions, or final owner acceptance.
 
-Select validation evidence through `.systems/ai/core/validation-profiles.md`: `fast` and `scoped` remain iteration-only, `standard` applies to ordinary closure, and `full` remains required when the work reaches a full-required gate. Profile selection does not weaken this gate or make skipped smoke tests PASS.
+Select script evidence through `.systems/ai/core/validation-routing.md` and `.systems/ai/core/validation-profiles.md`. Semantic QA, findings-first review, product checks, and failure-path analysis come first. Scripts are supporting-only and green output does not independently create PASS.
 
 The gate requires a decision. It does not grant permission to write. Durable writes still require the correct target, privacy-safe content, and explicit owner-approved scope unless a stricter checkpoint or final-check route already authorizes that exact capture.
 
-End-of-Task Capture from `.systems/ai/core/end-of-task-capture.md` can precede work closure when the owner says the task is done and asks to preserve learnings. It is capture review/proposal by default. It does not replace this compliance gate and does not grant permission to skip evidence, privacy, validation, risk, memory scope boundaries, or owner approvals.
+End-of-Task Capture from `.systems/ai/core/end-of-task-capture.md` can precede work closure when the owner says the task is done and asks to preserve learnings. Exact `Koniec pracy` and `Koniec zadania` mean `capture-now`; other completion wording is capture review/proposal by default. It does not replace this compliance gate or permit skipped evidence, privacy, quality, risk, memory boundaries, or approvals.
 
 ## AI_SYSTEM_WORK_CLOSURE
 
@@ -59,6 +59,18 @@ Contract compliance:
 ```
 
 If `Work mode compliance` is `blocked`, stop before claiming closure unless the current action is only recording the blocker or asking for the missing owner decision.
+
+For a substantive AI System or AI Workflow upgrade before commit or handoff, also state:
+
+```text
+Cross-system impact:
+- Owner decision: <yes|no|pending>
+- Counterpart: <ai-workflow|ai-system|none>
+- Handoff artifact: <path|not-required|pending>
+- Reason:
+```
+
+If the decision is `pending`, stop before commit or handoff. If it is `yes`, stop unless the privacy-safe handoff exists. If it is `no`, require `Counterpart: none`, `Handoff artifact: not-required`, and a reason.
 
 ## Knowledge Capture Decision
 

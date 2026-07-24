@@ -58,3 +58,5 @@ Supported opt-out wording includes `bez deadlinu`, `bez deadline'u`, `bez planow
 - `response-contract` reports deadline/timebox, overrun state, and scope adaptation when this contract applies.
 
 Quality closure records the agreed constraint, delivered scope, deferred scope, deadline status, quality floor, skipped checks, overrun decisions, and residual risk.
+
+Weekly planning may provide a task-level deadline, time estimate, must-have outcome, and quality floor for work scheduled in the target week. The `.systems/ai/core/weekly-planning.md` contract is the route for that Saturday plan. When a task starts, reuse those fields and ask only for missing delivery constraints. A weekly plan does not authorize implementation outside its explicit TaskNote and owner scope.

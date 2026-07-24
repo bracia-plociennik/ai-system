@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# weekly-planning smoke coverage is kept alongside the existing task/workspace fixtures.
+
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 tmp="$(mktemp -d "${TMPDIR:-/tmp}/ai-system-validator-smoke.XXXXXX")"
 copy_repo="$tmp/repo"
@@ -61,6 +63,7 @@ run_must_pass_capture() {
 validator="$copy_repo/.systems/scripts/check-prompt-composition"
 
 run_must_pass "prompt-composition-baseline" "$validator"
+run_must_pass "weekly-planning-baseline" "$copy_repo/.systems/scripts/check-weekly-planning"
 
 (
   cd "$copy_repo"
@@ -262,6 +265,16 @@ External Memory stores product-domain lessons
 MD
 run_must_fail "end-of-task-capture-unsafe-wording" "$end_of_task_validator"
 rm "$copy_repo/.systems/ai/core/end-of-task-capture-unsafe-smoke.md"
+
+cp "$end_of_task_core" "$end_of_task_core.bak"
+printf '\nKoniec pracy may acknowledge only and ask what to do next.\n' >> "$end_of_task_core"
+run_must_fail "end-of-task-capture-blocks-acknowledge-only" "$end_of_task_validator"
+mv "$end_of_task_core.bak" "$end_of_task_core"
+
+cp "$end_of_task_template" "$end_of_task_template.bak"
+perl -0pi -e 's/^- Capture mode:.*\n//m' "$end_of_task_template"
+run_must_fail "end-of-task-capture-requires-capture-mode" "$end_of_task_validator"
+mv "$end_of_task_template.bak" "$end_of_task_template"
 
 project_state_validator="$copy_repo/.systems/scripts/check-project-state"
 project_state_core="$copy_repo/.systems/ai/core/project-state.md"
@@ -1970,6 +1983,46 @@ run_must_pass "task-candidates-owner-approved-write" "$task_candidate_script" --
 test "$(grep -R -l 'source_type: "check-in"' "$task_candidate_vault/TaskNotes/Tasks" | wc -l | tr -d ' ')" = "3" || { echo "owner-approved check-in write did not create 3 TaskNotes"; exit 1; }
 grep -R -q 'source_type: "check-in"' "$task_candidate_vault/TaskNotes/Tasks" || { echo "written TaskNotes missing check-in source type"; exit 1; }
 
+weekly_plan_workspace="$tmp/weekly-plan-workspace"
+weekly_plan_file="$weekly_plan_workspace/tasks/weekly-plans/2026/2026-W31.md"
+mkdir -p "$(dirname "$weekly_plan_file")"
+cat > "$weekly_plan_file" <<'MD'
+---
+type: weekly-plan
+week_id: 2026-W31
+week_start: 2026-07-27
+week_end: 2026-07-31
+timezone: Europe/Warsaw
+plan_revision: 1
+plan_readiness: ready
+overload_status: none
+overload_acknowledged: false
+task_generation_status: proposal-only
+wig_kind: standalone
+wig_id: wig-01
+wig_title: Ship the weekly fixture
+wig_definition_of_done: Fixture is validated
+daily_blocks_json: [{"date":"2026-07-27","block_id":"build-future"},{"date":"2026-07-27","block_id":"adapt-build-deliver"},{"date":"2026-07-27","block_id":"deliver-financial-impact"},{"date":"2026-07-27","block_id":"adapt-promote-deliver"},{"date":"2026-07-28","block_id":"build-future"},{"date":"2026-07-28","block_id":"adapt-build-deliver"},{"date":"2026-07-28","block_id":"deliver-financial-impact"},{"date":"2026-07-28","block_id":"adapt-promote-deliver"},{"date":"2026-07-29","block_id":"build-future"},{"date":"2026-07-29","block_id":"adapt-build-deliver"},{"date":"2026-07-29","block_id":"deliver-financial-impact"},{"date":"2026-07-29","block_id":"adapt-promote-deliver"},{"date":"2026-07-30","block_id":"build-future"},{"date":"2026-07-30","block_id":"adapt-build-deliver"},{"date":"2026-07-30","block_id":"deliver-financial-impact"},{"date":"2026-07-30","block_id":"adapt-promote-deliver"},{"date":"2026-07-31","block_id":"build-future"},{"date":"2026-07-31","block_id":"adapt-build-deliver"},{"date":"2026-07-31","block_id":"deliver-financial-impact"},{"date":"2026-07-31","block_id":"adapt-promote-deliver"}]
+weekly_plan_items_json: [{"id":"weekly-build-01","stream":"build","title":"Build weekly fixture","definition_of_done":"Fixture file and validation evidence exist","estimated_minutes":60,"deadline":"2026-07-29T15:00","planned_allocations":[{"date":"2026-07-27","block_id":"build-future","minutes":60}]},{"id":"weekly-deliver-01","stream":"deliver","title":"Defer weekly follow-up","definition_of_done":"Follow-up is ready for a later week","estimated_minutes":30,"planned_allocations":[{"date":"2026-07-28","block_id":"adapt-build-deliver","minutes":30}]},{"id":"weekly-promote-01","stream":"promote","title":"Delegate weekly promotion","definition_of_done":"Promotion handoff is accepted","estimated_minutes":20,"deadline":"2026-07-30T12:00","task_bucket":"delegate","planned_allocations":[{"date":"2026-07-30","block_id":"adapt-promote-deliver","minutes":20}]}]
+task_generation_references_json: []
+revision_audit_json: []
+---
+
+# Weekly Plan
+MD
+run_must_pass "weekly-planning-valid-workspace-plan" "$copy_repo/.systems/scripts/check-weekly-planning" --workspace "$weekly_plan_workspace"
+"$task_candidate_script" --workspace "$weekly_plan_workspace" --weekly-plan "$weekly_plan_file" --task-vault "$task_candidate_vault" --json > "$tmp/weekly-plan-candidates.json"
+grep -q '"source_week_id": "2026-W31"' "$tmp/weekly-plan-candidates.json" || { echo "weekly plan candidate missing source week"; exit 1; }
+grep -q '"source_week_item_id": "weekly-build-01"' "$tmp/weekly-plan-candidates.json" || { echo "weekly plan candidate missing source item"; exit 1; }
+grep -q '"6d/do"' "$tmp/weekly-plan-candidates.json" || { echo "weekly plan candidate missing deadline-derived 6d/do"; exit 1; }
+grep -q '"due": "2026-07-29T15:00"' "$tmp/weekly-plan-candidates.json" || { echo "weekly plan candidate missing explicit due"; exit 1; }
+grep -q '"6d/defer"' "$tmp/weekly-plan-candidates.json" || { echo "weekly plan candidate missing no-deadline defer"; exit 1; }
+grep -q '"6d/delegate"' "$tmp/weekly-plan-candidates.json" || { echo "weekly plan candidate missing explicit delegate"; exit 1; }
+grep -q '"due": "2026-07-30T12:00"' "$tmp/weekly-plan-candidates.json" || { echo "weekly plan candidate missing delegated deadline"; exit 1; }
+
+sed 's/plan_readiness: ready/plan_readiness: needs-review/' "$weekly_plan_file" > "$tmp/weekly-plan-not-ready.md"
+run_must_fail "weekly-planning-not-ready-blocks-tasks" "$task_candidate_script" --workspace "$weekly_plan_workspace" --weekly-plan "$tmp/weekly-plan-not-ready.md" --task-vault "$task_candidate_vault" --json
+
 task_candidate_ai_workspace="$tmp/task-candidate-ai-workspace"
 mkdir -p "$task_candidate_ai_workspace/personal-ops/check-ins/2026" "$task_candidate_ai_workspace/project-state/ai"
 cat > "$task_candidate_ai_workspace/personal-ops/check-ins/2026/2026-06-22.md" <<'MD'
@@ -2783,6 +2836,8 @@ test -f "$init_target/personal-ops/indexes/check-ins-v3.md" || { echo "init-work
 test -f "$init_target/tasks/README.md" || { echo "init-workspace did not create tasks README"; exit 1; }
 test -f "$init_target/tasks/tasknote.template.md" || { echo "init-workspace did not create tasknote template"; exit 1; }
 test -f "$init_target/tasks/taskforge-vault-setup.template.md" || { echo "init-workspace did not create taskforge setup template"; exit 1; }
+test -f "$init_target/tasks/weekly-plan.template.md" || { echo "init-workspace did not create weekly plan template"; exit 1; }
+test -f "$init_target/tasks/weekly-plans/README.md" || { echo "init-workspace did not create weekly plans README"; exit 1; }
 test -f "$init_target/dreams/README.md" || { echo "init-workspace did not create dreams README"; exit 1; }
 test -d "$init_target/dreams/runs" || { echo "init-workspace did not create dreams/runs"; exit 1; }
 
@@ -2800,6 +2855,8 @@ run_must_pass "update-workspace-task-management-backfill" "$copy_repo/.systems/s
 grep -q 'existing tasks readme sentinel' "$task_update_workspace/tasks/README.md" || { echo "update-workspace overwrote existing tasks README"; exit 1; }
 test -f "$task_update_workspace/tasks/tasknote.template.md" || { echo "update-workspace did not create tasknote template"; exit 1; }
 test -f "$task_update_workspace/tasks/taskforge-vault-setup.template.md" || { echo "update-workspace did not create taskforge setup template"; exit 1; }
+test -f "$task_update_workspace/tasks/weekly-plan.template.md" || { echo "update-workspace did not create weekly plan template"; exit 1; }
+test -f "$task_update_workspace/tasks/weekly-plans/README.md" || { echo "update-workspace did not create weekly plans README"; exit 1; }
 
 delivery_validator="$copy_repo/.systems/scripts/check-delivery-constraints"
 distillation_state_validator="$copy_repo/.systems/scripts/check-distillation-state"
@@ -2932,5 +2989,179 @@ cp "$copy_repo/.systems/ai/core/validation-profiles.md" "$copy_repo/.systems/ai/
 printf '\nskip smoke tests and mark PASS\n' >> "$copy_repo/.systems/ai/core/validation-profiles.md"
 run_must_fail "validation-profiles-block-skipped-smoke-pass" "$validation_profiles_validator"
 mv "$copy_repo/.systems/ai/core/validation-profiles.md.bak" "$copy_repo/.systems/ai/core/validation-profiles.md"
+
+validation_routing_validator="$copy_repo/.systems/scripts/check-validation-routing"
+validation_routing_core="$copy_repo/.systems/ai/core/validation-routing.md"
+validation_routing_template="$copy_repo/.systems/ai/templates/quality/validation-execution-record.template.md"
+
+run_must_pass "validation-routing-valid" "$validation_routing_validator"
+
+mv "$validation_routing_core" "$validation_routing_core.bak"
+run_must_fail "validation-routing-contract-required" "$copy_repo/.systems/scripts/check-required-artifacts"
+mv "$validation_routing_core.bak" "$validation_routing_core"
+
+mv "$validation_routing_template" "$validation_routing_template.bak"
+run_must_fail "validation-routing-template-required" "$copy_repo/.systems/scripts/check-required-artifacts"
+mv "$validation_routing_template.bak" "$validation_routing_template"
+
+cp "$validation_routing_core" "$validation_routing_core.bak"
+printf '\nGreen scripts equal PASS.\n' >> "$validation_routing_core"
+run_must_fail "validation-routing-blocks-green-scripts-pass" "$validation_routing_validator"
+mv "$validation_routing_core.bak" "$validation_routing_core"
+
+cp "$validation_routing_core" "$validation_routing_core.bak"
+printf '\nOrdinary implementation must run broad validate-ai-system.\n' >> "$validation_routing_core"
+run_must_fail "validation-routing-blocks-broad-ordinary-implementation" "$validation_routing_validator"
+mv "$validation_routing_core.bak" "$validation_routing_core"
+
+model_guidance_validator="$copy_repo/.systems/scripts/check-model-selection-guidance"
+model_guidance_core="$copy_repo/.systems/ai/core/model-selection-guidance.md"
+
+run_must_pass "model-selection-guidance-valid" "$model_guidance_validator"
+
+mv "$model_guidance_core" "$model_guidance_core.bak"
+run_must_fail "model-selection-guidance-contract-required" "$copy_repo/.systems/scripts/check-required-artifacts"
+mv "$model_guidance_core.bak" "$model_guidance_core"
+
+cp "$model_guidance_core" "$model_guidance_core.bak"
+perl -0pi -e 's/Blocking: no/Blocking: yes/g' "$model_guidance_core"
+run_must_fail "model-selection-guidance-requires-nonblocking" "$model_guidance_validator"
+mv "$model_guidance_core.bak" "$model_guidance_core"
+
+cp "$model_guidance_core" "$model_guidance_core.bak"
+printf '\nModel selection may bypass QA and approvals.\n' >> "$model_guidance_core"
+run_must_fail "model-selection-guidance-blocks-authority-bypass" "$model_guidance_validator"
+mv "$model_guidance_core.bak" "$model_guidance_core"
+
+cross_handoff_validator="$copy_repo/.systems/scripts/check-cross-system-upgrade-handoff"
+cross_handoff_core="$copy_repo/.systems/ai/core/cross-system-upgrade-handoff.md"
+cross_handoff_template="$copy_repo/.systems/ai/templates/capture/cross-system-upgrade-handoff.template.md"
+cross_handoff_workspace="$tmp/cross-system-workspace"
+cross_handoff_dir="$cross_handoff_workspace/external-memory/memory"
+cross_handoff_record="$tmp/cross-system-record.md"
+cross_handoff_file="$cross_handoff_dir/2026-07-24-operator-efficiency-ai-workflow-handoff.md"
+
+run_must_pass "cross-system-upgrade-handoff-valid-contract" "$cross_handoff_validator"
+
+mv "$cross_handoff_core" "$cross_handoff_core.bak"
+run_must_fail "cross-system-upgrade-handoff-contract-required" "$copy_repo/.systems/scripts/check-required-artifacts"
+mv "$cross_handoff_core.bak" "$cross_handoff_core"
+
+mv "$cross_handoff_template" "$cross_handoff_template.bak"
+run_must_fail "cross-system-upgrade-handoff-template-required" "$copy_repo/.systems/scripts/check-required-artifacts"
+mv "$cross_handoff_template.bak" "$cross_handoff_template"
+
+mkdir -p "$cross_handoff_dir"
+cat > "$cross_handoff_file" <<'MD'
+# Operator Efficiency Handoff
+
+## Concept And Intended Outcome
+
+Align completion capture, semantic-first validation, model guidance, and cross-system handoff decisions.
+
+## Owner Decisions
+
+- Adapt locally after counterpart review.
+
+## Safety And Authority Boundaries
+
+- Advisory context only.
+
+## Source-System References
+
+- `.systems/ai/core/validation-routing.md`
+
+## Validation Expectations
+
+- Semantic review precedes applicable scripts.
+
+## Counterpart Adaptation Checklist
+
+- [ ] Compare local contracts before adaptation.
+
+## Privacy Check
+
+- Client or private runtime copied: `no`
+- Secrets or credentials copied: `no`
+- Production identifiers copied: `no`
+
+## Residual Risk
+
+Runtime behavior still depends on correct routing.
+MD
+cat > "$cross_handoff_record" <<MD
+# Quality Closure
+
+## Cross-system Impact
+
+- Owner decision: yes
+- Counterpart: ai-workflow
+- Handoff artifact: $cross_handoff_file
+- Reason: Substantive AI System policy upgrade.
+MD
+run_must_pass "cross-system-upgrade-handoff-yes-with-artifact" "$cross_handoff_validator" --workspace "$cross_handoff_workspace" --record "$cross_handoff_record"
+
+cat > "$cross_handoff_record" <<'MD'
+# Quality Closure
+
+## Cross-system Impact
+
+- Owner decision: yes
+- Counterpart: ai-workflow
+- Handoff artifact: not-required
+- Reason: Missing artifact fixture.
+MD
+run_must_fail "cross-system-upgrade-handoff-yes-requires-artifact" "$cross_handoff_validator" --workspace "$cross_handoff_workspace" --record "$cross_handoff_record"
+
+cat > "$cross_handoff_record" <<'MD'
+# Quality Closure
+
+## Cross-system Impact
+
+- Owner decision: no
+- Counterpart: none
+- Handoff artifact: not-required
+- Reason: Change is local to AI System.
+MD
+run_must_pass "cross-system-upgrade-handoff-no-with-reason" "$cross_handoff_validator" --workspace "$cross_handoff_workspace" --record "$cross_handoff_record"
+
+cat > "$cross_handoff_record" <<'MD'
+# Quality Closure
+
+## Cross-system Impact
+
+- Owner decision: no
+- Counterpart: none
+- Handoff artifact: not-required
+- Reason:
+MD
+run_must_fail "cross-system-upgrade-handoff-no-requires-reason" "$cross_handoff_validator" --workspace "$cross_handoff_workspace" --record "$cross_handoff_record"
+
+cat > "$cross_handoff_record" <<'MD'
+# Quality Closure
+
+## Cross-system Impact
+
+- Owner decision: pending
+- Counterpart: ai-workflow
+- Handoff artifact: pending
+- Reason: Owner decision outstanding.
+MD
+run_must_fail "cross-system-upgrade-handoff-pending-blocks" "$cross_handoff_validator" --workspace "$cross_handoff_workspace" --record "$cross_handoff_record"
+
+cp "$cross_handoff_file" "$cross_handoff_file.bak"
+printf '\nEmail: private@example.com\n' >> "$cross_handoff_file"
+cat > "$cross_handoff_record" <<MD
+# Quality Closure
+
+## Cross-system Impact
+
+- Owner decision: yes
+- Counterpart: ai-workflow
+- Handoff artifact: $cross_handoff_file
+- Reason: Privacy-negative fixture.
+MD
+run_must_fail "cross-system-upgrade-handoff-blocks-private-marker" "$cross_handoff_validator" --workspace "$cross_handoff_workspace" --record "$cross_handoff_record"
+mv "$cross_handoff_file.bak" "$cross_handoff_file"
 
 echo "Validator smoke tests passed."

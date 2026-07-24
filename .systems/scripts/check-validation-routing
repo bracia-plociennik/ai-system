@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+fail=0
+
+require_ref() {
+  local file="$1" pattern="$2" label="$3"
+  if [[ ! -f "$repo_root/$file" ]]; then
+    echo "Missing validation routing file: $file"
+    fail=1
+  elif ! rg -qi -- "$pattern" "$repo_root/$file"; then
+    echo "Missing validation routing requirement in $file: $label"
+    fail=1
+  fi
+}
+
+contract=".systems/ai/core/validation-routing.md"
+template=".systems/ai/templates/quality/validation-execution-record.template.md"
+
+for ref in \
+  "$contract:^# Validation Routing$:core contract" \
+  "$contract:owner intent, scope, Definition of Done:semantic first" \
+  "$contract:findings-first code, diff, or artifact review:findings first" \
+  "$contract:target-product tests, builds, and manual checks:product checks" \
+  "$contract:applicable .*\\.systems/scripts/\\*\\*:supporting scripts" \
+  "$contract:Green scripts do not equal .*PASS:PASS boundary" \
+  "$contract:no broad .*validate-ai-system:implementation boundary" \
+  "$contract:Architecture, project plan, specification:artifact QA routing" \
+  "$contract:Checkpoint:checkpoint routing" \
+  "$contract:CI, final system verification:full routing" \
+  ".systems/ai/core/validation-profiles.md:not a default implementation command:profile separation" \
+  ".systems/ai/core/command-routing.md:validation-routing\\.md:routing integration" \
+  ".systems/ai/core/response-contract.md:Validation Execution Record:response integration" \
+  ".systems/ai/templates/root/AGENTS.template.md:validation-routing\\.md:root template integration" \
+  "README.md:validation-routing\\.md:README integration" \
+  "HUMANS.md:Semantic QA Przed Skryptami:HUMANS integration" \
+  ".systems/scripts/validate-ai-system:script evidence is supporting-only:neutral CLI result" \
+  ".systems/scripts/check-required-artifacts:check-validation-routing:required artifacts" \
+  ".systems/scripts/check-validator-smoke-tests:validation-routing:smoke integration"
+do
+  file="${ref%%:*}"
+  rest="${ref#*:}"
+  pattern="${rest%%:*}"
+  label="${rest#*:}"
+  require_ref "$file" "$pattern" "$label"
+done
+
+for field in \
+  'Semantic QA result' \
+  'Findings/blockers' \
+  'Product checks' \
+  'AI System script applicability' \
+  'Targeted AI System commands' \
+  'Script evidence role.*supporting-only' \
+  'Final verdict'
+do
+  require_ref "$contract" "$field" "contract field: $field"
+  require_ref "$template" "$field" "template field: $field"
+done
+
+unsafe_patterns=(
+  'green (AI System )?scripts?[^.\n]{0,80}(equal|means?|produce|justify|guarantee)[^.\n]{0,50}PASS'
+  '(ordinary|routine) implementation[^.\n]{0,120}(run|requires?|must run)[^.\n]{0,80}(validate-ai-system|broad AI System validation)'
+  'AI System scripts?[^.\n]{0,120}(replace|substitute for|come before)[^.\n]{0,80}(semantic|product|code|diff|DoD)'
+)
+
+for pattern in "${unsafe_patterns[@]}"; do
+  if rg -n -i -- "$pattern" \
+    "$repo_root/.systems/ai/core" \
+    "$repo_root/.systems/ai/templates" \
+    "$repo_root/README.md" \
+    "$repo_root/HUMANS.md" \
+    | rg -v -i 'do not|does not|must not|never|cannot|no broad|not run|nie oznaczają|nie wymagają'; then
+    echo "Unsafe validation routing wording found: $pattern"
+    fail=1
+  fi
+done
+
+exit "$fail"

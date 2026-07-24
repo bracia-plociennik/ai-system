@@ -157,15 +157,25 @@ Dreaming reports unresolved state counts and privacy-safe paths in an Undistille
 
 ## End-of-Task Capture
 
-For chat-end task closure prompts such as `to koniec zadania`, `koniec taska`, `dziękuję, utrwal wiedzę`, or `end task and capture knowledge`, AI System uses `.systems/ai/core/end-of-task-capture.md`.
+For chat-end task closure prompts such as `Koniec pracy`, `Koniec zadania`, `to koniec zadania`, `koniec taska`, `dziękuję, utrwal wiedzę`, or `end task and capture knowledge`, AI System uses `.systems/ai/core/end-of-task-capture.md`.
 
-This produces capture review/proposal by default. It does not mark PASS, run final check, close a project, update status from chat-only claims, create commits, or write memory automatically.
+Exact `Koniec pracy` and `Koniec zadania` mean `capture-now`: execute or route the applicable memory, status/evidence, distillation, checkpoint, System Insights, External Memory, or `none` decision. Do not acknowledge only or ask what to do next. Other completion wording produces capture review/proposal by default.
 
-Durable capture requires explicit owner-approved target, selected workspace, scope, privacy/scope check, evidence, and write permission.
+Capture does not mark PASS, run final check, close a project, update status from chat-only claims, create commits, or push. It requires a clear target, selected workspace, scope, privacy, quality, evidence, and write permission.
 
-## Validation Profiles
+## Semantic QA Before Scripts
 
-Use `.systems/ai/core/validation-profiles.md`. `.systems/scripts/validate-ai-system` defaults to `standard`; use `fast` for quick sanity checks and `scoped --checks <check-name>` for explicit validator iteration. Use `full` for checkpoints, major verification or distillation, CI, release/final confidence, upstream updates, and high-impact AI System contract changes. `fast` and `scoped` are not final evidence, and skipped smoke tests do not support PASS without explicit owner acceptance of residual risk.
+Use `.systems/ai/core/validation-routing.md` before `.systems/ai/core/validation-profiles.md`. Review owner intent, scope, DoD, the accepted plan/spec, findings, regressions, failure paths, and product evidence before applicable `.systems/scripts/**`.
+
+AI System scripts are supporting-only. Green scripts do not equal PASS. Ordinary implementation, client work, PDF, document, and design work do not run broad `validate-ai-system`; targeted or full profiles apply only in the matching artifact QA, checkpoint, CI, upstream-update, or final system-verification route.
+
+## Model Selection Guidance
+
+Use `.systems/ai/core/model-selection-guidance.md` for every new planning, implementation, or QA scope. Recommend `GPT-5.6 Luna High` for bounded reversible work and `GPT-5.6 Sol High` for difficult architecture, ambiguity, security, migrations, production, broad integrations, adversarial review, and high-impact policy changes. The recommendation is always advisory with `Blocking: no`.
+
+## Cross-System Upgrade Handoff
+
+Use `.systems/ai/core/cross-system-upgrade-handoff.md` before committing or handing off a substantive AI System or AI Workflow upgrade. The owner decides `yes|no|pending`; `pending` blocks commit/handoff, while `yes` requires one privacy-safe handoff under the selected workspace `external-memory/memory/`.
 
 ## Repo-Safe Project State
 
@@ -236,6 +246,16 @@ If `unsynced-check-in-count` is below `7`, sync is not required yet. If it is `7
 The threshold counts newly added daily files. It does not detect edits to older check-ins or reliably detect deleted daily files as a stale-index event; after editing or deleting an existing day, run owner-approved sync manually when the indexes need to be fresh.
 
 The V2 Notion check-in importer is retired. Preserve future exports as raw context and use the owner-approved V3 manual intake route; use lazy V3 sync from canonical Markdown and any validated immutable legacy snapshot.
+
+## Weekly Planning
+
+On Saturday, use `zaplanuj tydzień` to create the next Monday-Friday plan under:
+
+```text
+<workspace>/tasks/weekly-plans/YYYY/YYYY-Www.md
+```
+
+The weekly plan records four configurable daily blocks, one WIG, capacity, estimates, Definition of Done, deadlines, 6D buckets, mappings, and stable source IDs. Sunday is excluded and V1 has no scheduler. A ready plan may create or revise linked TaskNotes with the same owner approval; the WIG itself never creates a separate TaskNote. Use `.systems/ai/core/weekly-planning.md` and run `.systems/scripts/check-weekly-planning` before a write.
 
 ## TaskForge Task Management
 

@@ -1,0 +1,136 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+record=""
+workspace=""
+fail=0
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --record)
+      [[ $# -ge 2 ]] || { echo "--record requires a value"; exit 2; }
+      record="$2"
+      shift 2
+      ;;
+    --workspace)
+      [[ $# -ge 2 ]] || { echo "--workspace requires a value"; exit 2; }
+      workspace="$2"
+      shift 2
+      ;;
+    -h|--help)
+      echo "Usage: .systems/scripts/check-cross-system-upgrade-handoff [--record <path>] [--workspace <path>]"
+      exit 0
+      ;;
+    *)
+      echo "Unknown argument: $1"
+      exit 2
+      ;;
+  esac
+done
+
+require_ref() {
+  local file="$1" pattern="$2" label="$3"
+  if [[ ! -f "$repo_root/$file" ]]; then
+    echo "Missing cross-system handoff file: $file"
+    fail=1
+  elif ! rg -qi -- "$pattern" "$repo_root/$file"; then
+    echo "Missing cross-system handoff requirement in $file: $label"
+    fail=1
+  fi
+}
+
+contract=".systems/ai/core/cross-system-upgrade-handoff.md"
+template=".systems/ai/templates/capture/cross-system-upgrade-handoff.template.md"
+
+require_ref "$contract" '^# Cross-System Upgrade Handoff$' "core contract"
+require_ref "$contract" 'Owner decision: <yes\|no\|pending>' "owner decision"
+require_ref "$contract" 'Counterpart: <ai-workflow\|ai-system\|none>' "counterpart"
+require_ref "$contract" 'Handoff artifact: <path\|not-required\|pending>' "handoff artifact"
+require_ref "$contract" 'pending.*stop before commit and handoff' "pending boundary"
+require_ref "$contract" 'yes.*privacy-safe External Memory handoff' "yes boundary"
+require_ref "$contract" 'no-question opt-out.*cannot infer' "opt-out boundary"
+require_ref "$contract" 'external-memory/memory/' "canonical path"
+require_ref "$template" 'Privacy/scope check:.*<pass\|fail>' "privacy field"
+require_ref "$template" 'Raw client data included: `no`' "raw data boundary"
+require_ref ".systems/ai/core/contract-compliance.md" 'Cross-system impact' "consumer"
+require_ref ".systems/ai/core/response-contract.md" 'Cross-system impact' "response consumer"
+require_ref ".systems/ai/core/command-routing.md" 'cross-system-upgrade-handoff\.md' "routing"
+require_ref ".systems/ai/templates/root/AGENTS.template.md" 'cross-system-upgrade-handoff\.md' "root template"
+require_ref "README.md" 'cross-system-upgrade-handoff\.md' "README"
+require_ref "HUMANS.md" 'Cross-System Upgrade Handoff' "HUMANS"
+require_ref ".systems/scripts/validate-ai-system" 'check-cross-system-upgrade-handoff' "validator chain"
+require_ref ".systems/scripts/check-required-artifacts" 'check-cross-system-upgrade-handoff' "required artifacts"
+require_ref ".systems/scripts/check-validator-smoke-tests" 'cross-system-upgrade-handoff' "smoke"
+
+if [[ -n "$workspace" ]]; then
+  [[ -d "$workspace" ]] || { echo "Workspace does not exist: $workspace"; exit 2; }
+  workspace="$(cd "$workspace" && pwd -P)"
+fi
+
+if [[ -n "$record" ]]; then
+  [[ -f "$record" ]] || { echo "Cross-system decision record missing: $record"; exit 1; }
+  section="$(awk '
+    /^## Cross-system [Ii]mpact[[:space:]]*$/ { active=1; next }
+    /^## / && active { exit }
+    active { print }
+  ' "$record")"
+  [[ -n "$section" ]] || { echo "Missing Cross-system Impact section in $record"; exit 1; }
+
+  decision="$(sed -nE 's/^- Owner decision: `?([^`[:space:]]+)`?.*/\1/p' <<< "$section" | head -1)"
+  counterpart="$(sed -nE 's/^- Counterpart: `?([^`[:space:]]+)`?.*/\1/p' <<< "$section" | head -1)"
+  handoff="$(sed -nE 's/^- Handoff artifact: `?([^`]+)`?.*/\1/p' <<< "$section" | head -1)"
+  reason="$(sed -nE 's/^- Reason: `?([^`]+)`?.*/\1/p' <<< "$section" | head -1)"
+
+  case "$decision" in
+    yes)
+      [[ "$counterpart" == "ai-workflow" || "$counterpart" == "ai-system" ]] || { echo "Cross-system yes requires a counterpart"; fail=1; }
+      [[ -n "$handoff" && "$handoff" != "pending" && "$handoff" != "not-required" ]] || { echo "Cross-system yes requires a handoff path"; fail=1; }
+      if [[ -n "$handoff" && ! -f "$handoff" ]]; then
+        echo "Cross-system handoff does not exist: $handoff"
+        fail=1
+      elif [[ -n "$handoff" ]]; then
+        [[ "$handoff" != *".."* ]] || { echo "Cross-system handoff path cannot traverse: $handoff"; fail=1; }
+        [[ ! -L "$handoff" ]] || { echo "Cross-system handoff cannot be a symlink: $handoff"; fail=1; }
+        handoff_real="$(cd "$(dirname "$handoff")" && pwd -P)/$(basename "$handoff")"
+        if [[ -n "$workspace" ]]; then
+          case "$handoff_real" in
+            "$workspace"/external-memory/memory/*.md) ;;
+            *) echo "Cross-system handoff is outside selected workspace external-memory/memory/: $handoff"; fail=1 ;;
+          esac
+        else
+          case "$handoff_real" in
+            */external-memory/memory/*.md) ;;
+            *) echo "Cross-system handoff must live under external-memory/memory/: $handoff"; fail=1 ;;
+          esac
+        fi
+      fi
+      ;;
+    no)
+      [[ "$counterpart" == "none" && "$handoff" == "not-required" ]] || { echo "Cross-system no requires none/not-required"; fail=1; }
+      [[ -n "$reason" ]] || { echo "Cross-system no requires a reason"; fail=1; }
+      ;;
+    pending)
+      echo "Cross-system impact pending blocks commit/handoff"
+      fail=1
+      ;;
+    *)
+      echo "Missing or invalid Cross-system impact decision in $record"
+      fail=1
+      ;;
+  esac
+
+  if [[ -n "$handoff" && -f "$handoff" ]] && rg -qi -- \
+    '(^|[[:space:]])(client name|email|phone|api key|private key|wallet key|production credentials)[[:space:]]*:[[:space:]]*.+' \
+    "$handoff"; then
+    echo "Cross-system handoff contains a raw client or credential marker: $handoff"
+    fail=1
+  elif [[ -n "$handoff" && -f "$handoff" ]] && rg -qi -- \
+    '([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|sk-[a-z0-9]{16,})' \
+    "$handoff"; then
+    echo "Cross-system handoff contains an email or credential-shaped value: $handoff"
+    fail=1
+  fi
+fi
+
+exit "$fail"

@@ -1,0 +1,243 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+workspace=""
+fail=0
+
+usage() {
+  echo "Usage: .systems/scripts/check-weekly-planning [--workspace <path>]"
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --workspace)
+      workspace="${2:-}"
+      [[ -n "$workspace" ]] || { echo "Missing value for --workspace"; exit 2; }
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      usage
+      exit 2
+      ;;
+  esac
+done
+
+require_file() {
+  local path="$1"
+  if [[ ! -f "$repo_root/$path" ]]; then
+    echo "Missing weekly planning artifact: $path"
+    fail=1
+  fi
+}
+
+require_ref() {
+  local path="$1"
+  local term="$2"
+  if [[ ! -f "$repo_root/$path" ]] || ! rg -F -q -- "$term" "$repo_root/$path"; then
+    echo "Missing weekly planning reference '$term' in $path"
+    fail=1
+  fi
+}
+
+for path in \
+  ".systems/ai/core/weekly-planning.md" \
+  ".systems/ai/templates/workspace/tasks/weekly-plan.template.md" \
+  ".systems/scripts/propose-task-candidates" \
+  ".systems/scripts/check-weekly-planning"
+do
+  require_file "$path"
+done
+
+for term in \
+  'Saturday is the planning day' \
+  'Monday-Friday' \
+  'Sunday is intentionally outside' \
+  'build-future' \
+  'adapt-build-deliver' \
+  'deliver-financial-impact' \
+  'adapt-promote-deliver' \
+  'exactly one weekly WIG' \
+  'deadline without a category resolves to `do`' \
+  'no deadline and no category resolves to `defer`' \
+  'overload_acknowledged' \
+  'source_week_id + source_week_item_id' \
+  'Daily Check-In' \
+  'TaskForge writes require an existing configured vault' \
+  'no scheduler'
+do
+  require_ref ".systems/ai/core/weekly-planning.md" "$term"
+done
+
+for term in \
+  'type: weekly-plan' \
+  'daily_blocks_json:' \
+  'weekly_plan_items_json:' \
+  'wig_kind:' \
+  'plan_readiness:' \
+  'overload_status:' \
+  'task_generation_references_json:' \
+  'revision_audit_json:'
+do
+  require_ref ".systems/ai/templates/workspace/tasks/weekly-plan.template.md" "$term"
+done
+
+for term in \
+  '--weekly-plan' \
+  'candidates_from_weekly_plan' \
+  'source_week_id' \
+  'source_week_item_id' \
+  'Weekly plan is not ready' \
+  'Updated existing weekly TaskNotes'
+do
+  require_ref ".systems/scripts/propose-task-candidates" "$term"
+done
+
+for path in \
+  ".systems/ai/core/task-management.md" \
+  ".systems/ai/core/personal-ops.md" \
+  ".systems/ai/core/delivery-constraints.md" \
+  ".systems/ai/core/command-routing.md" \
+  ".systems/ai/core/operating-model.md" \
+  ".systems/ai/templates/root/AGENTS.template.md" \
+  ".systems/scripts/README.md" \
+  "README.md" \
+  "HUMANS.md"
+do
+  require_ref "$path" 'weekly-planning'
+done
+
+for path in \
+  ".systems/scripts/validate-ai-system" \
+  ".systems/scripts/check-required-artifacts" \
+  ".systems/scripts/check-validator-smoke-tests" \
+  ".systems/scripts/check-update-workspace" \
+  ".systems/scripts/init-workspace" \
+  ".systems/scripts/update-workspace"
+do
+  require_ref "$path" 'weekly-planning'
+done
+
+if [[ -n "$workspace" ]]; then
+  workspace="$(cd "$workspace" 2>/dev/null && pwd -P || true)"
+  if [[ -z "$workspace" || ! -d "$workspace" ]]; then
+    echo "Weekly planning workspace does not exist: ${workspace:-unknown}"
+    exit 1
+  fi
+  while IFS= read -r plan; do
+    [[ -n "$plan" ]] || continue
+    if ! rg -q '^type:\s*weekly-plan\s*$' "$plan"; then
+      echo "Invalid weekly plan type: $plan"
+      fail=1
+    fi
+    for field in week_id week_start week_end timezone plan_revision plan_readiness overload_status overload_acknowledged wig_kind wig_id wig_title wig_definition_of_done daily_blocks_json weekly_plan_items_json task_generation_status task_generation_references_json revision_audit_json; do
+      if ! rg -q "^${field}:" "$plan"; then
+        echo "Missing weekly plan field '$field': $plan"
+        fail=1
+      fi
+    done
+    if ! python3 - "$plan" <<'PY'
+import datetime as dt
+import json
+import re
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+frontmatter = text.split("\n---", 1)[0].splitlines()[1:]
+values = {}
+for line in frontmatter:
+    if ":" in line and not line.startswith(" "):
+        key, value = line.split(":", 1)
+        values[key.strip()] = value.strip().strip('"')
+for key in ("daily_blocks_json", "weekly_plan_items_json"):
+    value = values.get(key, "")
+    try:
+        parsed = json.loads(value)
+    except json.JSONDecodeError:
+        try:
+            parsed = json.loads(json.loads(value))
+        except Exception:
+            raise SystemExit(f"Malformed {key}")
+    if not isinstance(parsed, list):
+        raise SystemExit(f"{key} must be an array")
+blocks = json.loads(values.get("daily_blocks_json", "[]"))
+items = json.loads(values.get("weekly_plan_items_json", "[]"))
+week_start = dt.date.fromisoformat(values.get("week_start", ""))
+week_end = dt.date.fromisoformat(values.get("week_end", ""))
+if week_end - week_start != dt.timedelta(days=4):
+    raise SystemExit("weekly plan must cover exactly Monday-Friday")
+expected_block_ids = {
+    "build-future",
+    "adapt-build-deliver",
+    "deliver-financial-impact",
+    "adapt-promote-deliver",
+}
+by_date = {}
+for block in blocks:
+    if not isinstance(block, dict):
+        raise SystemExit("daily_blocks_json must contain objects")
+    block_date = dt.date.fromisoformat(str(block.get("date", "")))
+    block_id = str(block.get("block_id", ""))
+    if block_date < week_start or block_date > week_end or block_date.weekday() > 4:
+        raise SystemExit("weekly plan daily blocks must stay Monday-Friday")
+    by_date.setdefault(block_date, set()).add(block_id)
+if set(by_date) != {week_start + dt.timedelta(days=offset) for offset in range(5)}:
+    raise SystemExit("weekly plan must define daily blocks for every Monday-Friday")
+if any(block_ids != expected_block_ids for block_ids in by_date.values()):
+    raise SystemExit("each weekday must define exactly the four weekly planning blocks")
+wig_kind = values.get("wig_kind", "")
+if wig_kind not in {"plan-item", "standalone", "none"}:
+    raise SystemExit("wig_kind must be plan-item, standalone, or none")
+if values.get("plan_readiness") == "ready" and wig_kind == "none":
+    raise SystemExit("ready weekly plan requires exactly one WIG")
+if values.get("plan_readiness") == "ready" and any(not values.get(key, "").strip() for key in ("wig_id", "wig_title", "wig_definition_of_done")):
+    raise SystemExit("ready weekly plan requires WIG id, title, and Definition of Done")
+item_by_id = {}
+allowed_by_block = {
+    "build-future": {"build"},
+    "adapt-build-deliver": {"build", "deliver"},
+    "deliver-financial-impact": {"deliver"},
+    "adapt-promote-deliver": {"promote", "deliver"},
+}
+for item in items:
+    if not isinstance(item, dict):
+        raise SystemExit("weekly_plan_items_json must contain objects")
+    item_id = str(item.get("id", "")).strip()
+    stream = str(item.get("stream", "")).strip().lower()
+    if not item_id or not str(item.get("title", "")).strip() or stream not in {"build", "deliver", "promote"}:
+        raise SystemExit("weekly plan items require id, title, and build/deliver/promote stream")
+    item_by_id[item_id] = item
+    allocations = item.get("planned_allocations", [])
+    if not isinstance(allocations, list):
+        raise SystemExit(f"planned_allocations must be an array for {item_id}")
+    for allocation in allocations:
+        if not isinstance(allocation, dict):
+            raise SystemExit(f"planned_allocations must contain objects for {item_id}")
+        allocation_date = dt.date.fromisoformat(str(allocation.get("date", "")))
+        block_id = str(allocation.get("block_id", ""))
+        if allocation_date < week_start or allocation_date > week_end or block_id not in expected_block_ids:
+            raise SystemExit(f"allocation is outside Monday-Friday or uses an unknown block for {item_id}")
+        if stream not in allowed_by_block[block_id]:
+            raise SystemExit(f"incompatible block assignment for {item_id}")
+if wig_kind == "plan-item":
+    wig_item = values.get("wig_plan_item_id", "")
+    if not wig_item or wig_item not in item_by_id:
+        raise SystemExit("plan-item WIG must reference one existing weekly item")
+ids = [item.get("id", "") for item in items if isinstance(item, dict)]
+if any(not item_id for item_id in ids) or len(ids) != len(set(ids)):
+    raise SystemExit("weekly item IDs must be unique and non-empty")
+PY
+    then
+      echo "Invalid weekly plan JSON: $plan"
+      fail=1
+    fi
+  done < <(find "$workspace/tasks/weekly-plans" -mindepth 2 -maxdepth 2 -type f -name '*.md' 2>/dev/null | sort)
+fi
+
+exit "$fail"

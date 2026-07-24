@@ -317,11 +317,15 @@ backfill_workspace() {
   ensure_dir "$workspace_home" "$workspace_home/links"
   ensure_dir "$workspace_home" "$workspace_home/memory"
   ensure_dir "$workspace_home" "$workspace_home/external-memory"
+  ensure_dir "$workspace_home" "$workspace_home/external-memory/memory"
   ensure_dir "$workspace_home" "$workspace_home/system-insights/insights"
   ensure_dir "$workspace_home" "$workspace_home/personal-ops/check-ins"
   ensure_dir "$workspace_home" "$workspace_home/personal-ops/check-ins/import-profiles"
   ensure_dir "$workspace_home" "$workspace_home/personal-ops/indexes"
   ensure_dir "$workspace_home" "$workspace_home/dreams/runs"
+  ensure_dir "$workspace_home" "$workspace_home/tasks"
+  ensure_dir "$workspace_home" "$workspace_home/tasks/weekly-plans"
+  # weekly-planning backfill is neutral and never overwrites a plan or TaskNote.
   ensure_dir "$workspace_home" "$workspace_home/skills"
   ensure_dir "$workspace_home" "$workspace_home/archive"
 
@@ -351,11 +355,15 @@ backfill_workspace() {
     copy_primary_entity_directory_readme "$workspace_home" "$workspace_home/distillations/README.md" "Primary Entity Distillations" "Store compressed summaries and lessons distilled from primary entity memory, notes, and materials."
     copy_primary_entity_directory_readme "$workspace_home" "$workspace_home/documents/README.md" "Primary Entity Documents" "Store owner-approved documents that belong to the primary entity."
     copy_primary_entity_directory_readme "$workspace_home" "$workspace_home/notes/README.md" "Primary Entity Notes" "Store raw and working notes for the primary entity before they are promoted into memory, decisions, tasks, or documents."
-    copy_template "$workspace_home" "$templates/tasks/task-management-readme.template.md" "$workspace_home/tasks/README.md"
-    copy_template "$workspace_home" "$templates/tasks/tasknote.template.md" "$workspace_home/tasks/tasknote.template.md"
-    copy_template "$workspace_home" "$templates/tasks/task-candidate.template.md" "$workspace_home/tasks/task-candidate.template.md"
-    copy_template "$workspace_home" "$templates/tasks/taskforge-vault-setup.template.md" "$workspace_home/tasks/taskforge-vault-setup.template.md"
   fi
+
+  copy_template "$workspace_home" "$templates/tasks/task-management-readme.template.md" "$workspace_home/tasks/README.md"
+  copy_template "$workspace_home" "$templates/tasks/tasknote.template.md" "$workspace_home/tasks/tasknote.template.md"
+  copy_template "$workspace_home" "$templates/tasks/task-candidate.template.md" "$workspace_home/tasks/task-candidate.template.md"
+  copy_template "$workspace_home" "$templates/tasks/taskforge-vault-setup.template.md" "$workspace_home/tasks/taskforge-vault-setup.template.md"
+  copy_template "$workspace_home" "$templates/tasks/weekly-plan.template.md" "$workspace_home/tasks/weekly-plan.template.md"
+  copy_template "$workspace_home" "$templates/tasks/weekly-plan.template.md" "$workspace_home/tasks/weekly-plans/weekly-plan.template.md"
+  copy_template "$workspace_home" "$templates/tasks/weekly-plans-readme.template.md" "$workspace_home/tasks/weekly-plans/README.md"
 
   copy_template "$workspace_home" "$templates/core/README.md" "$workspace_home/core/README.md"
   copy_template "$workspace_home" "$templates/core/status.template.md" "$workspace_home/core/status.md"
@@ -376,6 +384,7 @@ backfill_workspace() {
   copy_template "$workspace_home" "$templates/memory/README.md" "$workspace_home/memory/README.md"
   copy_template "$workspace_home" "$templates/memory/workspace-memory.template.md" "$workspace_home/memory/workspace-memory.md"
   copy_template "$workspace_home" "$templates/external-memory/README.md" "$workspace_home/external-memory/README.md"
+  copy_template "$workspace_home" "$templates/external-memory/memory/README.md" "$workspace_home/external-memory/memory/README.md"
   copy_template "$workspace_home" "$templates/system-insights/system-insights-readme.template.md" "$workspace_home/system-insights/README.md"
   copy_template "$workspace_home" "$templates/system-insights/system-insights.template.md" "$workspace_home/system-insights/system-insights.md"
   copy_template "$workspace_home" "$templates/system-insights/insights-readme.template.md" "$workspace_home/system-insights/insights/README.md"

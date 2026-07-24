@@ -273,7 +273,10 @@ for term in \
   'strong title-token match' \
   '## Subtasks' \
   'Missing, ambiguous, weak, or cross-project similarity' \
-  'no task write occurs without exact owner approval'
+  'no task write occurs without exact owner approval' \
+  'weekly-planning' \
+  'source_week_id + source_week_item_id' \
+  'Removed weekly items never delete existing tasks'
 do
   require_ref ".systems/ai/core/task-management.md" "$term" "$term"
 done
@@ -295,6 +298,11 @@ for field in \
   'source_check_in_field:' \
   'source_session_date:' \
   'source_plan_item_id:' \
+  'source_week_id:' \
+  'source_week_item_id:' \
+  'source_week_plan:' \
+  'estimated_minutes:' \
+  'weekly_allocations_json:' \
   'source_dream_report:' \
   '## Outcome' \
   '## Definition Of Done' \
@@ -317,7 +325,7 @@ fi
 
 for candidate_term in \
   'This is a proposal artifact, not a TaskForge TaskNote' \
-  'source_type: `<check-in|dream-report>`' \
+  'source_type: `<check-in|dream-report|weekly-plan>`' \
   'task_method: `<legacy-5d|6d|none>`' \
   'execution_bucket: `<do|defer|delegate|delete|dump|done|unclassified>`' \
   '6d_tag: `<6d/do|6d/defer|6d/delegate|6d/delete|6d/dump>`' \
@@ -377,6 +385,8 @@ require_ref ".systems/scripts/validate-ai-system" 'check-task-management' "valid
 require_ref ".systems/scripts/check-required-artifacts" 'check-task-management' "required artifact list"
 require_ref ".systems/scripts/check-update-workspace" 'tasks/tasknote.template.md' "workspace task template backfill"
 require_ref ".systems/scripts/check-validator-smoke-tests" 'check-task-management' "smoke coverage"
+require_ref ".systems/ai/core/weekly-planning.md" 'TaskNotes' "weekly planning TaskNote contract"
+require_ref ".systems/scripts/check-weekly-planning" 'TaskForge' "weekly planning TaskForge validation"
 
 if rg -i -q 'automatically (create|complete|reschedule|write|rewrite|migrate|delete|archive).*task|bulk rewrite.*allowed|TaskForge app automation is allowed|connector/API sync.*allowed' \
   "$repo_root/.systems/ai/core" \

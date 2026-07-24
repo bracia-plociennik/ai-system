@@ -84,24 +84,24 @@ explain_profile() {
         echo "Final validation evidence: no, unless owner explicitly accepts residual risk"
       else
         echo "Smoke tests: run"
-        echo "Final validation evidence: yes"
+      echo "Script evidence: complete supporting evidence"
       fi
       ;;
     standard)
       echo "Validation profile: standard"
       echo "Smoke tests: skipped"
-      echo "Final validation evidence: yes for ordinary work; no when a full-required gate applies"
+      echo "Script evidence: supporting-only; semantic and product QA still required"
       ;;
     scoped)
       echo "Validation profile: scoped"
       echo "Scoped checks: $checks"
       echo "Smoke tests: skipped"
-      echo "Final validation evidence: no, unless owner explicitly accepts narrow validation with residual risk"
+      echo "Script evidence: targeted supporting-only"
       ;;
     fast)
       echo "Validation profile: fast"
       echo "Smoke tests: skipped"
-      echo "Final validation evidence: no, iteration only"
+      echo "Script evidence: supporting-only sanity check"
       ;;
   esac
 }
@@ -119,6 +119,9 @@ run_fast_checks() {
   run_cmd "$script_dir/check-delivery-constraints"
   run_cmd "$script_dir/check-distillation-state"
   run_cmd "$script_dir/check-owner-approval"
+  run_cmd "$script_dir/check-validation-routing"
+  run_cmd "$script_dir/check-model-selection-guidance"
+  run_cmd "$script_dir/check-weekly-planning"
 }
 
 run_named_check() {
@@ -146,6 +149,10 @@ run_standard_checks() {
   run_cmd "$script_dir/check-delivery-constraints"
   run_cmd "$script_dir/check-distillation-state"
   run_cmd "$script_dir/check-owner-approval"
+  run_cmd "$script_dir/check-validation-routing"
+  run_cmd "$script_dir/check-model-selection-guidance"
+  run_cmd "$script_dir/check-cross-system-upgrade-handoff"
+  run_cmd "$script_dir/check-weekly-planning"
   run_cmd "$script_dir/check-end-of-task-capture"
   run_cmd "$script_dir/check-update-workspace"
   run_cmd "$script_dir/check-project-state"
@@ -188,4 +195,4 @@ if [[ "$smoke_skipped" == "1" ]]; then
   exit 0
 fi
 
-echo "AI System validation passed ($profile profile)."
+echo "AI System validation checks completed successfully ($profile profile); script evidence is supporting-only."

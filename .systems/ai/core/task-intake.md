@@ -8,6 +8,8 @@ It is not a phase and does not grant write permission. It decides whether the re
 
 Use `.systems/ai/core/owner-approval.md` to determine whether direct approval or strict acceptance of the immediately preceding complete plan supplies recognized owner approval. Task intake still requires resolvable target, scope, acceptance criteria, decisions, and evidence.
 
+For a new planning, implementation, or QA scope, include the advisory Model recommendation from `.systems/ai/core/model-selection-guidance.md`. It never blocks routing or changes any gate.
+
 ## When To Use
 
 Use task intake before:

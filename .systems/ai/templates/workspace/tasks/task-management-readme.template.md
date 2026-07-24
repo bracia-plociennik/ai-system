@@ -31,3 +31,7 @@ Use `tags` for the 6D execution axis (`6d/do`, `6d/defer`, `6d/delegate`, `6d/de
 - Before writing a task file, re-read the target file and preserve unknown frontmatter/body fields.
 - Do not bulk rewrite a TaskForge vault.
 - Keep task titles notification-safe.
+
+## Weekly Plans
+
+Saturday weekly planning uses `.systems/ai/core/weekly-planning.md` and stores one plan per week under `tasks/weekly-plans/YYYY/YYYY-Www.md`. The plan contains Monday-Friday only, four daily work blocks, one WIG, capacity, estimates, DoD, deadlines, 6D buckets, mappings, and stable source IDs. A ready owner-approved plan may create or revise linked TaskNotes; the WIG never creates its own TaskNote and removed plan items never delete existing tasks.

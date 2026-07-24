@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+fail=0
+
+require_ref() {
+  local file="$1" pattern="$2" label="$3"
+  if [[ ! -f "$repo_root/$file" ]]; then
+    echo "Missing model guidance file: $file"
+    fail=1
+  elif ! rg -qi -- "$pattern" "$repo_root/$file"; then
+    echo "Missing model guidance requirement in $file: $label"
+    fail=1
+  fi
+}
+
+contract=".systems/ai/core/model-selection-guidance.md"
+
+require_ref "$contract" '^# Model Selection Guidance$' "core contract"
+require_ref "$contract" 'GPT-5\.6 Luna High' "Luna option"
+require_ref "$contract" 'GPT-5\.6 Sol High' "Sol option"
+require_ref "$contract" 'bounded, reversible' "Luna classification"
+require_ref "$contract" 'security, billing, migrations, production' "Sol classification"
+require_ref "$contract" 'advisory-only' "authority boundary"
+require_ref "$contract" 'Blocking: no' "non-blocking output"
+require_ref "$contract" 'Deadline pressure.*does not justify' "deadline boundary"
+
+for file in \
+  ".systems/ai/core/task-intake.md" \
+  ".systems/ai/core/command-routing.md" \
+  ".systems/ai/core/operating-model.md" \
+  ".systems/ai/core/response-contract.md" \
+  ".systems/ai/templates/root/AGENTS.template.md" \
+  "README.md" \
+  "HUMANS.md"
+do
+  require_ref "$file" 'model-selection-guidance\.md|Model recommendation|Luna / Sol' "model guidance integration"
+done
+
+for field in 'Recommended:' 'Reason:' 'Criticality:' 'Current model known:' 'Blocking: no'; do
+  require_ref "$contract" "$field" "model field: $field"
+  require_ref ".systems/ai/core/response-contract.md" "$field" "response field: $field"
+done
+
+require_ref ".systems/scripts/validate-ai-system" 'check-model-selection-guidance' "validator chain"
+require_ref ".systems/scripts/check-required-artifacts" 'check-model-selection-guidance' "required artifacts"
+require_ref ".systems/scripts/check-validator-smoke-tests" 'model-selection-guidance' "smoke integration"
+
+unsafe_patterns=(
+  'Model recommendation[^.\n]{0,100}Blocking:[[:space:]]*(yes|conditional)'
+  '(Luna|Sol|model choice|model selection)[^.\n]{0,120}(may|can|allows?|should)[^.\n]{0,100}(bypass|skip|change)[^.\n]{0,80}(risk|permissions|QA|approval|DoD)'
+  'deadline[^.\n]{0,100}(may|can|should)[^.\n]{0,100}(lower|reduce|weaken)[^.\n]{0,80}(model|quality)'
+)
+
+for pattern in "${unsafe_patterns[@]}"; do
+  if rg -n -i -- "$pattern" \
+    "$repo_root/.systems/ai/core" \
+    "$repo_root/.systems/ai/templates" \
+    "$repo_root/README.md" \
+    "$repo_root/HUMANS.md" \
+    | rg -v -i 'does not|do not|must not|never|cannot|nie zmienia'; then
+    echo "Unsafe model guidance wording found: $pattern"
+    fail=1
+  fi
+done
+
+exit "$fail"

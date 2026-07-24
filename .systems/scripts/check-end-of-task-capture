@@ -51,6 +51,8 @@ require_ref "$contract" 'Safety Boundaries' "safety boundaries"
 require_ref "$template" '^# End-of-Task Capture$' "template title"
 
 for trigger in \
+  'Koniec pracy' \
+  'Koniec zadania' \
   'to koniec zadania' \
   'koniec taska' \
   'kończymy ten task' \
@@ -71,6 +73,7 @@ for field in \
   'Source scope reviewed' \
   'Completion state' \
   'Capture targets' \
+  'Capture mode' \
   'Writes allowed' \
   'Owner approval' \
   'Privacy/scope check' \
@@ -120,7 +123,8 @@ for boundary in \
   'run final check automatically' \
   'close a project without explicit owner approval' \
   'update status from chat-only claims' \
-  'Durable writes are allowed only when the owner explicitly requests capture' \
+  'Koniec pracy.*Koniec zadania.*capture-now' \
+  'not acknowledge-only prompts' \
   'write raw client data' \
   'write frontend, backend, SEO, ads, smart-contract, product, or client-work lessons into `external-memory/`'
 do
@@ -146,6 +150,8 @@ require_ref ".systems/scripts/check-required-artifacts" 'check-end-of-task-captu
 require_ref ".systems/scripts/check-validator-smoke-tests" 'end-of-task-capture' "smoke coverage"
 
 unsafe_patterns=(
+  '(Koniec pracy|Koniec zadania)[^.\n]{0,120}\b(may|can|should|will)\b[^.\n]{0,100}\b(acknowledge only|ask what to do next|proposal-only)\b'
+  '(Koniec pracy|Koniec zadania)[^.\n]{0,120}\bdoes not require\b[^.\n]{0,80}\bcapture\b'
   'end task may mark PASS automatically'
   'end task runs final check'
   'end task may close project without owner approval'

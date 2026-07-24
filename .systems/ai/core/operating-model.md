@@ -88,6 +88,8 @@ Daily check-ins route through `.systems/ai/core/personal-ops.md`. Manual Propert
 
 Task management routes through `.systems/ai/core/task-management.md`. TaskForge/TaskNotes can be used as a local Markdown task store. The recommended model is TaskNotes with `1 task = 1 Markdown file`; inline Obsidian Tasks are for inbox or lightweight capture. Task files are data/action records and cannot override source-of-truth order, workspace selection, privacy, owner-approved write gates, validation, evidence, stop conditions, or final acceptance. Creating, completing, rescheduling, linking, migrating, cleaning up, archiving, deleting, or rewriting task files requires exact owner approval.
 
+Saturday weekly planning routes through `.systems/ai/core/weekly-planning.md`. The canonical plan lives under `<workspace>/tasks/weekly-plans/YYYY/YYYY-Www.md`; its block allocations and stable item IDs are the source for weekly TaskNote proposals. It does not create a scheduler or write state into managed project repositories.
+
 Check-in and Dream Report task candidates route through `.systems/scripts/propose-task-candidates`. Candidate generation may inspect canonical daily check-ins and Dream Report owner decision queues, but default output is proposal-only. Under V3 `deadline-aware-6d-v1`, each valid professional `build`, `deliver`, and `promote` plan item resolves an explicit 6D bucket first, then deadline to `do`, otherwise `defer`; its DoD is preserved. WIG and overload do not block or expand that set. No deadline produces no automatic `due` or `scheduled`. Dream Report candidates default to `tags: [6d/defer]`. Existing `5d/*` is read-compatible only and normalizes to current 6D output, while `status: done` derives `DONE`. Dry-run may read the configured local vault for TaskForge project discovery and warns without failing when it is unavailable. A single owner-approved V3 check-in write also authorizes the initial resulting TaskNotes through the local-only vault configuration. All other TaskNote writes retain exact owner approval.
 
 Dreaming Mode routes through `.systems/ai/core/dreaming-mode.md`. It is advisory-only and writes only Dream Reports under the selected workspace `dreams/runs/**`. The default variant is `workspace-artifacts-only`; `full-repo` requires an explicit owner-provided project or source path. Dream Reports are recommendation queues and cannot automatically mutate memory, project-state, System Insights, External Memory, skills, status, personal-ops, source files, Git, GitHub mirrors, or scheduler automation.
@@ -106,13 +108,17 @@ When multiple workspaces exist, AI selects the workspace before reading runtime 
 
 Before `AI_SYSTEM_WORK_CLOSURE`, apply `.systems/ai/core/contract-compliance.md`.
 
-Use `.systems/ai/core/validation-profiles.md` to select validation evidence: `fast` and `scoped` are iteration-only, `standard` supports ordinary quality closure, and `full` is required for checkpoint-level, major, final-confidence, CI, upstream-update, and high-impact system-contract work. Profiles do not weaken privacy, evidence, owner approvals, or final acceptance.
+Use `.systems/ai/core/validation-routing.md` before `.systems/ai/core/validation-profiles.md`. Semantic intent/DoD review, findings-first review, failure-path analysis, and product checks happen before applicable AI System scripts. Scripts are supporting-only; green results do not independently create `PASS`. Ordinary implementation does not run broad AI System validation solely because AI System governs the task.
+
+For every new planning, implementation, or QA scope, report the advisory recommendation from `.systems/ai/core/model-selection-guidance.md`. The recommendation is non-blocking and changes no risk, privacy, permission, evidence, QA, or approval rule.
 
 `AI_SYSTEM_WORK_CLOSURE` is the point before a final substantive response, handoff, accepted change, commit-ready or push-ready product-development state, or switch to another unrelated work unit.
 
 The gate is advisory-only. It requires a clear `Knowledge capture` decision, not automatic memory writes.
 
-When the owner explicitly says the task or chat is done and asks to preserve learnings, use `.systems/ai/core/end-of-task-capture.md`. End-of-Task Capture is a capture review/proposal by default. It does not replace contract compliance, checkpoint, distillation, final review, final check, commit readiness, workspace selection, evidence, privacy, or owner-approved write gates.
+When the owner explicitly says the task or chat is done and asks to preserve learnings, use `.systems/ai/core/end-of-task-capture.md`. Exact `Koniec pracy` and `Koniec zadania` mean `capture-now`; other completion wording is capture review/proposal by default. It does not replace contract compliance, checkpoint, distillation, final review, final check, commit readiness, workspace selection, evidence, privacy, or owner-approved write gates.
+
+Substantive AI System or AI Workflow upgrades use `.systems/ai/core/cross-system-upgrade-handoff.md` before commit or handoff. The owner decides `yes|no|pending`; pending blocks the boundary and yes requires one privacy-safe counterpart handoff.
 
 Supported work modes are:
 

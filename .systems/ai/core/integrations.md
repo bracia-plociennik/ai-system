@@ -37,6 +37,8 @@ AI may read task files for planning. Creating, completing, rescheduling, linking
 
 No TaskForge app automation, URL scheme automation, connector API, live sync, or bulk vault rewrite exists in V1.
 
+Saturday weekly planning is a local Markdown workflow, not an external integration. It may create or revise TaskNotes only through the weekly-planning contract, existing vault preflight, and one explicit owner approval for the accepted plan.
+
 ## Read-Only API Planning
 
 Registry entries may use `allowed-operation: read-only-api-planned` to reserve future connector intent.

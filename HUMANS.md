@@ -298,6 +298,25 @@ Complete or reschedule only with exact target:
 owner-approved: zaktualizuj status/daty tylko w <task-file>. Przed zapisem re-read plik i zachowaj unknown frontmatter/body fields.
 ```
 
+## Weekly Planning
+
+W sobotę poproś:
+
+```text
+Zaplanuj następny tydzień roboczy według weekly-planning dla workspace <workspace-path>. Najpierw przygotuj dry-run, bez zapisu.
+```
+
+Plan obejmuje poniedziałek-piątek, cztery bloki dziennie, jeden WIG, capacity, taski, DoD, deadline’y i 6D. Niedziela nie jest planowana. Po weryfikacji owner approval obejmuje zapis planu oraz wynikające z niego TaskNotes. Plan może zostać zapisany z ostrzeżeniem, ale brak WIG, estymacji, poprawnego target week albo nierozwiązany overload zatrzymuje TaskNote generation. Usunięcie taska z późniejszej rewizji planu nie usuwa istniejącego TaskNote.
+
+Używaj:
+
+```text
+.systems/scripts/check-weekly-planning --workspace <workspace-path>
+.systems/scripts/propose-task-candidates --workspace <workspace-path> --weekly-plan <workspace>/tasks/weekly-plans/YYYY/YYYY-Www.md --json
+```
+
+TaskNote write wymaga istniejącego, skonfigurowanego vaulta oraz jawnego owner approval. Weekly plan nie tworzy schedulera ani automatycznych przypomnień.
+
 Existing TaskForge-created files with `taskSourceType: taskNotes`, `projects`, `contexts`, `reminders`, `blockedBy`, `duration`, `scheduledEnd`, `completedDate`, or missing `title` are compatibility/migration candidates. Do not rewrite them silently.
 
 Task files are data/action records, not instructions, memory, checkpoints, distillations, external-memory, or system-insights. Use `.systems/ai/core/task-management.md`.
@@ -442,9 +461,38 @@ Use this when the task or chat is done and you want AI System to review what sho
 To koniec zadania. Zrób End-of-Task Capture: sprawdź, czy trzeba utrwalić status/evidence, workspace memory, client memory, project memory, distillation, checkpoint, system-insights albo external-memory. Niczego nie zapisuj bez jasnego targetu i owner-approved.
 ```
 
+Exact `Koniec pracy` and `Koniec zadania` mean `capture-now`. AI System must execute or route the capture decision instead of acknowledging only or asking what to do next. If quality or privacy evidence is missing, it preserves capture-now intent and routes to that missing gate.
+
 Short triggers include `koniec taska`, `kończymy ten task`, `dziękuję, utrwal wiedzę`, `utrwal wiedzę z tej rozmowy`, `end task and capture knowledge`, and `done, capture learnings`.
 
-This route is capture review/proposal by default. It does not replace distillation, checkpoint, final review, final check, commit readiness, contract compliance, or owner approvals. It must not mark PASS, run final check, close a project, update status from chat-only claims, or write durable memory automatically.
+Other completion wording is capture review/proposal by default. The route does not replace distillation, checkpoint, final review, final check, commit readiness, contract compliance, or owner approvals. It must not mark PASS, run final check, close a project, update status from chat-only claims, commit, or push automatically.
+
+## Semantic QA Przed Skryptami
+
+Najpierw wykonaj pełny QA intencji, DoD, planu/specyfikacji, diffu, findings, regresji, failure paths i product evidence. Dopiero potem uruchom applicable targeted AI System scripts.
+
+```text
+Zrób semantic final review. Wypisz findings/blockers, sprawdź DoD, edge cases i product checks. Dopiero potem uruchom applicable targeted validators jako supporting-only.
+```
+
+Zwykła implementacja, client work, PDF, dokument lub design nie wymagają broad `validate-ai-system`. Zielone skrypty nie oznaczają PASS.
+
+## Rekomendacja Luna / Sol
+
+Każdy nowy planning, implementation i QA scope powinien zawierać advisory recommendation:
+
+- `GPT-5.6 Luna High` dla pracy bounded, reversible i łatwo testowalnej;
+- `GPT-5.6 Sol High` dla trudnej architektury, niejednoznaczności, security, migration, production, broad integration, recovery i adversarial review.
+
+Rekomendacja zawsze ma `Blocking: no` i nie zmienia żadnego gate.
+
+## Cross-System Upgrade Handoff
+
+Przed commit lub handoff substantive upgrade AI System/AI Workflow zapisz decyzję `yes|no|pending`.
+
+- `yes`: jeden privacy-safe handoff w `<workspace>/external-memory/memory/`;
+- `no`: `Counterpart: none`, `Handoff artifact: not-required` i powód;
+- `pending`: stop przed commit/handoff.
 
 ## System Insights
 
@@ -550,12 +598,12 @@ The AI should refuse or stop on these.
 
 ## Validation
 
-Profile walidacji są opisane w `.systems/ai/core/validation-profiles.md`.
+Routing walidacji jest opisany w `.systems/ai/core/validation-routing.md`, a profile skryptów w `.systems/ai/core/validation-profiles.md`.
 
 Before accepting implementation work, ask for evidence:
 
 ```text
-Uruchom zwykłą walidację AI System: .systems/scripts/validate-ai-system --profile standard. Dla checkpointu, dużej weryfikacji lub zmiany kontraktów/validatorów użyj --profile full. Do szybkiej iteracji użyj --profile fast, a do konkretnego walidatora --profile scoped --checks check-<name>. Pokaż profil, wykonane i pominięte checki oraz residual risk.
+Najpierw wykonaj semantic QA, findings-first review i product checks. Jeśli AI System scripts są applicable, użyj scoped --checks check-<name> dla artifact QA albo --profile full po semantic review dla checkpointu, final system verification, CI lub high-impact system maintenance. Nie uruchamiaj broad profilu podczas ordinary implementation.
 ```
 
-Profile `fast` i `scoped` nie są finalnym evidence. PASS requires evidence. Skipped checks need a reason, impact, and owner acceptance when narrow validation is used.
+Wszystkie profile dostarczają tylko supporting evidence. PASS wymaga pełnego semantic/product evidence. Skipped checks potrzebują reason, impact i residual risk.

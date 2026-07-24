@@ -52,6 +52,8 @@ Reports require:
 
 ## Priorities, Closure, And TaskNotes
 
+Daily Check-In items may link to a Saturday weekly plan with `source_week_id` and `source_week_item_id`. When a matching weekly TaskNote exists, the daily route appends a marked subtask instead of creating a duplicate. Weekly planning itself is governed by `.systems/ai/core/weekly-planning.md`.
+
 `## Priorytety dnia` may define one WIG with an observable Definition of Done. A WIG is `plan-item`, `standalone`, or `none`. It can improve readiness and closure analysis, but it never creates a TaskNote.
 
 `previous_day_minimum_day_status` derives only from `previous_day_wig_closure_json`. A historical V2 `minimum_day_done` is not equivalent and never supplies this field.
@@ -114,10 +116,29 @@ Owner-normalized values take precedence over raw wording and OCR. `brak`, `nie p
 
 ## Validation
 
-Before claiming Personal Ops quality, run:
+For routine native V3 check-in writes, use targeted validation by default:
 
 ```text
 AI_SYSTEM_WORKSPACE_HOME=<workspace-path> .systems/scripts/check-personal-ops
+```
+
+When the same approved check-in write creates or updates TaskNotes, also run:
+
+```text
+AI_SYSTEM_WORKSPACE_HOME=<workspace-path> .systems/scripts/check-task-management
+```
+
+Use V3 `--status-only` to inspect lazy index freshness without regenerating indexes:
+
+```text
+.systems/scripts/sync-personal-ops-check-ins-v3 --workspace <workspace-path> --status-only
+```
+
+Run the standard or full repository validation chain for changes to `.systems/**`, templates, validators, validation/update scripts, migrations, checkpoints, upstream handoff, release/final confidence work, or when the owner explicitly requests it. Targeted validation does not weaken schema, privacy, TaskForge, owner-approval, or required-check boundaries.
+
+For the broader routes, run:
+
+```text
 .systems/scripts/check-validator-smoke-tests
 ```
 

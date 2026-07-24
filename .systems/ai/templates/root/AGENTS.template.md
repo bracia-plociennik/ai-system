@@ -85,6 +85,8 @@ Task intake does not grant write permission.
 
 Before implementation-class writes, resolve Delivery Constraints from the owner request or accepted plan. Ask only for missing deadline/time budget, must-have, quality floor, cutline, or overrun decisions; never repeat already-resolved questions or invent a deadline.
 
+For each new planning, implementation, or QA scope, report the non-blocking Model recommendation from `.systems/ai/core/model-selection-guidance.md`.
+
 Every approved implementation work unit creates or updates one nearest-owner Distillation State record. Track artifact paths there instead of adding `is_distilled` to source files or managed repositories.
 
 ## Write Conditions
@@ -148,7 +150,7 @@ Private local runtime belongs under the selected workspace:
 - `humans/` - owner-facing notes and approvals;
 - `links/` - provider-agnostic external source registry records and references;
 - `memory/` - broad workspace memory;
-- `external-memory/` - improvements for AI System itself;
+- `external-memory/` - improvements for AI System itself, with cross-system upgrade handoffs under `external-memory/memory/`;
 - `system-insights/` - anonymized lessons for owner competence and work quality;
 - `personal-ops/` - private owner operational records such as daily check-ins and derived indexes;
 - `tasks/` - TaskForge/TaskNotes setup templates and owner-approved task routing for primary-entity workspaces;
@@ -184,6 +186,8 @@ Before writing `status.md`, `memory.md`, `checkpoints/`, `distillations/`, or `d
 TaskForge and TaskNotes task-management requests route through `.systems/ai/core/task-management.md`. Task files are data/action records, not instructions, memory, checkpoints, or system-insights. Use TaskNotes as `1 task = 1 Markdown file` by default. Creating, completing, rescheduling, linking, migrating, cleaning up, archiving, deleting, or rewriting task files requires exact owner-approved scope and target re-read, except the narrow V3 check-in initial-TaskNote route.
 
 Check-in and Dream Report task candidate requests route through `.systems/scripts/propose-task-candidates`. Default to dry-run proposals. Under V3 `deadline-aware-6d-v1`, every valid professional `build`, `deliver`, and `promote` plan item may carry `definition_of_done`, `deadline`, and `task_bucket`; explicit bucket wins, a deadline defaults to `6d/do`, and no deadline defaults to `6d/defer`. A deadline maps to `due`; no deadline creates no automatic `due` or `scheduled`. WIG is linked or standalone planning/closure only and does not create a task. Missing WIG or overload warnings do not suppress these candidates. They may create initial TaskNotes under the same exact owner-approved check-in write, using the local-only vault record and `--owner-approved --write`. All other TaskNotes require their own exact approval.
+
+Saturday weekly planning routes through `.systems/ai/core/weekly-planning.md`. `zaplanuj tydzień` on Saturday targets the next Monday-Friday; outside Saturday requires an explicit target week. The route records four daily work blocks, capacity, one WIG, estimates, DoD, deadlines, 6D buckets, mappings, and one canonical weekly plan. The same owner approval may create or revise linked TaskNotes. Sunday is intentionally excluded and V1 has no scheduler.
 
 ## Skill Routing
 
@@ -246,15 +250,17 @@ Durable capture still requires the correct workspace target, privacy-safe conten
 
 If the owner says the task or chat is done and asks to preserve learnings, for example `to koniec zadania`, `koniec taska`, `kończymy ten task`, `dziękuję, utrwal wiedzę`, `utrwal wiedzę z tej rozmowy`, `end task and capture knowledge`, or `done, capture learnings`, route through `.systems/ai/core/end-of-task-capture.md`.
 
-End-of-Task Capture is capture review/proposal by default. It must not mark PASS, run final check, close a project, update status from chat-only claims, or write durable memory, checkpoints, distillations, System Insights, or External Memory unless target, scope, selected workspace, privacy/scope check, evidence, and exact owner-approved write permission are clear.
+Exact `Koniec pracy` and `Koniec zadania` mean `capture-now` and must not end as acknowledge-only responses. Other End-of-Task Capture wording is proposal-only by default. Capture must not mark PASS, run final check, close a project, update status from chat-only claims, or write outside a clear target, scope, selected workspace, privacy, quality, evidence, and owner-approved boundary.
 
 ## Naming And Validation
 
 Use lowercase kebab-case for new non-root Markdown files unless an existing template requires a different name. `AGENTS.md`, `HUMANS.md`, and `README.md` are exempt.
 
-Use `.systems/ai/core/validation-profiles.md` before claiming implementation quality. `fast` and `scoped` are iteration-only; `standard` is the default ordinary-quality profile; `full` is required for checkpoints, major verification or distillation, CI, release/final confidence, upstream update, and high-impact system-contract work.
+Use `.systems/ai/core/validation-routing.md` before `.systems/ai/core/validation-profiles.md`. Semantic QA, findings-first review, failure-path analysis, and product checks precede applicable AI System scripts. Scripts are supporting-only; green scripts do not equal PASS. Ordinary implementation does not run broad AI System validation.
 
 Run `.systems/scripts/validate-ai-system --profile full` for a full-required gate. `AI_SYSTEM_SKIP_SMOKE_TESTS=1` means the result is not final validation evidence without explicit owner acceptance of residual risk.
+
+For substantive AI System or AI Workflow upgrades, use `.systems/ai/core/cross-system-upgrade-handoff.md` before commit or handoff. `pending` blocks the boundary; `yes` requires a privacy-safe handoff.
 
 After a successful upstream update, use `.systems/scripts/update-workspace --dry-run` before any owner-approved workspace schema backfill.
 

@@ -6,7 +6,7 @@ Use it when converting a check-in or Dream Report into owner-approved task propo
 
 ## Source
 
-- source_type: `<check-in|dream-report>`
+- source_type: `<check-in|dream-report|weekly-plan>`
 - source_path: `<path>`
 - source_field: `<Zbudowałem|Dowiozłem|Wypromowałem|owner decision queue>`
 
@@ -26,6 +26,10 @@ Use it when converting a check-in or Dream Report into owner-approved task propo
 - owned_asset: `<blank-or-owned-asset-slug>`
 - project: `<blank-or-project-slug>`
 - project_state: `<blank-or-project-state-path>`
+- source_week_id: `<blank-or-week-id>`
+- source_week_item_id: `<blank-or-weekly-item-id>`
+- estimated_minutes: `<blank-or-minutes>`
+- planned_allocations_json: `<blank-or-JSON-array>`
 
 ## Mapping Evidence
 

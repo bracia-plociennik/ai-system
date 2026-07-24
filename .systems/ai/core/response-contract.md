@@ -6,6 +6,19 @@ This file defines the required user-facing response shape for AI System work.
 
 It is communication policy. It does not grant write permission and does not bypass blockers, privacy, validation, or `owner-approved` gates.
 
+For every new planning, implementation, or QA scope, include:
+
+```text
+Model recommendation:
+- Recommended: <GPT-5.6 Luna High|GPT-5.6 Sol High>
+- Reason:
+- Criticality:
+- Current model known: <yes|no>
+- Blocking: no
+```
+
+Follow `.systems/ai/core/model-selection-guidance.md`. For unrelated substantive responses, the block may be omitted.
+
 ## When It Applies
 
 Every substantive response must end with `Co dalej?`.
@@ -37,6 +50,20 @@ Contract compliance:
 This gate is advisory-only. It records the Knowledge capture decision before `AI_SYSTEM_WORK_CLOSURE`; it does not grant write permission or bypass privacy, evidence, validation, stop conditions, or owner approvals.
 
 If End-of-Task Capture is used, apply `.systems/ai/core/end-of-task-capture.md` and include the required `End-of-Task Capture` block before the `Contract compliance` block when both apply. The trace must state whether End-of-Task Capture was the matched route or supporting output, source scope reviewed, durable writes performed or skipped, and residual risk.
+
+For substantive system-maintenance upgrades before commit or handoff, include:
+
+```text
+Cross-system impact:
+- Owner decision: <yes|no|pending>
+- Counterpart: <ai-workflow|ai-system|none>
+- Handoff artifact: <path|not-required|pending>
+- Reason:
+```
+
+Use `.systems/ai/core/cross-system-upgrade-handoff.md`. `pending` blocks commit and handoff.
+
+Quality closures use the Validation Execution Record from `.systems/ai/core/validation-routing.md`. Scripts remain supporting-only.
 
 ## Delivery And Distillation Trace
 

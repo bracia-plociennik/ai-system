@@ -64,7 +64,7 @@ for term in \
   'run_standard_checks' \
   'run_named_check' \
   'check-validator-smoke-tests' \
-  'Final validation evidence: yes for ordinary work' \
+  'Script evidence: supporting-only; semantic and product QA still required' \
   'AI_SYSTEM_SKIP_SMOKE_TESTS' \
   'AI System validation completed with smoke tests skipped; not final validation evidence without explicit owner acceptance of residual risk.'
 do
@@ -78,10 +78,7 @@ require_ref "$validate" '--checks is valid only with --profile scoped' "checks s
 
 for file in README.md HUMANS.md .systems/ai/core/operating-model.md .systems/ai/core/command-routing.md .systems/ai/core/contract-compliance.md .systems/ai/templates/root/AGENTS.template.md; do
   require_ref "$file" 'validation-profiles\.md|Validation Profiles|validation profile' "$file profile guidance"
-  require_ref "$file" 'full' "$file full guidance"
-  require_ref "$file" 'standard' "$file standard guidance"
-  require_ref "$file" 'scoped' "$file scoped guidance"
-  require_ref "$file" 'fast' "$file fast guidance"
+  require_ref "$file" 'supporting-only|supporting evidence|Semantic QA' "$file supporting-only guidance"
 done
 
 require_ref ".systems/ai/core/update-from-upstream.md" 'validation-profiles\.md' "upstream update profile guidance"
@@ -96,6 +93,10 @@ require_ref ".systems/scripts/validate-ai-system" 'check-validation-profiles' "s
 require_ref ".systems/scripts/README.md" 'check-validation-profiles' "scripts documentation"
 
 unsafe_patterns=(
+  'green scripts equal PASS'
+  'green scripts mean PASS'
+  'ordinary implementation must run broad'
+  'ordinary implementation requires broad'
   'fast is enough before commit'
   'scoped is enough before commit'
   'standard is enough before commit'

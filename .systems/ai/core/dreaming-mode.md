@@ -28,6 +28,8 @@ Personal Ops V2 indexes are retired. Dreaming Mode may read only `personal-ops/i
 
 Dreaming Mode v1 does not support all-workspaces scans.
 
+Dreaming may identify a possible cross-system upgrade handoff candidate. It must not decide `Cross-system impact`, create the handoff, or unblock a pending commit or handoff decision.
+
 ## Advisory Boundary
 
 Dreaming Mode may recommend owner actions. It must not take them.

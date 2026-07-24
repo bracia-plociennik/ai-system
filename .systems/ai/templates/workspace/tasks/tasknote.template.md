@@ -31,6 +31,11 @@ source_check_in_date:
 source_check_in_field:
 source_session_date:
 source_plan_item_id:
+source_week_id:
+source_week_item_id:
+source_week_plan:
+estimated_minutes:
+weekly_allocations_json:
 source_dream_report:
 ---
 
@@ -43,6 +48,10 @@ source_dream_report:
 ## Definition Of Done
 
 <observable completion condition when supplied by a planned check-in item>
+
+## Weekly Allocation
+
+<weekly plan source, allocated block slices, and expected work-slice outcomes when applicable>
 
 ## Context
 

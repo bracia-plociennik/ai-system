@@ -61,6 +61,7 @@ Each workspace owns its own:
 - `links/` for provider-agnostic external source registry records;
 - `system-insights/`;
 - `personal-ops/`;
+- `tasks/weekly-plans/YYYY/YYYY-Www.md` for Saturday Monday-Friday planning;
 - `prompting/` when workspace-level prompt composition artifacts are explicitly approved;
 - checkpoints, routers, decisions, and task artifacts.
 
@@ -115,8 +116,10 @@ Use selected-workspace-relative paths:
 - `<workspace>/links/`;
 - `<workspace>/memory/`;
 - `<workspace>/external-memory/`;
+- `<workspace>/external-memory/memory/` for privacy-safe cross-system upgrade handoffs;
 - `<workspace>/system-insights/`;
 - `<workspace>/personal-ops/`;
+- `<workspace>/tasks/weekly-plans/YYYY/YYYY-Www.md`;
 - `<workspace>/prompting/`;
 - `<workspace>/clients/<client>/prompting/`;
 - `<workspace>/clients/<client>/projects/<project>/prompting/`;
