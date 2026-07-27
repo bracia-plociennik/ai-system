@@ -65,6 +65,18 @@ validator="$copy_repo/.systems/scripts/check-prompt-composition"
 run_must_pass "prompt-composition-baseline" "$validator"
 run_must_pass "weekly-planning-baseline" "$copy_repo/.systems/scripts/check-weekly-planning"
 
+weekly_summary_contract="$copy_repo/.systems/ai/core/weekly-planning.md"
+weekly_summary_contract_backup="$tmp/weekly-planning-summary-contract.md"
+cp "$weekly_summary_contract" "$weekly_summary_contract_backup"
+sed '/^## Post-Write Weekly Summary$/d' "$weekly_summary_contract" > "$tmp/weekly-planning-no-summary-contract.md"
+mv "$tmp/weekly-planning-no-summary-contract.md" "$weekly_summary_contract"
+run_must_fail "weekly-planning-missing-post-write-summary-contract" "$copy_repo/.systems/scripts/check-weekly-planning"
+cp "$weekly_summary_contract_backup" "$weekly_summary_contract"
+printf '\nPost-write summary can execute tasks.\n' >> "$weekly_summary_contract"
+run_must_fail "weekly-planning-unsafe-post-write-summary-authority" "$copy_repo/.systems/scripts/check-weekly-planning"
+cp "$weekly_summary_contract_backup" "$weekly_summary_contract"
+run_must_pass "weekly-planning-post-write-summary-safe" "$copy_repo/.systems/scripts/check-weekly-planning"
+
 (
   cd "$copy_repo"
   git init -q
@@ -1121,6 +1133,18 @@ personal_ops_input="$tmp/notion-check-ins.csv"
 mkdir -p "$personal_ops_workspace/dump/incoming/external/notion/check-ins"
 
 run_must_pass "personal-ops-baseline" "$personal_ops_validator"
+
+personal_ops_summary_contract="$copy_repo/.systems/ai/core/personal-ops.md"
+personal_ops_summary_contract_backup="$tmp/personal-ops-summary-contract.md"
+cp "$personal_ops_summary_contract" "$personal_ops_summary_contract_backup"
+sed '/^## Post-Write Daily Summary$/d' "$personal_ops_summary_contract" > "$tmp/personal-ops-no-summary-contract.md"
+mv "$tmp/personal-ops-no-summary-contract.md" "$personal_ops_summary_contract"
+run_must_fail "personal-ops-missing-post-write-summary-contract" "$personal_ops_validator"
+cp "$personal_ops_summary_contract_backup" "$personal_ops_summary_contract"
+printf '\nPost-write daily summary can send external communication.\n' >> "$personal_ops_summary_contract"
+run_must_fail "personal-ops-unsafe-post-write-summary-authority" "$personal_ops_validator"
+cp "$personal_ops_summary_contract_backup" "$personal_ops_summary_contract"
+run_must_pass "personal-ops-post-write-summary-safe" "$personal_ops_validator"
 
 mv "$copy_repo/.systems/ai/core/personal-ops.md" "$copy_repo/.systems/ai/core/personal-ops.md.bak"
 run_must_fail "personal-ops-missing-core-contract" "$personal_ops_validator"

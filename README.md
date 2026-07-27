@@ -247,6 +247,8 @@ The threshold counts newly added daily files. It does not detect edits to older 
 
 The V2 Notion check-in importer is retired. Preserve future exports as raw context and use the owner-approved V3 manual intake route; use lazy V3 sync from canonical Markdown and any validated immutable legacy snapshot.
 
+After a successful daily write or update, AI System re-reads the saved check-in and returns a chat-only `Plan na dziś` summary before reporting the actual targeted validation result. It omits prior-day closure, Raw Check-In, OCR, and attachments, and it does not execute the recorded plan.
+
 ## Weekly Planning
 
 On Saturday, use `zaplanuj tydzień` to create the next Monday-Friday plan under:
@@ -255,7 +257,7 @@ On Saturday, use `zaplanuj tydzień` to create the next Monday-Friday plan under
 <workspace>/tasks/weekly-plans/YYYY/YYYY-Www.md
 ```
 
-The weekly plan records four configurable daily blocks, one WIG, capacity, estimates, Definition of Done, deadlines, 6D buckets, mappings, and stable source IDs. Sunday is excluded and V1 has no scheduler. A ready plan may create or revise linked TaskNotes with the same owner approval; the WIG itself never creates a separate TaskNote. Use `.systems/ai/core/weekly-planning.md` and run `.systems/scripts/check-weekly-planning` before a write.
+The weekly plan records four configurable daily blocks, one WIG, capacity, estimates, Definition of Done, deadlines, 6D buckets, mappings, and stable source IDs. Sunday is excluded and V1 has no scheduler. A ready plan may create or revise linked TaskNotes with the same owner approval; the WIG itself never creates a separate TaskNote. After a successful write or revision, AI System re-reads the saved plan and returns a chat-only Monday-Friday summary with unavailable days, capacity, buffers, deferred scope, and TaskNote status. Use `.systems/ai/core/weekly-planning.md` and run `.systems/scripts/check-weekly-planning` before a write.
 
 ## TaskForge Task Management
 

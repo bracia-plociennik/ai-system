@@ -114,6 +114,47 @@ Use `personal-ops/check-ins/import-profiles/manual-daily-check-in-v3.md` for new
 
 Owner-normalized values take precedence over raw wording and OCR. `brak`, `nie podano`, and `nie dotyczy` are missing data, not completion. A material unresolved conflict stops durable capture.
 
+## Post-Write Daily Summary
+
+After a successful create or update, re-read the saved canonical daily Markdown and return a read-only `Plan na dziś` projection in the response. Follow the ordering in `.systems/ai/core/response-contract.md`.
+
+Include only source-backed current-day values that exist in the saved artifact:
+
+- session date;
+- WIG, Definition of Done, and deadline;
+- professional plan items ordered by their explicit deadline or linked weekly allocation, then by source order when no time is available;
+- training, NSDR, intermittent fasting, calorie limit, and budget when supplied;
+- close-of-day habits, overload or plan-readiness warnings, and deferred professional scope;
+- linked weekly time blocks only when the daily item has an explicit `source_week_id` and `source_week_item_id`.
+
+The daily artifact is authoritative when it conflicts with its linked weekly plan. State the conflict in the summary and use the daily value. Never use fuzzy title matching to import weekly time blocks.
+
+Do not show prior-day closure, Raw Check-In, OCR, attachment paths or content, private historical measurements, lessons, or quotations. Omit missing fields instead of filling them from conversation context.
+
+Reference response shape:
+
+```text
+Zapisano:
+- check-in: <path>
+- TaskNotes: <paths|brak>
+
+Plan na dziś (read-only):
+- Data: <date>
+- WIG: <title>
+- DoD: <definition>
+- Deadline: <time>
+- <time|kolejność>: <professional item>
+- Trening / NSDR / IF / kalorie / budżet: <only supplied values>
+- Wieczorem: <close habits>
+- Odroczone: <deferred scope>
+- Ostrzeżenia: <conflicts or overload>
+
+Walidacja targeted:
+- <check>: przeszła|nie przeszła
+```
+
+This summary does not execute tasks, authorize deploys, or send external communication.
+
 ## Validation
 
 For routine native V3 check-in writes, use targeted validation by default:

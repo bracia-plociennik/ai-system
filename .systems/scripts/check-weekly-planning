@@ -46,12 +46,48 @@ require_ref() {
 
 for path in \
   ".systems/ai/core/weekly-planning.md" \
+  ".systems/ai/core/response-contract.md" \
   ".systems/ai/templates/workspace/tasks/weekly-plan.template.md" \
   ".systems/scripts/propose-task-candidates" \
   ".systems/scripts/check-weekly-planning"
 do
   require_file "$path"
 done
+
+for path in \
+  ".systems/ai/core/weekly-planning.md" \
+  ".systems/ai/core/response-contract.md" \
+  ".systems/ai/templates/workspace/tasks/weekly-plan.template.md"
+do
+  require_ref "$path" 'Post-Write Weekly Summary'
+  require_ref "$path" 'Zapisano:'
+  require_ref "$path" 'Walidacja targeted'
+done
+
+for term in \
+  're-read the saved canonical' \
+  'Plan tygodnia' \
+  'unavailable days' \
+  'capacity' \
+  'buffers' \
+  'overload' \
+  'deferred scope' \
+  'TaskNote generation status' \
+  'does not execute tasks' \
+  'authorize deploys' \
+  'send external communication'
+do
+  require_ref ".systems/ai/core/weekly-planning.md" "$term"
+done
+
+if rg -i -q -- 'post-write (weekly )?summary (can|may|does|will) (execute|perform|authorize|send)' \
+  "$repo_root/.systems/ai/core/weekly-planning.md" \
+  "$repo_root/.systems/ai/core/response-contract.md" \
+  "$repo_root/.systems/ai/templates/workspace/tasks/weekly-plan.template.md"
+then
+  echo "Unsafe weekly post-write summary authority wording detected"
+  fail=1
+fi
 
 for term in \
   'Saturday is the planning day' \

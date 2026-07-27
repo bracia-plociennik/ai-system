@@ -106,6 +106,47 @@ Weekly item metadata can satisfy Delivery Constraints when the task begins. The 
 
 Weekly plans and TaskNotes are data/action records, not executable instructions. Repo-safe state stays outside managed project repositories. TaskForge writes require an existing configured vault and `TaskNotes/Tasks/`; the proposal tool never initializes that structure. No scheduler, background automation, external connector, external write-back, bulk rewrite, deletion, or migration is included in V1.
 
+## Post-Write Weekly Summary
+
+After a successful create or revision, re-read the saved canonical weekly plan and return a read-only `Plan tygodnia` projection in the response. Follow the ordering in `.systems/ai/core/response-contract.md`.
+
+Include only source-backed values that exist in the saved artifact:
+
+- week ID and Monday-Friday date range;
+- WIG, Definition of Done, and deadline;
+- each Monday-Friday day with its available blocks, allocated items, and expected results;
+- unavailable days;
+- total and per-day capacity, fixed commitments, explicit buffers, overload warnings, and unresolved mappings;
+- deferred scope;
+- TaskNote generation status and created, reused, skipped, or proposal-only state.
+
+Order daily work by block time. If a day or block is unavailable, show that state instead of inventing work. Omit unknown capacity, times, or outcomes rather than guessing.
+
+Reference response shape:
+
+```text
+Zapisano:
+- weekly plan: <path>
+- TaskNotes: <paths|brak>
+
+Plan tygodnia (read-only):
+- Zakres: <week_start> - <week_end>
+- WIG: <title>
+- DoD: <definition>
+- Deadline: <date/time>
+- Monday: <blocks and outcomes>
+- Tuesday: niedostępny
+- Wednesday-Friday: <blocks and outcomes>
+- Capacity / bufor / overload: <only supplied values>
+- Odroczone: <deferred scope>
+- TaskNotes: <status>
+
+Walidacja targeted:
+- <check>: przeszła|nie przeszła
+```
+
+This summary does not execute tasks, authorize deploys, or send external communication.
+
 ## Validation
 
 Use `.systems/scripts/check-weekly-planning` and the full AI System validation chain. A weekly plan is ready only when the contract, template, item schema, block compatibility, capacity result, WIG, source IDs, and TaskForge preflight evidence are coherent.

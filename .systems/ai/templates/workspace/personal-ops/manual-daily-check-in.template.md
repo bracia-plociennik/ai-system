@@ -52,3 +52,24 @@ The lazy-sync threshold is seven new reports. Normal sync requires exact owner a
 ## Privacy
 
 Reports and detailed indexes are `private-sensitive`. `detailed-private` keeps normalized private values local; `redacted` removes private property values from generated CSV/JSONL/metrics. Raw Check-In and full OCR are never indexed. `check-ins-v3.trends.md` is always sanitized and is the only V3 index Dreaming Mode may read.
+
+## Post-Write Daily Summary
+
+After a successful owner-approved write or update, re-read the saved canonical check-in and answer in this order:
+
+```text
+Zapisano:
+- check-in: <path>
+- TaskNotes: <paths|brak>
+
+Plan na dziś (read-only):
+- Data, WIG, DoD, deadline
+- Professional plan items in chronological order
+- Training, NSDR, IF, calories, and budget when supplied
+- Close habits, warnings, conflicts, and deferred scope when supplied
+
+Walidacja targeted:
+- <actual check>: przeszła|nie przeszła
+```
+
+An explicitly linked weekly plan may supply block times. The daily artifact wins on conflict, and the conflict must be stated. Do not include prior-day closure, Raw Check-In, OCR, attachments, lessons, or quotations. This summary does not execute tasks, authorize deploys, or send external communication.

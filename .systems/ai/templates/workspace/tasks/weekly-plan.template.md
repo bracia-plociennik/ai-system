@@ -64,3 +64,24 @@ Warnings, unresolved estimates, invalid dates, ambiguous client/project mappings
 
 Proposal/write status, source IDs, created paths, reused parents, subtasks, skipped writes, and revision drift.
 ```
+
+## Post-Write Weekly Summary
+
+After a successful owner-approved write or revision, re-read the saved canonical weekly plan and answer in this order:
+
+```text
+Zapisano:
+- weekly plan: <path>
+- TaskNotes: <paths|brak>
+
+Plan tygodnia (read-only):
+- Date range, WIG, DoD, and deadline
+- Monday-Friday blocks and expected results
+- Unavailable days, capacity, buffers, overload, and deferred scope
+- TaskNote generation status
+
+Walidacja targeted:
+- <actual check>: przeszła|nie przeszła
+```
+
+Omit unknown values instead of guessing. This summary does not execute tasks, authorize deploys, or send external communication.

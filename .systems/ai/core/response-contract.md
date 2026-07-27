@@ -32,6 +32,29 @@ Substantive responses include:
 
 Do not place the footer inside strict machine-readable output when the owner explicitly requested JSON-only, patch-only, or exact-template output. Put it in the nearest surrounding human-facing response.
 
+## Post-Write Operational Summaries
+
+After a successful owner-approved create or update of a canonical daily check-in or weekly plan, the user-facing response must use this order:
+
+1. `Zapisano:` with the exact paths of the artifacts that were actually written.
+2. The route-specific read-only plan summary: `Post-Write Daily Summary` or `Post-Write Weekly Summary`.
+3. The actual targeted validation result.
+4. The applicable Execution Trace, contract-compliance blocks, and `Co dalej?`.
+
+Re-read the saved canonical artifact before producing the summary. Do not build it from conversation memory, a proposed plan, or an earlier draft. Omit unknown values instead of guessing.
+
+A post-write summary is chat-only. It does not create another file, execute tasks, authorize deploys, send external communication, or grant permission for any external action. When a displayed plan item mentions a deploy, message, publication, payment, or other external action, label it as a recorded plan rather than completed or authorized work.
+
+If the write fails, do not say `Zapisano:`. If targeted validation fails, say `Walidacja targeted nie przeszła` and list the failed check; never report that validation passed.
+
+### Post-Write Daily Summary
+
+Use the daily route rules in `.systems/ai/core/personal-ops.md`. The summary must exclude prior-day closure, Raw Check-In, OCR, and attachment content.
+
+### Post-Write Weekly Summary
+
+Use the weekly route rules in `.systems/ai/core/weekly-planning.md`. The summary must expose unavailable days, capacity limits, deferred scope, and TaskNote generation status when present.
+
 ## Work Closure Gate
 
 When a substantive response closes a unit of work, performs a handoff, reports an accepted change, or prepares commit-ready or push-ready product-development work, apply `.systems/ai/core/contract-compliance.md` before the `Co dalej?` footer.

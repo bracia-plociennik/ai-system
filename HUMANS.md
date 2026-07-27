@@ -264,6 +264,8 @@ The threshold counts newly added daily files. It does not detect edits to older 
 
 The Notion check-in importer is retired. Do not use it for new or manual-only edits; use the V3 manual route and lazy V3 sync from canonical Markdown instead.
 
+Po udanym zapisie lub aktualizacji check-inu odpowiedź zawiera `Zapisano:`, read-only `Plan na dziś` odczytany ponownie z zapisanego artefaktu, rzeczywisty wynik targeted validation, a następnie standardowy trace i `Co dalej?`. Podsumowanie nie pokazuje closure poprzedniego dnia, Raw Check-In, OCR ani attachmentów i nie wykonuje zapisanych działań.
+
 ## TaskForge Task Management
 
 Use this for TaskForge/TaskNotes as a local Markdown task manager.
@@ -316,6 +318,8 @@ Używaj:
 ```
 
 TaskNote write wymaga istniejącego, skonfigurowanego vaulta oraz jawnego owner approval. Weekly plan nie tworzy schedulera ani automatycznych przypomnień.
+
+Po udanym zapisie lub rewizji weekly planu odpowiedź zawiera `Zapisano:`, read-only `Plan tygodnia` odczytany ponownie z zapisanego planu, rzeczywisty wynik targeted validation, a następnie standardowy trace i `Co dalej?`. Podsumowanie pokazuje WIG, bloki poniedziałek-piątek, dni niedostępne, capacity, bufory, deferred scope i status TaskNotes, ale nie wykonuje żadnego planu.
 
 Existing TaskForge-created files with `taskSourceType: taskNotes`, `projects`, `contexts`, `reminders`, `blockedBy`, `duration`, `scheduledEnd`, `completedDate`, or missing `title` are compatibility/migration candidates. Do not rewrite them silently.
 

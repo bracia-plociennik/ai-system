@@ -32,6 +32,7 @@ require_ref() {
 
 required_files=(
   ".systems/ai/core/personal-ops.md"
+  ".systems/ai/core/response-contract.md"
   ".systems/ai/templates/workspace/personal-ops/README.md"
   ".systems/ai/templates/workspace/personal-ops/personal-ops-readme.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-ins-readme.template.md"
@@ -58,6 +59,39 @@ for path in \
 do
   require_executable "$path"
 done
+
+for file in \
+  ".systems/ai/core/personal-ops.md" \
+  ".systems/ai/core/response-contract.md" \
+  ".systems/ai/templates/workspace/personal-ops/manual-daily-check-in.template.md"
+do
+  require_ref "$file" 'Post-Write Daily Summary'
+  require_ref "$file" 'Zapisano:'
+  require_ref "$file" 'Walidacja targeted'
+done
+
+for term in \
+  're-read the saved canonical' \
+  'Plan na dziś' \
+  'prior-day closure' \
+  'daily artifact is authoritative' \
+  'source_week_id' \
+  'source_week_item_id' \
+  'does not execute tasks' \
+  'authorize deploys' \
+  'send external communication'
+do
+  require_ref ".systems/ai/core/personal-ops.md" "$term"
+done
+
+if rg -i -q -- 'post-write (daily )?summary (can|may|does|will) (execute|perform|authorize|send)' \
+  "$repo_root/.systems/ai/core/personal-ops.md" \
+  "$repo_root/.systems/ai/core/response-contract.md" \
+  "$repo_root/.systems/ai/templates/workspace/personal-ops/manual-daily-check-in.template.md"
+then
+  echo "Unsafe Personal Ops post-write summary authority wording detected"
+  fail=1
+fi
 
 if [[ -e "$repo_root/.systems/ai/templates/workspace/personal-ops/check-ins-index.template.md" ]]; then
   echo "Retired V2 index template remains active"
