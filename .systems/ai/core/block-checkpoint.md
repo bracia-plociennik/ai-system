@@ -16,7 +16,18 @@ The exact manual triggers are:
 
 They route to this contract only when no higher-priority formal route is present. Distillation, project checkpoint, final review, final check, commit readiness, contract compliance, and explicit End-of-Task Capture keep their precedence.
 
-The trigger is recognized owner approval only for writing the new block checkpoint and its `latest.md` router. It does not authorize TaskNotes, memory, distillation, project changes, status changes, commits, pushes, external effects, or cleanup.
+The following route-specific phrases are also explicit owner write intent when they clearly refer to this block-checkpoint route:
+
+- `przyjmij ten checkpoint blok`
+- `przyjmij checkpoint bloku`
+- `przyjmij checkpoint przed zmianą bloku`
+- `zaakceptuj ten checkpoint bloku`
+- `zapisz ten checkpoint bloku`
+- `zapisz checkpoint bloku`
+- `accept this block checkpoint`
+- `write this block checkpoint`
+
+These aliases do not require an additional `owner-approved` prefix. They authorize only the new append-only block checkpoint and its `latest.md` router after the required fields are complete. They do not authorize TaskNotes, memory, distillation, project changes, status changes, commits, pushes, external effects, or cleanup. Phrases such as `przygotuj`, `zaplanuj`, `pokaż`, `przejrzyj`, or `zdiagnozuj checkpoint` remain read-only unless a separate approved write route is present.
 
 ## Storage And Identity
 

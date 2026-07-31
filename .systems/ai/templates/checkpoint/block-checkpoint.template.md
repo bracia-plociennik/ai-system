@@ -1,5 +1,7 @@
 # Block-Boundary Checkpoint
 
+Write intent is explicit for this narrow route when the owner uses `przyjmij ten checkpoint blok`, `przyjmij checkpoint bloku`, `zaakceptuj ten checkpoint bloku`, `zapisz checkpoint bloku`, `accept this block checkpoint`, or `write this block checkpoint`. These phrases authorize only this append-only checkpoint and its `latest.md` pointer; preparation and review wording remains read-only.
+
 ```yaml
 schema_version: 1
 checkpoint_kind: block-boundary

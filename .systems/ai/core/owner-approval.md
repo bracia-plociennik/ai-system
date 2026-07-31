@@ -62,3 +62,7 @@ Plan acceptance must not bypass privacy checks, validation, evidence, risk class
 Destructive, production, credential, permission, billing, migration, and external actions require explicit scope in the accepted plan and must also satisfy every stricter target-specific contract.
 
 References elsewhere to `exact owner-approved` or `exact owner approval` use this recognized approval contract; they do not require the literal token when valid strict plan acceptance supplies the same explicit scope.
+
+## Route-Specific Approval Aliases
+
+Some narrow routes may define explicit approval aliases when their contract names the exact write scope. The block-checkpoint route accepts only its listed checkpoint phrases, including `przyjmij ten checkpoint blok`, `przyjmij checkpoint bloku`, `zaakceptuj ten checkpoint bloku`, `zapisz checkpoint bloku`, `accept this block checkpoint`, and `write this block checkpoint`. These aliases authorize only the append-only block checkpoint and its route-local pointer; they do not generalize to other writes or external effects. Generic preparation, review, display, or diagnosis wording remains read-only.

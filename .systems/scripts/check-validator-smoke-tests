@@ -71,6 +71,21 @@ block_checkpoint_template="$copy_repo/.systems/ai/templates/checkpoint/block-che
 
 run_must_pass "block-checkpoint-baseline" "$block_checkpoint_validator"
 
+for synonym in \
+  'przyjmij ten checkpoint blok' \
+  'przyjmij checkpoint bloku' \
+  'zaakceptuj ten checkpoint bloku' \
+  'zapisz checkpoint bloku' \
+  'accept this block checkpoint' \
+  'write this block checkpoint'
+do
+  run_must_pass "block-checkpoint-write-intent-${synonym//[^a-zA-Z0-9]/-}" \
+    grep -F -q -- "$synonym" "$block_checkpoint_core"
+done
+
+run_must_pass "block-checkpoint-read-only-preparation-wording" \
+  grep -F -q -- 'remain read-only unless a separate approved write route is present' "$block_checkpoint_core"
+
 mv "$block_checkpoint_core" "$block_checkpoint_core.bak"
 run_must_fail "block-checkpoint-missing-contract" "$copy_repo/.systems/scripts/check-required-artifacts"
 mv "$block_checkpoint_core.bak" "$block_checkpoint_core"

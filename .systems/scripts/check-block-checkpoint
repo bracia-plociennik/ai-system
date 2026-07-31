@@ -67,6 +67,12 @@ for term in \
   'checkpoint bloku' \
   'koniec bloku' \
   'checkpoint przed zmianą bloku' \
+  'przyjmij ten checkpoint blok' \
+  'przyjmij checkpoint bloku' \
+  'zaakceptuj ten checkpoint bloku' \
+  'zapisz checkpoint bloku' \
+  'accept this block checkpoint' \
+  'write this block checkpoint' \
   'checkpoint_kind: block-boundary' \
   'schema_version: 1' \
   'last_completed_step' \
