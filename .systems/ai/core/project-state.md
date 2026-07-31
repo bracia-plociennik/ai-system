@@ -16,6 +16,8 @@ AI_SYSTEM_WORKSPACE_HOME/project-state/<project-slug>/
   memory.md
   memory/
   checkpoints/
+    blocks/
+      latest.md
   distillations/
   capture-state/
   decisions/
@@ -102,3 +104,7 @@ Dreaming Mode may recommend project-state, status/evidence, decision, checkpoint
 Those recommendations are advisory only. Do not mutate `project-state/` from Dreaming Mode; use the normal project-state route with exact owner-approved scope.
 
 Project implementation Distillation State belongs in `project-state/<project>/capture-state/`, not in the managed project repository. Use `.systems/ai/core/distillation-state.md`; the state record stores paths and disposition, not raw project content.
+
+## Block Checkpoints
+
+Block-boundary checkpoints use `checkpoints/blocks/` within the nearest project, client, or owned-asset project-state namespace. Use `.systems/ai/core/block-checkpoint.md` for their contract. They are append-only resume records; `latest.md` is only a pointer to the newest record. The fallback workspace namespace is `<workspace>/checkpoints/blocks/`, whose neutral routers may be created by `init-workspace` and `update-workspace`. These records do not replace project status, memory, distillation state, or TaskNotes.

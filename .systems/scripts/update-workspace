@@ -323,6 +323,8 @@ backfill_workspace() {
   ensure_dir "$workspace_home" "$workspace_home/personal-ops/check-ins/import-profiles"
   ensure_dir "$workspace_home" "$workspace_home/personal-ops/indexes"
   ensure_dir "$workspace_home" "$workspace_home/dreams/runs"
+  ensure_dir "$workspace_home" "$workspace_home/checkpoints"
+  ensure_dir "$workspace_home" "$workspace_home/checkpoints/blocks"
   ensure_dir "$workspace_home" "$workspace_home/tasks"
   ensure_dir "$workspace_home" "$workspace_home/tasks/weekly-plans"
   # weekly-planning backfill is neutral and never overwrites a plan or TaskNote.
@@ -378,6 +380,8 @@ backfill_workspace() {
   copy_template "$workspace_home" "$templates/project-state/project-state.template.md" "$workspace_home/project-state/project-state.md"
   copy_template "$workspace_home" "$templates/capture-state/capture-state-readme.template.md" "$workspace_home/capture-state/README.md"
   copy_template "$workspace_home" "$templates/capture-state/capture-state.template.md" "$workspace_home/capture-state/capture-state.md"
+  copy_template "$workspace_home" "$templates/checkpoints/README.md" "$workspace_home/checkpoints/README.md"
+  copy_template "$workspace_home" "$templates/checkpoints/blocks/README.md" "$workspace_home/checkpoints/blocks/README.md"
   copy_template "$workspace_home" "$templates/micro-projects/README.md" "$workspace_home/micro-projects/README.md"
   copy_template "$workspace_home" "$templates/humans/README.md" "$workspace_home/humans/README.md"
   copy_template "$workspace_home" "$templates/links/links-readme.template.md" "$workspace_home/links/README.md"

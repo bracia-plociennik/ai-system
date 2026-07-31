@@ -65,6 +65,74 @@ validator="$copy_repo/.systems/scripts/check-prompt-composition"
 run_must_pass "prompt-composition-baseline" "$validator"
 run_must_pass "weekly-planning-baseline" "$copy_repo/.systems/scripts/check-weekly-planning"
 
+block_checkpoint_validator="$copy_repo/.systems/scripts/check-block-checkpoint"
+block_checkpoint_core="$copy_repo/.systems/ai/core/block-checkpoint.md"
+block_checkpoint_template="$copy_repo/.systems/ai/templates/checkpoint/block-checkpoint.template.md"
+
+run_must_pass "block-checkpoint-baseline" "$block_checkpoint_validator"
+
+mv "$block_checkpoint_core" "$block_checkpoint_core.bak"
+run_must_fail "block-checkpoint-missing-contract" "$copy_repo/.systems/scripts/check-required-artifacts"
+mv "$block_checkpoint_core.bak" "$block_checkpoint_core"
+
+mv "$block_checkpoint_template" "$block_checkpoint_template.bak"
+run_must_fail "block-checkpoint-missing-template" "$copy_repo/.systems/scripts/check-required-artifacts"
+mv "$block_checkpoint_template.bak" "$block_checkpoint_template"
+
+cp "$block_checkpoint_core" "$block_checkpoint_core.bak"
+printf '\nscope_fate: invalid\n' >> "$block_checkpoint_core"
+run_must_fail "block-checkpoint-unsafe-fate-contract" "$block_checkpoint_validator"
+mv "$block_checkpoint_core.bak" "$block_checkpoint_core"
+
+cp "$block_checkpoint_core" "$block_checkpoint_core.bak"
+printf '\nBlock checkpoint may write memory automatically.\n' >> "$block_checkpoint_core"
+run_must_fail "block-checkpoint-no-automatic-promotion" "$block_checkpoint_validator"
+mv "$block_checkpoint_core.bak" "$block_checkpoint_core"
+
+block_checkpoint_workspace="$tmp/block-checkpoint-workspace"
+mkdir -p "$block_checkpoint_workspace/checkpoints/blocks"
+cat > "$block_checkpoint_workspace/checkpoints/blocks/2026-07-31-1500-build-future.md" <<'MD'
+---
+schema_version: 1
+checkpoint_kind: block-boundary
+checkpoint_id: 2026-07-31-1500-build-future
+created_at: 2026-07-31 15:00
+timezone: Europe/Warsaw
+owner_scope: workspace
+workspace: smoke
+work_id: smoke-work
+block_id: build-future
+block_label: Buduję przyszłość
+block_date: 2026-07-31
+last_completed_step: completed contract review
+next_step: run targeted QA
+blocker: none
+scope_fate: continue
+delivered_scope: contract review
+unfinished_scope: targeted QA
+changed_artifacts: []
+evidence_paths: []
+resume_context: smoke fixture
+resume_instruction: run targeted QA
+---
+MD
+run_must_pass "block-checkpoint-valid-workspace" "$block_checkpoint_validator" --workspace "$block_checkpoint_workspace"
+
+cat > "$block_checkpoint_workspace/checkpoints/blocks/latest.md" <<'MD'
+latest_checkpoint_id: 2026-07-31-1500-build-future
+latest_checkpoint_path: 2026-07-31-1500-build-future.md
+updated_at: 2026-07-31 15:00
+MD
+run_must_pass "block-checkpoint-valid-latest-router" "$block_checkpoint_validator" --workspace "$block_checkpoint_workspace"
+
+sed 's/latest_checkpoint_path: .*/latest_checkpoint_path: ..\/outside.md/' "$block_checkpoint_workspace/checkpoints/blocks/latest.md" > "$tmp/invalid-block-router.md"
+mv "$tmp/invalid-block-router.md" "$block_checkpoint_workspace/checkpoints/blocks/latest.md"
+run_must_fail "block-checkpoint-invalid-latest-router" "$block_checkpoint_validator" --workspace "$block_checkpoint_workspace"
+
+sed 's/^scope_fate: continue$/scope_fate: invalid/' "$block_checkpoint_workspace/checkpoints/blocks/2026-07-31-1500-build-future.md" > "$tmp/invalid-block-checkpoint.md"
+mv "$tmp/invalid-block-checkpoint.md" "$block_checkpoint_workspace/checkpoints/blocks/2026-07-31-1500-build-future.md"
+run_must_fail "block-checkpoint-invalid-workspace-fate" "$block_checkpoint_validator" --workspace "$block_checkpoint_workspace"
+
 weekly_summary_contract="$copy_repo/.systems/ai/core/weekly-planning.md"
 weekly_summary_contract_backup="$tmp/weekly-planning-summary-contract.md"
 cp "$weekly_summary_contract" "$weekly_summary_contract_backup"
@@ -2864,6 +2932,8 @@ test -f "$init_target/tasks/weekly-plan.template.md" || { echo "init-workspace d
 test -f "$init_target/tasks/weekly-plans/README.md" || { echo "init-workspace did not create weekly plans README"; exit 1; }
 test -f "$init_target/dreams/README.md" || { echo "init-workspace did not create dreams README"; exit 1; }
 test -d "$init_target/dreams/runs" || { echo "init-workspace did not create dreams/runs"; exit 1; }
+test -f "$init_target/checkpoints/README.md" || { echo "init-workspace did not create checkpoints README"; exit 1; }
+test -f "$init_target/checkpoints/blocks/README.md" || { echo "init-workspace did not create block checkpoints README"; exit 1; }
 
 dreams_update_workspace="$tmp/dreaming-update-workspace"
 mkdir -p "$dreams_update_workspace/dreams/runs/2026-06-19-existing"
@@ -2881,6 +2951,8 @@ test -f "$task_update_workspace/tasks/tasknote.template.md" || { echo "update-wo
 test -f "$task_update_workspace/tasks/taskforge-vault-setup.template.md" || { echo "update-workspace did not create taskforge setup template"; exit 1; }
 test -f "$task_update_workspace/tasks/weekly-plan.template.md" || { echo "update-workspace did not create weekly plan template"; exit 1; }
 test -f "$task_update_workspace/tasks/weekly-plans/README.md" || { echo "update-workspace did not create weekly plans README"; exit 1; }
+test -f "$task_update_workspace/checkpoints/README.md" || { echo "update-workspace did not create checkpoints README"; exit 1; }
+test -f "$task_update_workspace/checkpoints/blocks/README.md" || { echo "update-workspace did not create block checkpoints README"; exit 1; }
 
 delivery_validator="$copy_repo/.systems/scripts/check-delivery-constraints"
 distillation_state_validator="$copy_repo/.systems/scripts/check-distillation-state"

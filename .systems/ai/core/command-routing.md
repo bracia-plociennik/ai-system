@@ -26,6 +26,8 @@ If more than one workspace plausibly matches, stop and ask the owner to choose t
 
 For project status, memory, checkpoints, distillations, and decisions, use `.systems/ai/core/project-state.md`. `projects/` may contain git repositories or source materials; `project-state/` is the default runtime state namespace.
 
+Block-boundary checkpoint requests route through `.systems/ai/core/block-checkpoint.md`. Exact `checkpoint bloku`, `koniec bloku`, and `checkpoint przed zmianą bloku` write only a new append-only block checkpoint and its `latest.md` router in the nearest owner namespace. The route captures the last completed step, next step, blocker, and `scope_fate`; it does not write memory, distillation, TaskNotes, project status, commits, or external effects. After a successful write, re-read the checkpoint and router and return the required read-only block summary.
+
 Prompt composition requests route through `.systems/ai/core/prompt-composition.md`. Prompting is advisory context read after authoritative status, memory, decision, checkpoint, and source artifacts. It does not grant write permission or change approval, privacy, evidence, validation, stop-condition, or workspace-selection rules.
 
 External source registry requests route through `.systems/ai/core/external-source-registry.md`. Select a workspace first. Source records live as `links/<source-slug>.md` under the selected workspace or nearest owner namespace. They describe provider, privacy, source-of-truth, allowed operation, freshness, routing, and GitHub mirror policy. They do not authorize imports, automatic sync, write-back, deletion, sharing, permission changes, emailing, memory promotion, or file movement.
@@ -88,6 +90,7 @@ Do not route ordinary workspace, client, project, owned-asset, dump, memory, pro
 | `utwórz workspace firmy`, `utwórz workspace marki`, `utwórz primary workspace` | Primary-entity workspace creation | Use `init-workspace --workspace-profile primary-entity`; the company, brand, or owner-controlled entity lives directly at the workspace root. |
 | `utwórz projekt klienta` | Client project state creation | Select workspace first; keep repo/materials in the project source path and create AI System state under nearest `project-state/` only after approval. |
 | `zapisz status projektu`, `zapisz checkpoint projektu`, `project state` | Project state capture | Use `.systems/ai/core/project-state.md`; if the project path is a git worktree, ask whether to use `project-state/` or colocated local-only state. |
+| `checkpoint bloku`, `koniec bloku`, `checkpoint przed zmianą bloku` | Block-boundary checkpoint | Use `.systems/ai/core/block-checkpoint.md`; write append-only checkpoint plus `latest.md` only, then return a re-read read-only summary. |
 | `zapisz memory` | Memory capture | Select workspace first; store in the appropriate workspace, client, owned-asset, or project memory location. |
 | `zrób destylację` | Distillation workflow | Compress raw memory and identify stale facts, decisions, risks, and checkpoint needs. |
 | `jaki deadline`, `ile czasu na task`, `do kiedy`, `bez deadline'u`, `no timebox` | Delivery Constraints | Use `.systems/ai/core/delivery-constraints.md`; reuse existing constraints, ask only for missing material decisions, and preserve the quality floor. |

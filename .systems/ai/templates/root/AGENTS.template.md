@@ -21,6 +21,8 @@ System-owned files are upstream-owned in management checkouts. This includes `.s
 
 If the owner asks to change system-owned files in a management checkout, STOP before local implementation. The safe local action is read-only analysis, task intake, and a recommendation. Route the actual product change to the upstream `ai-system-dev` product project, then update this checkout with `.systems/scripts/update-from-upstream`.
 
+For `checkpoint bloku`, `koniec bloku`, or `checkpoint przed zmianą bloku`, use `.systems/ai/core/block-checkpoint.md`. Write only the append-only nearest-owner block checkpoint and `latest.md` router, then re-read both and return the required read-only summary. Do not treat this route as authorization for memory, distillation, TaskNotes, project changes, commits, pushes, or external effects.
+
 ## Source Of Truth
 
 1. Current filesystem state for factual truth.

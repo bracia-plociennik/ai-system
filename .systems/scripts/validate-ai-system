@@ -122,6 +122,7 @@ run_fast_checks() {
   run_cmd "$script_dir/check-validation-routing"
   run_cmd "$script_dir/check-model-selection-guidance"
   run_cmd "$script_dir/check-weekly-planning"
+  run_cmd "$script_dir/check-block-checkpoint"
 }
 
 run_named_check() {
@@ -153,6 +154,7 @@ run_standard_checks() {
   run_cmd "$script_dir/check-model-selection-guidance"
   run_cmd "$script_dir/check-cross-system-upgrade-handoff"
   run_cmd "$script_dir/check-weekly-planning"
+  run_cmd "$script_dir/check-block-checkpoint"
   run_cmd "$script_dir/check-end-of-task-capture"
   run_cmd "$script_dir/check-update-workspace"
   run_cmd "$script_dir/check-project-state"

@@ -46,6 +46,8 @@ required_files=(
   ".systems/ai/templates/workspace/project-state/project-state.template.md"
   ".systems/ai/templates/workspace/capture-state/capture-state-readme.template.md"
   ".systems/ai/templates/workspace/capture-state/capture-state.template.md"
+  ".systems/ai/templates/workspace/checkpoints/README.md"
+  ".systems/ai/templates/workspace/checkpoints/blocks/README.md"
   ".systems/ai/templates/workspace/external-memory/memory/README.md"
   ".systems/ai/templates/workspace/personal-ops/personal-ops-readme.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-ins-readme.template.md"
@@ -86,6 +88,7 @@ required_script_terms=(
   "links"
   "dreams"
   "weekly-planning"
+  "checkpoints"
 )
 
 for term in "${required_script_terms[@]}"; do
@@ -135,5 +138,11 @@ require_ref ".systems/scripts/check-required-artifacts" 'check-update-workspace'
 require_ref ".systems/scripts/check-validator-smoke-tests" 'update-workspace' "smoke coverage"
 require_ref ".systems/scripts/validate-ai-system" 'check-weekly-planning' "weekly planning validator chain"
 require_ref ".systems/scripts/check-required-artifacts" 'check-weekly-planning' "weekly planning required artifact"
+require_ref ".systems/scripts/init-workspace" 'checkpoints/blocks' "init-workspace creates block checkpoint router"
+require_ref ".systems/scripts/update-workspace" 'checkpoints/blocks' "update-workspace backfills block checkpoint router"
+require_ref ".systems/scripts/init-workspace" 'templates/checkpoints/README.md' "init-workspace creates checkpoint README"
+require_ref ".systems/scripts/update-workspace" 'templates/checkpoints/README.md' "update-workspace creates checkpoint README"
+require_ref ".systems/scripts/validate-ai-system" 'check-block-checkpoint' "block checkpoint validator chain"
+require_ref ".systems/scripts/check-required-artifacts" 'check-block-checkpoint' "block checkpoint required artifact"
 
 exit "$fail"

@@ -259,6 +259,8 @@ On Saturday, use `zaplanuj tydzień` to create the next Monday-Friday plan under
 
 The weekly plan records four configurable daily blocks, one WIG, capacity, estimates, Definition of Done, deadlines, 6D buckets, mappings, and stable source IDs. Sunday is excluded and V1 has no scheduler. A ready plan may create or revise linked TaskNotes with the same owner approval; the WIG itself never creates a separate TaskNote. After a successful write or revision, AI System re-reads the saved plan and returns a chat-only Monday-Friday summary with unavailable days, capacity, buffers, deferred scope, and TaskNote status. Use `.systems/ai/core/weekly-planning.md` and run `.systems/scripts/check-weekly-planning` before a write.
 
+At a work-block boundary, use `checkpoint bloku`, `koniec bloku`, or `checkpoint przed zmianą bloku`. AI System writes one append-only `block-boundary` checkpoint under the nearest owner `project-state/<scope>/checkpoints/blocks/` or the workspace fallback `checkpoints/blocks/`, updates only the `latest.md` pointer after validation, and returns a re-read read-only summary with the last completed step, next step, blocker, scope fate, unfinished scope, and resume instruction. This route does not create memory, distillation, TaskNotes, project changes, commits, pushes, or scheduler automation. See `.systems/ai/core/block-checkpoint.md`.
+
 ## TaskForge Task Management
 
 AI System can work with TaskForge/TaskNotes as a local Markdown task store.

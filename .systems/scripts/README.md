@@ -44,6 +44,8 @@ Validation scripts for AI System live here.
 
 `check-weekly-planning` validates the Saturday Monday-Friday weekly plan contract, four daily blocks, WIG/capacity rules, weekly TaskNote routing, and optional workspace plan records.
 
+`check-block-checkpoint` validates the manual append-only block-boundary checkpoint contract, required resume fields, safe scope fate, nearest-owner routing, neutral workspace routers, and the re-read read-only post-write summary requirement. Ordinary block work uses this targeted validator only; it does not run broad validation.
+
 `check-system-skills` validates active system skill contracts, context intake plans, legacy boundaries, offline resources, and generated Python runtime artifact exclusions.
 
 `map-notion-check-ins` and `sync-personal-ops-check-ins` are retired V2 commands and always end with `STOP` without writing active indexes. `migrate-personal-ops-legacy-check-ins-v3` is the single owner-approved route that creates an immutable normalized legacy snapshot, validates it through V3 sync, and then archives retired `check-ins.*` index artifacts.

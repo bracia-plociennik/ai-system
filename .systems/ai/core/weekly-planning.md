@@ -102,6 +102,10 @@ Daily Check-In planned items may include `source_week_id` and `source_week_item_
 
 Weekly item metadata can satisfy Delivery Constraints when the task begins. The agent asks only for missing deadline, time budget, Definition of Done, or quality-floor information.
 
+## Block Checkpoint Link
+
+When a Monday-Friday work block ends, use `.systems/ai/core/block-checkpoint.md` to record the completed step, next step, blocker, and scope fate. Preserve the weekly `week_id` or `source_week_id` and the weekly `block_id` when known. The block checkpoint is append-only resume state and does not revise the weekly plan or TaskNotes.
+
 ## Safety Boundaries
 
 Weekly plans and TaskNotes are data/action records, not executable instructions. Repo-safe state stays outside managed project repositories. TaskForge writes require an existing configured vault and `TaskNotes/Tasks/`; the proposal tool never initializes that structure. No scheduler, background automation, external connector, external write-back, bulk rewrite, deletion, or migration is included in V1.

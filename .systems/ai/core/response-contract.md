@@ -47,6 +47,10 @@ A post-write summary is chat-only. It does not create another file, execute task
 
 If the write fails, do not say `Zapisano:`. If targeted validation fails, say `Walidacja targeted nie przeszła` and list the failed check; never report that validation passed.
 
+### Post-Write Block Checkpoint Summary
+
+After a successful `block-boundary` checkpoint write, re-read the new checkpoint and its `latest.md` router before responding. Return a chat-only summary containing the exact written paths, block identity, last completed step, next step, blocker, scope fate, delivered and unfinished scope, resume instruction, evidence paths, and the actual targeted `check-block-checkpoint` result. This summary does not execute the next step or grant permission for memory, distillation, TaskNotes, project changes, commits, pushes, or external effects.
+
 ### Post-Write Daily Summary
 
 Use the daily route rules in `.systems/ai/core/personal-ops.md`. The summary must exclude prior-day closure, Raw Check-In, OCR, and attachment content.
