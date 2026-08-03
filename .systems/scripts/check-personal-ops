@@ -32,6 +32,7 @@ require_ref() {
 
 required_files=(
   ".systems/ai/core/personal-ops.md"
+  ".systems/ai/core/personal-ops-budgets.md"
   ".systems/ai/core/response-contract.md"
   ".systems/ai/templates/workspace/personal-ops/README.md"
   ".systems/ai/templates/workspace/personal-ops/personal-ops-readme.template.md"
@@ -44,6 +45,7 @@ required_files=(
   ".systems/scripts/check-personal-ops"
   ".systems/scripts/personal_ops_properties_v3.py"
   ".systems/scripts/sync-personal-ops-check-ins-v3"
+  ".systems/scripts/calculate-personal-ops-budgets"
   ".systems/scripts/migrate-personal-ops-legacy-check-ins-v3"
   ".systems/scripts/sync-personal-ops-check-ins"
   ".systems/scripts/map-notion-check-ins"
@@ -53,6 +55,7 @@ for path in "${required_files[@]}"; do require_file "$path"; done
 for path in \
   ".systems/scripts/check-personal-ops" \
   ".systems/scripts/sync-personal-ops-check-ins-v3" \
+  ".systems/scripts/calculate-personal-ops-budgets" \
   ".systems/scripts/migrate-personal-ops-legacy-check-ins-v3" \
   ".systems/scripts/sync-personal-ops-check-ins" \
   ".systems/scripts/map-notion-check-ins"
@@ -69,6 +72,59 @@ do
   require_ref "$file" 'Zapisano:'
   require_ref "$file" 'Walidacja targeted'
 done
+
+for file in \
+  ".systems/ai/core/personal-ops.md" \
+  ".systems/ai/core/response-contract.md" \
+  ".systems/ai/core/command-routing.md" \
+  ".systems/ai/templates/workspace/personal-ops/manual-daily-check-in.template.md" \
+  ".systems/ai/templates/workspace/personal-ops/check-in-settings.local.template.md"
+do
+  require_ref "$file" 'post-write'
+done
+
+for term in \
+  'monthly_base_budget' \
+  'monthly_buffer' \
+  'daily_spending_pace' \
+  'weekly_calorie_budget' \
+  'training_day_standard' \
+  'rest_day_standard' \
+  'minimum_daily_calories'
+do
+  require_ref ".systems/ai/core/personal-ops-budgets.md" "$term"
+  require_ref ".systems/ai/templates/workspace/personal-ops/check-in-settings.local.template.md" "$term"
+done
+
+for term in \
+  'official' \
+  'mechanical' \
+  'common-sense' \
+  'does not provide medical' \
+  'private-sensitive' \
+  'stale' \
+  'Daily Summary Food Schedule' \
+  'food_blocks' \
+  'food-block' \
+  'configured' \
+  'empty' \
+  'unavailable' \
+  'if_conflicts_by_variant' \
+  'IF window'
+do
+  require_ref ".systems/ai/core/personal-ops-budgets.md" "$term"
+done
+
+if rg -i -q -- 'manual check-in(s)? (must not|do not) regenerate indexes automatically|lazy-sync threshold.*normal|sync is not required yet' \
+  "$repo_root/.systems/ai/core/personal-ops.md" \
+  "$repo_root/.systems/ai/core/command-routing.md" \
+  "$repo_root/.systems/ai/templates/workspace/personal-ops/manual-daily-check-in.template.md" \
+  "$repo_root/README.md" \
+  "$repo_root/HUMANS.md"
+then
+  echo "Stale lazy-sync default wording detected after budget module upgrade"
+  fail=1
+fi
 
 for term in \
   're-read the saved canonical' \

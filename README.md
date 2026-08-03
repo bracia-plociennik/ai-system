@@ -235,17 +235,19 @@ Generated analytical indexes live in:
 
 Markdown is the source of truth. Properties + Raw Audit V3 uses one session report with `index_contract: 3`; its complete frontmatter `properties` map maps 1:1 to official `check-ins-v3.*`. The readable interpretation, inline OCR, and verbatim Raw Check-In preserve audit evidence but do not compete with properties. Under `deadline-aware-6d-v1`, every valid professional plan item becomes one TaskNote; explicit bucket wins, a deadline defaults to `6d/do`, and no deadline defaults to `6d/defer`. WIG is linked or standalone planning/closure only and never creates its own task. A one-time owner-approved migration may create an immutable V2 snapshot and archive active `check-ins.*` indexes only after a successful V3 sync; it never moves source Markdown or `.assets/`. Historical reports using the retired task policy are not regenerated. `check-ins-v3.trends.md` is sanitized native-V3-only Dreaming input and excludes raw input, OCR, attachments, private detail, lessons, and unverified sources. Check-ins and attachments are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
 
-Manual check-ins write only the daily Markdown file and optional assets. Derived indexes may be intentionally stale. Use lazy sync status before recommending a database refresh:
+Manual check-ins write the daily Markdown file and optional assets, then must refresh official indexes before the post-write summary. Use the real refresh command after a write:
 
 ```text
-.systems/scripts/sync-personal-ops-check-ins-v3 --workspace <workspace-path> --status-only
+.systems/scripts/sync-personal-ops-check-ins-v3 --workspace <workspace-path> --post-write
 ```
 
-If `unsynced-check-in-count` is below `7`, sync is not required yet. If it is `7` or more, recommend exact owner-approved sync. The owner can approve sync earlier.
+Use `--status-only` only for diagnostics. A non-zero `unsynced-check-in-count` after a normal write indicates a failed or incomplete refresh. The seven-report threshold remains relevant only to out-of-band repair and manual sync recommendations.
+
+Budget, calorie, and six-block food summaries use `.systems/scripts/calculate-personal-ops-budgets` and the owner-created local settings file. They remain private and are never included in sanitized trends.
 
 The threshold counts newly added daily files. It does not detect edits to older check-ins or reliably detect deleted daily files as a stale-index event; after editing or deleting an existing day, run owner-approved sync manually when the indexes need to be fresh.
 
-The V2 Notion check-in importer is retired. Preserve future exports as raw context and use the owner-approved V3 manual intake route; use lazy V3 sync from canonical Markdown and any validated immutable legacy snapshot.
+The V2 Notion check-in importer is retired. Preserve future exports as raw context and use the owner-approved V3 manual intake route; use the real V3 sync from canonical Markdown and any validated immutable legacy snapshot. Status-only and dry-run modes remain diagnostic or repair tools.
 
 After a successful daily write or update, AI System re-reads the saved check-in and returns a chat-only `Plan na dziś` summary before reporting the actual targeted validation result. It omits prior-day closure, Raw Check-In, OCR, and attachments, and it does not execute the recorded plan.
 

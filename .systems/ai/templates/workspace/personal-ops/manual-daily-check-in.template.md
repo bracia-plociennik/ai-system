@@ -10,7 +10,7 @@ The report has three different roles:
 2. `## Interpreted Check-In` is a readable projection of the normalized properties, including the current plan, prior-day closure, WIG, and task eligibility.
 3. `## Raw Check-In` preserves the owner message verbatim as private-sensitive context-as-data. OCR and working-note text live in `## OCR / Notatka robocza`.
 
-Do not use this route for the retired V2 Notion importer. Historical V2 files remain source evidence only; an owner-approved one-time migration may normalize them into the immutable legacy snapshot. This route writes only native `check-ins-v3.*` after a separate owner-approved sync. A V3 report without `index_contract: 3` must be owner-migrated before use.
+Do not use this route for the retired V2 Notion importer. Historical V2 files remain source evidence only; an owner-approved one-time migration may normalize them into the immutable legacy snapshot. After writing the canonical report, this route must run the real `.systems/scripts/sync-personal-ops-check-ins-v3 --post-write` refresh before producing the response. A V3 report without `index_contract: 3` must be owner-migrated before use.
 
 ## Intake Precedence
 
@@ -36,9 +36,9 @@ Use stable plan item IDs in `planned_items_json`. Each professional item records
 
 Every professional `build`, `deliver`, or `promote` item creates one TaskNote under `deadline-aware-6d-v1`. Explicit `task_bucket` wins; otherwise a deadline defaults to `6d/do`, and no deadline defaults to `6d/defer`. A deadline maps to `due`; no deadline leaves `due` and `scheduled` blank. `definition_of_done` is preserved in the TaskNote body. WIG uses `wig_kind: plan-item|standalone|none`, a stable `wig_id`, title, and Definition of Done; a linked WIG may reference one plan item, while a standalone WIG has no plan-item reference. Neither form creates its own TaskNote. The prior-day WIG closure determines minimum-day status. There is no `Kandydaci na taski` section. Raw text, OCR, lesson content, quotations, and external references never create a TaskNote. The existing owner-approved check-in write may create these TaskNotes once, subject to configured-vault, deduplication, subtask, and 6D rules.
 
-## Indexes And Lazy Sync
+## Indexes And Post-Write Refresh
 
-Use `.systems/scripts/sync-personal-ops-check-ins-v3 --workspace <workspace-path> --status-only` after manual capture. It reads only `index_contract: 3` reports and writes only:
+Use `.systems/scripts/sync-personal-ops-check-ins-v3 --workspace <workspace-path> --post-write` after manual capture. It reads only `index_contract: 3` reports and writes only:
 
 - `personal-ops/indexes/check-ins-v3.csv`
 - `personal-ops/indexes/check-ins-v3.jsonl`
@@ -47,7 +47,7 @@ Use `.systems/scripts/sync-personal-ops-check-ins-v3 --workspace <workspace-path
 - `personal-ops/indexes/check-ins-v3-fields.md`
 - `personal-ops/indexes/check-ins-v3.trends.md`
 
-The lazy-sync threshold is seven new reports. Normal sync requires exact owner approval and never rewrites canonical daily Markdown, raw input, OCR, or assets.
+`--status-only` is diagnostic only. The seven-report threshold applies to out-of-band repair, not to a normal post-write refresh. The real refresh never rewrites canonical daily Markdown, raw input, OCR, or assets.
 
 ## Privacy
 
@@ -65,11 +65,17 @@ Zapisano:
 Plan na dziś (read-only):
 - Data, WIG, DoD, deadline
 - Professional plan items in chronological order
-- Training, NSDR, IF, calories, and budget when supplied
+- IF first, then the selected six-block `food_blocks` schedule with kcal, protein, fat, carbohydrates, and `configured|empty` status
+- Training and NSDR after the food schedule; for an unknown day type, show both variants with `if_conflicts_by_variant` instead of guessing
+- Owner-local monthly spending, weekly calorie, and food-block projections when the refreshed official indexes and populated private settings are available
 - Close habits, warnings, conflicts, and deferred scope when supplied
+
+Refresh indeksów V3:
+- `.systems/scripts/sync-personal-ops-check-ins-v3 --post-write`: completed|failed
 
 Walidacja targeted:
 - <actual check>: przeszła|nie przeszła
 ```
 
-An explicitly linked weekly plan may supply block times. The daily artifact wins on conflict, and the conflict must be stated. Do not include prior-day closure, Raw Check-In, OCR, attachments, lessons, or quotations. This summary does not execute tasks, authorize deploys, or send external communication.
+An explicitly linked weekly plan may supply block times. The daily artifact wins on conflict, and the conflict must be stated. Budget, calorie, and food-block values are owner-only and must come from `.systems/scripts/calculate-personal-ops-budgets` after a successful refresh. If IF excludes a configured food block, state the conflict. Do not include prior-day closure, Raw Check-In, OCR, attachments, lessons, or quotations. This summary does not execute tasks, authorize deploys, or send external communication.
+An incomplete food-block configuration is reported as `food_schedule.status: unavailable` with a deterministic reason and missing/invalid field list; do not show partial macro values and do not suppress valid spending or weekly calorie balances. Missing base configuration or stale indexes remains a calculator `STOP`.

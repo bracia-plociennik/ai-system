@@ -1,0 +1,497 @@
+#!/usr/bin/env python3
+"""Calculate owner-local Personal Ops spending and calorie projections."""
+
+from __future__ import annotations
+
+import argparse
+import calendar
+import json
+import math
+import re
+import sys
+from datetime import date, timedelta
+from decimal import Decimal, InvalidOperation, ROUND_CEILING, ROUND_HALF_UP
+from pathlib import Path
+
+
+CONFIG_RELATIVE = "personal-ops/check-ins/check-in-settings.local.md"
+INDEX_RELATIVE = "personal-ops/indexes/check-ins-v3.jsonl"
+ROUTER_RELATIVE = "personal-ops/indexes/check-ins-v3.md"
+FOOD_BLOCKS = (
+    ("09_11", "09:00-11:00"),
+    ("11_13", "11:00-13:00"),
+    ("13_15", "13:00-15:00"),
+    ("15_17", "15:00-17:00"),
+    ("17_19", "17:00-19:00"),
+    ("19_21", "19:00-21:00"),
+)
+
+
+def stop(message: str) -> None:
+    raise ValueError(message)
+
+
+def parse_frontmatter(path: Path) -> dict[str, str]:
+    if not path.is_file():
+        stop(f"Missing local Personal Ops budget configuration: {path}")
+    lines = path.read_text(encoding="utf-8").splitlines()
+    if not lines or lines[0].strip() != "---":
+        stop(f"Local budget configuration must use YAML frontmatter: {path}")
+    values: dict[str, str] = {}
+    closing = None
+    for index, line in enumerate(lines[1:], start=1):
+        if line.strip() == "---":
+            closing = index
+            break
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        match = re.match(r"^([A-Za-z0-9_]+):(?:\s*)(.*)$", line)
+        if not match:
+            stop(f"Unsupported local budget configuration line {index + 1}: {line}")
+        values[match.group(1)] = match.group(2).strip().strip('"').strip("'")
+    if closing is None:
+        stop(f"Local budget configuration has no closing frontmatter marker: {path}")
+    return values
+
+
+def decimal(value: object, label: str, required: bool = False) -> Decimal | None:
+    if value is None or str(value).strip() == "":
+        if required:
+            stop(f"Missing required budget configuration value: {label}")
+        return None
+    try:
+        return Decimal(str(value).strip())
+    except InvalidOperation as exc:
+        stop(f"Invalid numeric budget value for {label}: {value}")
+        raise AssertionError from exc
+
+
+def positive(value: Decimal | None, label: str) -> Decimal:
+    if value is None or value <= 0:
+        stop(f"Budget configuration value must be positive: {label}")
+    return value
+
+
+def parse_date(value: str, label: str) -> date:
+    try:
+        return date.fromisoformat(value)
+    except ValueError as exc:
+        stop(f"Invalid {label}: {value}")
+        raise AssertionError from exc
+
+
+def json_number(value: Decimal | None) -> float | None:
+    return float(value) if value is not None else None
+
+
+def format_decimal(value: Decimal | None) -> str:
+    if value is None:
+        return "unknown"
+    value = value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    return format(value, "f").rstrip("0").rstrip(".") or "0"
+
+
+def numeric_property(properties: dict, key: str) -> Decimal | None:
+    return decimal(properties.get(key), key)
+
+
+def nonnegative(value: object, label: str, required: bool = False) -> Decimal | None:
+    parsed = decimal(value, label, required)
+    if parsed is not None and parsed < 0:
+        stop(f"Budget configuration value must be non-negative: {label}")
+    return parsed
+
+
+def block_time(label: str) -> tuple[int, int]:
+    start, end = label.split("-", 1)
+    return int(start.split(":", 1)[0]), int(end.split(":", 1)[0])
+
+
+def unavailable_food_schedule(day_type: str, reason: str, fields: list[str]) -> dict:
+    result = {"status": "unavailable", "day_type": day_type, "reason": reason}
+    if fields:
+        result["invalid_or_missing_fields"] = fields
+    return result
+
+
+def configured_food_schedule(config: dict[str, str], day_type: str) -> dict:
+    prefix = "training" if day_type == "training" else "rest"
+    status_keys = [f"{prefix}_block_{block_id}_status" for block_id, _ in FOOD_BLOCKS]
+    if not any(key in config and config[key].strip() for key in status_keys):
+        return unavailable_food_schedule(day_type, "macro food-block configuration is missing", status_keys)
+
+    invalid_or_missing: list[str] = []
+    numeric_suffixes = ("protein_g", "fat_g", "carbohydrates_g", "calorie_target")
+    for block_id, _ in FOOD_BLOCKS:
+        block_prefix = f"{prefix}_block_{block_id}"
+        status_key = f"{block_prefix}_status"
+        status = config.get(status_key, "").strip().lower()
+        if status not in {"configured", "empty"}:
+            invalid_or_missing.append(status_key)
+            continue
+        if status == "empty":
+            invalid_or_missing.extend(
+                f"{block_prefix}_{suffix}"
+                for suffix in numeric_suffixes
+                if config.get(f"{block_prefix}_{suffix}", "").strip()
+            )
+            continue
+        for suffix in numeric_suffixes:
+            key = f"{block_prefix}_{suffix}"
+            raw_value = config.get(key, "").strip()
+            if not raw_value:
+                invalid_or_missing.append(key)
+                continue
+            try:
+                parsed = Decimal(raw_value)
+            except InvalidOperation:
+                invalid_or_missing.append(key)
+                continue
+            if suffix == "calorie_target" and parsed <= 0:
+                invalid_or_missing.append(key)
+            elif suffix != "calorie_target" and parsed < 0:
+                invalid_or_missing.append(key)
+    if invalid_or_missing:
+        return unavailable_food_schedule(
+            day_type,
+            "macro food-block configuration is incomplete or invalid",
+            invalid_or_missing,
+        )
+
+    food_blocks: list[dict] = []
+    total_protein = Decimal("0")
+    total_fat = Decimal("0")
+    total_carbohydrates = Decimal("0")
+    block_calorie_sum = Decimal("0")
+    configured_count = 0
+    empty_count = 0
+
+    for block_id, time_range in FOOD_BLOCKS:
+        block_prefix = f"{prefix}_block_{block_id}"
+        status = config.get(f"{block_prefix}_status", "").strip().lower()
+        if status not in {"configured", "empty"}:
+            stop(f"Macro food-block status must be configured or empty: {block_prefix}_status")
+        if status == "empty":
+            for suffix in ("protein_g", "fat_g", "carbohydrates_g", "calorie_target"):
+                if config.get(f"{block_prefix}_{suffix}", "").strip():
+                    stop(f"Empty macro food block cannot contain values: {block_prefix}_{suffix}")
+            empty_count += 1
+            food_blocks.append({"id": block_id, "time": time_range, "status": "empty"})
+            continue
+
+        protein = nonnegative(config.get(f"{block_prefix}_protein_g"), f"{block_prefix}_protein_g", True)
+        fat = nonnegative(config.get(f"{block_prefix}_fat_g"), f"{block_prefix}_fat_g", True)
+        carbohydrates = nonnegative(config.get(f"{block_prefix}_carbohydrates_g"), f"{block_prefix}_carbohydrates_g", True)
+        calories = positive(decimal(config.get(f"{block_prefix}_calorie_target"), f"{block_prefix}_calorie_target", True), f"{block_prefix}_calorie_target")
+        assert protein is not None and fat is not None and carbohydrates is not None
+        configured_count += 1
+        total_protein += protein
+        total_fat += fat
+        total_carbohydrates += carbohydrates
+        block_calorie_sum += calories
+        food_blocks.append({
+            "id": block_id,
+            "time": time_range,
+            "status": "configured",
+            "protein_g": json_number(protein),
+            "fat_g": json_number(fat),
+            "carbohydrates_g": json_number(carbohydrates),
+            "calorie_target": json_number(calories),
+        })
+
+    macro_derived = total_protein * 4 + total_carbohydrates * 4 + total_fat * 9
+    daily_target = positive(
+        decimal(config.get("training_day_standard" if day_type == "training" else "rest_day_standard"), f"{day_type}_day_standard", True),
+        f"{day_type}_day_standard",
+    )
+    return {
+        "status": "available",
+        "day_type": day_type,
+        "daily_calorie_target": json_number(daily_target),
+        "food_blocks": food_blocks,
+        "totals": {
+            "protein_g": json_number(total_protein),
+            "fat_g": json_number(total_fat),
+            "carbohydrates_g": json_number(total_carbohydrates),
+        },
+        "macro_derived_calories": json_number(macro_derived),
+        "macro_calorie_delta": json_number(daily_target - macro_derived),
+        "block_calorie_sum": json_number(block_calorie_sum),
+        "block_calorie_delta": json_number(daily_target - block_calorie_sum),
+        "configured_block_count": configured_count,
+        "empty_block_count": empty_count,
+    }
+
+
+def select_food_day_type(properties: dict) -> str:
+    training_type = str(properties.get("planned_training_type", "")).strip().lower()
+    training_start = str(properties.get("planned_training_start", "")).strip()
+    training_end = str(properties.get("planned_training_end", "")).strip()
+    if training_type in {"rest", "recovery", "off", "none", "brak"}:
+        return "rest"
+    if training_type or training_start or training_end:
+        return "training"
+    return "unknown"
+
+
+def clock_hour(value: str) -> int | None:
+    match = re.search(r"(?:T|\s)(\d{2}):\d{2}", value)
+    if not match:
+        match = re.match(r"^(\d{2}):\d{2}", value)
+    return int(match.group(1)) if match else None
+
+
+def food_if_conflicts(properties: dict, schedule: dict) -> list[str]:
+    if_start = clock_hour(str(properties.get("planned_if_start", "")))
+    if_end = clock_hour(str(properties.get("planned_if_end", "")))
+    if if_start is None or if_end is None or schedule.get("status") != "available":
+        return []
+    conflicts = []
+    for block in schedule["food_blocks"]:
+        if block["status"] != "configured":
+            continue
+        block_start, block_end = block_time(block["time"])
+        if block_start < if_start or block_end > if_end:
+            conflicts.append(block["time"])
+    return conflicts
+
+
+def food_schedule_report(records: list[dict], target: date, config: dict[str, str]) -> dict:
+    properties = next((p for p in records if str(p.get("session_date")) == target.isoformat()), {})
+    day_type = select_food_day_type(properties)
+    if day_type == "unknown":
+        variants = {}
+        conflicts_by_variant = {}
+        for variant in ("training", "rest"):
+            variant_schedule = configured_food_schedule(config, variant)
+            variant_schedule["if_conflicts"] = food_if_conflicts(properties, variant_schedule)
+            variants[variant] = variant_schedule
+            conflicts_by_variant[variant] = variant_schedule["if_conflicts"]
+        return {
+            "status": "unknown",
+            "day_type": "unknown",
+            "reason": "planned training type or time is not specified",
+            "variants": variants,
+            "if_conflicts": [],
+            "if_conflicts_by_variant": conflicts_by_variant,
+        }
+    schedule = configured_food_schedule(config, day_type)
+    schedule["if_conflicts"] = food_if_conflicts(properties, schedule)
+    return schedule
+
+
+def load_official_records(workspace: Path) -> list[dict]:
+    router = workspace / ROUTER_RELATIVE
+    if not router.is_file():
+        stop(f"Missing official V3 router: {router}")
+    router_text = router.read_text(encoding="utf-8")
+    stale_match = re.search(r"^unsynced-native-check-in-count:\s*(\d+)\s*$", router_text, re.MULTILINE)
+    if not stale_match:
+        stop(f"Official V3 router has no freshness value: {router}")
+    if int(stale_match.group(1)) != 0:
+        stop(f"Official V3 indexes are stale; refresh is required before budget calculation: {router}")
+    index = workspace / INDEX_RELATIVE
+    if not index.is_file():
+        stop(f"Missing official V3 JSONL index: {index}")
+    records: list[dict] = []
+    seen: set[str] = set()
+    for line_number, line in enumerate(index.read_text(encoding="utf-8").splitlines(), start=1):
+        if not line.strip():
+            continue
+        try:
+            payload = json.loads(line)
+        except json.JSONDecodeError as exc:
+            stop(f"Malformed official V3 JSONL at line {line_number}: {index}")
+            raise AssertionError from exc
+        properties = payload.get("properties") if isinstance(payload, dict) else None
+        if not isinstance(properties, dict):
+            stop(f"Official V3 JSONL row has no properties at line {line_number}: {index}")
+        if str(properties.get("private_index_policy", "")) == "redacted":
+            stop(f"Official V3 detailed values are unavailable under redacted index policy: {index}")
+        session = str(properties.get("session_date", ""))
+        if not session:
+            stop(f"Official V3 JSONL row has no session_date at line {line_number}: {index}")
+        if session in seen:
+            stop(f"Duplicate session_date in official V3 JSONL: {session}")
+        seen.add(session)
+        records.append(properties)
+    return records
+
+
+def monthly_report(records: list[dict], target: date, config: dict[str, str]) -> dict:
+    base = positive(decimal(config.get("monthly_base_budget"), "monthly_base_budget", True), "monthly_base_budget")
+    buffer = positive(decimal(config.get("monthly_buffer"), "monthly_buffer", True), "monthly_buffer")
+    pace = positive(decimal(config.get("daily_spending_pace"), "daily_spending_pace", True), "daily_spending_pace")
+    currency = config.get("monthly_budget_currency", "").strip()
+    if not currency:
+        stop("Missing required budget configuration value: monthly_budget_currency")
+    month_key = target.strftime("%Y-%m")
+    spending = Decimal("0")
+    approximate = False
+    for properties in records:
+        closure = str(properties.get("closure_date", ""))
+        if closure.startswith(month_key) and closure <= target.isoformat():
+            amount = numeric_property(properties, "previous_day_finance_amount")
+            if amount is not None:
+                spending += amount
+                approximate = approximate or str(properties.get("previous_day_finance_approximate", "")).lower() == "true"
+    days_in_month = calendar.monthrange(target.year, target.month)[1]
+    remaining_days = days_in_month - target.day + 1
+    remaining = base - spending
+    average = remaining / Decimal(remaining_days)
+    pace_target = pace * Decimal(target.day)
+    overrun = max(Decimal("0"), spending - pace_target)
+    after_today = int((overrun / pace).to_integral_value(rounding=ROUND_CEILING)) if overrun > 0 else 0
+    from_today = after_today + 1 if overrun > 0 else 0
+    resume = target + timedelta(days=from_today) if from_today else target
+    return {
+        "base_budget": json_number(base),
+        "buffer": json_number(buffer),
+        "currency": currency,
+        "current_spending": json_number(spending),
+        "remaining_base_budget": json_number(remaining),
+        "remaining_days_inclusive": remaining_days,
+        "average_available_per_remaining_day": json_number(average),
+        "daily_spending_pace": json_number(pace),
+        "cumulative_pace_target": json_number(pace_target),
+        "pace_overrun": json_number(overrun),
+        "no_spend_days_after_today": after_today,
+        "no_spend_days_from_today": from_today,
+        "standard_spend_resume_date": resume.isoformat(),
+        "approximate": approximate,
+    }
+
+
+def calorie_report(records: list[dict], target: date, config: dict[str, str]) -> dict:
+    weekly = positive(decimal(config.get("weekly_calorie_budget"), "weekly_calorie_budget", True), "weekly_calorie_budget")
+    training = positive(decimal(config.get("training_day_standard"), "training_day_standard", True), "training_day_standard")
+    rest = positive(decimal(config.get("rest_day_standard"), "rest_day_standard", True), "rest_day_standard")
+    minimum = decimal(config.get("minimum_daily_calories"), "minimum_daily_calories")
+    week_start = target - timedelta(days=target.weekday())
+    week_end = week_start + timedelta(days=6)
+    actual = Decimal("0")
+    approximate = False
+    for properties in records:
+        closure = str(properties.get("closure_date", ""))
+        if not closure:
+            continue
+        closure_date = parse_date(closure, "closure_date")
+        if week_start <= closure_date <= target:
+            amount = numeric_property(properties, "previous_day_actual_calories_representative")
+            if amount is not None:
+                actual += amount
+                approximate = approximate or str(properties.get("previous_day_actual_calories_approximate", "")).lower() == "true"
+    planned_today = numeric_property(next((p for p in records if str(p.get("session_date")) == target.isoformat()), {}), "planned_calories_representative")
+    inclusive_days = (week_end - target).days + 1
+    after_days = (week_end - target).days
+    remaining_before_today = weekly - actual
+    projected_after_today = actual + planned_today if planned_today is not None else None
+    remaining_after_today = weekly - projected_after_today if projected_after_today is not None else None
+    mechanical_inclusive = remaining_before_today / Decimal(inclusive_days)
+    mechanical_after = remaining_after_today / Decimal(after_days) if remaining_after_today is not None and after_days else None
+    common_sense = max(mechanical_after, minimum) if mechanical_after is not None and minimum is not None else None
+    unbalanced = None
+    if common_sense is not None and remaining_after_today is not None:
+        unbalanced = max(Decimal("0"), common_sense * Decimal(after_days) - remaining_after_today)
+    return {
+        "weekly_budget": json_number(weekly),
+        "week_start": week_start.isoformat(),
+        "week_end": week_end.isoformat(),
+        "actual_consumed": json_number(actual),
+        "remaining_before_today": json_number(remaining_before_today),
+        "remaining_days_inclusive": inclusive_days,
+        "mechanical_limit_inclusive": json_number(mechanical_inclusive),
+        "planned_today": json_number(planned_today),
+        "projected_after_today": json_number(projected_after_today),
+        "remaining_after_today": json_number(remaining_after_today),
+        "remaining_days_after_today": after_days,
+        "mechanical_limit_after_today": json_number(mechanical_after),
+        "training_day_standard": json_number(training),
+        "rest_day_standard": json_number(rest),
+        "minimum_daily_calories": json_number(minimum),
+        "common_sense_limit_after_today": json_number(common_sense),
+        "unbalanced_balance": json_number(unbalanced),
+        "approximate": approximate,
+        "food_schedule": food_schedule_report(records, target, config),
+    }
+
+
+def calculate(workspace: Path, target: date) -> dict:
+    config = parse_frontmatter(workspace / CONFIG_RELATIVE)
+    records = load_official_records(workspace)
+    return {
+        "report_date": target.isoformat(),
+        "privacy": "private-sensitive",
+        "monthly_spending": monthly_report(records, target, config),
+        "weekly_calories": calorie_report(records, target, config),
+    }
+
+
+def print_human(report: dict) -> None:
+    month = report["monthly_spending"]
+    week = report["weekly_calories"]
+    print(f"report-date: {report['report_date']}")
+    print("monthly-spending:")
+    for key in ("base_budget", "buffer", "current_spending", "remaining_base_budget", "average_available_per_remaining_day", "pace_overrun", "no_spend_days_from_today", "standard_spend_resume_date"):
+        value = month[key]
+        if isinstance(value, float):
+            value = format_decimal(Decimal(str(value)))
+        print(f"  {key}: {value}")
+    print("weekly-calories:")
+    for key in ("weekly_budget", "actual_consumed", "remaining_before_today", "remaining_days_inclusive", "planned_today", "projected_after_today", "remaining_after_today", "mechanical_limit_after_today", "training_day_standard", "rest_day_standard", "minimum_daily_calories", "common_sense_limit_after_today", "unbalanced_balance"):
+        value = week[key]
+        if isinstance(value, float):
+            value = format_decimal(Decimal(str(value)))
+        print(f"  {key}: {value}")
+    schedule = week["food_schedule"]
+    print("food-schedule:")
+    print(f"  status: {schedule['status']}")
+    print(f"  day_type: {schedule['day_type']}")
+    if schedule["status"] == "unknown":
+        print(f"  reason: {schedule['reason']}")
+        return
+    if schedule["status"] != "available":
+        print(f"  reason: {schedule['reason']}")
+        return
+    print(f"  daily_calorie_target: {format_decimal(Decimal(str(schedule['daily_calorie_target'])))}")
+    totals = schedule["totals"]
+    print(f"  totals: B {format_decimal(Decimal(str(totals['protein_g'])))} g | T {format_decimal(Decimal(str(totals['fat_g'])))} g | W {format_decimal(Decimal(str(totals['carbohydrates_g'])))} g")
+    print(f"  macro_derived_calories: {format_decimal(Decimal(str(schedule['macro_derived_calories'])))}")
+    print(f"  macro_calorie_delta: {format_decimal(Decimal(str(schedule['macro_calorie_delta'])))}")
+    print(f"  block_calorie_sum: {format_decimal(Decimal(str(schedule['block_calorie_sum'])))}")
+    print(f"  block_calorie_delta: {format_decimal(Decimal(str(schedule['block_calorie_delta'])))}")
+    print("  food_blocks:")
+    for block in schedule["food_blocks"]:
+        if block["status"] == "empty":
+            print(f"    - {block['time']}: empty")
+        else:
+            print(
+                f"    - {block['time']}: {format_decimal(Decimal(str(block['calorie_target'])))} kcal | "
+                f"B {format_decimal(Decimal(str(block['protein_g'])))} g | "
+                f"T {format_decimal(Decimal(str(block['fat_g'])))} g | "
+                f"W {format_decimal(Decimal(str(block['carbohydrates_g'])))} g"
+            )
+    conflicts = schedule.get("if_conflicts", [])
+    print(f"  if_conflicts: {', '.join(conflicts) if conflicts else 'none'}")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--workspace", required=True, type=Path)
+    parser.add_argument("--date", required=True)
+    parser.add_argument("--json", action="store_true")
+    args = parser.parse_args()
+    try:
+        report = calculate(args.workspace.resolve(), parse_date(args.date, "report date"))
+        if args.json:
+            print(json.dumps(report, ensure_ascii=False, sort_keys=True))
+        else:
+            print_human(report)
+    except Exception as exc:  # noqa: BLE001
+        print(f"STOP: {exc}", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

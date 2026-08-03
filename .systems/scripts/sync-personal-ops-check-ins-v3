@@ -9,6 +9,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import sys
 import tempfile
 from datetime import date, timedelta
@@ -319,7 +320,39 @@ def render_router(records: list[dict], source: str) -> str:
     ])
 
 
-def write_indexes(records: list[dict], fields: list[dict], workspace: Path, dry_run: bool) -> None:
+def write_index_set_atomic(outputs: dict[Path, str]) -> None:
+    paths = list(outputs)
+    if not paths:
+        return
+    index = paths[0].parent
+    index.mkdir(parents=True, exist_ok=True)
+    stage = Path(tempfile.mkdtemp(prefix=".check-ins-v3-stage.", dir=index))
+    backup = Path(tempfile.mkdtemp(prefix=".check-ins-v3-backup.", dir=index))
+    replaced: list[Path] = []
+    try:
+        for path, content in outputs.items():
+            staged = stage / path.name
+            staged.write_text(content, encoding="utf-8", newline="")
+            if path.exists():
+                shutil.copy2(path, backup / path.name)
+        try:
+            for path in paths:
+                (stage / path.name).replace(path)
+                replaced.append(path)
+        except Exception:
+            for path in replaced:
+                previous = backup / path.name
+                if previous.exists():
+                    previous.replace(path)
+                else:
+                    path.unlink(missing_ok=True)
+            raise
+    finally:
+        shutil.rmtree(stage, ignore_errors=True)
+        shutil.rmtree(backup, ignore_errors=True)
+
+
+def write_indexes(records: list[dict], fields: list[dict], workspace: Path, dry_run: bool, source: str) -> None:
     index = workspace / "personal-ops/indexes"
     outputs = {
         index / "check-ins-v3.csv": render_csv(records, fields),
@@ -327,14 +360,13 @@ def write_indexes(records: list[dict], fields: list[dict], workspace: Path, dry_
         index / "check-ins-v3.metrics.csv": render_csv(records, fields, metrics_only=True),
         index / "check-ins-v3-fields.md": render_fields(fields),
         index / "check-ins-v3.trends.md": render_trends(records, fields),
-        index / "check-ins-v3.md": render_router(records, "owner-approved-sync"),
+        index / "check-ins-v3.md": render_router(records, source),
     }
     if dry_run:
         for path in outputs:
             print(f"would write: {path}")
         return
-    for path, content in outputs.items():
-        write_atomic(path, content)
+    write_index_set_atomic(outputs)
 
 
 def print_status(records: list[dict], workspace: Path) -> None:
@@ -361,16 +393,20 @@ def main() -> int:
     parser.add_argument("--workspace", required=True, type=Path)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--status-only", action="store_true")
+    parser.add_argument("--post-write", action="store_true", help="Mark this real refresh as required after a canonical check-in write")
     args = parser.parse_args()
     try:
         records, fields = load_records(args.workspace.resolve())
+        if args.post_write and (args.status_only or args.dry_run):
+            raise ValueError("--post-write requires a real index refresh, not --status-only or --dry-run")
+        source = "post-write-check-in" if args.post_write else "owner-approved-sync"
         if args.status_only:
             print_status(records, args.workspace.resolve())
         elif args.dry_run:
             print_status(records, args.workspace.resolve())
-            write_indexes(records, fields, args.workspace.resolve(), True)
+            write_indexes(records, fields, args.workspace.resolve(), True, source)
         else:
-            write_indexes(records, fields, args.workspace.resolve(), False)
+            write_indexes(records, fields, args.workspace.resolve(), False, source)
     except Exception as exc:  # noqa: BLE001
         print(f"STOP: {exc}", file=sys.stderr)
         return 1

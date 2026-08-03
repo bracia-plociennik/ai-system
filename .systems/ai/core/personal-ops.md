@@ -28,7 +28,7 @@ Derived official indexes remain at:
 <workspace>/personal-ops/indexes/check-ins-v3.md
 ```
 
-Markdown and the immutable legacy snapshot are sources of truth for their own source class. Derived indexes never override them. Manual check-in writes create only canonical Markdown and optional sibling assets; they do not regenerate indexes automatically.
+Markdown and the immutable legacy snapshot are sources of truth for their own source class. Derived indexes never override them. A normal manual check-in write creates the canonical Markdown and optional sibling assets, then must run the real V3 index refresh before the post-write summary. The durable-first rule keeps the Markdown if refresh fails and reports the partial result explicitly.
 
 Dreaming Mode may read only `personal-ops/indexes/check-ins-v3.trends.md`. It must not read raw daily Markdown, detailed CSV/JSONL/metrics indexes, legacy snapshot details, attachments, OCR, financial values, calorie data, health detail, reflections, lessons, or quotations.
 
@@ -70,9 +70,15 @@ Use:
 .systems/scripts/sync-personal-ops-check-ins-v3 --workspace <workspace-path> --status-only
 ```
 
-The synchronizer reads strict current native `index_contract: 3` reports and, when present, one validated immutable legacy snapshot. It also has a read-only compatibility projection for historical native reports through `2026-07-17` using the retired `all-professional-do-v1` policy and for legacy snapshot `format_version: 1`. That projection adds only the nine later `planned_*` fields as blank/unknown in memory; it never edits source Markdown, the snapshot, or its manifest. New snapshots use `format_version: 2`. Reports using the retired policy after the cutover are rejected. It produces only the six official `check-ins-v3.*` artifacts. It rejects malformed source reports, malformed snapshots, non-additive missing/unknown properties, hash mismatches, and duplicate effective session dates before replacing any official index.
+The synchronizer reads strict current native `index_contract: 3` reports and, when present, one validated immutable legacy snapshot. It also has a read-only compatibility projection for historical native reports through `2026-07-17` using the retired `all-professional-do-v1` policy and for legacy snapshot `format_version: 1`. That projection adds only the nine later `planned_*` fields as blank/unknown in memory; it never edits source Markdown, the snapshot, or its manifest. New snapshots use `format_version: 2`. Reports using the retired policy after the cutover are rejected. It produces only the six official `check-ins-v3.*` artifacts. It rejects malformed source reports, malformed snapshots, non-additive missing/unknown properties, hash mismatches, and duplicate effective session dates before replacing any official index. `--post-write` records that the refresh was required by a canonical check-in write; it is a real write mode and cannot be combined with `--status-only` or `--dry-run`.
 
-The router and `--status-only` report native, legacy, and total row counts separately. Lazy-sync freshness is `unsynced-native-check-in-count`: `max(0, current-native-check-in-count - last-synced-native-check-in-count)`. `unsynced-check-in-count` is a compatibility alias of that native value. Imported legacy rows are immutable and do not make a newly captured day stale; `last-synced-check-in-count` remains total-reporting evidence only. If a router has no native baseline, `last-synced-native-check-in-count` is `0`, so every native report is unsynced until the first owner-approved sync. The threshold remains seven new native reports. An owner may approve an earlier sync or must approve a sync after correcting an older native day.
+The router and `--status-only` report native, legacy, and total row counts separately. Diagnostic freshness is `unsynced-native-check-in-count`: `max(0, current-native-check-in-count - last-synced-native-check-in-count)`. `unsynced-check-in-count` is a compatibility alias of that native value. Imported legacy rows are immutable and do not make a newly captured day stale; `last-synced-check-in-count` remains total-reporting evidence only. A normal check-in write must finish with a real refresh and therefore normally leaves this value at `0`. Non-zero freshness is acceptable only while diagnosing or repairing a failed durable-first refresh. The threshold remains a recommendation for out-of-band manual sync, not a waiver for normal post-write refresh.
+
+## Budget Reporting
+
+Owner-local budget calculations use `.systems/ai/core/personal-ops-budgets.md` and `.systems/scripts/calculate-personal-ops-budgets`. The calculator reads the populated local settings file and official detailed V3 JSONL only after a successful refresh. It reports monthly spending base/buffer/pace, remaining balance, recovery days and resume date, plus Monday-Sunday calorie balances, mechanical limits, configured training/rest standards, the optional common-sense limit, and the selected six-block food schedule with macro totals and IF conflicts. Incomplete food-block configuration is reported as `food_schedule.status: unavailable` with deterministic missing/invalid fields; it does not suppress otherwise valid spending and calorie balances. Unknown day type exposes `if_conflicts_by_variant` for both variants instead of guessing.
+
+Budget and calorie values are `private-sensitive` owner output. They are excluded from `check-ins-v3.trends.md`, Dreaming Mode, memory, System Insights, External Memory, skills, and public/project artifacts. A blank `minimum_daily_calories` produces `unknown`, never a guessed recommendation or health advice.
 
 The JSONL index retains `legacy_metadata` only for legacy rows: source provenance, source hash, source range, field confidence, unmapped fields, and the legacy V2 minimum flag. It never copies Raw Check-In, OCR text, private source body text, financial details beyond normalized properties, or asset binaries.
 
@@ -124,8 +130,11 @@ Include only source-backed current-day values that exist in the saved artifact:
 - WIG, Definition of Done, and deadline;
 - professional plan items ordered by their explicit deadline or linked weekly allocation, then by source order when no time is available;
 - training, NSDR, intermittent fasting, calorie limit, and budget when supplied;
+- IF first, then the selected six-block food schedule with kcal, protein, fat, carbohydrates, and `configured|empty` status;
+- training and NSDR after the food schedule; when day type is unknown, show both variants and their `if_conflicts_by_variant` rather than guessing;
 - close-of-day habits, overload or plan-readiness warnings, and deferred professional scope;
 - linked weekly time blocks only when the daily item has an explicit `source_week_id` and `source_week_item_id`.
+- owner-local spending, calorie, and food-block projections from the refreshed official indexes when a valid private configuration exists.
 
 The daily artifact is authoritative when it conflicts with its linked weekly plan. State the conflict in the summary and use the daily value. Never use fuzzy title matching to import weekly time blocks.
 
@@ -151,6 +160,7 @@ Plan na dziś (read-only):
 
 Walidacja targeted:
 - <check>: przeszła|nie przeszła
+- index refresh: completed|failed; budget projection: available|not available
 ```
 
 This summary does not execute tasks, authorize deploys, or send external communication.

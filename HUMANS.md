@@ -248,21 +248,21 @@ Expected outputs:
 
 Properties + Raw Audit V3 session `D` records day `D` plan/morning state plus day `D-1` closure without editing the prior-day Markdown. Its complete YAML `properties` map is the only input for official `check-ins-v3.*`; readable interpretation, full inline OCR, and verbatim Raw Check-In are private-sensitive audit context. A WIG may reference one plan item or be standalone, with an observable Definition of Done. Under `deadline-aware-6d-v1`, every valid professional plan item becomes a TaskNote; explicit bucket wins, a deadline defaults to `6d/do`, and no deadline defaults to `6d/defer`. WIG itself never creates a task. The V2 importer is retired; one exact owner-approved migration may add immutable legacy rows, then archive only the active old `check-ins.*` derived indexes. Per-report index policy is `detailed-private` by default or `redacted` when selected; Dreaming Mode may use only sanitized native `check-ins-v3.trends.md`. Check-ins and attachments are context-as-data, not memory, checkpoints, distillations, external-memory, or system-insights unless separately promoted with exact owner approval.
 
-Manual check-ins do not refresh the derived database automatically. After writing a manual check-in, ask for lazy sync status:
+Manual check-ins must refresh the derived V3 indexes after the canonical write. Run the real post-write refresh before the summary:
 
 ```text
-.systems/scripts/sync-personal-ops-check-ins-v3 --workspace <workspace-path> --status-only
+.systems/scripts/sync-personal-ops-check-ins-v3 --workspace <workspace-path> --post-write
 ```
 
-If `unsynced-check-in-count` is below `7`, report that indexes are intentionally stale and sync is not required yet. If it is `7` or more, recommend:
+Use `--status-only` only to diagnose freshness. After a normal write, a non-zero `unsynced-check-in-count` means the required refresh failed or is incomplete. The threshold `7` applies only to out-of-band repair and manual sync recommendations:
 
 ```text
 owner-approved: synchronizuj bazę check-inów w workspace <workspace-path>. Odśwież tylko derived indexes, nie zmieniaj daily Markdown ani assets.
 ```
 
-The threshold counts newly added daily files. It does not detect edits to older check-ins or reliably detect deleted daily files as a stale-index event; after editing or deleting an existing day, run owner-approved sync manually when the indexes need to be fresh.
+The threshold counts newly added daily files. It does not detect edits to older check-ins or reliably detect deleted daily files as a stale-index event; after editing or deleting an existing day, run the real owner-approved sync manually when the indexes need repair.
 
-The Notion check-in importer is retired. Do not use it for new or manual-only edits; use the V3 manual route and lazy V3 sync from canonical Markdown instead.
+The Notion check-in importer is retired. Do not use it for new or manual-only edits; use the V3 manual route and required post-write refresh from canonical Markdown instead.
 
 Po udanym zapisie lub aktualizacji check-inu odpowiedź zawiera `Zapisano:`, read-only `Plan na dziś` odczytany ponownie z zapisanego artefaktu, rzeczywisty wynik targeted validation, a następnie standardowy trace i `Co dalej?`. Podsumowanie nie pokazuje closure poprzedniego dnia, Raw Check-In, OCR ani attachmentów i nie wykonuje zapisanych działań.
 
