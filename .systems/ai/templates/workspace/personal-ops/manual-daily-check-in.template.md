@@ -65,9 +65,10 @@ Zapisano:
 Plan na dziś (read-only):
 - Data, WIG, DoD, deadline
 - Professional plan items in chronological order
-- IF first, then the selected six-block `food_blocks` schedule with kcal, protein, fat, carbohydrates, and `configured|empty` status
-- Training and NSDR after the food schedule; select the schedule by exact `planned_calories_representative`, and do not guess when that target is unknown
-- Owner-local monthly spending, weekly calorie, and food-block projections when the refreshed official indexes and populated private settings are available
+- IF as a standalone window line only; do not nest calorie or budget values under IF
+- A separate six-block macro schedule with `food_blocks`, kcal, protein, fat, carbohydrates, and `configured|empty` status; select it by exact `planned_calories_representative`, and do not guess when that target is unknown
+- A separate Budget section for the daily budget and monthly spending projection; weekly calorie target belongs in the macro schedule section
+- Training and NSDR after the macro schedule
 - Close habits, warnings, conflicts, and deferred scope when supplied
 
 Refresh indeksów V3:

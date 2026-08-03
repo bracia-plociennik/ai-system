@@ -1417,13 +1417,17 @@ import sys
 
 template = open(sys.argv[1], encoding="utf-8").read()
 contract = open(sys.argv[2], encoding="utf-8").read()
-if_pos = template.index("IF first")
-food_pos = template.index("food_blocks", if_pos)
+if_pos = template.index("IF as a standalone window line only")
+food_pos = template.index("separate six-block macro schedule", if_pos)
 training_pos = template.index("Training and NSDR after", food_pos)
 assert if_pos < food_pos < training_pos, (if_pos, food_pos, training_pos)
 assert "projection" in template.lower(), template
 assert "planned_calories_representative" in template, template
 assert "planned_calories_representative" in contract, contract
+assert "standalone window line" in template, template
+assert "separate Budget section" in template, template
+assert "standalone window line" in contract, contract
+assert "separate budget section" in contract, contract
 PY
 python3 - "$copy_repo/.systems/ai/templates/workspace/personal-ops/check-in-properties-v3.schema.json" <<'PY'
 import json

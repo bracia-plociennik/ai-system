@@ -130,8 +130,10 @@ Include only source-backed current-day values that exist in the saved artifact:
 - WIG, Definition of Done, and deadline;
 - professional plan items ordered by their explicit deadline or linked weekly allocation, then by source order when no time is available;
 - training, NSDR, intermittent fasting, calorie limit, and budget when supplied;
-- IF first, then the selected six-block food schedule with kcal, protein, fat, carbohydrates, and `configured|empty` status;
-- training and NSDR after the food schedule; the schedule is selected by exact planned calories, not by training/rest mode, and unknown planned calories remain unknown rather than being guessed;
+- IF as a standalone window line without calorie or budget subitems;
+- a separate six-block macro schedule with kcal, protein, fat, carbohydrates, and `configured|empty` status, selected by exact planned calories rather than training/rest mode;
+- a separate budget section for the daily budget and monthly spending projection;
+- training and NSDR after the macro schedule; unknown planned calories remain unknown rather than being guessed;
 - close-of-day habits, overload or plan-readiness warnings, and deferred professional scope;
 - linked weekly time blocks only when the daily item has an explicit `source_week_id` and `source_week_item_id`.
 - owner-local spending, calorie, and food-block projections from the refreshed official indexes when a valid private configuration exists.
