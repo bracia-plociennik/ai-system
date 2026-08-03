@@ -76,7 +76,7 @@ The router and `--status-only` report native, legacy, and total row counts separ
 
 ## Budget Reporting
 
-Owner-local budget calculations use `.systems/ai/core/personal-ops-budgets.md` and `.systems/scripts/calculate-personal-ops-budgets`. The calculator reads the populated local settings file and official detailed V3 JSONL only after a successful refresh. It reports monthly spending base/buffer/pace, remaining balance, recovery days and resume date, plus Monday-Sunday calorie balances, mechanical limits, configured training/rest standards, the optional common-sense limit, and the selected six-block food schedule with macro totals and IF conflicts. Incomplete food-block configuration is reported as `food_schedule.status: unavailable` with deterministic missing/invalid fields; it does not suppress otherwise valid spending and calorie balances. Unknown day type exposes `if_conflicts_by_variant` for both variants instead of guessing.
+Owner-local budget calculations use `.systems/ai/core/personal-ops-budgets.md` and `.systems/scripts/calculate-personal-ops-budgets`. The calculator reads the populated local settings file and official detailed V3 JSONL only after a successful refresh. It reports monthly spending base/buffer/pace, remaining balance, recovery days and resume date, plus Monday-Sunday calorie balances, mechanical limits, configured training/rest standards, the optional common-sense limit, and the selected six-block food schedule with macro totals and IF conflicts. The schedule is selected by the exact planned calorie target, not by training/rest mode; protein and fat are approximately stable while carbohydrates rotate by target profile. Incomplete food-block configuration is reported as `food_schedule.status: unavailable` with deterministic missing/invalid fields; it does not suppress otherwise valid spending and calorie balances. An unknown calorie target exposes `available_calorie_plans` without guessing.
 
 Budget and calorie values are `private-sensitive` owner output. They are excluded from `check-ins-v3.trends.md`, Dreaming Mode, memory, System Insights, External Memory, skills, and public/project artifacts. A blank `minimum_daily_calories` produces `unknown`, never a guessed recommendation or health advice.
 
@@ -131,7 +131,7 @@ Include only source-backed current-day values that exist in the saved artifact:
 - professional plan items ordered by their explicit deadline or linked weekly allocation, then by source order when no time is available;
 - training, NSDR, intermittent fasting, calorie limit, and budget when supplied;
 - IF first, then the selected six-block food schedule with kcal, protein, fat, carbohydrates, and `configured|empty` status;
-- training and NSDR after the food schedule; when day type is unknown, show both variants and their `if_conflicts_by_variant` rather than guessing;
+- training and NSDR after the food schedule; the schedule is selected by exact planned calories, not by training/rest mode, and unknown planned calories remain unknown rather than being guessed;
 - close-of-day habits, overload or plan-readiness warnings, and deferred professional scope;
 - linked weekly time blocks only when the daily item has an explicit `source_week_id` and `source_week_item_id`.
 - owner-local spending, calorie, and food-block projections from the refreshed official indexes when a valid private configuration exists.

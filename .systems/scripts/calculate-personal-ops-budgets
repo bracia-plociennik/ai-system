@@ -107,18 +107,30 @@ def block_time(label: str) -> tuple[int, int]:
     return int(start.split(":", 1)[0]), int(end.split(":", 1)[0])
 
 
-def unavailable_food_schedule(day_type: str, reason: str, fields: list[str]) -> dict:
-    result = {"status": "unavailable", "day_type": day_type, "reason": reason}
+def unavailable_food_schedule(calorie_target: Decimal | None, reason: str, fields: list[str]) -> dict:
+    result = {
+        "status": "unavailable",
+        "selection_basis": "planned_calories_representative",
+        "planned_calorie_target": json_number(calorie_target),
+        "reason": reason,
+    }
     if fields:
         result["invalid_or_missing_fields"] = fields
     return result
 
 
-def configured_food_schedule(config: dict[str, str], day_type: str) -> dict:
-    prefix = "training" if day_type == "training" else "rest"
+def calorie_plan_key(target: Decimal) -> str:
+    if target == target.to_integral_value():
+        return str(int(target))
+    return format(target, "f").replace(".", "_")
+
+
+def configured_food_schedule(config: dict[str, str], calorie_target: Decimal) -> dict:
+    plan_key = calorie_plan_key(calorie_target)
+    prefix = f"calorie_{plan_key}"
     status_keys = [f"{prefix}_block_{block_id}_status" for block_id, _ in FOOD_BLOCKS]
     if not any(key in config and config[key].strip() for key in status_keys):
-        return unavailable_food_schedule(day_type, "macro food-block configuration is missing", status_keys)
+        return unavailable_food_schedule(calorie_target, "macro food-block configuration is missing", status_keys)
 
     invalid_or_missing: list[str] = []
     numeric_suffixes = ("protein_g", "fat_g", "carbohydrates_g", "calorie_target")
@@ -153,7 +165,7 @@ def configured_food_schedule(config: dict[str, str], day_type: str) -> dict:
                 invalid_or_missing.append(key)
     if invalid_or_missing:
         return unavailable_food_schedule(
-            day_type,
+            calorie_target,
             "macro food-block configuration is incomplete or invalid",
             invalid_or_missing,
         )
@@ -200,13 +212,12 @@ def configured_food_schedule(config: dict[str, str], day_type: str) -> dict:
         })
 
     macro_derived = total_protein * 4 + total_carbohydrates * 4 + total_fat * 9
-    daily_target = positive(
-        decimal(config.get("training_day_standard" if day_type == "training" else "rest_day_standard"), f"{day_type}_day_standard", True),
-        f"{day_type}_day_standard",
-    )
+    daily_target = positive(calorie_target, "planned_calories_representative")
     return {
         "status": "available",
-        "day_type": day_type,
+        "selection_basis": "planned_calories_representative",
+        "planned_calorie_target": json_number(calorie_target),
+        "calorie_plan": plan_key,
         "daily_calorie_target": json_number(daily_target),
         "food_blocks": food_blocks,
         "totals": {
@@ -223,15 +234,13 @@ def configured_food_schedule(config: dict[str, str], day_type: str) -> dict:
     }
 
 
-def select_food_day_type(properties: dict) -> str:
-    training_type = str(properties.get("planned_training_type", "")).strip().lower()
-    training_start = str(properties.get("planned_training_start", "")).strip()
-    training_end = str(properties.get("planned_training_end", "")).strip()
-    if training_type in {"rest", "recovery", "off", "none", "brak"}:
-        return "rest"
-    if training_type or training_start or training_end:
-        return "training"
-    return "unknown"
+def configured_calorie_plans(config: dict[str, str]) -> list[str]:
+    plans = set()
+    for key in config:
+        match = re.match(r"^calorie_([0-9]+(?:_[0-9]+)?)_block_", key)
+        if match:
+            plans.add(match.group(1))
+    return sorted(plans, key=lambda value: Decimal(value.replace("_", ".")))
 
 
 def clock_hour(value: str) -> int | None:
@@ -258,24 +267,17 @@ def food_if_conflicts(properties: dict, schedule: dict) -> list[str]:
 
 def food_schedule_report(records: list[dict], target: date, config: dict[str, str]) -> dict:
     properties = next((p for p in records if str(p.get("session_date")) == target.isoformat()), {})
-    day_type = select_food_day_type(properties)
-    if day_type == "unknown":
-        variants = {}
-        conflicts_by_variant = {}
-        for variant in ("training", "rest"):
-            variant_schedule = configured_food_schedule(config, variant)
-            variant_schedule["if_conflicts"] = food_if_conflicts(properties, variant_schedule)
-            variants[variant] = variant_schedule
-            conflicts_by_variant[variant] = variant_schedule["if_conflicts"]
+    planned_calories = numeric_property(properties, "planned_calories_representative")
+    if planned_calories is None:
         return {
             "status": "unknown",
-            "day_type": "unknown",
-            "reason": "planned training type or time is not specified",
-            "variants": variants,
+            "selection_basis": "planned_calories_representative",
+            "planned_calorie_target": None,
+            "reason": "planned calorie target is not specified",
+            "available_calorie_plans": configured_calorie_plans(config),
             "if_conflicts": [],
-            "if_conflicts_by_variant": conflicts_by_variant,
         }
-    schedule = configured_food_schedule(config, day_type)
+    schedule = configured_food_schedule(config, planned_calories)
     schedule["if_conflicts"] = food_if_conflicts(properties, schedule)
     return schedule
 
@@ -446,9 +448,11 @@ def print_human(report: dict) -> None:
     schedule = week["food_schedule"]
     print("food-schedule:")
     print(f"  status: {schedule['status']}")
-    print(f"  day_type: {schedule['day_type']}")
+    print(f"  selection_basis: {schedule.get('selection_basis', 'unknown')}")
+    print(f"  planned_calorie_target: {schedule.get('planned_calorie_target')}")
     if schedule["status"] == "unknown":
         print(f"  reason: {schedule['reason']}")
+        print(f"  available_calorie_plans: {schedule.get('available_calorie_plans', [])}")
         return
     if schedule["status"] != "available":
         print(f"  reason: {schedule['reason']}")

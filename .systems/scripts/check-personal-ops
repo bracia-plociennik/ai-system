@@ -109,7 +109,8 @@ for term in \
   'configured' \
   'empty' \
   'unavailable' \
-  'if_conflicts_by_variant' \
+  'planned_calories_representative' \
+  'calorie_<target>_block_' \
   'IF window'
 do
   require_ref ".systems/ai/core/personal-ops-budgets.md" "$term"

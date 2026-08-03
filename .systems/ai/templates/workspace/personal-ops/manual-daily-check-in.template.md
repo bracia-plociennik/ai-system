@@ -66,7 +66,7 @@ Plan na dziś (read-only):
 - Data, WIG, DoD, deadline
 - Professional plan items in chronological order
 - IF first, then the selected six-block `food_blocks` schedule with kcal, protein, fat, carbohydrates, and `configured|empty` status
-- Training and NSDR after the food schedule; for an unknown day type, show both variants with `if_conflicts_by_variant` instead of guessing
+- Training and NSDR after the food schedule; select the schedule by exact `planned_calories_representative`, and do not guess when that target is unknown
 - Owner-local monthly spending, weekly calorie, and food-block projections when the refreshed official indexes and populated private settings are available
 - Close habits, warnings, conflicts, and deferred scope when supplied
 
@@ -77,5 +77,5 @@ Walidacja targeted:
 - <actual check>: przeszła|nie przeszła
 ```
 
-An explicitly linked weekly plan may supply block times. The daily artifact wins on conflict, and the conflict must be stated. Budget, calorie, and food-block values are owner-only and must come from `.systems/scripts/calculate-personal-ops-budgets` after a successful refresh. If IF excludes a configured food block, state the conflict. Do not include prior-day closure, Raw Check-In, OCR, attachments, lessons, or quotations. This summary does not execute tasks, authorize deploys, or send external communication.
+An explicitly linked weekly plan may supply block times. The daily artifact wins on conflict, and the conflict must be stated. Budget, calorie, and food-block values are owner-only and must come from `.systems/scripts/calculate-personal-ops-budgets` after a successful refresh. Select the food schedule by the exact planned calorie target, not by training/rest mode. If IF excludes a configured food block, state the conflict. Do not include prior-day closure, Raw Check-In, OCR, attachments, lessons, or quotations. This summary does not execute tasks, authorize deploys, or send external communication.
 An incomplete food-block configuration is reported as `food_schedule.status: unavailable` with a deterministic reason and missing/invalid field list; do not show partial macro values and do not suppress valid spending or weekly calorie balances. Missing base configuration or stale indexes remains a calculator `STOP`.
