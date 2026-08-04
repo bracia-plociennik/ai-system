@@ -1428,6 +1428,20 @@ assert "standalone window line" in template, template
 assert "separate Budget section" in template, template
 assert "standalone window line" in contract, contract
 assert "separate budget section" in contract, contract
+required_food_slots = [
+    "09:00-11:00",
+    "11:00-13:00",
+    "13:00-15:00",
+    "15:00-17:00",
+    "17:00-19:00",
+    "19:00-21:00",
+]
+for source in (template, contract):
+    positions = [source.index(slot) for slot in required_food_slots]
+    assert positions == sorted(positions), positions
+    assert "exactly six" in source, source
+    assert "configured|empty" in source, source
+    assert "never replaces" in source, source
 PY
 python3 - "$copy_repo/.systems/ai/templates/workspace/personal-ops/check-in-properties-v3.schema.json" <<'PY'
 import json

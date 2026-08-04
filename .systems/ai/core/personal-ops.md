@@ -131,7 +131,7 @@ Include only source-backed current-day values that exist in the saved artifact:
 - professional plan items ordered by their explicit deadline or linked weekly allocation, then by source order when no time is available;
 - training, NSDR, intermittent fasting, calorie limit, and budget when supplied;
 - IF as a standalone window line without calorie or budget subitems;
-- a separate six-block macro schedule with kcal, protein, fat, carbohydrates, and `configured|empty` status, selected by exact planned calories rather than training/rest mode;
+- a separate six-block macro schedule with kcal, protein, fat, carbohydrates, and `configured|empty` status, selected by exact planned calories rather than training/rest mode. When available, render exactly one row for each slot in this order: `09:00-11:00`, `11:00-13:00`, `13:00-15:00`, `15:00-17:00`, `17:00-19:00`, `19:00-21:00`; totals never replace the six rows;
 - a separate budget section for the daily budget and monthly spending projection;
 - training and NSDR after the macro schedule; unknown planned calories remain unknown rather than being guessed;
 - close-of-day habits, overload or plan-readiness warnings, and deferred professional scope;

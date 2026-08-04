@@ -66,7 +66,7 @@ Plan na dziś (read-only):
 - Data, WIG, DoD, deadline
 - Professional plan items in chronological order
 - IF as a standalone window line only; do not nest calorie or budget values under IF
-- A separate six-block macro schedule with `food_blocks`, kcal, protein, fat, carbohydrates, and `configured|empty` status; select it by exact `planned_calories_representative`, and do not guess when that target is unknown
+- A separate six-block macro schedule with `food_blocks`, rendered as exactly six rows in this order: `09:00-11:00`, `11:00-13:00`, `13:00-15:00`, `15:00-17:00`, `17:00-19:00`, `19:00-21:00`; every row has `configured|empty` status, and configured rows show kcal, protein, fat, and carbohydrates. A total never replaces the rows. Select it by exact `planned_calories_representative`, and do not guess when that target is unknown
 - A separate Budget section for the daily budget and monthly spending projection; weekly calorie target belongs in the macro schedule section
 - Training and NSDR after the macro schedule
 - Close habits, warnings, conflicts, and deferred scope when supplied
