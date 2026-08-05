@@ -31,6 +31,9 @@ weekly_calorie_budget: <number>
 training_day_standard: <number>
 rest_day_standard: <number>
 minimum_daily_calories: <number-or-blank>
+macro_target_protein_g: <number>
+macro_target_fat_g: <number>
+macro_calorie_tolerance_kcal: <number>
 ```
 
 `minimum_daily_calories` is optional. A blank value means that the common-sense recommendation is unavailable; AI System must not invent a minimum.
@@ -48,11 +51,11 @@ When the local configuration contains a complete macro food-block schedule, the 
 19:00-21:00
 ```
 
-The calculator returns the blocks under the `food_blocks` JSON key. Each block has `configured` or `empty` status. Configured blocks report target calories, protein, fat, and carbohydrates. Empty blocks report no numeric values and do not count as intake. The selected schedule is determined only by the exact `planned_calories_representative` value from the saved check-in. A matching `calorie_<target>_block_*` profile is required; training/rest mode and planned training time never select the macro schedule. If the calorie target is missing or no matching profile exists, the schedule is `unknown` or `unavailable` and the calculator does not guess. For a selected profile, IF conflicts are returned as `if_conflicts`.
+The calculator returns the blocks under the `food_blocks` JSON key. Each block has `configured` or `empty` status. Configured blocks report derived calories, protein, fat, and carbohydrates. Empty blocks report no numeric values and do not count as intake. The selected schedule is determined by planned training/rest mode: complete training data selects `training`, explicit no-training selects `rest`, and missing or ambiguous data remains `unknown`. The independent `planned_calories_representative` value supplies the total calorie target. If the calorie target or selected profile is missing, the schedule is `unknown` or `unavailable` and the calculator does not guess. For a selected profile, IF conflicts are returned as `if_conflicts`.
 
-Configuration keys use the form `calorie_<target>_block_<slot>_<field>`, where `<target>` is a configured calorie target such as `2300` or `2500`, `<slot>` is `09_11`, `11_13`, `13_15`, `15_17`, `17_19`, or `19_21`, and `<field>` is `status`, `protein_g`, `fat_g`, `carbohydrates_g`, or `calorie_target`. Protein and fat may remain approximately stable across profiles while carbohydrates rotate with the selected calorie target. The training/rest standards remain owner baselines for reporting only; they do not choose a food schedule.
+Configuration uses shared targets `macro_target_protein_g`, `macro_target_fat_g`, and `macro_calorie_tolerance_kcal`, plus `macro_training_block_<slot>_*` and `macro_rest_block_<slot>_*` keys. Each block has a `status` and, when configured, approximate `protein_share_percent`, `fat_share_percent`, and `carbohydrates_share_percent`. The calculator allocates the shared protein and fat anchors by those shares and calculates carbohydrates as the residual required by the check-in calorie target. The training/rest standards remain owner baselines for reporting and do not set the calorie target.
 
-The summary compares the primary daily calorie target with calories derived from macro grams using `4/4/9`, and with the sum of block calorie targets. It reports differences without changing the target or the macro values. If a configured block falls outside the IF window, the conflict is shown. Missing or incomplete macro configuration makes the food schedule unavailable while leaving the spending and weekly calorie report usable. The unavailable result contains a deterministic `reason` and `invalid_or_missing_fields`, and never exposes partial macro values. Missing or malformed base budget configuration, missing private configuration, or stale official indexes remains a calculator `STOP`.
+The summary compares the primary daily calorie target with calories derived from macro grams using `4/4/9`, and with the sum of block calories. It reports differences without changing the target or macro values. The sum of blocks must remain within the configured calorie tolerance, normally `±90 kcal`; protein and fat totals must match their configured anchors, while carbohydrates remain residual. If a configured block falls outside the IF window, the conflict is shown. Missing or incomplete macro configuration makes the food schedule unavailable while leaving the spending and weekly calorie report usable. The unavailable result contains a deterministic `reason` and `invalid_or_missing_fields`, and never exposes partial macro values. Missing or malformed base budget configuration, missing private configuration, or stale official indexes remains a calculator `STOP`.
 
 ## Monthly Spending
 

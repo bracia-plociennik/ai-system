@@ -66,7 +66,7 @@ Plan na dziś (read-only):
 - Data, WIG, DoD, deadline
 - Professional plan items in chronological order
 - IF as a standalone window line only; do not nest calorie or budget values under IF
-- A separate six-block macro schedule with `food_blocks`, rendered as exactly six rows in this order: `09:00-11:00`, `11:00-13:00`, `13:00-15:00`, `15:00-17:00`, `17:00-19:00`, `19:00-21:00`; every row has `configured|empty` status, and configured rows show kcal, protein, fat, and carbohydrates. A total never replaces the rows. Select it by exact `planned_calories_representative`, and do not guess when that target is unknown
+- A separate six-block macro schedule with `food_blocks`, rendered as exactly six rows in this order: `09:00-11:00`, `11:00-13:00`, `13:00-15:00`, `15:00-17:00`, `17:00-19:00`, `19:00-21:00`; every row has `configured|empty` status, and configured rows show kcal, protein, fat, and carbohydrates. A total never replaces the rows. Select it by planned training/rest mode; `planned_calories_representative` independently supplies the total calorie target, and do not guess when the mode is unknown
 - A separate Budget section for the daily budget and monthly spending projection; weekly calorie target belongs in the macro schedule section
 - Training and NSDR after the macro schedule
 - Close habits, warnings, conflicts, and deferred scope when supplied
@@ -78,5 +78,5 @@ Walidacja targeted:
 - <actual check>: przeszła|nie przeszła
 ```
 
-An explicitly linked weekly plan may supply block times. The daily artifact wins on conflict, and the conflict must be stated. Budget, calorie, and food-block values are owner-only and must come from `.systems/scripts/calculate-personal-ops-budgets` after a successful refresh. Select the food schedule by the exact planned calorie target, not by training/rest mode. If IF excludes a configured food block, state the conflict. Do not include prior-day closure, Raw Check-In, OCR, attachments, lessons, or quotations. This summary does not execute tasks, authorize deploys, or send external communication.
+An explicitly linked weekly plan may supply block times. The daily artifact wins on conflict, and the conflict must be stated. Budget, calorie, and food-block values are owner-only and must come from `.systems/scripts/calculate-personal-ops-budgets` after a successful refresh. Select the food schedule by planned training/rest mode; the planned calorie target remains independent. If IF excludes a configured food block, state the conflict. Do not include prior-day closure, Raw Check-In, OCR, attachments, lessons, or quotations. This summary does not execute tasks, authorize deploys, or send external communication.
 An incomplete food-block configuration is reported as `food_schedule.status: unavailable` with a deterministic reason and missing/invalid field list; do not show partial macro values and do not suppress valid spending or weekly calorie balances. Missing base configuration or stale indexes remains a calculator `STOP`.

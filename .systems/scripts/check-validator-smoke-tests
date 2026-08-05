@@ -1232,50 +1232,39 @@ weekly_calorie_budget: 16800
 training_day_standard: 2500
 rest_day_standard: 2300
 minimum_daily_calories:
-calorie_2500_block_09_11_status: empty
-calorie_2500_block_11_13_status: configured
-calorie_2500_block_11_13_protein_g: 60
-calorie_2500_block_11_13_fat_g: 20
-calorie_2500_block_11_13_carbohydrates_g: 110
-calorie_2500_block_11_13_calorie_target: 860
-calorie_2500_block_13_15_status: empty
-calorie_2500_block_15_17_status: configured
-calorie_2500_block_15_17_protein_g: 35
-calorie_2500_block_15_17_fat_g: 5
-calorie_2500_block_15_17_carbohydrates_g: 50
-calorie_2500_block_15_17_calorie_target: 385
-calorie_2500_block_17_19_status: configured
-calorie_2500_block_17_19_protein_g: 20
-calorie_2500_block_17_19_fat_g: 10
-calorie_2500_block_17_19_carbohydrates_g: 10
-calorie_2500_block_17_19_calorie_target: 210
-calorie_2500_block_19_21_status: configured
-calorie_2500_block_19_21_protein_g: 65
-calorie_2500_block_19_21_fat_g: 45
-calorie_2500_block_19_21_carbohydrates_g: 95
-calorie_2500_block_19_21_calorie_target: 1065
-calorie_2300_block_09_11_status: empty
-calorie_2300_block_11_13_status: configured
-calorie_2300_block_11_13_protein_g: 60
-calorie_2300_block_11_13_fat_g: 30
-calorie_2300_block_11_13_carbohydrates_g: 80
-calorie_2300_block_11_13_calorie_target: 830
-calorie_2300_block_13_15_status: empty
-calorie_2300_block_15_17_status: configured
-calorie_2300_block_15_17_protein_g: 35
-calorie_2300_block_15_17_fat_g: 5
-calorie_2300_block_15_17_carbohydrates_g: 30
-calorie_2300_block_15_17_calorie_target: 305
-calorie_2300_block_17_19_status: configured
-calorie_2300_block_17_19_protein_g: 20
-calorie_2300_block_17_19_fat_g: 10
-calorie_2300_block_17_19_carbohydrates_g: 10
-calorie_2300_block_17_19_calorie_target: 210
-calorie_2300_block_19_21_status: configured
-calorie_2300_block_19_21_protein_g: 65
-calorie_2300_block_19_21_fat_g: 35
-calorie_2300_block_19_21_carbohydrates_g: 100
-calorie_2300_block_19_21_calorie_target: 975
+macro_target_protein_g: 180
+macro_target_fat_g: 80
+macro_calorie_tolerance_kcal: 90
+macro_training_block_09_11_status: empty
+macro_training_block_11_13_status: configured
+macro_training_block_11_13_protein_share_percent: 33
+macro_training_block_11_13_fat_share_percent: 25
+macro_training_block_11_13_carbohydrates_share_percent: 42
+macro_training_block_13_15_status: empty
+macro_training_block_15_17_status: configured
+macro_training_block_15_17_protein_share_percent: 31
+macro_training_block_15_17_fat_share_percent: 19
+macro_training_block_15_17_carbohydrates_share_percent: 23
+macro_training_block_17_19_status: empty
+macro_training_block_19_21_status: configured
+macro_training_block_19_21_protein_share_percent: 36
+macro_training_block_19_21_fat_share_percent: 56
+macro_training_block_19_21_carbohydrates_share_percent: 36
+macro_rest_block_09_11_status: empty
+macro_rest_block_11_13_status: configured
+macro_rest_block_11_13_protein_share_percent: 33
+macro_rest_block_11_13_fat_share_percent: 38
+macro_rest_block_11_13_carbohydrates_share_percent: 36
+macro_rest_block_13_15_status: empty
+macro_rest_block_15_17_status: configured
+macro_rest_block_15_17_protein_share_percent: 31
+macro_rest_block_15_17_fat_share_percent: 19
+macro_rest_block_15_17_carbohydrates_share_percent: 18
+macro_rest_block_17_19_status: empty
+macro_rest_block_19_21_status: configured
+macro_rest_block_19_21_protein_share_percent: 36
+macro_rest_block_19_21_fat_share_percent: 44
+macro_rest_block_19_21_carbohydrates_share_percent: 46
 ---
 MD
 cat > "$budget_workspace/personal-ops/indexes/check-ins-v3.md" <<'MD'
@@ -1288,7 +1277,8 @@ cat > "$budget_workspace/personal-ops/indexes/check-ins-v3.jsonl" <<'JSONL'
 {"properties":{"session_date":"2026-08-02","closure_date":"2026-08-01","previous_day_actual_calories_representative":"9999","previous_day_finance_amount":"0"}}
 {"properties":{"session_date":"2026-08-03","closure_date":"2026-08-02","previous_day_actual_calories_representative":"0","previous_day_finance_amount":"420","planned_calories_representative":"2300","planned_training_type":"full_body","planned_training_start":"2026-08-03T17:00","planned_training_end":"2026-08-03T19:00","planned_if_start":"2026-08-03T11:00","planned_if_end":"2026-08-03T21:00"}}
 {"properties":{"session_date":"2026-08-04","closure_date":"2026-08-03","previous_day_actual_calories_representative":"","previous_day_finance_amount":"0","planned_calories_representative":"2300","planned_training_type":"rest","planned_if_start":"2026-08-04T11:00","planned_if_end":"2026-08-04T21:00"}}
-{"properties":{"session_date":"2026-08-05","closure_date":"2026-08-04","previous_day_actual_calories_representative":"","previous_day_finance_amount":"0","planned_if_start":"2026-08-05T11:00","planned_if_end":"2026-08-05T21:00"}}
+{"properties":{"session_date":"2026-08-05","closure_date":"2026-08-04","previous_day_actual_calories_representative":"","previous_day_finance_amount":"0","planned_calories_representative":"2300","planned_if_start":"2026-08-05T11:00","planned_if_end":"2026-08-05T21:00"}}
+{"properties":{"session_date":"2026-08-06","closure_date":"2026-08-05","previous_day_actual_calories_representative":"","previous_day_finance_amount":"0","planned_calories_representative":"2500","planned_training_type":"full_body_A","planned_training_start":"2026-08-06T13:00","planned_training_end":"2026-08-06T15:00","planned_if_start":"2026-08-06T11:00","planned_if_end":"2026-08-06T21:00"}}
 JSONL
 budget_report="$tmp/personal-ops-budget-report.json"
 run_must_pass_capture "personal-ops-budget-august-calculation" "$budget_report" "$budget_calculator" --workspace "$budget_workspace" --date 2026-08-03 --json
@@ -1313,15 +1303,15 @@ assert Decimal(str(weekly["mechanical_limit_after_today"])).quantize(Decimal("0.
 assert weekly["common_sense_limit_after_today"] is None, weekly
 food = weekly["food_schedule"]
 assert food["status"] == "available", food
-assert food["selection_basis"] == "planned_calories_representative", food
+assert food["selection_basis"] == "planned_training_profile", food
 assert food["planned_calorie_target"] == 2300.0, food
-assert food["calorie_plan"] == "2300", food
-assert food["totals"] == {"protein_g": 180.0, "fat_g": 80.0, "carbohydrates_g": 220.0}, food
-assert Decimal(str(food["macro_derived_calories"])) == Decimal("2320"), food
-assert Decimal(str(food["macro_calorie_delta"])) == Decimal("-20"), food
-assert Decimal(str(food["block_calorie_sum"])) == Decimal("2320"), food
+assert food["day_type"] == "training", food
+assert food["totals"] == {"protein_g": 180.0, "fat_g": 80.0, "carbohydrates_g": 215.0}, food
+assert Decimal(str(food["macro_derived_calories"])) == Decimal("2300"), food
+assert Decimal(str(food["macro_calorie_delta"])) == Decimal("0"), food
+assert Decimal(str(food["block_calorie_sum"])) == Decimal("2300"), food
 assert food["if_conflicts"] == [], food
-assert [block["status"] for block in food["food_blocks"]] == ["empty", "configured", "empty", "configured", "configured", "configured"], food
+assert [block["status"] for block in food["food_blocks"]] == ["empty", "configured", "empty", "configured", "empty", "configured"], food
 PY
 rest_report="$tmp/personal-ops-budget-rest-report.json"
 run_must_pass_capture "personal-ops-budget-rest-schedule" "$rest_report" "$budget_calculator" --workspace "$budget_workspace" --date 2026-08-04 --json
@@ -1333,22 +1323,37 @@ from decimal import Decimal
 food = json.loads(open(sys.argv[1], encoding="utf-8").read())["weekly_calories"]["food_schedule"]
 if food.get("status") != "available":
     raise AssertionError(f"rest status: {food!r}")
-if food.get("selection_basis") != "planned_calories_representative":
+if food.get("selection_basis") != "planned_training_profile":
     raise AssertionError(f"rest selection basis: {food!r}")
 if food.get("planned_calorie_target") != 2300.0:
     raise AssertionError(f"rest calorie target: {food!r}")
-if food.get("calorie_plan") != "2300":
-    raise AssertionError(f"rest calorie plan: {food!r}")
-if food.get("totals") != {"protein_g": 180.0, "fat_g": 80.0, "carbohydrates_g": 220.0}:
+if food.get("day_type") != "rest":
+    raise AssertionError(f"rest day type: {food!r}")
+if food.get("totals") != {"protein_g": 180.0, "fat_g": 80.0, "carbohydrates_g": 215.0}:
     raise AssertionError(f"rest totals: {food!r}")
-if Decimal(str(food.get("macro_derived_calories"))) != Decimal("2320"):
+if Decimal(str(food.get("macro_derived_calories"))) != Decimal("2300"):
     raise AssertionError(f"rest macro calories: {food!r}")
-if Decimal(str(food.get("macro_calorie_delta"))) != Decimal("-20"):
+if Decimal(str(food.get("macro_calorie_delta"))) != Decimal("0"):
     raise AssertionError(f"rest macro delta: {food!r}")
-if Decimal(str(food.get("block_calorie_sum"))) != Decimal("2320"):
+if Decimal(str(food.get("block_calorie_sum"))) != Decimal("2300"):
     raise AssertionError(f"rest block calories: {food!r}")
 if food.get("if_conflicts") != []:
     raise AssertionError(f"rest IF conflicts: {food!r}")
+PY
+training_2500_report="$tmp/personal-ops-budget-training-2500-report.json"
+run_must_pass_capture "personal-ops-budget-training-2500-target" "$training_2500_report" "$budget_calculator" --workspace "$budget_workspace" --date 2026-08-06 --json
+python3 - "$training_2500_report" <<'PY'
+import json
+import sys
+from decimal import Decimal
+
+food = json.loads(open(sys.argv[1], encoding="utf-8").read())["weekly_calories"]["food_schedule"]
+assert food["status"] == "available", food
+assert food["day_type"] == "training", food
+assert food["planned_calorie_target"] == 2500.0, food
+assert food["totals"] == {"protein_g": 180.0, "fat_g": 80.0, "carbohydrates_g": 265.0}, food
+assert Decimal(str(food["block_calorie_sum"])) == Decimal("2500"), food
+assert abs(Decimal(str(food["macro_calorie_delta"]))) <= Decimal("90"), food
 PY
 unknown_report="$tmp/personal-ops-budget-unknown-report.json"
 run_must_pass_capture "personal-ops-budget-unknown-day-type" "$unknown_report" "$budget_calculator" --workspace "$budget_workspace" --date 2026-08-05 --json
@@ -1359,16 +1364,16 @@ import sys
 food = json.loads(open(sys.argv[1], encoding="utf-8").read())["weekly_calories"]["food_schedule"]
 if food.get("status") != "unknown":
     raise AssertionError(f"unknown status: {food!r}")
-if food.get("selection_basis") != "planned_calories_representative":
+if food.get("selection_basis") != "planned_training_profile":
     raise AssertionError(f"unknown selection basis: {food!r}")
-if food.get("planned_calorie_target") is not None:
+if food.get("planned_calorie_target") != 2300.0:
     raise AssertionError(f"unknown target: {food!r}")
-if food.get("available_calorie_plans") != ["2300", "2500"]:
-    raise AssertionError(f"available plans: {food!r}")
+if food.get("available_profiles") != ["rest", "training"]:
+    raise AssertionError(f"available profiles: {food!r}")
 PY
 budget_settings="$budget_workspace/personal-ops/check-ins/check-in-settings.local.md"
 cp "$budget_settings" "$tmp/personal-ops-budget-settings.complete.md"
-grep -v '^calorie_2300_block_11_13_status:' "$budget_settings" > "$tmp/personal-ops-budget-settings.incomplete-training.md"
+grep -v '^macro_training_block_11_13_status:' "$budget_settings" > "$tmp/personal-ops-budget-settings.incomplete-training.md"
 mv "$tmp/personal-ops-budget-settings.incomplete-training.md" "$budget_settings"
 incomplete_training_report="$tmp/personal-ops-budget-incomplete-training-report.json"
 run_must_pass_capture "personal-ops-budget-incomplete-training-schedule" "$incomplete_training_report" "$budget_calculator" --workspace "$budget_workspace" --date 2026-08-03 --json
@@ -1384,13 +1389,13 @@ if report["weekly_calories"]["remaining_after_today"] != 14500:
 food = report["weekly_calories"]["food_schedule"]
 if food.get("status") != "unavailable":
     raise AssertionError(repr(food))
-if "calorie_2300_block_11_13_status" not in food.get("invalid_or_missing_fields", []):
+if "macro_training_block_11_13_status" not in food.get("invalid_or_missing_fields", []):
     raise AssertionError(repr(food))
 if any("protein_g" in block for block in food.get("food_blocks", [])):
     raise AssertionError(repr(food))
 PY
 cp "$tmp/personal-ops-budget-settings.complete.md" "$budget_settings"
-grep -v '^calorie_2300_block_13_15_status:' "$budget_settings" > "$tmp/personal-ops-budget-settings.incomplete-rest.md"
+grep -v '^macro_rest_block_13_15_status:' "$budget_settings" > "$tmp/personal-ops-budget-settings.incomplete-rest.md"
 mv "$tmp/personal-ops-budget-settings.incomplete-rest.md" "$budget_settings"
 incomplete_rest_report="$tmp/personal-ops-budget-incomplete-rest-report.json"
 run_must_pass_capture "personal-ops-budget-incomplete-rest-schedule" "$incomplete_rest_report" "$budget_calculator" --workspace "$budget_workspace" --date 2026-08-04 --json
@@ -1406,7 +1411,7 @@ if report["weekly_calories"]["remaining_after_today"] != 14500:
 food = report["weekly_calories"]["food_schedule"]
 if food.get("status") != "unavailable":
     raise AssertionError(repr(food))
-if "calorie_2300_block_13_15_status" not in food.get("invalid_or_missing_fields", []):
+if "macro_rest_block_13_15_status" not in food.get("invalid_or_missing_fields", []):
     raise AssertionError(repr(food))
 if any("protein_g" in block for block in food.get("food_blocks", [])):
     raise AssertionError(repr(food))
@@ -1424,6 +1429,8 @@ assert if_pos < food_pos < training_pos, (if_pos, food_pos, training_pos)
 assert "projection" in template.lower(), template
 assert "planned_calories_representative" in template, template
 assert "planned_calories_representative" in contract, contract
+assert "planned training/rest mode" in template, template
+assert "planned training/rest mode" in contract, contract
 assert "standalone window line" in template, template
 assert "separate Budget section" in template, template
 assert "standalone window line" in contract, contract

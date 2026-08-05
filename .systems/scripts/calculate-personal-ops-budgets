@@ -25,6 +25,9 @@ FOOD_BLOCKS = (
     ("17_19", "17:00-19:00"),
     ("19_21", "19:00-21:00"),
 )
+MACRO_PROFILES = ("training", "rest")
+MACRO_SHARE_FIELDS = ("protein_share_percent", "fat_share_percent", "carbohydrates_share_percent")
+MACRO_SHARE_SUM_TOLERANCE = Decimal("5")
 
 
 def stop(message: str) -> None:
@@ -107,11 +110,17 @@ def block_time(label: str) -> tuple[int, int]:
     return int(start.split(":", 1)[0]), int(end.split(":", 1)[0])
 
 
-def unavailable_food_schedule(calorie_target: Decimal | None, reason: str, fields: list[str]) -> dict:
+def unavailable_food_schedule(
+    calorie_target: Decimal | None,
+    profile: str | None,
+    reason: str,
+    fields: list[str],
+) -> dict:
     result = {
         "status": "unavailable",
-        "selection_basis": "planned_calories_representative",
+        "selection_basis": "planned_training_profile",
         "planned_calorie_target": json_number(calorie_target),
+        "day_type": profile or "unknown",
         "reason": reason,
     }
     if fields:
@@ -119,21 +128,39 @@ def unavailable_food_schedule(calorie_target: Decimal | None, reason: str, field
     return result
 
 
-def calorie_plan_key(target: Decimal) -> str:
-    if target == target.to_integral_value():
-        return str(int(target))
-    return format(target, "f").replace(".", "_")
+def planned_day_type(properties: dict) -> str | None:
+    training_type = str(properties.get("planned_training_type", "")).strip().lower()
+    start = str(properties.get("planned_training_start", "")).strip()
+    end = str(properties.get("planned_training_end", "")).strip()
+    explicit_rest_markers = {"rest", "none", "no_training", "not_planned", "unplanned"}
+    if training_type in explicit_rest_markers and not start and not end:
+        return "rest"
+    if training_type and start and end and training_type not in explicit_rest_markers:
+        return "training"
+    return None
 
 
-def configured_food_schedule(config: dict[str, str], calorie_target: Decimal) -> dict:
-    plan_key = calorie_plan_key(calorie_target)
-    prefix = f"calorie_{plan_key}"
+def allocate_total(total: Decimal, shares: list[Decimal | None]) -> list[Decimal]:
+    active = [index for index, share in enumerate(shares) if share is not None and share > 0]
+    if not active:
+        stop("Macro profile must contain at least one configured block")
+    share_total = sum((shares[index] for index in active), Decimal("0"))
+    values = [Decimal("0") for _ in shares]
+    for index in active:
+        values[index] = (total * shares[index] / share_total).quantize(Decimal("0.1"), rounding=ROUND_HALF_UP)
+    difference = total - sum(values, Decimal("0"))
+    values[active[-1]] += difference
+    return values
+
+
+def configured_food_schedule(config: dict[str, str], calorie_target: Decimal, profile: str) -> dict:
+    prefix = f"macro_{profile}"
     status_keys = [f"{prefix}_block_{block_id}_status" for block_id, _ in FOOD_BLOCKS]
     if not any(key in config and config[key].strip() for key in status_keys):
-        return unavailable_food_schedule(calorie_target, "macro food-block configuration is missing", status_keys)
+        return unavailable_food_schedule(calorie_target, profile, "macro food-block configuration is missing", status_keys)
 
     invalid_or_missing: list[str] = []
-    numeric_suffixes = ("protein_g", "fat_g", "carbohydrates_g", "calorie_target")
+    numeric_suffixes = MACRO_SHARE_FIELDS
     for block_id, _ in FOOD_BLOCKS:
         block_prefix = f"{prefix}_block_{block_id}"
         status_key = f"{block_prefix}_status"
@@ -166,17 +193,70 @@ def configured_food_schedule(config: dict[str, str], calorie_target: Decimal) ->
     if invalid_or_missing:
         return unavailable_food_schedule(
             calorie_target,
+            profile,
             "macro food-block configuration is incomplete or invalid",
             invalid_or_missing,
         )
 
-    food_blocks: list[dict] = []
-    total_protein = Decimal("0")
-    total_fat = Decimal("0")
-    total_carbohydrates = Decimal("0")
-    block_calorie_sum = Decimal("0")
+    target_protein = decimal(config.get("macro_target_protein_g"), "macro_target_protein_g")
+    target_fat = decimal(config.get("macro_target_fat_g"), "macro_target_fat_g")
+    tolerance = decimal(config.get("macro_calorie_tolerance_kcal"), "macro_calorie_tolerance_kcal")
+    target_fields = []
+    if target_protein is None or target_protein <= 0:
+        target_fields.append("macro_target_protein_g")
+    if target_fat is None or target_fat <= 0:
+        target_fields.append("macro_target_fat_g")
+    if tolerance is None or tolerance < 0:
+        target_fields.append("macro_calorie_tolerance_kcal")
+    if target_fields:
+        return unavailable_food_schedule(
+            calorie_target,
+            profile,
+            "macro target configuration is missing or invalid",
+            target_fields,
+        )
+    assert target_protein is not None and target_fat is not None and tolerance is not None
+
+    shares: dict[str, list[Decimal | None]] = {field: [] for field in MACRO_SHARE_FIELDS}
     configured_count = 0
     empty_count = 0
+    for block_id, _ in FOOD_BLOCKS:
+        block_prefix = f"{prefix}_block_{block_id}"
+        status = config.get(f"{block_prefix}_status", "").strip().lower()
+        if status == "configured":
+            configured_count += 1
+            for field in MACRO_SHARE_FIELDS:
+                shares[field].append(decimal(config.get(f"{block_prefix}_{field}"), f"{block_prefix}_{field}", True))
+        else:
+            empty_count += 1
+            for field in MACRO_SHARE_FIELDS:
+                shares[field].append(None)
+
+    for field, values in shares.items():
+        total = sum((value for value in values if value is not None), Decimal("0"))
+        if total <= 0 or abs(total - Decimal("100")) > MACRO_SHARE_SUM_TOLERANCE:
+            return unavailable_food_schedule(
+                calorie_target,
+                profile,
+                "macro share percentages must sum to approximately 100",
+                [f"{prefix}_block_*_{field}"],
+            )
+
+    daily_target = positive(calorie_target, "planned_calories_representative")
+    carbohydrate_target = (daily_target - target_protein * 4 - target_fat * 9) / 4
+    if carbohydrate_target < 0:
+        return unavailable_food_schedule(
+            calorie_target,
+            profile,
+            "planned calorie target is below configured protein and fat anchors",
+            ["planned_calories_representative", "macro_target_protein_g", "macro_target_fat_g"],
+        )
+
+    proteins = allocate_total(target_protein, shares["protein_share_percent"])
+    fats = allocate_total(target_fat, shares["fat_share_percent"])
+    carbohydrates = allocate_total(carbohydrate_target, shares["carbohydrates_share_percent"])
+    food_blocks: list[dict] = []
+    block_calorie_sum = Decimal("0")
 
     for block_id, time_range in FOOD_BLOCKS:
         block_prefix = f"{prefix}_block_{block_id}"
@@ -184,22 +264,16 @@ def configured_food_schedule(config: dict[str, str], calorie_target: Decimal) ->
         if status not in {"configured", "empty"}:
             stop(f"Macro food-block status must be configured or empty: {block_prefix}_status")
         if status == "empty":
-            for suffix in ("protein_g", "fat_g", "carbohydrates_g", "calorie_target"):
+            for suffix in MACRO_SHARE_FIELDS:
                 if config.get(f"{block_prefix}_{suffix}", "").strip():
                     stop(f"Empty macro food block cannot contain values: {block_prefix}_{suffix}")
-            empty_count += 1
             food_blocks.append({"id": block_id, "time": time_range, "status": "empty"})
             continue
-
-        protein = nonnegative(config.get(f"{block_prefix}_protein_g"), f"{block_prefix}_protein_g", True)
-        fat = nonnegative(config.get(f"{block_prefix}_fat_g"), f"{block_prefix}_fat_g", True)
-        carbohydrates = nonnegative(config.get(f"{block_prefix}_carbohydrates_g"), f"{block_prefix}_carbohydrates_g", True)
-        calories = positive(decimal(config.get(f"{block_prefix}_calorie_target"), f"{block_prefix}_calorie_target", True), f"{block_prefix}_calorie_target")
-        assert protein is not None and fat is not None and carbohydrates is not None
-        configured_count += 1
-        total_protein += protein
-        total_fat += fat
-        total_carbohydrates += carbohydrates
+        index = len(food_blocks)
+        protein = proteins[index]
+        fat = fats[index]
+        carbs = carbohydrates[index]
+        calories = protein * 4 + fat * 9 + carbs * 4
         block_calorie_sum += calories
         food_blocks.append({
             "id": block_id,
@@ -207,17 +281,29 @@ def configured_food_schedule(config: dict[str, str], calorie_target: Decimal) ->
             "status": "configured",
             "protein_g": json_number(protein),
             "fat_g": json_number(fat),
-            "carbohydrates_g": json_number(carbohydrates),
+            "carbohydrates_g": json_number(carbs),
             "calorie_target": json_number(calories),
         })
 
+    total_protein = sum(proteins, Decimal("0"))
+    total_fat = sum(fats, Decimal("0"))
+    total_carbohydrates = sum(carbohydrates, Decimal("0"))
     macro_derived = total_protein * 4 + total_carbohydrates * 4 + total_fat * 9
-    daily_target = positive(calorie_target, "planned_calories_representative")
+    if abs(daily_target - block_calorie_sum) > tolerance:
+        return unavailable_food_schedule(
+            calorie_target,
+            profile,
+            "macro schedule calories exceed configured tolerance",
+            ["macro_calorie_tolerance_kcal", "planned_calories_representative"],
+        )
     return {
         "status": "available",
-        "selection_basis": "planned_calories_representative",
+        "selection_basis": "planned_training_profile",
         "planned_calorie_target": json_number(calorie_target),
-        "calorie_plan": plan_key,
+        "day_type": profile,
+        "macro_target_protein_g": json_number(target_protein),
+        "macro_target_fat_g": json_number(target_fat),
+        "macro_calorie_tolerance_kcal": json_number(tolerance),
         "daily_calorie_target": json_number(daily_target),
         "food_blocks": food_blocks,
         "totals": {
@@ -234,13 +320,13 @@ def configured_food_schedule(config: dict[str, str], calorie_target: Decimal) ->
     }
 
 
-def configured_calorie_plans(config: dict[str, str]) -> list[str]:
-    plans = set()
+def configured_macro_profiles(config: dict[str, str]) -> list[str]:
+    profiles = set()
     for key in config:
-        match = re.match(r"^calorie_([0-9]+(?:_[0-9]+)?)_block_", key)
+        match = re.match(r"^macro_(training|rest)_block_", key)
         if match:
-            plans.add(match.group(1))
-    return sorted(plans, key=lambda value: Decimal(value.replace("_", ".")))
+            profiles.add(match.group(1))
+    return sorted(profiles)
 
 
 def clock_hour(value: str) -> int | None:
@@ -268,16 +354,28 @@ def food_if_conflicts(properties: dict, schedule: dict) -> list[str]:
 def food_schedule_report(records: list[dict], target: date, config: dict[str, str]) -> dict:
     properties = next((p for p in records if str(p.get("session_date")) == target.isoformat()), {})
     planned_calories = numeric_property(properties, "planned_calories_representative")
+    profile = planned_day_type(properties)
     if planned_calories is None:
         return {
             "status": "unknown",
-            "selection_basis": "planned_calories_representative",
+            "selection_basis": "planned_training_profile",
             "planned_calorie_target": None,
+            "day_type": profile or "unknown",
             "reason": "planned calorie target is not specified",
-            "available_calorie_plans": configured_calorie_plans(config),
+            "available_profiles": configured_macro_profiles(config),
             "if_conflicts": [],
         }
-    schedule = configured_food_schedule(config, planned_calories)
+    if profile is None:
+        return {
+            "status": "unknown",
+            "selection_basis": "planned_training_profile",
+            "planned_calorie_target": json_number(planned_calories),
+            "day_type": "unknown",
+            "reason": "planned training/rest day type is missing or ambiguous",
+            "available_profiles": configured_macro_profiles(config),
+            "if_conflicts": [],
+        }
+    schedule = configured_food_schedule(config, planned_calories, profile)
     schedule["if_conflicts"] = food_if_conflicts(properties, schedule)
     return schedule
 
@@ -452,7 +550,7 @@ def print_human(report: dict) -> None:
     print(f"  planned_calorie_target: {schedule.get('planned_calorie_target')}")
     if schedule["status"] == "unknown":
         print(f"  reason: {schedule['reason']}")
-        print(f"  available_calorie_plans: {schedule.get('available_calorie_plans', [])}")
+        print(f"  available_profiles: {schedule.get('available_profiles', [])}")
         return
     if schedule["status"] != "available":
         print(f"  reason: {schedule['reason']}")
