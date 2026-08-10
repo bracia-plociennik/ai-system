@@ -1,0 +1,259 @@
+#!/usr/bin/env python3
+"""Render the deterministic owner-only Personal Ops daily plan projection."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import subprocess
+import sys
+from datetime import date
+from decimal import Decimal
+from pathlib import Path
+
+from personal_ops_properties_v3 import parse_frontmatter_and_properties, validate_properties
+
+
+FOOD_TIMES = (
+    "09:00-11:00",
+    "11:00-13:00",
+    "13:00-15:00",
+    "15:00-17:00",
+    "17:00-19:00",
+    "19:00-21:00",
+)
+CALCULATOR = Path(__file__).with_name("calculate-personal-ops-budgets")
+
+
+def stop(message: str) -> None:
+    raise ValueError(message)
+
+
+def parse_date(value: str) -> date:
+    try:
+        return date.fromisoformat(value)
+    except ValueError as exc:
+        raise ValueError(f"invalid report date: {value}") from exc
+
+
+def scalar(properties: dict, key: str) -> str:
+    value = properties.get(key, "")
+    return str(value).strip() if value is not None else ""
+
+
+def parse_json_property(properties: dict, key: str, default):
+    raw = scalar(properties, key)
+    if not raw:
+        return default
+    try:
+        value = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        stop(f"malformed {key} in canonical check-in")
+        raise AssertionError from exc
+    return value
+
+
+def number(value: object) -> str:
+    if value is None or str(value) == "":
+        return "unknown"
+    decimal = Decimal(str(value))
+    rendered = format(decimal.quantize(Decimal("0.01")), "f").rstrip("0").rstrip(".")
+    return rendered or "0"
+
+
+def canonical_path(workspace: Path, report_date: date) -> Path:
+    return workspace / "personal-ops/check-ins" / report_date.strftime("%Y") / f"{report_date.isoformat()}.md"
+
+
+def load_check_in(workspace: Path, report_date: date) -> dict:
+    path = canonical_path(workspace, report_date)
+    if not path.is_file():
+        stop(f"missing canonical daily check-in: {path}")
+    text = path.read_text(encoding="utf-8")
+    try:
+        top, properties, _ = parse_frontmatter_and_properties(text, path)
+        validate_properties(top, properties, path)
+    except Exception as exc:  # noqa: BLE001
+        stop(f"canonical daily check-in is invalid: {exc}")
+    if str(properties.get("session_date", "")) != report_date.isoformat():
+        stop(f"canonical session_date does not match requested date: {path}")
+    return properties
+
+
+def budget_report(workspace: Path, report_date: date) -> dict:
+    result = subprocess.run(
+        [sys.executable, str(CALCULATOR), "--workspace", str(workspace), "--date", report_date.isoformat(), "--json"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode:
+        detail = result.stderr.strip() or result.stdout.strip() or "budget calculator failed"
+        stop(detail.removeprefix("STOP: ").strip())
+    try:
+        return json.loads(result.stdout)
+    except json.JSONDecodeError as exc:
+        stop("budget calculator returned malformed JSON")
+        raise AssertionError from exc
+
+
+def render_tasks(properties: dict) -> list[str]:
+    items = parse_json_property(properties, "planned_items_json", [])
+    if not isinstance(items, list):
+        stop("planned_items_json must be an array")
+    tasks = []
+    for item in items:
+        if not isinstance(item, dict) or str(item.get("stream", "")).lower() not in {"build", "deliver", "promote"}:
+            continue
+        title = str(item.get("title", "")).strip()
+        if not title:
+            continue
+        deadline = str(item.get("deadline", "")).strip()
+        bucket = str(item.get("task_bucket", "")).strip() or ("do" if deadline else "defer")
+        tasks.append((deadline or "9999-12-31T23:59", title, bucket))
+    tasks.sort(key=lambda item: item[0])
+    return [f"- {deadline if deadline != '9999-12-31T23:59' else 'bez deadlineu'}: {title} [{bucket}]" for deadline, title, bucket in tasks]
+
+
+def render_food_schedule(schedule: dict) -> list[str]:
+    status = schedule.get("status", "unknown")
+    lines = [f"- Status: {status}", f"- Typ dnia: {schedule.get('day_type', 'unknown')}", f"- Cel: {number(schedule.get('planned_calorie_target'))} kcal"]
+    if status == "available":
+        blocks = schedule.get("food_blocks", [])
+        by_time = {str(block.get("time")): block for block in blocks if isinstance(block, dict)}
+        if set(by_time) != set(FOOD_TIMES):
+            stop("food schedule does not contain the required six time slots")
+        for time in FOOD_TIMES:
+            block = by_time.get(time)
+            if not block:
+                stop(f"food schedule is missing block {time}")
+            block_status = str(block.get("status", ""))
+            if block_status not in {"configured", "empty"}:
+                stop(f"invalid food block status for {time}: {block_status}")
+            if block_status == "empty":
+                lines.append(f"- {time}: empty")
+            else:
+                lines.append(
+                    f"- {time}: configured | ~{number(block.get('calorie_target'))} kcal | "
+                    f"B {number(block.get('protein_g'))} g | T {number(block.get('fat_g'))} g | "
+                    f"W {number(block.get('carbohydrates_g'))} g"
+                )
+    else:
+        lines.append(f"- Powód: {schedule.get('reason', 'brak projekcji')}")
+        missing = schedule.get("invalid_or_missing_fields", [])
+        if missing:
+            lines.append(f"- Brakujące/nieprawidłowe pola: {', '.join(str(value) for value in missing)}")
+    conflicts = schedule.get("if_conflicts", [])
+    if conflicts:
+        lines.append(f"- Konflikt IF: {', '.join(str(value) for value in conflicts)}")
+    return lines
+
+
+def render(properties: dict, budget: dict) -> str:
+    monthly = budget["monthly_spending"]
+    weekly = budget["weekly_calories"]
+    schedule = weekly["food_schedule"]
+    lines = ["Plan na dziś (read-only):", f"- Data: {scalar(properties, 'session_date')}"]
+    wig = scalar(properties, "wig_title")
+    if wig:
+        lines.append(f"- WIG: {wig}")
+    dod = scalar(properties, "wig_definition_of_done")
+    if dod:
+        lines.append(f"- DoD: {dod}")
+    deadline = scalar(properties, "planned_latest_deadline")
+    if deadline:
+        lines.append(f"- Deadline: {deadline}")
+    tasks = render_tasks(properties)
+    if tasks:
+        lines.append("- Zadania profesjonalne:")
+        lines.extend(f"  {task}" for task in tasks)
+
+    if scalar(properties, "planned_if_start") and scalar(properties, "planned_if_end"):
+        lines.append(f"- IF: {scalar(properties, 'planned_if_start')} - {scalar(properties, 'planned_if_end')}")
+    lines.append("- Harmonogram makro:")
+    lines.extend(f"  {line}" for line in render_food_schedule(schedule))
+    lines.append("- Budżet:")
+    if scalar(properties, "planned_budget_max"):
+        lines.append(f"  - Limit dnia: {scalar(properties, 'planned_budget_max')} {scalar(properties, 'planned_budget_currency') or monthly.get('currency', '')}".rstrip())
+    lines.extend(
+        [
+            f"  - Budżet bazowy miesiąca: {number(monthly.get('base_budget'))} {monthly.get('currency', '')}".rstrip(),
+            f"  - Bufor: {number(monthly.get('buffer'))} {monthly.get('currency', '')}".rstrip(),
+            f"  - Wydatki bieżące: {number(monthly.get('current_spending'))} {monthly.get('currency', '')}".rstrip(),
+            f"  - Pozostały budżet bazowy: {number(monthly.get('remaining_base_budget'))} {monthly.get('currency', '')}".rstrip(),
+            f"  - Średnia na pozostały dzień: {number(monthly.get('average_available_per_remaining_day'))} {monthly.get('currency', '')}".rstrip(),
+            f"  - Przekroczenie tempa: {number(monthly.get('pace_overrun'))} {monthly.get('currency', '')}".rstrip(),
+            f"  - Powrót do limitu: {monthly.get('standard_spend_resume_date', 'unknown')}",
+        ]
+    )
+    lines.append("- Budżet kalorii tygodnia:")
+    lines.extend(
+        [
+            f"  - Tydzień: {weekly.get('week_start')} - {weekly.get('week_end')}",
+            f"  - Limit tygodniowy: {number(weekly.get('weekly_budget'))} kcal",
+            f"  - Zjedzone: {number(weekly.get('actual_consumed'))} kcal",
+            f"  - Pozostało przed dzisiaj: {number(weekly.get('remaining_before_today'))} kcal",
+            f"  - Plan dzisiaj: {number(weekly.get('planned_today'))} kcal",
+            f"  - Pozostało po dzisiaj: {number(weekly.get('remaining_after_today'))} kcal",
+            f"  - Mechanicznie na pozostałe dni: {number(weekly.get('mechanical_limit_after_today'))} kcal",
+        ]
+    )
+    training_start = scalar(properties, "planned_training_start")
+    training_end = scalar(properties, "planned_training_end")
+    if training_start and training_end:
+        lines.append(f"- Trening: {training_start} - {training_end} ({scalar(properties, 'planned_training_type')})")
+    nsdr_start = scalar(properties, "planned_nsdr_start")
+    nsdr_end = scalar(properties, "planned_nsdr_end")
+    if nsdr_start and nsdr_end:
+        lines.append(f"- NSDR: {nsdr_start} - {nsdr_end}")
+    habits = parse_json_property(properties, "dynamic_habits_json", [])
+    if habits:
+        lines.append("- Wieczorne nawyki:")
+        for habit in habits:
+            if isinstance(habit, dict) and habit.get("title"):
+                lines.append(f"  - {habit['title']}")
+    warnings = []
+    if scalar(properties, "overload_status") not in {"", "none"}:
+        warnings.append(f"overload: {scalar(properties, 'overload_status')}")
+    if scalar(properties, "plan_readiness") not in {"", "ready"}:
+        warnings.append(f"plan readiness: {scalar(properties, 'plan_readiness')}")
+    if warnings:
+        lines.append(f"- Ostrzeżenia: {'; '.join(warnings)}")
+    deferred = [task for task in tasks if "[defer]" in task]
+    if deferred:
+        lines.append("- Odroczone:")
+        lines.extend(f"  {task}" for task in deferred)
+    lines.append("- Zakres jest zapisanym planem; zapis nie autoryzuje wykonania zadań ani działań zewnętrznych.")
+    return "\n".join(lines) + "\n"
+
+
+def without_one_final_newline(value: str) -> str:
+    return value[:-1] if value.endswith("\n") else value
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--workspace", required=True, type=Path)
+    parser.add_argument("--date", required=True)
+    parser.add_argument("--check-file", type=Path)
+    args = parser.parse_args()
+    try:
+        report_date = parse_date(args.date)
+        workspace = args.workspace.resolve()
+        properties = load_check_in(workspace, report_date)
+        expected = render(properties, budget_report(workspace, report_date))
+        if args.check_file:
+            actual = args.check_file.read_text(encoding="utf-8")
+            if without_one_final_newline(actual) != without_one_final_newline(expected):
+                print("daily summary mismatch", file=sys.stderr)
+                return 1
+        else:
+            sys.stdout.write(expected)
+    except Exception as exc:  # noqa: BLE001
+        print(f"STOP: {exc}", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

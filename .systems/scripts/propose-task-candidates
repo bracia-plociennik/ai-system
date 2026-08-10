@@ -243,22 +243,85 @@ def apply_mapping(candidate: dict[str, object], labels: dict[str, list[tuple[str
     owned_asset = unique_match(text, labels["owned_asset"])
     project_state = unique_match(text, labels["project_state"])
     taskforge_project = unique_match(text, labels["taskforge_project"])
-    if client:
+    if client and not candidate.get("client"):
         candidate["client"] = client
         candidate["owner_scope"] = "client"
         set_single_context(candidate, f"client/{client}")
-    if owned_asset:
+    if owned_asset and not candidate.get("owned_asset"):
         candidate["owned_asset"] = owned_asset
         candidate["owner_scope"] = "owned-asset"
         set_single_context(candidate, f"owned-asset/{owned_asset}")
-    if project_state:
+    if project_state and not candidate.get("project_state"):
         candidate["project_state"] = f"project-state/{project_state}/"
-        candidate["project"] = project_state
-        candidate["owner_scope"] = "project"
-    if taskforge_project:
+        if not candidate.get("project"):
+            candidate["project"] = project_state
+        if not candidate.get("client") and not candidate.get("owned_asset"):
+            candidate["owner_scope"] = "project"
+    if taskforge_project and not candidate.get("projects"):
         candidate["projects"] = [f"[[{taskforge_project}]]"]
     if not any(candidate.get(key) for key in ("client", "owned_asset", "project", "project_state", "projects")):
         candidate["mapping_note"] = "Mapping requires review"
+
+
+WEEKLY_MAPPING_KEYS = {"workspace", "client", "owned_asset", "project", "project_state", "scope"}
+
+
+def explicit_weekly_mapping(item: dict[str, object], workspace: Path, source: Path) -> dict[str, str]:
+    """Validate and normalize canonical weekly routing before heuristics run."""
+    raw = item.get("mapping", {})
+    if raw in (None, ""):
+        return {}
+    if not isinstance(raw, dict):
+        raise SystemExit(f"Weekly plan mapping must be an object for {item.get('id', '')} in {source}")
+    unknown = sorted(set(raw) - WEEKLY_MAPPING_KEYS)
+    if unknown:
+        raise SystemExit(f"Unsupported weekly plan mapping fields for {item.get('id', '')} in {source}: {', '.join(unknown)}")
+    mapping: dict[str, str] = {}
+    for key, value in raw.items():
+        if value in (None, ""):
+            continue
+        if not isinstance(value, str):
+            raise SystemExit(f"Weekly plan mapping field {key} must be a string for {item.get('id', '')} in {source}")
+        normalized = value.strip()
+        if normalized:
+            mapping[key] = normalized
+    if mapping.get("workspace") and mapping["workspace"] != workspace.name:
+        raise SystemExit(
+            f"Weekly plan mapping workspace mismatch for {item.get('id', '')}: "
+            f"{mapping['workspace']} != {workspace.name}"
+        )
+    if mapping.get("client") and mapping.get("owned_asset"):
+        raise SystemExit(f"Weekly plan mapping cannot combine client and owned_asset for {item.get('id', '')}")
+    return mapping
+
+
+def apply_explicit_weekly_mapping(
+    candidate: dict[str, object], mapping: dict[str, str], labels: dict[str, list[tuple[str, str]]]
+) -> None:
+    """Apply canonical weekly routing; heuristic mapping remains a fallback only."""
+    if not mapping:
+        return
+    if mapping.get("client"):
+        candidate["client"] = mapping["client"]
+        candidate["owner_scope"] = "client"
+        set_single_context(candidate, f"client/{mapping['client']}")
+    if mapping.get("owned_asset"):
+        candidate["owned_asset"] = mapping["owned_asset"]
+        candidate["owner_scope"] = "owned-asset"
+        set_single_context(candidate, f"owned-asset/{mapping['owned_asset']}")
+    if mapping.get("project"):
+        candidate["project"] = mapping["project"]
+        taskforge_project = unique_match(mapping["project"], labels["taskforge_project"])
+        if taskforge_project:
+            candidate["projects"] = [f"[[{taskforge_project}]]"]
+    if mapping.get("project_state"):
+        candidate["project_state"] = f"project-state/{mapping['project_state']}/"
+        if not mapping.get("project"):
+            candidate["project"] = mapping["project_state"]
+        if not mapping.get("client") and not mapping.get("owned_asset"):
+            candidate["owner_scope"] = "project"
+    if mapping.get("scope"):
+        candidate["mapping_scope"] = mapping["scope"]
 
 
 def candidates_from_check_in(path: Path, workspace: Path, labels: dict[str, list[tuple[str, str]]]) -> list[dict[str, object]]:
@@ -480,6 +543,8 @@ def candidates_from_weekly_plan(path: Path, workspace: Path, labels: dict[str, l
             "estimated_minutes": str(item.get("estimated_minutes", "")),
             "weekly_allocations_json": json.dumps(weekly_allocations(item), ensure_ascii=False),
         }
+        mapping = explicit_weekly_mapping(item, workspace, path)
+        apply_explicit_weekly_mapping(candidate, mapping, labels)
         apply_execution_classification(candidate, bucket)
         apply_mapping(candidate, labels)
         candidates.append(candidate)
@@ -570,6 +635,7 @@ def render_tasknote(candidate: dict[str, object]) -> str:
         "weekly_allocations_json",
         "source_dream_report",
         "source_dream_priority",
+        "mapping_scope",
     ]
     for key in scalar_fields:
         if key in candidate:

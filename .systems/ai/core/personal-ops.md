@@ -124,6 +124,14 @@ Owner-normalized values take precedence over raw wording and OCR. `brak`, `nie p
 
 After a successful create or update, re-read the saved canonical daily Markdown and return a read-only `Plan na dziś` projection in the response. Follow the ordering in `.systems/ai/core/response-contract.md`.
 
+The projection must come from the deterministic canonical renderer after the real V3 post-write refresh:
+
+```text
+.systems/scripts/render-personal-ops-daily-summary --workspace <workspace> --date YYYY-MM-DD
+```
+
+Paste its output verbatim. For captured-response QA, run the same command with `--check-file <path>`; only a final newline may differ. The renderer is read-only and is not permission to execute a task, deploy, send a message, or perform any external action.
+
 Include only source-backed current-day values that exist in the saved artifact:
 
 - session date;

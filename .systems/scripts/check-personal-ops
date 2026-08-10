@@ -73,6 +73,18 @@ do
   require_ref "$file" 'Walidacja targeted'
 done
 
+require_executable ".systems/scripts/render-personal-ops-daily-summary"
+for term in \
+  'render-personal-ops-daily-summary' \
+  '--check-file' \
+  'verbatim' \
+  'deterministic canonical renderer'
+do
+  require_ref ".systems/ai/core/personal-ops.md" "$term"
+  require_ref ".systems/ai/core/response-contract.md" "$term"
+  require_ref ".systems/ai/templates/workspace/personal-ops/manual-daily-check-in.template.md" "$term"
+done
+
 for file in \
   ".systems/ai/core/personal-ops.md" \
   ".systems/ai/core/response-contract.md" \

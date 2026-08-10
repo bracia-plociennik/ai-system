@@ -57,6 +57,14 @@ Reports and detailed indexes are `private-sensitive`. `detailed-private` keeps n
 
 After a successful owner-approved write or update, re-read the saved canonical check-in and answer in this order:
 
+Generate the block from the saved artifact after the real V3 refresh with the deterministic canonical renderer; do not reconstruct it from chat memory:
+
+```text
+.systems/scripts/render-personal-ops-daily-summary --workspace <workspace> --date YYYY-MM-DD
+```
+
+Paste the renderer output verbatim. `--check-file <path>` is the read-only evaluator and permits only a final newline difference.
+
 ```text
 Zapisano:
 - check-in: <path>

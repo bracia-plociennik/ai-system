@@ -1218,6 +1218,7 @@ mkdir -p "$personal_ops_workspace/dump/incoming/external/notion/check-ins"
 run_must_pass "personal-ops-baseline" "$personal_ops_validator"
 
 budget_calculator="$copy_repo/.systems/scripts/calculate-personal-ops-budgets"
+summary_renderer="$copy_repo/.systems/scripts/render-personal-ops-daily-summary"
 budget_workspace="$tmp/personal-ops-budget-smoke-workspace"
 mkdir -p "$budget_workspace/personal-ops/check-ins" "$budget_workspace/personal-ops/indexes"
 cat > "$budget_workspace/personal-ops/check-ins/check-in-settings.local.md" <<'MD'
@@ -1277,8 +1278,9 @@ cat > "$budget_workspace/personal-ops/indexes/check-ins-v3.jsonl" <<'JSONL'
 {"properties":{"session_date":"2026-08-02","closure_date":"2026-08-01","previous_day_actual_calories_representative":"9999","previous_day_finance_amount":"0"}}
 {"properties":{"session_date":"2026-08-03","closure_date":"2026-08-02","previous_day_actual_calories_representative":"0","previous_day_finance_amount":"420","planned_calories_representative":"2300","planned_training_type":"full_body","planned_training_start":"2026-08-03T17:00","planned_training_end":"2026-08-03T19:00","planned_if_start":"2026-08-03T11:00","planned_if_end":"2026-08-03T21:00"}}
 {"properties":{"session_date":"2026-08-04","closure_date":"2026-08-03","previous_day_actual_calories_representative":"","previous_day_finance_amount":"0","planned_calories_representative":"2300","planned_training_type":"rest","planned_if_start":"2026-08-04T11:00","planned_if_end":"2026-08-04T21:00"}}
-{"properties":{"session_date":"2026-08-05","closure_date":"2026-08-04","previous_day_actual_calories_representative":"","previous_day_finance_amount":"0","planned_calories_representative":"2300","planned_if_start":"2026-08-05T11:00","planned_if_end":"2026-08-05T21:00"}}
+{"properties":{"session_date":"2026-08-05","closure_date":"2026-08-04","previous_day_actual_calories_representative":"","previous_day_finance_amount":"0","planned_calories_representative":"2300","planned_training_type":"full_body","planned_training_start":"2026-08-05T13:00","planned_training_end":"2026-08-05T14:00","planned_if_start":"2026-08-05T11:00","planned_if_end":"2026-08-05T21:00"}}
 {"properties":{"session_date":"2026-08-06","closure_date":"2026-08-05","previous_day_actual_calories_representative":"","previous_day_finance_amount":"0","planned_calories_representative":"2500","planned_training_type":"full_body_A","planned_training_start":"2026-08-06T13:00","planned_training_end":"2026-08-06T15:00","planned_if_start":"2026-08-06T11:00","planned_if_end":"2026-08-06T21:00"}}
+{"properties":{"session_date":"2026-08-07","closure_date":"2026-08-06","previous_day_actual_calories_representative":"","previous_day_finance_amount":"0","planned_calories_representative":"2300","planned_if_start":"2026-08-07T11:00","planned_if_end":"2026-08-07T21:00"}}
 JSONL
 budget_report="$tmp/personal-ops-budget-report.json"
 run_must_pass_capture "personal-ops-budget-august-calculation" "$budget_report" "$budget_calculator" --workspace "$budget_workspace" --date 2026-08-03 --json
@@ -1356,7 +1358,7 @@ assert Decimal(str(food["block_calorie_sum"])) == Decimal("2500"), food
 assert abs(Decimal(str(food["macro_calorie_delta"]))) <= Decimal("90"), food
 PY
 unknown_report="$tmp/personal-ops-budget-unknown-report.json"
-run_must_pass_capture "personal-ops-budget-unknown-day-type" "$unknown_report" "$budget_calculator" --workspace "$budget_workspace" --date 2026-08-05 --json
+run_must_pass_capture "personal-ops-budget-unknown-day-type" "$unknown_report" "$budget_calculator" --workspace "$budget_workspace" --date 2026-08-07 --json
 python3 - "$unknown_report" <<'PY'
 import json
 import sys
@@ -1417,6 +1419,112 @@ if any("protein_g" in block for block in food.get("food_blocks", [])):
     raise AssertionError(repr(food))
 PY
 cp "$tmp/personal-ops-budget-settings.complete.md" "$budget_settings"
+mkdir -p "$budget_workspace/personal-ops/check-ins/2026"
+python3 - "$copy_repo/.systems/ai/templates/workspace/personal-ops/check-in-properties-v3.schema.json" "$budget_workspace/personal-ops/check-ins/2026/2026-08-05.md" <<'PY'
+import json
+import sys
+
+schema = json.load(open(sys.argv[1], encoding="utf-8"))
+values = {field["key"]: field.get("default", "") for field in schema["fields"]}
+values.update({
+    "file_path": "personal-ops/check-ins/2026/2026-08-05.md",
+    "report_id": "2026-08-05",
+    "session_date": "2026-08-05",
+    "closure_date": "2026-08-04",
+    "weekday": "Wednesday",
+    "recording_time": "08:00",
+    "task_generation_policy": "deadline-aware-6d-v1",
+    "plan_readiness": "ready",
+    "wig_kind": "plan-item",
+    "wig_id": "wig-smoke",
+    "wig_title": "Smoke WIG",
+    "wig_plan_item_id": "build-01",
+    "wig_definition_of_done": "Smoke output exists",
+    "task_candidate_eligible_count": 1,
+    "planned_do_count": 1,
+    "planned_with_deadline_count": 1,
+    "planned_earliest_deadline": "2026-08-05T12:30",
+    "planned_latest_deadline": "2026-08-05T12:30",
+    "task_generation_status": "created",
+    "planned_training_start": "2026-08-05 13:00",
+    "planned_training_end": "2026-08-05 14:00",
+    "planned_training_type": "full_body",
+    "planned_nsdr_start": "2026-08-05 15:00",
+    "planned_nsdr_end": "2026-08-05 15:30",
+    "planned_if_start": "2026-08-05 11:00",
+    "planned_if_end": "2026-08-05 21:00",
+    "planned_calories_representative": 2300,
+    "planned_budget_max": 0,
+    "planned_budget_currency": "PLN",
+    "planned_items_json": json.dumps([{"id":"build-01","stream":"build","title":"Smoke task","deadline":"2026-08-05T12:30","task_bucket":"do","definition_of_done":"Smoke output exists"}], ensure_ascii=False),
+    "dynamic_habits_json": json.dumps([{ "title": "Close the kitchen" }], ensure_ascii=False),
+})
+def yaml_scalar(value):
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if value is None:
+        return ""
+    return json.dumps(str(value), ensure_ascii=False)
+lines = ["---", "type: daily-check-in", "schema_version: 3", "index_contract: 3", "session_date: 2026-08-05", "previous_day_date: 2026-08-04", "properties:"]
+for field in schema["fields"]:
+    key = field["key"]
+    lines.append(f"  {key}: {yaml_scalar(values.get(key, ''))}")
+lines.extend(["---", "", "# Smoke Daily Check-In", ""])
+open(sys.argv[2], "w", encoding="utf-8").write("\n".join(lines))
+PY
+summary_capture="$tmp/personal-ops-daily-summary.md"
+run_must_pass_capture "personal-ops-daily-summary-render" "$summary_capture" "$summary_renderer" --workspace "$budget_workspace" --date 2026-08-05
+run_must_pass "personal-ops-daily-summary-check-canonical" "$summary_renderer" --workspace "$budget_workspace" --date 2026-08-05 --check-file "$summary_capture"
+python3 - "$summary_capture" <<'PY'
+import sys
+
+text = open(sys.argv[1], encoding="utf-8").read()
+slots = ["09:00-11:00", "11:00-13:00", "13:00-15:00", "15:00-17:00", "17:00-19:00", "19:00-21:00"]
+positions = [text.index(f"  - {slot}:") for slot in slots]
+assert positions == sorted(positions), positions
+assert len(positions) == 6
+assert "- IF: 2026-08-05 11:00 - 2026-08-05 21:00" in text
+assert "- Budżet:" in text
+assert "- Trening: 2026-08-05 13:00 - 2026-08-05 14:00" in text
+assert "- NSDR: 2026-08-05 15:00 - 2026-08-05 15:30" in text
+PY
+python3 - "$budget_workspace/personal-ops/check-ins/2026/2026-08-05.md" "$budget_workspace/personal-ops/check-ins/2026/2026-08-07.md" <<'PY'
+import sys
+
+source = open(sys.argv[1], encoding="utf-8").read().replace("2026-08-05", "2026-08-07")
+source = source.replace("previous_day_date: 2026-08-04", "previous_day_date: 2026-08-06")
+source = source.replace('  closure_date: "2026-08-04"', '  closure_date: "2026-08-06"')
+source = source.replace('  planned_training_start: "2026-08-07 13:00"', '  planned_training_start: ""')
+source = source.replace('  planned_training_end: "2026-08-07 14:00"', '  planned_training_end: ""')
+source = source.replace('  planned_training_type: "full_body"', '  planned_training_type: ""')
+open(sys.argv[2], "w", encoding="utf-8").write(source)
+PY
+unknown_summary="$tmp/personal-ops-daily-summary-unknown.md"
+run_must_pass_capture "personal-ops-daily-summary-unknown-mode" "$unknown_summary" "$summary_renderer" --workspace "$budget_workspace" --date 2026-08-07
+grep -q '^  - Status: unknown$' "$unknown_summary" || { echo "renderer did not expose unknown food schedule"; exit 1; }
+cp "$budget_settings" "$tmp/personal-ops-budget-settings.renderer-complete.md"
+grep -v '^macro_training_block_11_13_status:' "$budget_settings" > "$tmp/personal-ops-budget-settings.renderer-incomplete.md"
+mv "$tmp/personal-ops-budget-settings.renderer-incomplete.md" "$budget_settings"
+unavailable_summary="$tmp/personal-ops-daily-summary-unavailable.md"
+run_must_pass_capture "personal-ops-daily-summary-unavailable-schedule" "$unavailable_summary" "$summary_renderer" --workspace "$budget_workspace" --date 2026-08-05
+grep -q '^  - Status: unavailable$' "$unavailable_summary" || { echo "renderer did not expose unavailable food schedule"; exit 1; }
+cp "$tmp/personal-ops-budget-settings.renderer-complete.md" "$budget_settings"
+python3 - "$summary_capture" "$tmp/personal-ops-daily-summary-missing-row.md" "$tmp/personal-ops-daily-summary-reordered.md" "$tmp/personal-ops-daily-summary-unsafe.md" <<'PY'
+import sys
+
+source = open(sys.argv[1], encoding="utf-8").read()
+rows = [line for line in source.splitlines() if line.startswith("  - ") and any(slot in line for slot in ("09:00-11:00", "11:00-13:00", "13:00-15:00", "15:00-17:00", "17:00-19:00", "19:00-21:00"))]
+open(sys.argv[2], "w", encoding="utf-8").write(source.replace(rows[-1] + "\n", ""))
+lines = source.splitlines()
+first = lines.index(rows[0])
+second = lines.index(rows[1])
+lines[first], lines[second] = lines[second], lines[first]
+open(sys.argv[3], "w", encoding="utf-8").write("\n".join(lines) + "\n")
+open(sys.argv[4], "w", encoding="utf-8").write(source + "\n- Task wykonany i wdrożenie wysłane.\n")
+PY
+run_must_fail "personal-ops-daily-summary-check-missing-row" "$summary_renderer" --workspace "$budget_workspace" --date 2026-08-05 --check-file "$tmp/personal-ops-daily-summary-missing-row.md"
+run_must_fail "personal-ops-daily-summary-check-reordered-row" "$summary_renderer" --workspace "$budget_workspace" --date 2026-08-05 --check-file "$tmp/personal-ops-daily-summary-reordered.md"
+run_must_fail "personal-ops-daily-summary-check-unsafe-claim" "$summary_renderer" --workspace "$budget_workspace" --date 2026-08-05 --check-file "$tmp/personal-ops-daily-summary-unsafe.md"
 python3 - "$copy_repo/.systems/ai/templates/workspace/personal-ops/manual-daily-check-in.template.md" "$copy_repo/.systems/ai/core/response-contract.md" <<'PY'
 import sys
 
@@ -2408,7 +2516,7 @@ wig_id: wig-01
 wig_title: Ship the weekly fixture
 wig_definition_of_done: Fixture is validated
 daily_blocks_json: [{"date":"2026-07-27","block_id":"build-future"},{"date":"2026-07-27","block_id":"adapt-build-deliver"},{"date":"2026-07-27","block_id":"deliver-financial-impact"},{"date":"2026-07-27","block_id":"adapt-promote-deliver"},{"date":"2026-07-28","block_id":"build-future"},{"date":"2026-07-28","block_id":"adapt-build-deliver"},{"date":"2026-07-28","block_id":"deliver-financial-impact"},{"date":"2026-07-28","block_id":"adapt-promote-deliver"},{"date":"2026-07-29","block_id":"build-future"},{"date":"2026-07-29","block_id":"adapt-build-deliver"},{"date":"2026-07-29","block_id":"deliver-financial-impact"},{"date":"2026-07-29","block_id":"adapt-promote-deliver"},{"date":"2026-07-30","block_id":"build-future"},{"date":"2026-07-30","block_id":"adapt-build-deliver"},{"date":"2026-07-30","block_id":"deliver-financial-impact"},{"date":"2026-07-30","block_id":"adapt-promote-deliver"},{"date":"2026-07-31","block_id":"build-future"},{"date":"2026-07-31","block_id":"adapt-build-deliver"},{"date":"2026-07-31","block_id":"deliver-financial-impact"},{"date":"2026-07-31","block_id":"adapt-promote-deliver"}]
-weekly_plan_items_json: [{"id":"weekly-build-01","stream":"build","title":"Build weekly fixture","definition_of_done":"Fixture file and validation evidence exist","estimated_minutes":60,"deadline":"2026-07-29T15:00","planned_allocations":[{"date":"2026-07-27","block_id":"build-future","minutes":60}]},{"id":"weekly-deliver-01","stream":"deliver","title":"Defer weekly follow-up","definition_of_done":"Follow-up is ready for a later week","estimated_minutes":30,"planned_allocations":[{"date":"2026-07-28","block_id":"adapt-build-deliver","minutes":30}]},{"id":"weekly-promote-01","stream":"promote","title":"Delegate weekly promotion","definition_of_done":"Promotion handoff is accepted","estimated_minutes":20,"deadline":"2026-07-30T12:00","task_bucket":"delegate","planned_allocations":[{"date":"2026-07-30","block_id":"adapt-promote-deliver","minutes":20}]}]
+weekly_plan_items_json: [{"id":"weekly-build-01","stream":"build","title":"Build weekly fixture","definition_of_done":"Fixture file and validation evidence exist","estimated_minutes":60,"deadline":"2026-07-29T15:00","mapping":{"workspace":"weekly-plan-workspace","project":"Demo Project"},"planned_allocations":[{"date":"2026-07-27","block_id":"build-future","minutes":60}]},{"id":"weekly-deliver-01","stream":"deliver","title":"Defer weekly follow-up","definition_of_done":"Follow-up is ready for a later week","estimated_minutes":30,"mapping":{"client":"demo-client","project":"Demo Project"},"planned_allocations":[{"date":"2026-07-28","block_id":"adapt-build-deliver","minutes":30}]},{"id":"weekly-promote-01","stream":"promote","title":"Delegate weekly promotion","definition_of_done":"Promotion handoff is accepted","estimated_minutes":20,"deadline":"2026-07-30T12:00","task_bucket":"delegate","mapping":{"client":"demo-client","scope":"advisory-only"},"planned_allocations":[{"date":"2026-07-30","block_id":"adapt-promote-deliver","minutes":20}]}]
 task_generation_references_json: []
 revision_audit_json: []
 ---
@@ -2424,6 +2532,29 @@ grep -q '"due": "2026-07-29T15:00"' "$tmp/weekly-plan-candidates.json" || { echo
 grep -q '"6d/defer"' "$tmp/weekly-plan-candidates.json" || { echo "weekly plan candidate missing no-deadline defer"; exit 1; }
 grep -q '"6d/delegate"' "$tmp/weekly-plan-candidates.json" || { echo "weekly plan candidate missing explicit delegate"; exit 1; }
 grep -q '"due": "2026-07-30T12:00"' "$tmp/weekly-plan-candidates.json" || { echo "weekly plan candidate missing delegated deadline"; exit 1; }
+python3 - "$tmp/weekly-plan-candidates.json" <<'PY'
+import json
+import sys
+
+candidates = json.load(open(sys.argv[1], encoding="utf-8"))
+client_candidates = [candidate for candidate in candidates if candidate.get("client") == "demo-client"]
+assert client_candidates, "explicit weekly client mapping was lost"
+assert any(candidate.get("project") == "Demo Project" for candidate in client_candidates), "explicit weekly project mapping was lost"
+assert any(candidate.get("contexts") == ["client/demo-client"] for candidate in client_candidates), "explicit weekly client context was lost"
+assert any(candidate.get("workspace") == "weekly-plan-workspace" for candidate in candidates), "explicit weekly workspace mapping was lost"
+PY
+
+python3 - "$weekly_plan_file" "$tmp/weekly-plan-malformed-mapping.md" "$tmp/weekly-plan-mismatched-workspace.md" <<'PY'
+import sys
+
+source = open(sys.argv[1], encoding="utf-8").read()
+malformed = source.replace('"mapping":{"workspace":"weekly-plan-workspace","project":"Demo Project"}', '"mapping":"invalid"')
+mismatched = source.replace('"workspace":"weekly-plan-workspace"', '"workspace":"other-workspace"', 1)
+open(sys.argv[2], "w", encoding="utf-8").write(malformed)
+open(sys.argv[3], "w", encoding="utf-8").write(mismatched)
+PY
+run_must_fail "weekly-plan-malformed-mapping-stops-tasks" "$task_candidate_script" --workspace "$weekly_plan_workspace" --weekly-plan "$tmp/weekly-plan-malformed-mapping.md" --task-vault "$task_candidate_vault" --json
+run_must_fail "weekly-plan-workspace-mismatch-stops-tasks" "$task_candidate_script" --workspace "$weekly_plan_workspace" --weekly-plan "$tmp/weekly-plan-mismatched-workspace.md" --task-vault "$task_candidate_vault" --json
 
 sed 's/plan_readiness: ready/plan_readiness: needs-review/' "$weekly_plan_file" > "$tmp/weekly-plan-not-ready.md"
 run_must_fail "weekly-planning-not-ready-blocks-tasks" "$task_candidate_script" --workspace "$weekly_plan_workspace" --weekly-plan "$tmp/weekly-plan-not-ready.md" --task-vault "$task_candidate_vault" --json

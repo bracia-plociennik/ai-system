@@ -57,6 +57,10 @@ Each Monday-Friday has four blocks:
 
 Each item in `weekly_plan_items_json` has a stable `id`, `stream`, `title`, `definition_of_done`, `estimated_minutes`, optional `planned_date`, optional `deadline`, optional `task_bucket`, optional mappings, and `planned_allocations`.
 
+### Explicit Mapping Precedence
+
+An item's optional `mapping` object is canonical routing metadata. Supported fields are `workspace`, `client`, `owned_asset`, `project`, `project_state`, and advisory `scope`. A mapping must be an object; an unsupported field, a client/owned-asset combination, or a workspace different from the active workspace stops TaskNote generation before any write. Explicit values are applied directly to candidate scalar fields and contexts: `client` sets `owner_scope: client` and `contexts: [client/<client>]`, `owned_asset` sets the corresponding owned-asset scope, and `project` is preserved even when no exact TaskForge project wiki link exists. Heuristics may fill only fields left empty and never overwrite explicit mapping. A missing mapping retains the existing heuristic fallback and its review note when no unambiguous result exists. `scope` is preserved as advisory metadata and does not change routing.
+
 Bucket precedence is deterministic:
 
 1. explicit category wins;
