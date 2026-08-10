@@ -32,6 +32,14 @@ Profiles may reduce script execution time, but they must not change source-of-tr
 
 `--explain` reports the selected profile, smoke-test behavior, final-evidence eligibility, and explicit scoped checks.
 
+Every completed invocation emits a final machine-readable marker:
+`AI_SYSTEM_VALIDATION_RESULT profile=<profile> status=<completed|failed> exit_code=<n> supporting_only=true ...`.
+This marker is completion evidence for the script run, not a semantic PASS or final acceptance. For checkpoint,
+final-system, or upstream-update evidence, pass `--evidence-file <existing-runtime-directory>/<record>.md`.
+The evidence record includes the profile, scope, baseline, checks run or skipped, smoke status, exit code, and residual
+risk; it explicitly records that script evidence is `supporting-only` and that the final verdict is not issued by the
+script. The evidence path must remain outside `.systems/**` and is never created by a routine implementation write.
+
 ## Standard And Full
 
 `standard` runs the complete AI System validator chain except embedded `check-validator-smoke-tests`. Use it only when validation routing marks the broad chain applicable.

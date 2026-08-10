@@ -2,22 +2,87 @@
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+repo_root="$(cd "$script_dir/../.." && pwd -P)"
 profile="standard"
 checks=""
 explain=0
+evidence_file=""
+current_check="argument parsing"
+evidence_path_valid=0
+smoke_skipped=0
 
 usage() {
   cat <<'EOF'
 Usage:
-  .systems/scripts/validate-ai-system [--profile full|standard|scoped|fast] [--checks check-a,check-b] [--explain]
+  .systems/scripts/validate-ai-system [--profile full|standard|scoped|fast] [--checks check-a,check-b] [--evidence-file <runtime-path>] [--explain]
 
 Profiles:
   standard  Complete AI System validator chain without smoke tests. Default daily validator.
   full      Complete validation, including check-validator-smoke-tests.
   scoped    Fast base checks plus explicit --checks validators. Iteration only.
   fast      Cheap sanity checks. Iteration only.
+
+The final AI_SYSTEM_VALIDATION_RESULT marker is script evidence only; it is not a semantic PASS.
+The neutral CLI result is supporting evidence only; script evidence is supporting-only, and semantic QA and final acceptance remain separate.
+AI System validation completed with smoke tests skipped; not final validation evidence without explicit owner acceptance of residual risk.
 EOF
 }
+
+write_evidence() {
+  [[ "$evidence_path_valid" == "1" ]] || return 0
+
+  local rc="$1"
+  local status="failed"
+  local smoke_status="not-applicable"
+  local temp_file
+  [[ "$rc" == "0" ]] && status="completed"
+  if [[ "$profile" == "full" ]]; then
+    smoke_status="run"
+    [[ "$smoke_skipped" == "1" ]] && smoke_status="skipped"
+  fi
+
+  temp_file="$(mktemp "${evidence_file}.tmp.XXXXXX")" || return 0
+  if ! {
+    printf '%s\n' '# Validation Execution Record'
+    printf '%s\n' "- Profile: \`$profile\`"
+    printf '%s\n' "- Scope: AI System product validator chain"
+    printf '%s\n' "- Status: \`$status\`"
+    printf '%s\n' "- Exit code: \`$rc\`"
+    printf '%s\n' "- Last check: \`$current_check\`"
+    printf '%s\n' "- Smoke status: \`$smoke_status\`"
+    printf '%s\n' '- Semantic QA result: not-provided-by-script'
+    printf '%s\n' '- Findings/blockers: script result only; semantic review required'
+    printf '%s\n' '- Product checks: not-provided-by-script'
+    printf '%s\n' '- AI System script applicability: applicable for this validator route'
+    printf '%s\n' '- Script evidence role: `supporting-only`'
+    printf '%s\n' '- Final verdict: not-issued-by-script'
+    printf '%s\n' '- Skipped checks: see smoke status and command output'
+    printf '%s\n' '- Residual risk: green scripts do not establish semantic PASS or final acceptance'
+  } > "$temp_file"; then
+    rm -f "$temp_file"
+    return 0
+  fi
+  mv "$temp_file" "$evidence_file"
+}
+
+emit_result() {
+  local rc="$1"
+  local status="failed"
+  local smoke_status="not-applicable"
+  [[ "$rc" == "0" ]] && status="completed"
+  if [[ "$profile" == "full" ]]; then
+    smoke_status="run"
+    [[ "$smoke_skipped" == "1" ]] && smoke_status="skipped"
+  fi
+  printf 'AI_SYSTEM_VALIDATION_RESULT profile=%s status=%s exit_code=%s supporting_only=true smoke=%s\n' "$profile" "$status" "$rc" "$smoke_status"
+}
+
+on_exit() {
+  local rc=$?
+  write_evidence "$rc"
+  emit_result "$rc"
+}
+trap on_exit EXIT
 
 while [[ "$#" -gt 0 ]]; do
   case "$1" in
@@ -29,6 +94,11 @@ while [[ "$#" -gt 0 ]]; do
     --checks)
       [[ "$#" -ge 2 ]] || { echo "Missing value for --checks"; exit 1; }
       checks="$2"
+      shift 2
+      ;;
+    --evidence-file)
+      [[ "$#" -ge 2 ]] || { echo "Missing value for --evidence-file"; exit 1; }
+      evidence_file="$2"
       shift 2
       ;;
     --explain)
@@ -57,6 +127,16 @@ if [[ "$profile" == "full" && "${AI_SYSTEM_SKIP_SMOKE_TESTS:-0}" == "1" ]]; then
   smoke_skipped=1
 fi
 
+if [[ -n "$evidence_file" ]]; then
+  if [[ "$evidence_file" == *".."* || "$evidence_file" == .systems/* || "$evidence_file" == "$repo_root/.systems/"* ]]; then
+    echo "Evidence file must be a runtime path outside .systems/**"
+    exit 2
+  fi
+  evidence_parent="$(dirname "$evidence_file")"
+  [[ -d "$evidence_parent" ]] || { echo "Evidence file parent does not exist: $evidence_parent"; exit 2; }
+  evidence_path_valid=1
+fi
+
 if [[ -n "$checks" && "$profile" != "scoped" ]]; then
   echo "--checks is valid only with --profile scoped"
   exit 1
@@ -68,6 +148,7 @@ if [[ "$profile" == "scoped" && -z "$checks" ]]; then
 fi
 
 run_cmd() {
+  current_check="$*"
   if [[ "$explain" == "1" ]]; then
     printf '+ %s\n' "$*"
   fi
@@ -81,11 +162,10 @@ explain_profile() {
       echo "Validation profile: full"
       if [[ "$smoke_skipped" == "1" ]]; then
         echo "Smoke tests: skipped by AI_SYSTEM_SKIP_SMOKE_TESTS=1"
-        echo "Final validation evidence: no, unless owner explicitly accepts residual risk"
       else
         echo "Smoke tests: run"
-      echo "Script evidence: complete supporting evidence"
       fi
+      echo "Script evidence: supporting-only"
       ;;
     standard)
       echo "Validation profile: standard"
@@ -107,8 +187,8 @@ explain_profile() {
 }
 
 run_fast_checks() {
-  if git -C "$script_dir/../.." rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    run_cmd git -C "$script_dir/../.." diff --check
+  if git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    run_cmd git -C "$repo_root" diff --check
   elif [[ "$explain" == "1" ]]; then
     echo "+ git diff --check (skipped: not a git repository)"
   fi
@@ -170,6 +250,10 @@ run_standard_checks() {
 
 explain_profile
 
+if [[ "$profile" == "full" && "$smoke_skipped" == "1" ]]; then
+  echo "AI System validation completed with smoke tests skipped; not final validation evidence without explicit owner acceptance of residual risk."
+fi
+
 if [[ "$profile" == "fast" ]]; then
   run_fast_checks
   exit 0
@@ -192,9 +276,4 @@ if [[ "$profile" == "full" && "$smoke_skipped" != "1" ]]; then
   run_cmd "$script_dir/check-validator-smoke-tests"
 fi
 
-if [[ "$smoke_skipped" == "1" ]]; then
-  echo "AI System validation completed with smoke tests skipped; not final validation evidence without explicit owner acceptance of residual risk."
-  exit 0
-fi
-
-echo "AI System validation checks completed successfully ($profile profile); script evidence is supporting-only."
+exit 0

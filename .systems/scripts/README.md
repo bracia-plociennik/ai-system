@@ -56,4 +56,6 @@ Validation scripts for AI System live here.
 
 `check-dreaming-mode` validates the advisory-only Dreaming Mode contract, templates, docs, and optional workspace Dream Reports.
 
+`validate-ai-system` emits `AI_SYSTEM_VALIDATION_RESULT` on every run and accepts `--evidence-file <runtime-path>` for an atomic Validation Execution Record. Both are supporting script evidence only; they never issue semantic PASS or final acceptance. Historical Dream Reports may use the workspace-local `dreams/legacy-dream-reports-v1.md` registry with exact path and SHA-256 while still undergoing privacy and secret scanning.
+
 `check-naming` validates strict Markdown filenames while allowing canonical `SKILL.md` contracts and legacy/context source material.
