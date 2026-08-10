@@ -491,6 +491,8 @@ Zrób semantic final review. Wypisz findings/blockers, sprawdź DoD, edge cases 
 
 Zwykła implementacja, client work, PDF, dokument lub design nie wymagają broad `validate-ai-system`. Zielone skrypty nie oznaczają PASS.
 
+`validate-ai-system` kończy się markerem `AI_SYSTEM_VALIDATION_RESULT`, a opcjonalne `--evidence-file` zapisuje runtime Validation Execution Record. To jest evidence wykonania skryptów `supporting-only`, nie semantic PASS ani final acceptance. Dla workflow evidence ograniczonego do tego projektu uruchom upstreamowy validator z `--project ai-system`; globalny tryb nadal pokazuje drift innych projektów.
+
 ## Rekomendacja Luna / Sol
 
 Każdy nowy planning, implementation i QA scope powinien zawierać advisory recommendation:

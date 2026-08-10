@@ -169,6 +169,8 @@ Use `.systems/ai/core/validation-routing.md` before `.systems/ai/core/validation
 
 AI System scripts are supporting-only. Green scripts do not equal PASS. Ordinary implementation, client work, PDF, document, and design work do not run broad `validate-ai-system`; targeted or full profiles apply only in the matching artifact QA, checkpoint, CI, upstream-update, or final system-verification route.
 
+`validate-ai-system` always emits a final `AI_SYSTEM_VALIDATION_RESULT` completion marker. For a durable validation record, use `--evidence-file` with a path in an existing runtime directory outside `.systems/**`. The marker and record report script completion and supporting evidence only; semantic QA and final acceptance remain separate decisions.
+
 ## Model Selection Guidance
 
 Use `.systems/ai/core/model-selection-guidance.md` for every new planning, implementation, or QA scope. Recommend `GPT-5.6 Luna High` for bounded reversible work and `GPT-5.6 Sol High` for difficult architecture, ambiguity, security, migrations, production, broad integrations, adversarial review, and high-impact policy changes. The recommendation is always advisory with `Blocking: no`.
@@ -176,6 +178,8 @@ Use `.systems/ai/core/model-selection-guidance.md` for every new planning, imple
 ## Cross-System Upgrade Handoff
 
 Use `.systems/ai/core/cross-system-upgrade-handoff.md` before committing or handing off a substantive AI System or AI Workflow upgrade. The owner decides `yes|no|pending`; `pending` blocks commit/handoff, while `yes` requires one privacy-safe handoff under the selected workspace `external-memory/memory/`.
+
+For workflow evidence scoped to this project, run the upstream validator from `ai-workflow/` with `--project ai-system`. This narrows only project status and QA evidence checks; global workflow validation without a selector still reports unrelated workspace drift.
 
 ## Repo-Safe Project State
 
