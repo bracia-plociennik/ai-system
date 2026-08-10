@@ -374,6 +374,14 @@ Uruchom Dreaming Mode full-repo dla workspace <workspace-path> i project/source 
 
 Dreaming Mode nie może automatycznie zapisywać memory, project-state, External Memory, System Insights, skills, statusu, personal-ops, source code, commitów, PR-ów, GitHub mirror ani scheduler automation. Każda promocja z Dream Report wymaga późniejszej jawnej decyzji ownera i normalnego routingu.
 
+Nowy raport najpierw zapisuje metadata i Source Inventory z `Scope preflight: pending`. Przed odczytem źródeł uruchom:
+
+```text
+.systems/scripts/check-dreaming-mode --workspace <workspace-path> --preflight-report <workspace>/dreams/runs/<run>/dream-report.md
+```
+
+Po sukcesie ustaw `Scope preflight: passed`. Finalny check ponownie waliduje inventory wobec lokalnego `dreams/dreaming-scope.local.md`. Scope jest `narrow-only`; nie może dopuścić raw check-inów, detailed indexes, attachmentów, OCR, finansów, kalorii, health details, TaskNote bodies, weekly-plan Markdown, dump intake ani sekretów. Z Personal Ops dozwolone jest wyłącznie `personal-ops/indexes/check-ins-v3.trends.md`.
+
 ## External Source Registry
 
 Use `links/` to record external source systems without copying raw data into memory.

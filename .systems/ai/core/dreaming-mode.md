@@ -18,9 +18,37 @@ AI_SYSTEM_WORKSPACE_HOME/dreams/
       dream-report.md
 ```
 
+Historical reports that predate the current report structure may be admitted through:
+
+```text
+AI_SYSTEM_WORKSPACE_HOME/dreams/legacy-dream-reports-v1.md
+```
+
+The registry records the exact workspace-relative report path and SHA-256. It bypasses only current structural-section validation for that immutable report; privacy and secret-marker scanning still applies. Any byte change invalidates the entry. Current-format reports cannot be downgraded through this registry.
+
+Every current Dream Report uses the workspace-local source guard:
+
+```text
+AI_SYSTEM_WORKSPACE_HOME/dreams/dreaming-scope.local.md
+```
+
+The scope contract is versioned, machine-readable Markdown with an exact workspace-relative allowlist and additive deny rules. Its policy mode is `narrow-only`: a workspace may remove allowed paths or add exclusions, but it cannot override the system hard denylist.
+
+Before reading any listed source, create the report metadata and Source Inventory with `Scope preflight: pending`, then run:
+
+```text
+.systems/scripts/check-dreaming-mode --workspace <workspace-path> --preflight-report <workspace>/dreams/runs/<run>/dream-report.md
+```
+
+Set `Scope preflight: passed` only after the command succeeds. Final Dream Report validation rechecks the source inventory against the same local scope. A reported preflight is evidence for the declared inventory only; without a dedicated runner it does not prove which files a model actually read.
+
+Every Source Inventory row must pass path, scope, hard-deny, existence, and symlink checks. `Reviewed: no` means the source is intentionally not opened; it does not exempt the row from validation and does not authorize later reading.
+
 ## Variants
 
 `workspace-artifacts-only` is the default variant. It may inspect selected workspace runtime artifacts such as `core/`, `dump/`, `memory/`, `project-state/`, `system-insights/`, `external-memory/`, `links/`, `personal-ops/indexes/check-ins-v3.trends.md`, `micro-projects/`, `skills/`, client routers, owned-asset routers, distillations, checkpoints, decisions, and status evidence.
+
+The local exact allowlist is authoritative within that broad category description. Paths absent from the local allowlist are not reviewable. Weekly-plan Markdown is excluded until AI System provides a separate sanitized projection.
 
 Personal Ops V2 indexes are retired. Dreaming Mode may read only `personal-ops/indexes/check-ins-v3.trends.md`, whose aggregate is native-V3-only even when the official V3 indexes also contain a legacy snapshot. It must not read daily check-in Markdown, detailed CSV/JSONL/metrics indexes or redacted projections, legacy snapshot files, attachments, OCR, finances, calories, health details, owner reflections, lessons, or unverified quotations/sources.
 
@@ -81,6 +109,9 @@ Use `.systems/ai/templates/dreaming/dream-report.template.md`.
 Every report must include:
 
 - `Dream variant: <workspace-artifacts-only|full-repo>`;
+- `Scope contract: 1`;
+- `Scope policy: dreams/dreaming-scope.local.md`;
+- `Scope preflight: passed`;
 - source inventory;
 - workspace artifact findings;
 - project/repo review findings, required only for `full-repo`;

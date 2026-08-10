@@ -11,6 +11,7 @@ Dream Reports collect source-backed recommendations from one selected workspace 
 ```text
 dreams/
   README.md
+  dreaming-scope.local.md
   runs/
     YYYY-MM-DD-<slug>/
       dream-report.md
@@ -23,6 +24,11 @@ dreams/
 
 ## Rules
 
+- Populate `dreaming-scope.local.md` from the system template, then keep it local to this workspace.
+- Run `.systems/scripts/check-dreaming-mode --workspace <workspace> --preflight-report <report>` before reading any source listed in a new report.
+- Set `Scope preflight: passed` only after that command succeeds. Final validation rechecks the same inventory.
+- The scope uses exact workspace-relative allowlist paths and additive deny rules. It may narrow the system policy but cannot widen it.
+- Personal Ops permits only `personal-ops/indexes/check-ins-v3.trends.md`. Weekly-plan Markdown has no sanitized projection and is excluded.
 - Treat Dream Reports as advisory recommendations.
 - Do not copy secrets, `.env` values, raw client data, private identifiers, personal check-in content, financial details, production credentials, or sensitive operational details.
 - Promote recommendations only through owner-approved memory, project-state, System Insights, External Memory, skill, status, task, personal-ops, or checkpoint routes.

@@ -4,13 +4,15 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 fail=0
 workspace_arg=""
+preflight_report=""
 
 usage() {
   cat <<'EOF'
-Usage: .systems/scripts/check-dreaming-mode [--workspace <path>]
+Usage: .systems/scripts/check-dreaming-mode [--workspace <path>] [--preflight-report <path>]
 
 Without --workspace, validates product contracts, templates, and docs only.
 With --workspace, also validates Dream Reports under <workspace>/dreams/runs/**.
+With --preflight-report, validates only that draft report's scope metadata and Source Inventory before source review.
 EOF
 }
 
@@ -19,6 +21,11 @@ while [[ $# -gt 0 ]]; do
     --workspace)
       workspace_arg="${2:-}"
       [[ -n "$workspace_arg" ]] || { echo "Missing value for --workspace"; exit 2; }
+      shift 2
+      ;;
+    --preflight-report)
+      preflight_report="${2:-}"
+      [[ -n "$preflight_report" ]] || { echo "Missing value for --preflight-report"; exit 2; }
       shift 2
       ;;
     -h|--help)
@@ -32,6 +39,11 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+if [[ -n "$preflight_report" && -z "$workspace_arg" ]]; then
+  echo "--preflight-report requires --workspace"
+  exit 2
+fi
 
 require_file() {
   local path="$1"
@@ -98,7 +110,10 @@ required_files=(
   ".systems/ai/templates/dreaming/dream-report.template.md"
   ".systems/ai/templates/workspace/dreams/README.md"
   ".systems/ai/templates/workspace/dreams/dreams-readme.template.md"
+  ".systems/ai/templates/workspace/dreams/dreaming-scope.local.template.md"
+  ".systems/ai/templates/workspace/dreams/legacy-dream-reports-v1.template.md"
   ".systems/scripts/check-dreaming-mode"
+  ".systems/scripts/check-dreaming-scope"
 )
 
 for path in "${required_files[@]}"; do
@@ -118,12 +133,20 @@ require_ref ".systems/ai/core/personal-ops.md" 'Dreaming Mode' "personal-ops pri
 require_ref ".systems/ai/core/personal-ops.md" 'check-ins-v3.trends.md' "sanitized Personal Ops trends boundary"
 require_ref ".systems/ai/core/external-memory.md" 'Dream Reports' "external memory boundary"
 require_ref ".systems/scripts/init-workspace" 'dreams/runs' "init-workspace dreams bootstrap"
+require_ref ".systems/scripts/init-workspace" 'dreaming-scope.local' "init-workspace Dreaming scope bootstrap"
 require_ref ".systems/scripts/update-workspace" 'dreams/runs' "update-workspace dreams bootstrap"
+require_ref ".systems/scripts/update-workspace" 'dreaming-scope.local' "update-workspace Dreaming scope bootstrap"
 require_ref ".systems/ai/templates/workspace/workspace-readme.template.md" 'dreams/' "generic workspace README dreams namespace"
 require_ref ".systems/ai/templates/workspace/primary-entity-workspace-readme.template.md" 'dreams/' "primary workspace README dreams namespace"
+require_ref ".systems/ai/core/dreaming-mode.md" 'legacy-dream-reports-v1' "legacy Dream Report registry"
+require_ref ".systems/ai/templates/workspace/dreams/legacy-dream-reports-v1.template.md" 'SHA-256' "legacy Dream Report registry template"
+require_ref ".systems/ai/templates/workspace/dreams/dreaming-scope.local.template.md" 'Policy mode: `narrow-only`' "narrow-only Dreaming scope template"
+require_ref ".systems/ai/templates/workspace/dreams/dreaming-scope.local.template.md" 'check-ins-v3.trends.md' "sanitized Personal Ops source"
+require_ref ".systems/ai/core/dreaming-mode.md" 'preflight-report' "Dreaming source preflight route"
 
 dream_policy="$repo_root/.systems/ai/core/dreaming-mode.md"
 dream_template="$repo_root/.systems/ai/templates/dreaming/dream-report.template.md"
+scope_validator="$repo_root/.systems/scripts/check-dreaming-scope"
 
 for required in \
   'advisory-only' \
@@ -146,7 +169,12 @@ for required in \
   'V1 has no scheduler' \
   'check-ins-v3.trends.md' \
   'must not read daily check-in Markdown' \
-  'detailed CSV/JSONL/metrics indexes'
+  'detailed CSV/JSONL/metrics indexes' \
+  'dreaming-scope.local.md' \
+  'narrow-only' \
+  'preflight-report' \
+  'Reviewed: no' \
+  'Weekly-plan Markdown is excluded'
 do
   if ! rg -q -- "$required" "$dream_policy"; then
     echo "Dreaming Mode policy missing required boundary text: $required"
@@ -156,6 +184,9 @@ done
 
 for required in \
   'Dream variant: `<workspace-artifacts-only\|full-repo>`' \
+  'Scope contract: `1`' \
+  'Scope policy: `dreams/dreaming-scope.local.md`' \
+  'Scope preflight: `<pending\|passed>`' \
   '^## Source Inventory$' \
   '^## Workspace Artifact Findings$' \
   '^## Project/Repo Review Findings$' \
@@ -229,12 +260,41 @@ done
 
 raw_data_pattern='(client[ _-]?name[[:space:]]*[:=]|customer[ _-]?name[[:space:]]*[:=]|\bemail[[:space:]]*[:=]|\bphone[[:space:]]*[:=]|[[:alnum:]._%+-]+@[[:alnum:].-]+\.[[:alpha:]]{2,}|\+[0-9][0-9 .()-]{7,}[0-9]|\([0-9]{2,4}\)[0-9 .-]{5,}[0-9]|[0-9]{3}[ .][0-9]{3}[ .][0-9]{3,4}|\b0x[0-9a-f]{40}\b|\.env\b|api[ _-]?key[[:space:]]*[:=]|private[ _-]?key[[:space:]]*[:=]|wallet[ _-]?private[ _-]?key|production[ _-]?credentials[[:space:]]*[:=]|secret[ _-]?token[[:space:]]*[:=]|\b(sk|pk|ghp|gho|github_pat)_[[:alnum:]_=-]{20,})'
 
+is_registered_legacy_report() {
+  local file="$1"
+  local registry="$workspace_arg/dreams/legacy-dream-reports-v1.md"
+  local relative_path checksum
+  [[ -f "$registry" && "$file" == "$workspace_arg"/* ]] || return 1
+  relative_path="${file#"$workspace_arg"/}"
+  checksum="$(shasum -a 256 "$file" | awk '{print $1}')"
+  awk -F'|' -v expected_path="$relative_path" -v expected_checksum="$checksum" '
+    function trim(value) {
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+      gsub(/^`|`$/, "", value)
+      return value
+    }
+    NF >= 3 && trim($2) == expected_path && trim($3) == expected_checksum { found=1 }
+    END { exit(found ? 0 : 1) }
+  ' "$registry"
+}
+
+check_legacy_dream_report() {
+  local file="$1"
+  if rg -n -i -- "$raw_data_pattern" "$file"; then
+    echo "Legacy Dream Report appears to contain raw client data or secret markers: ${file#"$repo_root/"}"
+    fail=1
+  fi
+}
+
 check_dream_report() {
   local file="$1"
 
   for required in \
     '^## Metadata$' \
     'Dream variant:' \
+    'Scope contract:[[:space:]]*`1`' \
+    'Scope policy:[[:space:]]*`dreams/dreaming-scope.local.md`' \
+    'Scope preflight:[[:space:]]*`passed`' \
     '^## Source Inventory$' \
     '^## Workspace Artifact Findings$' \
     '^## Project/Repo Review Findings$' \
@@ -314,14 +374,35 @@ check_dream_report() {
   fi
 }
 
+check_current_dream_scope() {
+  local file="$1"
+  if ! "$scope_validator" --workspace "$workspace_arg" --report "$file" --require-preflight-passed; then
+    fail=1
+  fi
+}
+
 if [[ -n "$workspace_arg" ]]; then
   if [[ ! -d "$workspace_arg" ]]; then
     echo "Dreaming Mode workspace does not exist: $workspace_arg"
     fail=1
-  elif [[ -d "$workspace_arg/dreams/runs" ]]; then
-    while IFS= read -r -d '' file; do
-      check_dream_report "$file"
-    done < <(find "$workspace_arg/dreams/runs" -type f -name 'dream-report.md' -print0)
+  else
+    workspace_arg="$(cd "$workspace_arg" && pwd -P)"
+    if [[ -n "$preflight_report" ]]; then
+      if [[ "$fail" -eq 0 ]]; then
+        if ! "$scope_validator" --workspace "$workspace_arg" --report "$preflight_report"; then
+          fail=1
+        fi
+      fi
+    elif [[ -d "$workspace_arg/dreams/runs" ]]; then
+      while IFS= read -r -d '' file; do
+        if is_registered_legacy_report "$file"; then
+          check_legacy_dream_report "$file"
+        else
+          check_dream_report "$file"
+          check_current_dream_scope "$file"
+        fi
+      done < <(find "$workspace_arg/dreams/runs" -type f -name 'dream-report.md' -print0)
+    fi
   fi
 fi
 

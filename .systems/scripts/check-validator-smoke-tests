@@ -2571,7 +2571,12 @@ write_dream_report() {
   local file="$1"
   local variant="$2"
   local repo_row="$3"
-  local explicit_path="$4"
+  local project_source_path="$4"
+  local repo_inventory_row="${5:-}"
+  local explicit_path_confirmation="not-applicable"
+  if [[ "$variant" == "full-repo" ]]; then
+    explicit_path_confirmation="yes"
+  fi
   mkdir -p "$(dirname "$file")"
   cat > "$file" <<MD
 # Dream Report
@@ -2581,7 +2586,10 @@ write_dream_report() {
 - Date: \`2026-06-19\`
 - Dream variant: \`$variant\`
 - Workspace: \`/tmp/workspace\`
-- Project/source path: \`$explicit_path\`
+- Project/source path: \`$project_source_path\`
+- Scope contract: \`1\`
+- Scope policy: \`dreams/dreaming-scope.local.md\`
+- Scope preflight: \`passed\`
 - Result: \`completed\`
 
 ## Source Inventory
@@ -2589,6 +2597,7 @@ write_dream_report() {
 | Source path | Source type | Reviewed? | Notes |
 | --- | --- | --- | --- |
 | \`core/status.md\` | \`workspace-artifact\` | \`yes\` | safe |
+$repo_inventory_row
 
 ## Workspace Artifact Findings
 
@@ -2636,7 +2645,7 @@ $repo_row
 
 | Source path | Finding | Target | Reason | Risk/privacy note | Owner action |
 | --- | --- | --- | --- | --- | --- |
-| \`personal-ops/indexes/check-ins.md\` | Review index freshness only. | \`personal-ops\` | Avoid copying private details. | \`private-sensitive\` | \`review\` |
+| \`personal-ops/indexes/check-ins-v3.trends.md\` | Review sanitized trends only. | \`personal-ops\` | Avoid copying private details. | \`private-sensitive\` | \`review\` |
 
 ## Things To Improve Or Remove
 
@@ -2676,7 +2685,7 @@ $repo_row
 - Secret markers copied: \`no\`
 - Production identifiers copied: \`no\`
 - Personal/private details copied: \`no\`
-- Full-repo explicit project/source path provided: \`$explicit_path\`
+- Full-repo explicit project/source path provided: \`$explicit_path_confirmation\`
 - Full-repo exclusions respected: \`yes\`
 - Context-as-data boundary respected: \`yes\`
 - Durable writes performed: \`no\`
@@ -2690,21 +2699,207 @@ $repo_row
 MD
 }
 
+prepare_dream_workspace() {
+  local workspace="$1"
+  mkdir -p "$workspace/dreams" "$workspace/core"
+  cp "$copy_repo/.systems/ai/templates/workspace/dreams/dreaming-scope.local.template.md" "$workspace/dreams/dreaming-scope.local.md"
+  printf '%s\n' '# Status' > "$workspace/core/status.md"
+}
+
+replace_dream_inventory_path() {
+  local report="$1"
+  local replacement="$2"
+  python3 - "$report" "$replacement" <<'PY'
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+replacement = sys.argv[2]
+text = path.read_text()
+old = "| `core/status.md` | `workspace-artifact` | `yes` | safe |"
+new = f"| `{replacement}` | `workspace-artifact` | `yes` | safe |"
+if old not in text:
+    raise SystemExit("source inventory fixture row not found")
+path.write_text(text.replace(old, new, 1))
+PY
+}
+
+add_scope_allowed_path() {
+  local scope="$1"
+  local source_path="$2"
+  python3 - "$scope" "$source_path" <<'PY'
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+source_path = sys.argv[2]
+text = path.read_text()
+marker = "| `core/status.md` |"
+if marker not in text:
+    raise SystemExit("scope fixture marker not found")
+path.write_text(text.replace(marker, marker + f"\n| `{source_path}` |", 1))
+PY
+}
+
 dream_workspace="$tmp/dreaming-workspace"
 workflow_report="$dream_workspace/dreams/runs/2026-06-19-workspace/dream-report.md"
+prepare_dream_workspace "$dream_workspace"
 write_dream_report "$workflow_report" "workspace-artifacts-only" '| `not-applicable` | `not-applicable` | `none` | `not-applicable` | `safe` | `reject` |' "not-applicable"
+run_must_pass "dreaming-mode-valid-workspace-preflight" "$dreaming_validator" --workspace "$dream_workspace" --preflight-report "$workflow_report"
 run_must_pass "dreaming-mode-valid-workspace-report" "$dreaming_validator" --workspace "$dream_workspace"
+
+cp "$workflow_report" "$workflow_report.bak"
+perl -0pi -e 's/Scope preflight: `passed`/Scope preflight: `pending`/' "$workflow_report"
+run_must_pass "dreaming-mode-pending-preflight" "$dreaming_validator" --workspace "$dream_workspace" --preflight-report "$workflow_report"
+run_must_fail "dreaming-mode-final-rejects-pending" "$dreaming_validator" --workspace "$dream_workspace"
+mv "$workflow_report.bak" "$workflow_report"
+
+reviewed_no_workspace="$tmp/dreaming-reviewed-no"
+reviewed_no_report="$reviewed_no_workspace/dreams/runs/2026-06-19-reviewed-no/dream-report.md"
+prepare_dream_workspace "$reviewed_no_workspace"
+write_dream_report "$reviewed_no_report" "workspace-artifacts-only" '| `not-applicable` | `not-applicable` | `none` | `not-applicable` | `safe` | `reject` |' "not-applicable"
+perl -0pi -e 's/\| `core\/status\.md` \| `workspace-artifact` \| `yes`/| `core\/status.md` | `workspace-artifact` | `no`/' "$reviewed_no_report"
+run_must_pass "dreaming-mode-reviewed-no-existing-source" "$dreaming_validator" --workspace "$reviewed_no_workspace" --preflight-report "$reviewed_no_report"
+
+reviewed_no_missing_workspace="$tmp/dreaming-reviewed-no-missing"
+reviewed_no_missing_report="$reviewed_no_missing_workspace/dreams/runs/2026-06-19-reviewed-no-missing/dream-report.md"
+prepare_dream_workspace "$reviewed_no_missing_workspace"
+add_scope_allowed_path "$reviewed_no_missing_workspace/dreams/dreaming-scope.local.md" 'notes/missing-reviewed-no.md'
+write_dream_report "$reviewed_no_missing_report" "workspace-artifacts-only" '| `not-applicable` | `not-applicable` | `none` | `not-applicable` | `safe` | `reject` |' "not-applicable"
+replace_dream_inventory_path "$reviewed_no_missing_report" 'notes/missing-reviewed-no.md'
+perl -0pi -e 's/\| `notes\/missing-reviewed-no\.md` \| `workspace-artifact` \| `yes`/| `notes\/missing-reviewed-no.md` | `workspace-artifact` | `no`/' "$reviewed_no_missing_report"
+run_must_fail "dreaming-mode-reviewed-no-missing-source" "$dreaming_validator" --workspace "$reviewed_no_missing_workspace" --preflight-report "$reviewed_no_missing_report"
 
 full_repo_workspace="$tmp/dreaming-full-repo-workspace"
 full_repo_report="$full_repo_workspace/dreams/runs/2026-06-19-full-repo/dream-report.md"
-write_dream_report "$full_repo_report" "full-repo" '| `projects/example/app.md` | `Review repeated manual step.` | `review` | `Could become a task.` | `safe` | `review` |' "yes"
+full_repo_source="$tmp/dreaming-full-repo-source"
+mkdir -p "$full_repo_source/src"
+printf '%s\n' 'safe source fixture' > "$full_repo_source/src/example.md"
+prepare_dream_workspace "$full_repo_workspace"
+write_dream_report "$full_repo_report" "full-repo" '| `src/example.md` | `Review repeated manual step.` | `review` | `Could become a task.` | `safe` | `review` |' "$full_repo_source" '| `src/example.md` | `repo-source` | `yes` | safe repo source |'
 run_must_pass "dreaming-mode-valid-full-repo-report" "$dreaming_validator" --workspace "$full_repo_workspace"
 
 bad_dream_workspace="$tmp/dreaming-bad-workspace"
 bad_dream_report="$bad_dream_workspace/dreams/runs/2026-06-19-bad/dream-report.md"
+prepare_dream_workspace "$bad_dream_workspace"
 write_dream_report "$bad_dream_report" "workspace-artifacts-only" '| `not-applicable` | `not-applicable` | `none` | `not-applicable` | `safe` | `reject` |' "not-applicable"
 printf '%s\n' 'api_key: sk_test_12345678901234567890' >> "$bad_dream_report"
 run_must_fail "dreaming-mode-secret-marker-report" "$dreaming_validator" --workspace "$bad_dream_workspace"
+
+missing_scope_metadata_workspace="$tmp/dreaming-missing-scope-metadata"
+missing_scope_metadata_report="$missing_scope_metadata_workspace/dreams/runs/2026-06-19-missing-scope/dream-report.md"
+prepare_dream_workspace "$missing_scope_metadata_workspace"
+write_dream_report "$missing_scope_metadata_report" "workspace-artifacts-only" '| `not-applicable` | `not-applicable` | `none` | `not-applicable` | `safe` | `reject` |' "not-applicable"
+perl -0pi -e 's/^- Scope contract:.*\n//m' "$missing_scope_metadata_report"
+run_must_fail "dreaming-mode-current-report-missing-scope-contract" "$dreaming_validator" --workspace "$missing_scope_metadata_workspace"
+
+missing_scope_workspace="$tmp/dreaming-missing-local-scope"
+missing_scope_report="$missing_scope_workspace/dreams/runs/2026-06-19-missing-local-scope/dream-report.md"
+mkdir -p "$missing_scope_workspace/core"
+printf '%s\n' '# Status' > "$missing_scope_workspace/core/status.md"
+write_dream_report "$missing_scope_report" "workspace-artifacts-only" '| `not-applicable` | `not-applicable` | `none` | `not-applicable` | `safe` | `reject` |' "not-applicable"
+run_must_fail "dreaming-mode-current-report-missing-local-scope" "$dreaming_validator" --workspace "$missing_scope_workspace"
+
+unsafe_policy_workspace="$tmp/dreaming-unsafe-policy-mode"
+unsafe_policy_report="$unsafe_policy_workspace/dreams/runs/2026-06-19-unsafe-policy/dream-report.md"
+prepare_dream_workspace "$unsafe_policy_workspace"
+write_dream_report "$unsafe_policy_report" "workspace-artifacts-only" '| `not-applicable` | `not-applicable` | `none` | `not-applicable` | `safe` | `reject` |' "not-applicable"
+perl -0pi -e 's/Policy mode: `narrow-only`/Policy mode: `narrow-only but may widen`/' "$unsafe_policy_workspace/dreams/dreaming-scope.local.md"
+run_must_fail "dreaming-mode-local-scope-conflicting-widen-clause" "$dreaming_validator" --workspace "$unsafe_policy_workspace"
+
+local_deny_workspace="$tmp/dreaming-local-deny"
+local_deny_report="$local_deny_workspace/dreams/runs/2026-06-19-local-deny/dream-report.md"
+prepare_dream_workspace "$local_deny_workspace"
+write_dream_report "$local_deny_report" "workspace-artifacts-only" '| `not-applicable` | `not-applicable` | `none` | `not-applicable` | `safe` | `reject` |' "not-applicable"
+python3 - "$local_deny_workspace/dreams/dreaming-scope.local.md" <<'PY'
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+text = path.read_text()
+marker = "| `prefix` | `dump/incoming/` | Raw intake is outside Dreaming scope. |"
+path.write_text(text.replace(marker, "| `exact` | `core/status.md` | Locally narrowed for smoke coverage. |\n" + marker, 1))
+PY
+run_must_fail "dreaming-mode-local-scope-narrows-allowlist" "$dreaming_validator" --workspace "$local_deny_workspace" --preflight-report "$local_deny_report"
+
+for forbidden_case in \
+  'personal-ops/check-ins/2026/2026-08-10.md' \
+  'personal-ops/indexes/check-ins-v3.csv' \
+  'personal-ops/indexes/check-ins-v3.jsonl' \
+  'personal-ops/indexes/check-ins-v3.metrics.csv' \
+  'personal-ops/check-ins/2026/2026-08-10.assets/photo.jpg' \
+  'notes/private-ocr.md' \
+  'notes/finance/budget.md' \
+  'notes/calories/macro.md' \
+  'notes/health/record.md' \
+  'tasks/TaskNotes/Tasks/client-task.md' \
+  'tasks/weekly-plans/2026/2026-W33.md' \
+  'dump/incoming/raw.md'
+do
+  case_slug="$(printf '%s' "$forbidden_case" | tr '/.' '--')"
+  forbidden_workspace="$tmp/dreaming-forbidden-$case_slug"
+  forbidden_report="$forbidden_workspace/dreams/runs/2026-06-19-forbidden/dream-report.md"
+  prepare_dream_workspace "$forbidden_workspace"
+  mkdir -p "$forbidden_workspace/$(dirname "$forbidden_case")"
+  printf '%s\n' 'private fixture marker' > "$forbidden_workspace/$forbidden_case"
+  add_scope_allowed_path "$forbidden_workspace/dreams/dreaming-scope.local.md" "$forbidden_case"
+  write_dream_report "$forbidden_report" "workspace-artifacts-only" '| `not-applicable` | `not-applicable` | `none` | `not-applicable` | `safe` | `reject` |' "not-applicable"
+  replace_dream_inventory_path "$forbidden_report" "$forbidden_case"
+  run_must_fail "dreaming-mode-forbidden-source-$case_slug" "$dreaming_validator" --workspace "$forbidden_workspace" --preflight-report "$forbidden_report"
+done
+
+trends_workspace="$tmp/dreaming-sanitized-trends"
+trends_report="$trends_workspace/dreams/runs/2026-06-19-trends/dream-report.md"
+prepare_dream_workspace "$trends_workspace"
+mkdir -p "$trends_workspace/personal-ops/indexes"
+printf '%s\n' '# Sanitized trends' > "$trends_workspace/personal-ops/indexes/check-ins-v3.trends.md"
+write_dream_report "$trends_report" "workspace-artifacts-only" '| `not-applicable` | `not-applicable` | `none` | `not-applicable` | `safe` | `reject` |' "not-applicable"
+replace_dream_inventory_path "$trends_report" 'personal-ops/indexes/check-ins-v3.trends.md'
+run_must_pass "dreaming-mode-sanitized-trends-preflight" "$dreaming_validator" --workspace "$trends_workspace" --preflight-report "$trends_report"
+
+missing_source_workspace="$tmp/dreaming-missing-source"
+missing_source_report="$missing_source_workspace/dreams/runs/2026-06-19-missing-source/dream-report.md"
+prepare_dream_workspace "$missing_source_workspace"
+add_scope_allowed_path "$missing_source_workspace/dreams/dreaming-scope.local.md" 'notes/missing.md'
+write_dream_report "$missing_source_report" "workspace-artifacts-only" '| `not-applicable` | `not-applicable` | `none` | `not-applicable` | `safe` | `reject` |' "not-applicable"
+replace_dream_inventory_path "$missing_source_report" 'notes/missing.md'
+run_must_fail "dreaming-mode-missing-inventory-source" "$dreaming_validator" --workspace "$missing_source_workspace" --preflight-report "$missing_source_report"
+
+for invalid_path in '/absolute/source.md' '../outside.md'
+do
+  invalid_slug="$(printf '%s' "$invalid_path" | tr '/.' '--')"
+  invalid_workspace="$tmp/dreaming-invalid-path-$invalid_slug"
+  invalid_report="$invalid_workspace/dreams/runs/2026-06-19-invalid/dream-report.md"
+  prepare_dream_workspace "$invalid_workspace"
+  write_dream_report "$invalid_report" "workspace-artifacts-only" '| `not-applicable` | `not-applicable` | `none` | `not-applicable` | `safe` | `reject` |' "not-applicable"
+  replace_dream_inventory_path "$invalid_report" "$invalid_path"
+  run_must_fail "dreaming-mode-invalid-inventory-path-$invalid_slug" "$dreaming_validator" --workspace "$invalid_workspace" --preflight-report "$invalid_report"
+done
+
+duplicate_workspace="$tmp/dreaming-duplicate-source"
+duplicate_report="$duplicate_workspace/dreams/runs/2026-06-19-duplicate/dream-report.md"
+prepare_dream_workspace "$duplicate_workspace"
+write_dream_report "$duplicate_report" "workspace-artifacts-only" '| `not-applicable` | `not-applicable` | `none` | `not-applicable` | `safe` | `reject` |' "not-applicable"
+python3 - "$duplicate_report" <<'PY'
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+text = path.read_text()
+row = "| `core/status.md` | `workspace-artifact` | `yes` | safe |"
+path.write_text(text.replace(row, row + "\n" + row, 1))
+PY
+run_must_fail "dreaming-mode-duplicate-inventory-source" "$dreaming_validator" --workspace "$duplicate_workspace" --preflight-report "$duplicate_report"
+
+symlink_workspace="$tmp/dreaming-symlink-escape"
+symlink_report="$symlink_workspace/dreams/runs/2026-06-19-symlink/dream-report.md"
+prepare_dream_workspace "$symlink_workspace"
+mkdir -p "$symlink_workspace/notes"
+printf '%s\n' 'outside fixture' > "$tmp/dreaming-outside.md"
+ln -s "$tmp/dreaming-outside.md" "$symlink_workspace/notes/README.md"
+write_dream_report "$symlink_report" "workspace-artifacts-only" '| `not-applicable` | `not-applicable` | `none` | `not-applicable` | `safe` | `reject` |' "not-applicable"
+replace_dream_inventory_path "$symlink_report" 'notes/README.md'
+run_must_fail "dreaming-mode-symlink-escape" "$dreaming_validator" --workspace "$symlink_workspace" --preflight-report "$symlink_report"
 
 properties_v3_workspace="$tmp/personal-ops-properties-v3-workspace"
 mkdir -p "$properties_v3_workspace/personal-ops/check-ins/2026"
@@ -3244,6 +3439,7 @@ test -f "$init_target/tasks/taskforge-vault-setup.template.md" || { echo "init-w
 test -f "$init_target/tasks/weekly-plan.template.md" || { echo "init-workspace did not create weekly plan template"; exit 1; }
 test -f "$init_target/tasks/weekly-plans/README.md" || { echo "init-workspace did not create weekly plans README"; exit 1; }
 test -f "$init_target/dreams/README.md" || { echo "init-workspace did not create dreams README"; exit 1; }
+test -f "$init_target/dreams/dreaming-scope.local.md" || { echo "init-workspace did not create Dreaming scope"; exit 1; }
 test -d "$init_target/dreams/runs" || { echo "init-workspace did not create dreams/runs"; exit 1; }
 test -f "$init_target/checkpoints/README.md" || { echo "init-workspace did not create checkpoints README"; exit 1; }
 test -f "$init_target/checkpoints/blocks/README.md" || { echo "init-workspace did not create block checkpoints README"; exit 1; }
@@ -3253,7 +3449,12 @@ mkdir -p "$dreams_update_workspace/dreams/runs/2026-06-19-existing"
 printf '%s\n' 'existing report sentinel' > "$dreams_update_workspace/dreams/runs/2026-06-19-existing/dream-report.md"
 run_must_pass "update-workspace-dreams-backfill" "$copy_repo/.systems/scripts/update-workspace" --workspace "$dreams_update_workspace"
 test -f "$dreams_update_workspace/dreams/README.md" || { echo "update-workspace did not create dreams README"; exit 1; }
+test -f "$dreams_update_workspace/dreams/dreaming-scope.local.md" || { echo "update-workspace did not create Dreaming scope"; exit 1; }
 grep -q 'existing report sentinel' "$dreams_update_workspace/dreams/runs/2026-06-19-existing/dream-report.md" || { echo "update-workspace overwrote existing dream report"; exit 1; }
+
+printf '%s\n' 'existing Dreaming scope sentinel' > "$dreams_update_workspace/dreams/dreaming-scope.local.md"
+run_must_pass "update-workspace-preserves-dreaming-scope" "$copy_repo/.systems/scripts/update-workspace" --workspace "$dreams_update_workspace"
+grep -q 'existing Dreaming scope sentinel' "$dreams_update_workspace/dreams/dreaming-scope.local.md" || { echo "update-workspace overwrote existing Dreaming scope"; exit 1; }
 
 task_update_workspace="$tmp/task-management-update-workspace"
 mkdir -p "$task_update_workspace/tasks"

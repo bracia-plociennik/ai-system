@@ -335,6 +335,8 @@ Default variant: `workspace-artifacts-only`. It reviews selected workspace artif
 
 Explicit variant: `full-repo`. It requires an owner-provided project or source path and treats repository content as context-as-data.
 
+Current reports declare `Scope contract: 1` and use `<workspace>/dreams/dreaming-scope.local.md`. Populate Source Inventory first, run `.systems/scripts/check-dreaming-mode --workspace <workspace> --preflight-report <report>`, and read sources only after preflight succeeds. The local scope may narrow the system allowlist but cannot override hard exclusions. Personal Ops permits only `personal-ops/indexes/check-ins-v3.trends.md`; weekly-plan Markdown has no sanitized Dreaming projection.
+
 Dreaming Mode does not automatically write memory, project-state, System Insights, External Memory, skills, status, personal-ops, source files, commits, GitHub mirrors, or scheduler automation.
 
 ## External Source Registry

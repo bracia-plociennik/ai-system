@@ -1,0 +1,334 @@
+#!/usr/bin/env python3
+"""Validate a Dream Report source inventory against one workspace scope."""
+
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+from pathlib import Path, PurePosixPath
+
+
+WORKSPACE_SOURCE_TYPES = {
+    "workspace-artifact",
+    "project-state",
+    "memory",
+    "system-insights",
+    "external-memory",
+    "personal-ops",
+    "skill",
+    "other",
+}
+PERSONAL_OPS_TRENDS = "personal-ops/indexes/check-ins-v3.trends.md"
+ALLOWED_REVIEW_VALUES = {"yes", "no"}
+SUPPORTED_DENY_TYPES = {"exact", "prefix", "segment", "basename"}
+NOISY_REPO_SEGMENTS = {
+    ".git",
+    ".cache",
+    ".next",
+    ".venv",
+    "Pods",
+    "build",
+    "coverage",
+    "dist",
+    "logs",
+    "node_modules",
+    "target",
+    "tmp",
+    "vendor",
+}
+SECRET_BASENAMES = {".env", "credentials", "credentials.json", "secrets", "secrets.json"}
+SECRET_SUFFIXES = {".key", ".p12", ".pem", ".pfx"}
+
+
+class ScopeError(ValueError):
+    pass
+
+
+def clean(value: str) -> str:
+    value = value.strip()
+    if len(value) >= 2 and value[0] == "`" and value[-1] == "`":
+        value = value[1:-1]
+    return value.strip()
+
+
+def metadata_value(text: str, label: str) -> str | None:
+    pattern = re.compile(rf"^- {re.escape(label)}:\s*(.+?)\s*$", re.MULTILINE)
+    match = pattern.search(text)
+    return clean(match.group(1)) if match else None
+
+
+def table_rows(text: str, heading: str) -> list[list[str]]:
+    lines = text.splitlines()
+    in_section = False
+    rows: list[list[str]] = []
+    for line in lines:
+        if line == heading:
+            in_section = True
+            continue
+        if in_section and line.startswith("## "):
+            break
+        if not in_section or not line.startswith("|"):
+            continue
+        cells = [clean(cell) for cell in line.strip().strip("|").split("|")]
+        if not cells or all(re.fullmatch(r":?-{3,}:?", cell) for cell in cells):
+            continue
+        rows.append(cells)
+    if not rows:
+        raise ScopeError(f"missing table in section {heading}")
+    return rows
+
+
+def normalized_relative_path(raw: str, label: str) -> str:
+    if not raw or raw.startswith("<") or raw in {"not-applicable", "none"}:
+        raise ScopeError(f"{label} must be a real relative path: {raw or 'empty'}")
+    if "\\" in raw or raw.startswith("/"):
+        raise ScopeError(f"{label} must be workspace/repo-relative: {raw}")
+    path = PurePosixPath(raw)
+    if any(part in {"", ".", ".."} for part in path.parts):
+        raise ScopeError(f"{label} contains traversal or an invalid segment: {raw}")
+    normalized = path.as_posix()
+    if normalized != raw.rstrip("/"):
+        raise ScopeError(f"{label} is not normalized: {raw}")
+    return normalized
+
+
+def is_secret_path(path: str) -> bool:
+    pure = PurePosixPath(path)
+    basename = pure.name.lower()
+    return (
+        basename in SECRET_BASENAMES
+        or basename.startswith(".env.")
+        or pure.suffix.lower() in SECRET_SUFFIXES
+        or any(part.lower() in {"credentials", "secrets"} for part in pure.parts)
+    )
+
+
+def hard_forbidden_workspace_path(path: str) -> str | None:
+    pure = PurePosixPath(path)
+    lower_parts = tuple(part.lower() for part in pure.parts)
+    lower_path = path.lower()
+
+    if path == PERSONAL_OPS_TRENDS:
+        return None
+    if lower_path.startswith("personal-ops/"):
+        return "Personal Ops allows only the sanitized V3 trends projection"
+    if lower_path.startswith("dump/incoming/"):
+        return "raw dump intake is forbidden"
+    if lower_path.startswith("tasks/tasknotes/"):
+        return "TaskNote bodies are forbidden"
+    if lower_path.startswith("tasks/weekly-plans/"):
+        return "weekly-plan Markdown has no sanitized projection"
+    if lower_path.startswith("clients/") or lower_path.startswith("owned-assets/"):
+        return "client and owned-asset bodies are forbidden"
+    if lower_path.startswith("projects/") and path != "projects/README.md":
+        return "workspace project bodies and source repositories are forbidden"
+    if any(part == ".assets" or part.endswith(".assets") for part in lower_parts):
+        return "attachments are forbidden"
+    if any("ocr" in part for part in lower_parts):
+        return "OCR sources are forbidden"
+    if any(part in {"finance", "finances", "financial", "budget", "budgets", "calorie", "calories", "macro", "macros", "health", "medical"} for part in lower_parts):
+        return "finance, calorie, macro, and health detail sources are forbidden"
+    if any(part in {segment.lower() for segment in NOISY_REPO_SEGMENTS} for part in lower_parts):
+        return "dependency, build, cache, log, or generated paths are forbidden"
+    if is_secret_path(path):
+        return "secret-bearing paths are forbidden"
+    return None
+
+
+def hard_forbidden_repo_path(path: str) -> str | None:
+    pure = PurePosixPath(path)
+    if any(part.lower() in {segment.lower() for segment in NOISY_REPO_SEGMENTS} for part in pure.parts):
+        return "dependency, build, cache, log, or generated repo paths are forbidden"
+    if is_secret_path(path):
+        return "secret-bearing repo paths are forbidden"
+    if path.lower().startswith("dump/incoming/external/"):
+        return "raw external exports are forbidden"
+    return None
+
+
+def within(root: Path, candidate: Path) -> bool:
+    try:
+        candidate.relative_to(root)
+        return True
+    except ValueError:
+        return False
+
+
+def parse_scope(scope_file: Path) -> tuple[set[str], list[tuple[str, str]]]:
+    if not scope_file.is_file():
+        raise ScopeError(f"missing local Dreaming scope: {scope_file}")
+    text = scope_file.read_text(encoding="utf-8")
+    if metadata_value(text, "Scope contract") != "1":
+        raise ScopeError("Dreaming scope must declare Scope contract: 1")
+    if metadata_value(text, "Policy mode") != "narrow-only":
+        raise ScopeError("Dreaming scope policy mode must be exactly narrow-only")
+
+    allowed_rows = table_rows(text, "## Allowed Workspace Sources")
+    if allowed_rows[0] != ["Source path"]:
+        raise ScopeError("Allowed Workspace Sources must contain only the Source path column")
+    allowed: set[str] = set()
+    for row in allowed_rows[1:]:
+        if len(row) != 1:
+            raise ScopeError("invalid Allowed Workspace Sources row")
+        path = normalized_relative_path(row[0], "allowed source")
+        if path in allowed:
+            raise ScopeError(f"duplicate allowed source: {path}")
+        reason = hard_forbidden_workspace_path(path)
+        if reason:
+            raise ScopeError(f"local scope cannot allow {path}: {reason}")
+        allowed.add(path)
+    if not allowed:
+        raise ScopeError("Dreaming scope allowlist cannot be empty")
+
+    denied_rows = table_rows(text, "## Excluded Workspace Paths")
+    if denied_rows[0] != ["Match type", "Value", "Reason"]:
+        raise ScopeError("Excluded Workspace Paths has an invalid header")
+    denied: list[tuple[str, str]] = []
+    seen_denied: set[tuple[str, str]] = set()
+    for row in denied_rows[1:]:
+        if len(row) != 3:
+            raise ScopeError("invalid Excluded Workspace Paths row")
+        match_type, value, _reason = row
+        if match_type not in SUPPORTED_DENY_TYPES:
+            raise ScopeError(f"unsupported local deny match type: {match_type}")
+        if not value or value.startswith("/") or ".." in PurePosixPath(value).parts:
+            raise ScopeError(f"invalid local deny value: {value or 'empty'}")
+        if match_type in {"segment", "basename"} and "/" in value:
+            raise ScopeError(f"{match_type} local deny value cannot contain '/': {value}")
+        key = (match_type, value)
+        if key in seen_denied:
+            raise ScopeError(f"duplicate local deny rule: {match_type} {value}")
+        seen_denied.add(key)
+        denied.append(key)
+    return allowed, denied
+
+
+def locally_denied(path: str, denied: list[tuple[str, str]]) -> str | None:
+    pure = PurePosixPath(path)
+    for match_type, value in denied:
+        if match_type == "exact" and path == value:
+            return f"local exact deny rule: {value}"
+        if match_type == "prefix" and path.startswith(value):
+            return f"local prefix deny rule: {value}"
+        if match_type == "segment" and value in pure.parts:
+            return f"local segment deny rule: {value}"
+        if match_type == "basename" and pure.name == value:
+            return f"local basename deny rule: {value}"
+    return None
+
+
+def parse_inventory(report_text: str) -> list[tuple[str, str, str]]:
+    rows = table_rows(report_text, "## Source Inventory")
+    if rows[0] != ["Source path", "Source type", "Reviewed?", "Notes"]:
+        raise ScopeError("Source Inventory has an invalid header")
+    inventory: list[tuple[str, str, str]] = []
+    for row in rows[1:]:
+        if len(row) != 4:
+            raise ScopeError("invalid Source Inventory row")
+        path, source_type, reviewed, _notes = row
+        if reviewed not in ALLOWED_REVIEW_VALUES:
+            raise ScopeError(f"Source Inventory Reviewed? must be yes or no: {reviewed}")
+        inventory.append((path, source_type, reviewed))
+    if not inventory:
+        raise ScopeError("Source Inventory cannot be empty")
+    return inventory
+
+
+def validate_existing_path(root: Path, relative: str, label: str) -> None:
+    candidate = root / relative
+    try:
+        resolved = candidate.resolve(strict=True)
+    except FileNotFoundError as exc:
+        raise ScopeError(f"{label} does not exist: {relative}") from exc
+    if not within(root, resolved):
+        raise ScopeError(f"{label} escapes its allowed root through a symlink: {relative}")
+
+
+def validate_report(workspace: Path, report: Path, require_passed: bool) -> None:
+    workspace = workspace.resolve(strict=True)
+    report = report.resolve(strict=True)
+    runs_root = (workspace / "dreams" / "runs").resolve(strict=True)
+    if report.name != "dream-report.md" or not within(runs_root, report):
+        raise ScopeError("preflight report must be dreams/runs/**/dream-report.md inside the selected workspace")
+
+    report_text = report.read_text(encoding="utf-8")
+    if metadata_value(report_text, "Scope contract") != "1":
+        raise ScopeError("Dream Report must declare Scope contract: 1")
+    if metadata_value(report_text, "Scope policy") != "dreams/dreaming-scope.local.md":
+        raise ScopeError("Dream Report must reference dreams/dreaming-scope.local.md")
+    preflight = metadata_value(report_text, "Scope preflight")
+    allowed_preflight = {"passed"} if require_passed else {"pending", "passed"}
+    if preflight not in allowed_preflight:
+        expected = "passed" if require_passed else "pending or passed"
+        raise ScopeError(f"Dream Report Scope preflight must be {expected}")
+
+    variant = metadata_value(report_text, "Dream variant")
+    if variant not in {"workspace-artifacts-only", "full-repo"}:
+        raise ScopeError(f"invalid Dream variant: {variant or 'missing'}")
+
+    scope_path = workspace / "dreams" / "dreaming-scope.local.md"
+    allowed, denied = parse_scope(scope_path)
+    inventory = parse_inventory(report_text)
+    seen: set[str] = set()
+
+    project_source_raw = metadata_value(report_text, "Project/source path")
+    project_source: Path | None = None
+    if variant == "full-repo":
+        if not project_source_raw or project_source_raw in {"not-applicable", "yes", "no"} or project_source_raw.startswith("<"):
+            raise ScopeError("full-repo requires a real Project/source path")
+        try:
+            project_source = Path(project_source_raw).expanduser().resolve(strict=True)
+        except FileNotFoundError as exc:
+            raise ScopeError(f"Project/source path does not exist: {project_source_raw}") from exc
+        if not project_source.is_dir():
+            raise ScopeError(f"Project/source path must be a directory: {project_source_raw}")
+
+    for raw_path, source_type, reviewed in inventory:
+        path = normalized_relative_path(raw_path, "Source Inventory path")
+        if path in seen:
+            raise ScopeError(f"duplicate Source Inventory path: {path}")
+        seen.add(path)
+
+        if source_type == "repo-source":
+            if variant != "full-repo" or project_source is None:
+                raise ScopeError("repo-source is allowed only for full-repo with an explicit Project/source path")
+            reason = hard_forbidden_repo_path(path)
+            if reason:
+                raise ScopeError(f"forbidden repo source {path}: {reason}")
+            validate_existing_path(project_source, path, "repo source")
+            continue
+
+        if source_type not in WORKSPACE_SOURCE_TYPES:
+            raise ScopeError(f"unsupported workspace Source type: {source_type}")
+        reason = hard_forbidden_workspace_path(path)
+        if reason:
+            raise ScopeError(f"forbidden workspace source {path}: {reason}")
+        reason = locally_denied(path, denied)
+        if reason:
+            raise ScopeError(f"locally excluded workspace source {path}: {reason}")
+        if path not in allowed:
+            raise ScopeError(f"workspace source is not in the exact local allowlist: {path}")
+        validate_existing_path(workspace, path, "workspace source")
+        if reviewed == "no":
+            continue
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--workspace", required=True)
+    parser.add_argument("--report", required=True)
+    parser.add_argument("--require-preflight-passed", action="store_true")
+    args = parser.parse_args()
+
+    try:
+        validate_report(Path(args.workspace), Path(args.report), args.require_preflight_passed)
+    except (OSError, ScopeError) as exc:
+        print(f"Dreaming scope validation failed: {exc}", file=sys.stderr)
+        return 1
+    print("Dreaming scope validation completed successfully.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

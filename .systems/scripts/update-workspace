@@ -399,6 +399,7 @@ backfill_workspace() {
   # check-in-settings.local.md and taskforge-vault.local.md are owner-created local-only settings.
   # Do not backfill populated local configuration or private vault paths.
   copy_template "$workspace_home" "$templates/dreams/dreams-readme.template.md" "$workspace_home/dreams/README.md"
+  copy_template "$workspace_home" "$templates/dreams/dreaming-scope.local.template.md" "$workspace_home/dreams/dreaming-scope.local.md"
   copy_template "$workspace_home" "$templates/skills/README.md" "$workspace_home/skills/README.md"
   copy_template "$workspace_home" "$templates/archive/README.md" "$workspace_home/archive/README.md"
 }

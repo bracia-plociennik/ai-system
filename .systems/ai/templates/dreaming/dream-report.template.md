@@ -6,6 +6,9 @@
 - Dream variant: `<workspace-artifacts-only|full-repo>`
 - Workspace: `<AI_SYSTEM_WORKSPACE_HOME>`
 - Project/source path: `<not-applicable|path>`
+- Scope contract: `1`
+- Scope policy: `dreams/dreaming-scope.local.md`
+- Scope preflight: `<pending|passed>`
 - Result: `<completed|blocked>`
 
 ## Source Inventory
