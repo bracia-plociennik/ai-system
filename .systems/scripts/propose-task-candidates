@@ -243,7 +243,7 @@ def apply_mapping(candidate: dict[str, object], labels: dict[str, list[tuple[str
     owned_asset = unique_match(text, labels["owned_asset"])
     project_state = unique_match(text, labels["project_state"])
     taskforge_project = unique_match(text, labels["taskforge_project"])
-    if client and not candidate.get("client"):
+    if client and not candidate.get("client") and not candidate.get("owned_asset"):
         candidate["client"] = client
         candidate["owner_scope"] = "client"
         set_single_context(candidate, f"client/{client}")

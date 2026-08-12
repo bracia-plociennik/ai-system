@@ -2538,7 +2538,7 @@ wig_id: wig-01
 wig_title: Ship the weekly fixture
 wig_definition_of_done: Fixture is validated
 daily_blocks_json: [{"date":"2026-07-27","block_id":"build-future"},{"date":"2026-07-27","block_id":"adapt-build-deliver"},{"date":"2026-07-27","block_id":"deliver-financial-impact"},{"date":"2026-07-27","block_id":"adapt-promote-deliver"},{"date":"2026-07-28","block_id":"build-future"},{"date":"2026-07-28","block_id":"adapt-build-deliver"},{"date":"2026-07-28","block_id":"deliver-financial-impact"},{"date":"2026-07-28","block_id":"adapt-promote-deliver"},{"date":"2026-07-29","block_id":"build-future"},{"date":"2026-07-29","block_id":"adapt-build-deliver"},{"date":"2026-07-29","block_id":"deliver-financial-impact"},{"date":"2026-07-29","block_id":"adapt-promote-deliver"},{"date":"2026-07-30","block_id":"build-future"},{"date":"2026-07-30","block_id":"adapt-build-deliver"},{"date":"2026-07-30","block_id":"deliver-financial-impact"},{"date":"2026-07-30","block_id":"adapt-promote-deliver"},{"date":"2026-07-31","block_id":"build-future"},{"date":"2026-07-31","block_id":"adapt-build-deliver"},{"date":"2026-07-31","block_id":"deliver-financial-impact"},{"date":"2026-07-31","block_id":"adapt-promote-deliver"}]
-weekly_plan_items_json: [{"id":"weekly-build-01","stream":"build","title":"Build weekly fixture","definition_of_done":"Fixture file and validation evidence exist","estimated_minutes":60,"deadline":"2026-07-29T15:00","mapping":{"workspace":"weekly-plan-workspace","project":"Demo Project"},"planned_allocations":[{"date":"2026-07-27","block_id":"build-future","minutes":60}]},{"id":"weekly-deliver-01","stream":"deliver","title":"Defer weekly follow-up","definition_of_done":"Follow-up is ready for a later week","estimated_minutes":30,"mapping":{"client":"demo-client","project":"Demo Project"},"planned_allocations":[{"date":"2026-07-28","block_id":"adapt-build-deliver","minutes":30}]},{"id":"weekly-promote-01","stream":"promote","title":"Delegate weekly promotion","definition_of_done":"Promotion handoff is accepted","estimated_minutes":20,"deadline":"2026-07-30T12:00","task_bucket":"delegate","mapping":{"client":"demo-client","scope":"advisory-only"},"planned_allocations":[{"date":"2026-07-30","block_id":"adapt-promote-deliver","minutes":20}]}]
+weekly_plan_items_json: [{"id":"weekly-build-01","stream":"build","title":"Build demo-client weekly fixture","definition_of_done":"Fixture file and validation evidence exist","estimated_minutes":60,"deadline":"2026-07-29T15:00","mapping":{"workspace":"weekly-plan-workspace","owned_asset":"demo-asset","project":"Demo Project"},"planned_allocations":[{"date":"2026-07-27","block_id":"build-future","minutes":60}]},{"id":"weekly-deliver-01","stream":"deliver","title":"Defer weekly follow-up","definition_of_done":"Follow-up is ready for a later week","estimated_minutes":30,"mapping":{"client":"demo-client","project":"Demo Project"},"planned_allocations":[{"date":"2026-07-28","block_id":"adapt-build-deliver","minutes":30}]},{"id":"weekly-promote-01","stream":"promote","title":"Delegate weekly promotion","definition_of_done":"Promotion handoff is accepted","estimated_minutes":20,"deadline":"2026-07-30T12:00","task_bucket":"delegate","mapping":{"client":"demo-client","scope":"advisory-only"},"planned_allocations":[{"date":"2026-07-30","block_id":"adapt-promote-deliver","minutes":20}]}]
 task_generation_references_json: []
 revision_audit_json: []
 ---
@@ -2565,7 +2565,10 @@ assert any(candidate.get("project") == "Demo Project" for candidate in client_ca
 assert any(candidate.get("contexts") == ["client/demo-client"] for candidate in client_candidates), "explicit weekly client context was lost"
 assert any(candidate.get("projects") == ["[[Demo Project]]"] for candidate in client_candidates), "explicit weekly project wiki link was lost"
 assert all(candidate.get("tags")[-1:] == ["AI"] for candidate in candidates), "AI provenance tag was lost"
-assert next(candidate for candidate in candidates if candidate["source_week_item_id"] == "weekly-build-01")["contexts"] == []
+owned_asset_candidate = next(candidate for candidate in candidates if candidate["source_week_item_id"] == "weekly-build-01")
+assert owned_asset_candidate["owned_asset"] == "demo-asset", owned_asset_candidate
+assert owned_asset_candidate["client"] == "", owned_asset_candidate
+assert owned_asset_candidate["contexts"] == [], owned_asset_candidate
 assert any(candidate.get("workspace") == "weekly-plan-workspace" for candidate in candidates), "explicit weekly workspace mapping was lost"
 PY
 
@@ -2573,7 +2576,7 @@ python3 - "$weekly_plan_file" "$tmp/weekly-plan-malformed-mapping.md" "$tmp/week
 import sys
 
 source = open(sys.argv[1], encoding="utf-8").read()
-malformed = source.replace('"mapping":{"workspace":"weekly-plan-workspace","project":"Demo Project"}', '"mapping":"invalid"')
+malformed = source.replace('"mapping":{"workspace":"weekly-plan-workspace","owned_asset":"demo-asset","project":"Demo Project"}', '"mapping":"invalid"')
 mismatched = source.replace('"workspace":"weekly-plan-workspace"', '"workspace":"other-workspace"', 1)
 open(sys.argv[2], "w", encoding="utf-8").write(malformed)
 open(sys.argv[3], "w", encoding="utf-8").write(mismatched)
