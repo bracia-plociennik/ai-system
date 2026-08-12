@@ -129,6 +129,8 @@ New AI-created TaskNotes are single-write 6D:
 - `DUMP`: `tags: [6d/dump]`, `status: open`, `priority: none` or `normal`.
 - `DONE`: no `6d/done` tag exists. It is derived from `status: done` and retains the task's routing tag when TaskForge changes status.
 
+Every newly generated TaskNote also carries the non-classification provenance tag `AI`. Therefore `tags` contains exactly one `6d/*` classification plus `AI`; `AI` does not participate in 6D routing. Existing TaskNotes are not backfilled.
+
 Existing `5d/do`, `5d/defer`, `5d/delegate`, `5d/delete`, and `5d/dump` tags are legacy read-compatible data. Do not add `6d/*`, rename files, or backfill historical TaskNotes. A completed historical task may remain `tags: [5d/do]` with `status: done`.
 
 For derived views and proposals, normalize without editing source files:
@@ -143,17 +145,20 @@ execution_bucket: do | defer | delegate | delete | dump | done | unclassified
 Task candidates from today's check-in `Zbudowałem`, `Dowiozłem`, and `Wypromowałem` use the normalized per-item deadline as `due` (the legacy end-of-day form remains `due: YYYY-MM-DDT23:59` when a date-only deadline is explicit). Under `deadline-aware-6d-v1`, explicit `task_bucket` wins; otherwise a deadline defaults to `tags: [6d/do]`, `status: open`, `priority: high`, while no deadline defaults to `tags: [6d/defer]`, `status: planned`, `priority: normal`. In shorthand: deadline defaults to `6d/do`; no deadline defaults to `6d/defer`. `definition_of_done` is preserved in the TaskNote body. No deadline means no automatic `due` or `scheduled`. WIG is not a task candidate. The owner later manages task lifecycle in TaskForge.
 If the TaskForge app setup UI does not expose `Waiting` for `DELEGATE`, use `On Hold` as the app-level custom-list default; do not change the AI System TaskNote status contract.
 
-Use TaskForge `contexts` for client, owned-asset, workspace, or personal routing:
+Newly generated TaskNotes use deterministic app-facing routing lists:
 
 - recognized clients: `contexts: [client/<client-slug>]`;
-- recognized owned assets: `contexts: [owned-asset/<asset-slug>]`;
-- workspace-scoped tasks: `contexts: [workspace/<workspace-slug>]`;
-- personal tasks: `contexts: [personal]`.
+- no recognized client: `contexts: []`, without a workspace, owned-asset, or personal fallback;
+- recognized projects: scalar `project: "<Project>"` and `projects: ["[[<Project>]]"]`;
+- no recognized project: `projects: []`.
+
+Explicit daily or weekly source mapping has precedence. Heuristics may fill only fields that remain blank and never replace a canonical client or project.
 
 Custom lists should filter the main 6D axis by `Tags contains 6d/<bucket>`, not by folder path. Keep task files in `TaskNotes/Tasks/` unless a separate owner-approved migration chooses another storage model.
 
 Recommended body sections:
 
+- `## Checkpoint OSNR` as the first section after the title, with empty Outcome, Status, Next, and Resume placeholders;
 - `## Outcome`;
 - `## Context`;
 - `## Next Action`;
@@ -178,11 +183,13 @@ Preserve these fields when present.
 
 Existing TaskForge-created TaskNotes with `taskSourceType: taskNotes` but without `title` are compatibility/migration candidates, not invalid runtime data. Do not silently add AI System fields to existing app output unless the owner approves a migration or cleanup.
 
-`projects` and `contexts` are TaskForge app-facing fields. AI System mapping fields such as `workspace`, `owner_scope`, `client`, `owned_asset`, `project`, and `project_state` should be added by AI-created templates or by owner-approved migration.
+`projects` and `contexts` are TaskForge app-facing fields. AI System mapping fields such as `workspace`, `owner_scope`, `client`, `owned_asset`, `project`, and `project_state` should be added by AI-created templates or by owner-approved migration. New TaskNotes always render `tags`, `contexts`, and `projects` as YAML lists, including explicit empty lists where routing is unknown.
 
 ## Personal Ops V3 Initial Task Creation
 
-For one canonical V3 daily check-in write, the exact `owner-approved` approval for that check-in also authorizes initial TaskNotes from professional planned items. Under `task_generation_policy: deadline-aware-6d-v1`, every valid `build-*`, `deliver-*`, and `promote-*` item becomes one TaskNote with `definition_of_done` preserved. Explicit `task_bucket` wins; otherwise a deadline maps to `6d/do` and no deadline maps to `6d/defer`. A malformed non-empty deadline or unsupported bucket stops TaskNote generation rather than silently defaulting. Missing WIG or overload warning does not suppress candidates. WIG may be linked to one plan item or standalone, but never creates its own TaskNote. V3 TaskNote generation requires the current `index_contract: 3` properties contract; historical reports using the retired policy are not regenerated. The current V3 policy never emits a `5d/*` TaskNote. A legacy `5d/*` input is read-compatible only for non-V3 source routes and normalizes to the matching `6d/*` tag. This is not a general TaskForge write exemption.
+For one canonical V3 daily check-in write, the exact `owner-approved` approval for that check-in also authorizes initial TaskNotes from professional planned items. Under `task_generation_policy: deadline-aware-6d-v1`, every valid `build-*`, `deliver-*`, and `promote-*` item becomes one TaskNote with `definition_of_done` preserved. Explicit `task_bucket` wins; otherwise a deadline maps to `6d/do` and no deadline maps to `6d/defer`. A malformed non-empty deadline or unsupported bucket stops TaskNote generation rather than silently defaulting. Missing WIG or overload warning does not suppress candidates. WIG may be linked to one plan item or standalone, but never creates its own TaskNote. V3 TaskNote generation requires the current `index_contract: 3` properties contract; historical reports using the retired policy are not regenerated. The current V3 policy never emits a `5d/*` TaskNote. A legacy `5d/*` input is read-compatible only for non-V3 source routes and normalizes to the matching `6d/*` tag. Daily planned-item mapping is consumed before heuristic matching, using the same `workspace`, `client`, `owned_asset`, `project`, and `project_state` fields as weekly items. This is not a general TaskForge write exemption.
+
+Every newly created TaskNote starts with a blank `## Checkpoint OSNR` section directly after its title. OSNR contains `O — Outcome`, `S — Status: <DONE|PARTIAL|BLOCKED>`, `N — Next`, and `R — Resume`. Do not add OSNR retroactively to historical TaskNotes, and do not rebuild an existing parent body when adding a deduplicated subtask.
 
 The route uses `.systems/scripts/propose-task-candidates --owner-approved --write --task-vault-config <workspace>/tasks/taskforge-vault.local.md`. The mechanical flag records the same approval; do not request a second approval. The local-only vault configuration must be enabled, point to an existing vault, and the vault must already contain `TaskNotes/Tasks/`.
 
@@ -248,7 +255,7 @@ Routes:
 - task review: read task files and produce recommendations; do not mutate files;
 - link task: add AI System mapping fields only when owner-approved.
 
-Candidate generation may auto-detect task candidates and conservative source mappings, but TaskNote creation still requires exact owner approval. Boundary-only v1 matching means: match client, owned-asset, project-state, or existing TaskForge project names only when exactly one strong match exists and only as full normalized token/phrase matches; do not use substring matching; do not auto-match labels shorter than 3 chars; no aliases in v1. Existing TaskForge project discovery reads only frontmatter `projects:` wiki links, not `blockedBy`, body notes, inline tasks, or arbitrary wiki links. Dry-run uses the configured local-only vault when available and warns without failing when project discovery cannot run. New writes put 6D in `tags`; client/workspace/personal routing stays in `contexts`. The generator reads explicit historical `5d/*` and current `6d/*` source markers, normalizes their bucket, and writes only `6d/*`. Leave ambiguous mappings blank and record `Mapping requires review`.
+Candidate generation may auto-detect task candidates and conservative source mappings, but TaskNote creation still requires exact owner approval. Boundary-only v1 matching means: match client, owned-asset, project-state, or existing TaskForge project names only when exactly one strong match exists and only as full normalized token/phrase matches; do not use substring matching; do not auto-match labels shorter than 3 chars; no aliases in v1. Existing TaskForge project discovery reads only frontmatter `projects:` wiki links, not `blockedBy`, body notes, inline tasks, or arbitrary wiki links. Dry-run uses the configured local-only vault when available and warns without failing when project discovery cannot run. New writes put one 6D classification and `AI` in `tags`; client routing stays in `contexts`, and project routing stays in scalar `project` plus `projects`. The generator reads explicit historical `5d/*` and current `6d/*` source markers, normalizes their bucket, and writes only current `6d/*`. Leave ambiguous mappings blank, emit `contexts: []` and `projects: []`, and record `Mapping requires review`.
 
 The proposal script does not initialize TaskForge vault structure. `--owner-approved --write --task-vault <taskforge-vault>` requires an existing vault directory and an existing `TaskNotes/Tasks/` directory; if either is missing, stop before writing.
 

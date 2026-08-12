@@ -16,8 +16,8 @@ scheduled:
 start:
 tags:
   - 6d/<do|defer|delegate|delete|dump>
-contexts:
-  - <client/client-slug|owned-asset/asset-slug|workspace/workspace-slug|personal>
+  - AI
+contexts: []
 projects: []
 workspace: "<workspace-slug>"
 owner_scope: "<workspace|client|owned-asset|project|personal>"
@@ -40,6 +40,13 @@ source_dream_report:
 ---
 
 # <notification-safe task title>
+
+## Checkpoint OSNR
+
+- O — Outcome:
+- S — Status: <DONE|PARTIAL|BLOCKED>
+- N — Next:
+- R — Resume:
 
 ## Outcome
 

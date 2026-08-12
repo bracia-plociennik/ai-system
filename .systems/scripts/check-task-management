@@ -241,6 +241,10 @@ for term in \
   'status: done` has precedence' \
   '6d/done' \
   'contexts: [client/<client-slug>]' \
+  'contexts: []' \
+  'projects: ["[[<Project>]]"]' \
+  'exactly one `6d/*` classification plus `AI`' \
+  '## Checkpoint OSNR' \
   'Tags contains 6d/<bucket>' \
   'Zbudowałem' \
   'Dowiozłem' \
@@ -288,6 +292,7 @@ for field in \
   'status: open' \
   'priority: normal' \
   'tags:' \
+  '  - AI' \
   'contexts:' \
   'projects:' \
   'owner_scope:' \
@@ -304,6 +309,11 @@ for field in \
   'estimated_minutes:' \
   'weekly_allocations_json:' \
   'source_dream_report:' \
+  '## Checkpoint OSNR' \
+  '- O — Outcome:' \
+  '- S — Status: <DONE|PARTIAL|BLOCKED>' \
+  '- N — Next:' \
+  '- R — Resume:' \
   '## Outcome' \
   '## Definition Of Done' \
   '## Context' \
@@ -313,6 +323,16 @@ for field in \
   '## Notes'
 do
   require_ref ".systems/ai/templates/workspace/tasks/tasknote.template.md" "$field" "tasknote field $field"
+done
+
+for generator_term in \
+  'candidate["tags"] = [classification_tags[0], "AI"]' \
+  'candidate["contexts"] = [f"client/{client}"] if client else []' \
+  'candidate["projects"] = [f"[[{project}]]"] if project else []' \
+  'def explicit_item_mapping' \
+  '## Checkpoint OSNR'
+do
+  require_ref ".systems/scripts/propose-task-candidates" "$generator_term" "TaskNote generator rule $generator_term"
 done
 
 require_ref ".systems/ai/templates/workspace/tasks/taskforge-vault.local.template.md" 'vault_path:' "local vault configuration"

@@ -49,7 +49,7 @@ def apply_execution_classification(candidate: dict[str, object], bucket: str, ta
         raise ValueError(f"Unsupported task tag: {tag}")
     candidate["status"] = SIX_D[bucket]["status"]
     candidate["priority"] = SIX_D[bucket]["priority"]
-    candidate["tags"] = [SIX_D[bucket]["tag"]]
+    candidate["tags"] = [SIX_D[bucket]["tag"], "AI"]
     candidate["task_method"] = "6d"
     candidate["execution_bucket"] = bucket
 
@@ -247,58 +247,68 @@ def apply_mapping(candidate: dict[str, object], labels: dict[str, list[tuple[str
         candidate["client"] = client
         candidate["owner_scope"] = "client"
         set_single_context(candidate, f"client/{client}")
-    if owned_asset and not candidate.get("owned_asset"):
+    if owned_asset and not candidate.get("owned_asset") and not candidate.get("client"):
         candidate["owned_asset"] = owned_asset
         candidate["owner_scope"] = "owned-asset"
-        set_single_context(candidate, f"owned-asset/{owned_asset}")
     if project_state and not candidate.get("project_state"):
         candidate["project_state"] = f"project-state/{project_state}/"
         if not candidate.get("project"):
             candidate["project"] = project_state
         if not candidate.get("client") and not candidate.get("owned_asset"):
             candidate["owner_scope"] = "project"
-    if taskforge_project and not candidate.get("projects"):
-        candidate["projects"] = [f"[[{taskforge_project}]]"]
+    if taskforge_project and not candidate.get("project"):
+        candidate["project"] = taskforge_project
     if not any(candidate.get(key) for key in ("client", "owned_asset", "project", "project_state", "projects")):
         candidate["mapping_note"] = "Mapping requires review"
 
 
-WEEKLY_MAPPING_KEYS = {"workspace", "client", "owned_asset", "project", "project_state", "scope"}
+ITEM_MAPPING_KEYS = {"workspace", "client", "owned_asset", "project", "project_state", "scope"}
+DIRECT_ITEM_MAPPING_KEYS = {"client", "owned_asset", "project", "project_state"}
 
 
-def explicit_weekly_mapping(item: dict[str, object], workspace: Path, source: Path) -> dict[str, str]:
-    """Validate and normalize canonical weekly routing before heuristics run."""
+def explicit_item_mapping(item: dict[str, object], workspace: Path, source: Path, source_kind: str) -> dict[str, str]:
+    """Validate canonical daily/weekly routing before heuristics run."""
     raw = item.get("mapping", {})
     if raw in (None, ""):
-        return {}
+        raw = {}
     if not isinstance(raw, dict):
-        raise SystemExit(f"Weekly plan mapping must be an object for {item.get('id', '')} in {source}")
-    unknown = sorted(set(raw) - WEEKLY_MAPPING_KEYS)
+        raise SystemExit(f"{source_kind} mapping must be an object for {item.get('id', '')} in {source}")
+    unknown = sorted(set(raw) - ITEM_MAPPING_KEYS)
     if unknown:
-        raise SystemExit(f"Unsupported weekly plan mapping fields for {item.get('id', '')} in {source}: {', '.join(unknown)}")
+        raise SystemExit(f"Unsupported {source_kind} mapping fields for {item.get('id', '')} in {source}: {', '.join(unknown)}")
     mapping: dict[str, str] = {}
     for key, value in raw.items():
         if value in (None, ""):
             continue
         if not isinstance(value, str):
-            raise SystemExit(f"Weekly plan mapping field {key} must be a string for {item.get('id', '')} in {source}")
+            raise SystemExit(f"{source_kind} mapping field {key} must be a string for {item.get('id', '')} in {source}")
         normalized = value.strip()
         if normalized:
             mapping[key] = normalized
+    for key in DIRECT_ITEM_MAPPING_KEYS:
+        value = item.get(key, "")
+        if value in (None, ""):
+            continue
+        if not isinstance(value, str):
+            raise SystemExit(f"{source_kind} field {key} must be a string for {item.get('id', '')} in {source}")
+        normalized = value.strip()
+        if not normalized:
+            continue
+        if key in mapping and mapping[key] != normalized:
+            raise SystemExit(f"Conflicting {source_kind} {key} mapping for {item.get('id', '')} in {source}")
+        mapping.setdefault(key, normalized)
     if mapping.get("workspace") and mapping["workspace"] != workspace.name:
         raise SystemExit(
-            f"Weekly plan mapping workspace mismatch for {item.get('id', '')}: "
+            f"{source_kind} mapping workspace mismatch for {item.get('id', '')}: "
             f"{mapping['workspace']} != {workspace.name}"
         )
     if mapping.get("client") and mapping.get("owned_asset"):
-        raise SystemExit(f"Weekly plan mapping cannot combine client and owned_asset for {item.get('id', '')}")
+        raise SystemExit(f"{source_kind} mapping cannot combine client and owned_asset for {item.get('id', '')}")
     return mapping
 
 
-def apply_explicit_weekly_mapping(
-    candidate: dict[str, object], mapping: dict[str, str], labels: dict[str, list[tuple[str, str]]]
-) -> None:
-    """Apply canonical weekly routing; heuristic mapping remains a fallback only."""
+def apply_explicit_item_mapping(candidate: dict[str, object], mapping: dict[str, str]) -> None:
+    """Apply canonical daily/weekly routing; heuristics remain fallback-only."""
     if not mapping:
         return
     if mapping.get("client"):
@@ -308,12 +318,8 @@ def apply_explicit_weekly_mapping(
     if mapping.get("owned_asset"):
         candidate["owned_asset"] = mapping["owned_asset"]
         candidate["owner_scope"] = "owned-asset"
-        set_single_context(candidate, f"owned-asset/{mapping['owned_asset']}")
     if mapping.get("project"):
         candidate["project"] = mapping["project"]
-        taskforge_project = unique_match(mapping["project"], labels["taskforge_project"])
-        if taskforge_project:
-            candidate["projects"] = [f"[[{taskforge_project}]]"]
     if mapping.get("project_state"):
         candidate["project_state"] = f"project-state/{mapping['project_state']}/"
         if not mapping.get("project"):
@@ -322,6 +328,20 @@ def apply_explicit_weekly_mapping(
             candidate["owner_scope"] = "project"
     if mapping.get("scope"):
         candidate["mapping_scope"] = mapping["scope"]
+
+
+def finalize_candidate_routing(candidate: dict[str, object]) -> None:
+    """Emit stable TaskForge lists after explicit and heuristic mapping."""
+    tags = [str(value) for value in candidate.get("tags", [])]
+    classification_tags = [value for value in tags if re.fullmatch(r"6d/(?:do|defer|delegate|delete|dump)", value)]
+    if len(classification_tags) != 1:
+        raise ValueError("A generated TaskNote requires exactly one 6D classification tag")
+    candidate["tags"] = [classification_tags[0], "AI"]
+
+    client = str(candidate.get("client", "")).strip()
+    project = str(candidate.get("project", "")).strip()
+    candidate["contexts"] = [f"client/{client}"] if client else []
+    candidate["projects"] = [f"[[{project}]]"] if project else []
 
 
 def candidates_from_check_in(path: Path, workspace: Path, labels: dict[str, list[tuple[str, str]]]) -> list[dict[str, object]]:
@@ -348,7 +368,8 @@ def candidates_from_check_in(path: Path, workspace: Path, labels: dict[str, list
             "title": title,
             "due": f"{check_date}T23:59",
             "scheduled": check_date,
-            "contexts": [f"workspace/{workspace.name}"],
+            "contexts": [],
+            "projects": [],
             "workspace": workspace.name,
             "owner_scope": "workspace",
             "client": "",
@@ -365,6 +386,7 @@ def candidates_from_check_in(path: Path, workspace: Path, labels: dict[str, list
         }
         apply_execution_classification(candidate, "do")
         apply_mapping(candidate, labels)
+        finalize_candidate_routing(candidate)
         candidates.append(candidate)
     return candidates
 
@@ -413,7 +435,8 @@ def candidates_from_index_v3_check_in(path: Path, workspace: Path, labels: dict[
             "title": normalize_title(str(item.get("task_title", "")) or title),
             "due": deadline,
             "scheduled": "",
-            "contexts": [f"workspace/{workspace.name}"],
+            "contexts": [],
+            "projects": [],
             "workspace": workspace.name,
             "owner_scope": "workspace",
             "client": "",
@@ -431,8 +454,11 @@ def candidates_from_index_v3_check_in(path: Path, workspace: Path, labels: dict[
             "definition_of_done": definition_of_done,
             "candidate_key": f"{session_date}:{item_id}",
         }
+        mapping = explicit_item_mapping(item, workspace, path, "V3 planned item")
+        apply_explicit_item_mapping(candidate, mapping)
         apply_execution_classification(candidate, bucket)
         apply_mapping(candidate, labels)
+        finalize_candidate_routing(candidate)
         candidates.append(candidate)
     return candidates
 
@@ -525,7 +551,8 @@ def candidates_from_weekly_plan(path: Path, workspace: Path, labels: dict[str, l
             "title": title,
             "due": deadline,
             "scheduled": planned_date,
-            "contexts": [f"workspace/{workspace.name}"],
+            "contexts": [],
+            "projects": [],
             "workspace": workspace.name,
             "owner_scope": "workspace",
             "client": "",
@@ -543,10 +570,11 @@ def candidates_from_weekly_plan(path: Path, workspace: Path, labels: dict[str, l
             "estimated_minutes": str(item.get("estimated_minutes", "")),
             "weekly_allocations_json": json.dumps(weekly_allocations(item), ensure_ascii=False),
         }
-        mapping = explicit_weekly_mapping(item, workspace, path)
-        apply_explicit_weekly_mapping(candidate, mapping, labels)
+        mapping = explicit_item_mapping(item, workspace, path, "Weekly plan")
+        apply_explicit_item_mapping(candidate, mapping)
         apply_execution_classification(candidate, bucket)
         apply_mapping(candidate, labels)
+        finalize_candidate_routing(candidate)
         candidates.append(candidate)
     return candidates
 
@@ -586,7 +614,8 @@ def candidates_from_dream_report(path: Path, workspace: Path, labels: dict[str, 
             "title": title,
             "due": "",
             "scheduled": "",
-            "contexts": [f"workspace/{workspace.name}"],
+            "contexts": [],
+            "projects": [],
             "workspace": workspace.name,
             "owner_scope": "workspace",
             "client": "",
@@ -603,6 +632,7 @@ def candidates_from_dream_report(path: Path, workspace: Path, labels: dict[str, 
         }
         apply_execution_classification(candidate, execution_bucket)
         apply_mapping(candidate, labels)
+        finalize_candidate_routing(candidate)
         candidates.append(candidate)
     return candidates
 
@@ -644,10 +674,29 @@ def render_tasknote(candidate: dict[str, object]) -> str:
     for key in ("tags", "contexts", "projects"):
         values = candidate.get(key)
         if isinstance(values, list):
-            lines.append(f"{key}:")
-            for value in values:
-                lines.append(f"  - {quote_yaml(str(value))}")
-    lines.extend(["---", "", f"# {candidate['title']}", "", "## Outcome", "", str(candidate.get("raw_value", "")).strip(), ""])
+            if values:
+                lines.append(f"{key}:")
+                for value in values:
+                    lines.append(f"  - {quote_yaml(str(value))}")
+            else:
+                lines.append(f"{key}: []")
+    lines.extend([
+        "---",
+        "",
+        f"# {candidate['title']}",
+        "",
+        "## Checkpoint OSNR",
+        "",
+        "- O — Outcome:",
+        "- S — Status: <DONE|PARTIAL|BLOCKED>",
+        "- N — Next:",
+        "- R — Resume:",
+        "",
+        "## Outcome",
+        "",
+        str(candidate.get("raw_value", "")).strip(),
+        "",
+    ])
     if candidate.get("definition_of_done"):
         lines.extend(["## Definition Of Done", "", str(candidate["definition_of_done"]).strip(), ""])
     lines.extend(["## Context", ""])
@@ -780,8 +829,9 @@ def replace_frontmatter_fields(text: str, candidate: dict[str, object]) -> str:
             index += 1
             continue
         if key in list_updates:
-            output.append(f"{key}:")
-            output.extend(f"  - {quote_yaml(value)}" for value in list_updates[key])
+            values = list_updates[key]
+            output.append(f"{key}:" if values else f"{key}: []")
+            output.extend(f"  - {quote_yaml(value)}" for value in values)
             index += 1
             while index < len(lines) and re.match(r"^\s+-\s+", lines[index]):
                 index += 1
@@ -795,7 +845,7 @@ def replace_frontmatter_fields(text: str, candidate: dict[str, object]) -> str:
             output.append(f"{key}: {quote_yaml(value) if value else ''}")
     for key, values in list_updates.items():
         if key not in present_keys:
-            output.append(f"{key}:")
+            output.append(f"{key}:" if values else f"{key}: []")
             output.extend(f"  - {quote_yaml(value)}" for value in values)
     return "---\n" + "\n".join(output) + text[end:]
 
