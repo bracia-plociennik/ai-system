@@ -48,7 +48,7 @@ source_dream_report:
 - N — Next:
 - R — Resume:
 
-## Outcome
+## TODO
 
 <desired result>
 
@@ -62,7 +62,7 @@ source_dream_report:
 
 ## Context
 
-<workspace/client/owned-asset/project links and source references>
+<workspace/client/owned-asset/project routing and source references>
 
 ## Next Action
 

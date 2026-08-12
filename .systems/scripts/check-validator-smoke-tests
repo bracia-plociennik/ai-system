@@ -2435,12 +2435,22 @@ cat > "$task_candidate_vault/TaskNotes/Tasks/project-link.md" <<'MD'
 ---
 status: open
 projects:
-  - "[[Demo Project]]"
+  - Demo Project
 blockedBy:
   - "[[Blocked Link]]"
 ---
 
 Project link fixture.
+MD
+
+cat > "$task_candidate_vault/TaskNotes/Tasks/legacy-project-link.md" <<'MD'
+---
+status: open
+projects:
+  - "[[Legacy Project]]"
+---
+
+Legacy project link fixture.
 MD
 
 cat > "$task_candidate_workspace/personal-ops/check-ins/2026/2026-06-22.md" <<'MD'
@@ -2495,7 +2505,17 @@ assert all("workspace/" not in context for candidate in candidates for context i
 PY
 grep -q '"due": "2026-06-22T23:59"' "$tmp/task-candidates.json" || { echo "check-in candidate missing end-of-day due"; exit 1; }
 grep -q '"project_state": "project-state/demo-project/"' "$tmp/task-candidates.json" || { echo "boundary project-state match failed"; exit 1; }
-grep -F -q '"[[demo-project]]"' "$tmp/task-candidates.json" || { echo "mapped project was not emitted as a projects wiki link"; exit 1; }
+grep -F -q '"demo-project"' "$tmp/task-candidates.json" || { echo "mapped project was not emitted as a plain projects value"; exit 1; }
+python3 - "$task_candidate_script" "$task_candidate_vault/TaskNotes/Tasks/legacy-project-link.md" <<'PY'
+import runpy
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(sys.argv[1]).parent))
+namespace = runpy.run_path(sys.argv[1])
+text = open(sys.argv[2], encoding="utf-8").read()
+assert namespace["projects_from_frontmatter"](text) == ["Legacy Project"]
+PY
 run_must_fail "task-candidates-write-without-owner-approval" "$task_candidate_script" --workspace "$task_candidate_workspace" --check-in "$task_candidate_workspace/personal-ops/check-ins/2026/2026-06-22.md" --task-vault "$task_candidate_vault" --write
 run_must_fail "task-candidates-write-missing-vault" "$task_candidate_script" --workspace "$task_candidate_workspace" --check-in "$task_candidate_workspace/personal-ops/check-ins/2026/2026-06-22.md" --task-vault "$tmp/missing-task-candidate-vault" --owner-approved --write
 mkdir -p "$tmp/task-candidate-empty-vault"
@@ -2515,7 +2535,7 @@ for path in paths:
     assert "description:" not in text, path
     assert re.search(r'tags:\n  - "6d/do"\n  - "AI"', text), path
     assert "contexts: []" in text, path
-    assert re.search(r'^# .+\n\n## Checkpoint OSNR\n\n- O — Outcome:\n- S — Status: <DONE\|PARTIAL\|BLOCKED>\n- N — Next:\n- R — Resume:\n\n## Outcome$', text, re.MULTILINE), path
+    assert re.search(r'^# .+\n\n## Checkpoint OSNR\n\n- O — Outcome:\n- S — Status: <DONE\|PARTIAL\|BLOCKED>\n- N — Next:\n- R — Resume:\n\n## TODO$', text, re.MULTILINE), path
 PY
 
 weekly_plan_workspace="$tmp/weekly-plan-workspace"
@@ -2563,7 +2583,7 @@ client_candidates = [candidate for candidate in candidates if candidate.get("cli
 assert client_candidates, "explicit weekly client mapping was lost"
 assert any(candidate.get("project") == "Demo Project" for candidate in client_candidates), "explicit weekly project mapping was lost"
 assert any(candidate.get("contexts") == ["client/demo-client"] for candidate in client_candidates), "explicit weekly client context was lost"
-assert any(candidate.get("projects") == ["[[Demo Project]]"] for candidate in client_candidates), "explicit weekly project wiki link was lost"
+assert any(candidate.get("projects") == ["Demo Project"] for candidate in client_candidates), "explicit weekly project value was lost"
 assert all(candidate.get("tags")[-1:] == ["AI"] for candidate in candidates), "AI provenance tag was lost"
 owned_asset_candidate = next(candidate for candidate in candidates if candidate["source_week_item_id"] == "weekly-build-01")
 assert owned_asset_candidate["owned_asset"] == "demo-asset", owned_asset_candidate
@@ -3205,7 +3225,7 @@ deliver = next(candidate for candidate in candidates if candidate["source_plan_i
 assert deliver["client"] == "tokenuj", deliver
 assert deliver["project"] == "CHT", deliver
 assert deliver["contexts"] == ["client/tokenuj"], deliver
-assert deliver["projects"] == ["[[CHT]]"], deliver
+assert deliver["projects"] == ["CHT"], deliver
 PY
 
 deadline_policy_report="$properties_v3_workspace/personal-ops/check-ins/2026/2026-07-26.md"

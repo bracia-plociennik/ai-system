@@ -48,7 +48,7 @@ Use this runbook before relying on TaskForge as an operational task store.
 - allowed statuses: `open`, `planned`, `in-progress`, `waiting`, `on-hold`, `done`, `cancelled`
 - allowed priorities: `highest`, `high`, `normal`, `low`, `lowest`, `none`
 - Use Body Template: `off` in V1
-- AI-created TaskNotes still use body sections: `Outcome`, `Context`, `Next Action`, `Evidence`, `Notes`
+- AI-created TaskNotes use body sections: `Checkpoint OSNR`, `TODO`, `Definition Of Done`, `Context`, `Next Action`, `Evidence`, `Notes`
 - Optional TaskNotes plugin import path: `.obsidian/plugins/tasknotes/data.json`
 - field mappings should keep defaults unless owner approves remapping:
   - title: `title`

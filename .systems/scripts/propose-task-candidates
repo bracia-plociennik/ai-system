@@ -188,6 +188,24 @@ def wikilinks(value: str) -> list[str]:
     return [match.strip() for match in re.findall(r"\[\[([^\]]+)\]\]", value) if match.strip()]
 
 
+def project_values(value: str) -> list[str]:
+    """Read TaskForge project values while retaining legacy wiki-link support."""
+    links = wikilinks(value)
+    if links:
+        return links
+    normalized = value.strip().lstrip("-").strip()
+    if not normalized or normalized == "[]":
+        return []
+    if normalized.startswith("[") and normalized.endswith("]"):
+        normalized = normalized[1:-1].strip()
+    values: list[str] = []
+    for item in normalized.split(","):
+        project = item.strip().strip('"\'')
+        if project:
+            values.append(project)
+    return values
+
+
 def projects_from_frontmatter(text: str) -> list[str]:
     fm = frontmatter_text(text)
     if not fm:
@@ -198,14 +216,14 @@ def projects_from_frontmatter(text: str) -> list[str]:
         if not in_projects:
             match = re.match(r"^projects\s*:\s*(.*)$", line)
             if match:
-                projects.extend(wikilinks(match.group(1)))
+                projects.extend(project_values(match.group(1)))
                 in_projects = True
             continue
         if re.match(r"^[A-Za-z0-9_-]+\s*:", line):
             break
         stripped = line.strip()
         if stripped.startswith("-"):
-            projects.extend(wikilinks(stripped))
+            projects.extend(project_values(stripped))
     return sorted(set(projects))
 
 
@@ -341,7 +359,7 @@ def finalize_candidate_routing(candidate: dict[str, object]) -> None:
     client = str(candidate.get("client", "")).strip()
     project = str(candidate.get("project", "")).strip()
     candidate["contexts"] = [f"client/{client}"] if client else []
-    candidate["projects"] = [f"[[{project}]]"] if project else []
+    candidate["projects"] = [project] if project else []
 
 
 def candidates_from_check_in(path: Path, workspace: Path, labels: dict[str, list[tuple[str, str]]]) -> list[dict[str, object]]:
@@ -692,7 +710,7 @@ def render_tasknote(candidate: dict[str, object]) -> str:
         "- N — Next:",
         "- R — Resume:",
         "",
-        "## Outcome",
+        "## TODO",
         "",
         str(candidate.get("raw_value", "")).strip(),
         "",
@@ -743,7 +761,7 @@ def equivalent_label(left: str, right: str) -> bool:
 def candidate_project_labels(candidate: dict[str, object]) -> list[str]:
     labels = [str(candidate.get("project", "")).strip()]
     for value in candidate.get("projects", []):
-        labels.extend(wikilinks(str(value)))
+        labels.extend(project_values(str(value)))
     return [label for label in labels if label]
 
 

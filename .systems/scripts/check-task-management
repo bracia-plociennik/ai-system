@@ -242,7 +242,7 @@ for term in \
   '6d/done' \
   'contexts: [client/<client-slug>]' \
   'contexts: []' \
-  'projects: ["[[<Project>]]"]' \
+  'projects: ["<Project>"]' \
   'exactly one `6d/*` classification plus `AI`' \
   '## Checkpoint OSNR' \
   'Tags contains 6d/<bucket>' \
@@ -257,7 +257,7 @@ for term in \
   'full normalized token/phrase matches' \
   'labels shorter than 3 chars' \
   'no aliases in v1' \
-  'reads only frontmatter `projects:` wiki links' \
+  'reads plain frontmatter `projects:` values and historical wiki links' \
   'does not initialize TaskForge vault structure' \
   'Personal Ops V3 Initial Task Creation' \
   'task_generation_policy: deadline-aware-6d-v1' \
@@ -273,7 +273,7 @@ for term in \
   'warns without failing when project discovery cannot run' \
   'task_generation_status: skipped' \
   'task_generation_references_json' \
-  'Project matching reads AI System `project:` plus TaskForge frontmatter `projects:` wiki links only' \
+  'Project matching reads AI System `project:` plus plain TaskForge frontmatter `projects:` values and historical wiki links' \
   'strong title-token match' \
   '## Subtasks' \
   'Missing, ambiguous, weak, or cross-project similarity' \
@@ -314,7 +314,7 @@ for field in \
   '- S — Status: <DONE|PARTIAL|BLOCKED>' \
   '- N — Next:' \
   '- R — Resume:' \
-  '## Outcome' \
+  '## TODO' \
   '## Definition Of Done' \
   '## Context' \
   '## Next Action' \
@@ -328,7 +328,7 @@ done
 for generator_term in \
   'candidate["tags"] = [classification_tags[0], "AI"]' \
   'candidate["contexts"] = [f"client/{client}"] if client else []' \
-  'candidate["projects"] = [f"[[{project}]]"] if project else []' \
+  'candidate["projects"] = [project] if project else []' \
   'def explicit_item_mapping' \
   '## Checkpoint OSNR'
 do
