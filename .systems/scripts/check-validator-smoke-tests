@@ -1488,6 +1488,43 @@ assert "- Budżet:" in text
 assert "- Trening: 2026-08-05 13:00 - 2026-08-05 14:00" in text
 assert "- NSDR: 2026-08-05 15:00 - 2026-08-05 15:30" in text
 PY
+python3 - "$summary_renderer" <<'PY'
+import importlib.util
+import sys
+from importlib.machinery import SourceFileLoader
+
+path = sys.argv[1]
+sys.path.insert(0, str(__import__("pathlib").Path(path).parent))
+loader = SourceFileLoader("daily_summary_renderer", path)
+spec = importlib.util.spec_from_loader(loader.name, loader)
+module = importlib.util.module_from_spec(spec)
+loader.exec_module(module)
+properties = {
+    "session_date": "2026-08-13",
+    "wig_title": "Gotowy copywriting CHT",
+    "wig_plan_item_id": "deliver-01",
+    "wig_definition_of_done": "Landing page działa.",
+    "planned_latest_deadline": "2026-08-13T18:20",
+    "planned_items_json": '[{"id":"deliver-01","stream":"deliver","title":"CHT - copywriting","deadline":"2026-08-13T12:40","task_bucket":"do"},{"id":"deliver-03","stream":"deliver","title":"Tokenuj","deadline":"2026-08-13T18:20","task_bucket":"do"}]',
+    "planned_if_start": "2026-08-13 11:00",
+    "planned_if_end": "2026-08-13 21:00",
+    "planned_training_type": "rest",
+    "mental_clarity_score": "3",
+    "body_readiness_score": "4",
+    "organism_mode": "recovery",
+    "overload_status": "none",
+    "plan_readiness": "ready",
+    "dynamic_habits_json": "[]",
+}
+budget = {
+    "monthly_spending": {"base_budget": 2100, "buffer": 210, "current_spending": 0, "remaining_base_budget": 2100, "average_available_per_remaining_day": 70, "pace_overrun": 0, "standard_spend_resume_date": "2026-08-13", "currency": "PLN"},
+    "weekly_calories": {"food_schedule": {"status": "unknown", "day_type": "unknown", "planned_calorie_target": 2300, "reason": "test"}, "week_start": "2026-08-10", "week_end": "2026-08-16", "weekly_budget": 16800, "actual_consumed": 0, "remaining_before_today": 16800, "planned_today": 2300, "remaining_after_today": 14500, "mechanical_limit_after_today": 2416.67},
+}
+text = module.render(properties, budget)
+assert "- Deadline: 2026-08-13T12:40" in text, text
+assert "- Deadline: 2026-08-13T18:20" not in text.split("- Zadania profesjonalne:", 1)[0], text
+assert "- Ostrzeżenia: gotowość: mental 3/5, ciało 4/5; tryb organizmu: recovery" in text, text
+PY
 python3 - "$budget_workspace/personal-ops/check-ins/2026/2026-08-05.md" "$budget_workspace/personal-ops/check-ins/2026/2026-08-07.md" <<'PY'
 import sys
 

@@ -115,6 +115,47 @@ def render_tasks(properties: dict) -> list[str]:
     return [f"- {deadline if deadline != '9999-12-31T23:59' else 'bez deadlineu'}: {title} [{bucket}]" for deadline, title, bucket in tasks]
 
 
+def wig_deadline(properties: dict) -> str:
+    linked_item_id = scalar(properties, "wig_plan_item_id")
+    if linked_item_id:
+        items = parse_json_property(properties, "planned_items_json", [])
+        if not isinstance(items, list):
+            stop("planned_items_json must be an array")
+        for item in items:
+            if not isinstance(item, dict) or str(item.get("id", "")).strip() != linked_item_id:
+                continue
+            deadline = str(item.get("deadline", "")).strip()
+            if deadline:
+                return deadline
+            break
+    return scalar(properties, "planned_latest_deadline")
+
+
+def readiness_warning(properties: dict) -> str:
+    mental = scalar(properties, "mental_clarity_score")
+    body = scalar(properties, "body_readiness_score")
+    organism_mode = scalar(properties, "organism_mode")
+    scores = []
+    for label, value in (("mental", mental), ("ciało", body)):
+        if not value:
+            continue
+        try:
+            if int(value) <= 3:
+                scores.append(f"{label} {value}/5")
+        except ValueError:
+            continue
+    if organism_mode == "recovery" and (mental or body):
+        scores = []
+        if mental:
+            scores.append(f"mental {mental}/5")
+        if body:
+            scores.append(f"ciało {body}/5")
+    if not scores:
+        return ""
+    suffix = "; tryb organizmu: recovery" if organism_mode == "recovery" else ""
+    return "gotowość: " + ", ".join(scores) + suffix
+
+
 def render_food_schedule(schedule: dict) -> list[str]:
     status = schedule.get("status", "unknown")
     lines = [f"- Status: {status}", f"- Typ dnia: {schedule.get('day_type', 'unknown')}", f"- Cel: {number(schedule.get('planned_calorie_target'))} kcal"]
@@ -160,7 +201,7 @@ def render(properties: dict, budget: dict) -> str:
     dod = scalar(properties, "wig_definition_of_done")
     if dod:
         lines.append(f"- DoD: {dod}")
-    deadline = scalar(properties, "planned_latest_deadline")
+    deadline = wig_deadline(properties)
     if deadline:
         lines.append(f"- Deadline: {deadline}")
     tasks = render_tasks(properties)
@@ -213,6 +254,9 @@ def render(properties: dict, budget: dict) -> str:
             if isinstance(habit, dict) and habit.get("title"):
                 lines.append(f"  - {habit['title']}")
     warnings = []
+    readiness = readiness_warning(properties)
+    if readiness:
+        warnings.append(readiness)
     if scalar(properties, "overload_status") not in {"", "none"}:
         warnings.append(f"overload: {scalar(properties, 'overload_status')}")
     if scalar(properties, "plan_readiness") not in {"", "ready"}:
