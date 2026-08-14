@@ -125,4 +125,4 @@ Use `6d/defer` as the default proposed TaskForge tag for new task candidates unl
 
 | Priority | Source path | Finding | Proposed target | Owner action |
 | --- | --- | --- | --- | --- |
-| `<P1|P2|P3>` | `<path>` | `<finding>` | `<target|task:6d/defer>` | `<capture|review|create-task|create-skill-plan|reject|defer>` |
+| `<P1|P2|P3>` | `<path>` | `<finding>` | `<target|task:6d/dump>` | `<capture|review|create-task|create-skill-plan|reject|defer>` |

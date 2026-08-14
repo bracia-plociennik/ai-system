@@ -19,6 +19,7 @@ from personal_ops_properties_v3 import (
     CURRENT_TASK_GENERATION_POLICY,
     HISTORICAL_NATIVE_CUTOFF,
     HISTORICAL_TASK_GENERATION_POLICY,
+    PREVIOUS_TASK_GENERATION_POLICY,
     csv_value,
     decoded_json_properties,
     load_schema,
@@ -61,7 +62,7 @@ def load_native_records(workspace: Path, excluded_source_paths: set[str] | None 
         text = path.read_text(encoding="utf-8")
         top, properties, _ = parse_frontmatter_and_properties(text, path)
         policy = str(properties.get("task_generation_policy", ""))
-        if policy == CURRENT_TASK_GENERATION_POLICY:
+        if policy in {CURRENT_TASK_GENERATION_POLICY, PREVIOUS_TASK_GENERATION_POLICY}:
             validate_properties(top, properties, path)
         elif policy == HISTORICAL_TASK_GENERATION_POLICY:
             try:

@@ -16,7 +16,7 @@
     {"key":"private_index_policy","type":"enum","values":["detailed-private","redacted"],"default":"detailed-private"},
     {"key":"report_revision","type":"integer","default":1,"metric":true},
     {"key":"normalization_authority","type":"string","default":"interpreted-report"},
-    {"key":"task_generation_policy","type":"enum","values":["deadline-aware-6d-v1"],"default":"deadline-aware-6d-v1","metric":true},
+    {"key":"task_generation_policy","type":"enum","values":["commitment-first-6d-v1","deadline-aware-6d-v1"],"default":"commitment-first-6d-v1","metric":true},
     {"key":"plan_readiness","type":"enum","values":["ready","needs-prioritization"],"default":"needs-prioritization","metric":true,"trend":true},
     {"key":"overload_status","type":"enum","values":["none","warning"],"default":"none","metric":true,"trend":true},
     {"key":"overload_reasons","type":"string","default":""},

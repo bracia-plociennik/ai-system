@@ -2586,6 +2586,7 @@ week_start: 2026-07-27
 week_end: 2026-07-31
 timezone: Europe/Warsaw
 plan_revision: 1
+task_generation_policy: commitment-first-6d-v1
 plan_readiness: ready
 overload_status: none
 overload_acknowledged: false
@@ -2608,7 +2609,16 @@ grep -q '"source_week_id": "2026-W31"' "$tmp/weekly-plan-candidates.json" || { e
 grep -q '"source_week_item_id": "weekly-build-01"' "$tmp/weekly-plan-candidates.json" || { echo "weekly plan candidate missing source item"; exit 1; }
 grep -q '"6d/do"' "$tmp/weekly-plan-candidates.json" || { echo "weekly plan candidate missing deadline-derived 6d/do"; exit 1; }
 grep -q '"due": "2026-07-29T15:00"' "$tmp/weekly-plan-candidates.json" || { echo "weekly plan candidate missing explicit due"; exit 1; }
-grep -q '"6d/defer"' "$tmp/weekly-plan-candidates.json" || { echo "weekly plan candidate missing no-deadline defer"; exit 1; }
+python3 - "$tmp/weekly-plan-candidates.json" <<'PY'
+import json
+import sys
+
+candidates = json.load(open(sys.argv[1], encoding="utf-8"))
+no_deadline = next(candidate for candidate in candidates if candidate["source_week_item_id"] == "weekly-deliver-01")
+assert no_deadline["execution_bucket"] == "do", no_deadline
+assert no_deadline["tags"] == ["6d/do", "AI"], no_deadline
+assert no_deadline["due"] == "", no_deadline
+PY
 grep -q '"6d/delegate"' "$tmp/weekly-plan-candidates.json" || { echo "weekly plan candidate missing explicit delegate"; exit 1; }
 grep -q '"due": "2026-07-30T12:00"' "$tmp/weekly-plan-candidates.json" || { echo "weekly plan candidate missing delegated deadline"; exit 1; }
 python3 - "$tmp/weekly-plan-candidates.json" <<'PY'
@@ -2627,6 +2637,19 @@ assert owned_asset_candidate["owned_asset"] == "demo-asset", owned_asset_candida
 assert owned_asset_candidate["client"] == "", owned_asset_candidate
 assert owned_asset_candidate["contexts"] == [], owned_asset_candidate
 assert any(candidate.get("workspace") == "weekly-plan-workspace" for candidate in candidates), "explicit weekly workspace mapping was lost"
+PY
+
+sed '/^task_generation_policy:/d' "$weekly_plan_file" > "$tmp/weekly-plan-legacy-policy.md"
+"$task_candidate_script" --workspace "$weekly_plan_workspace" --weekly-plan "$tmp/weekly-plan-legacy-policy.md" --task-vault "$task_candidate_vault" --json > "$tmp/weekly-plan-legacy-candidates.json"
+python3 - "$tmp/weekly-plan-legacy-candidates.json" <<'PY'
+import json
+import sys
+
+candidates = json.load(open(sys.argv[1], encoding="utf-8"))
+no_deadline = next(candidate for candidate in candidates if candidate["source_week_item_id"] == "weekly-deliver-01")
+assert no_deadline["execution_bucket"] == "defer", no_deadline
+assert no_deadline["tags"] == ["6d/defer", "AI"], no_deadline
+assert no_deadline["due"] == "", no_deadline
 PY
 
 python3 - "$weekly_plan_file" "$tmp/weekly-plan-malformed-mapping.md" "$tmp/weekly-plan-mismatched-workspace.md" <<'PY'
@@ -2693,14 +2716,18 @@ cat > "$dream_task_report" <<'MD'
 | Priority | Source path | Finding | Proposed target | Owner action |
 | --- | --- | --- | --- | --- |
 | P2 | personal-ops/indexes/check-ins.md | Review repeated late check-ins | task:5d/defer | create-task |
+| P3 | personal-ops/indexes/check-ins.md | Capture an unclassified improvement idea | task | create-task |
 MD
 run_must_pass "task-candidates-dream-report-dry-run" "$task_candidate_script" --workspace "$task_candidate_workspace" --dream-report "$dream_task_report"
+run_must_fail "task-candidates-dream-report-write-without-owner-approval" "$task_candidate_script" --workspace "$task_candidate_workspace" --dream-report "$dream_task_report" --task-vault "$task_candidate_vault" --write
 "$task_candidate_script" --workspace "$task_candidate_workspace" --dream-report "$dream_task_report" --json > "$tmp/dream-task-candidates.json"
 grep -q '"source_type": "dream-report"' "$tmp/dream-task-candidates.json" || { echo "Dream Report candidate missing source type"; exit 1; }
 grep -F -q '"tags": [' "$tmp/dream-task-candidates.json" || { echo "Dream Report candidate missing tags"; exit 1; }
 grep -q '"6d/defer"' "$tmp/dream-task-candidates.json" || { echo "Dream Report candidate did not normalize legacy 5d/defer to 6d/defer"; exit 1; }
 grep -q '"AI"' "$tmp/dream-task-candidates.json" || { echo "Dream Report candidate missing AI provenance tag"; exit 1; }
 grep -q '"execution_bucket": "defer"' "$tmp/dream-task-candidates.json" || { echo "Dream Report candidate missing DEFER execution bucket"; exit 1; }
+grep -q '"6d/dump"' "$tmp/dream-task-candidates.json" || { echo "Dream Report unclassified candidate did not default to 6d/dump"; exit 1; }
+grep -q '"execution_bucket": "dump"' "$tmp/dream-task-candidates.json" || { echo "Dream Report candidate missing DUMP execution bucket"; exit 1; }
 
 current_dream_task_report="$tmp/current-dream-task-report.md"
 cat > "$current_dream_task_report" <<'MD'
@@ -3136,7 +3163,7 @@ values.update({
     "weekday": "wednesday",
     "recording_time": "08:00",
     "timezone": "Europe/Warsaw",
-    "task_generation_policy": "deadline-aware-6d-v1",
+    "task_generation_policy": "commitment-first-6d-v1",
     "plan_readiness": "ready",
     "wig_kind": "plan-item",
     "wig_id": "wig-build-01",
@@ -3277,15 +3304,15 @@ path = Path(sys.argv[1])
 text = path.read_text(encoding="utf-8").replace("2026-07-22", "2026-07-26").replace("2026-07-21", "2026-07-25")
 items = [
     {"id": "build-01", "stream": "build", "title": "Deadline defaults to DO", "definition_of_done": "Delivered result", "deadline": "2026-07-26T18:00"},
-    {"id": "deliver-01", "stream": "deliver", "title": "No deadline defaults to DEFER", "definition_of_done": "Reviewed result"},
+    {"id": "deliver-01", "stream": "deliver", "title": "No deadline defaults to DO", "definition_of_done": "Reviewed result"},
     {"id": "promote-01", "stream": "promote", "title": "Explicit DO without deadline", "definition_of_done": "Published result", "task_bucket": "6d/do"},
     {"id": "build-02", "stream": "build", "title": "Explicit DUMP with deadline", "definition_of_done": "Captured result", "task_bucket": "dump", "deadline": "2026-07-27"},
 ]
 encoded = json.dumps(json.dumps(items, ensure_ascii=False))
 text = re.sub(r"^  planned_items_json:.*$", f"  planned_items_json: {encoded}", text, flags=re.MULTILINE)
 text = re.sub(r"^  task_candidate_eligible_count:.*$", "  task_candidate_eligible_count: 4", text, flags=re.MULTILINE)
-text = re.sub(r"^  planned_do_count:.*$", "  planned_do_count: 2", text, flags=re.MULTILINE)
-text = re.sub(r"^  planned_defer_count:.*$", "  planned_defer_count: 1", text, flags=re.MULTILINE)
+text = re.sub(r"^  planned_do_count:.*$", "  planned_do_count: 3", text, flags=re.MULTILINE)
+text = re.sub(r"^  planned_defer_count:.*$", "  planned_defer_count: 0", text, flags=re.MULTILINE)
 text = re.sub(r"^  planned_delegate_count:.*$", "  planned_delegate_count: 0", text, flags=re.MULTILINE)
 text = re.sub(r"^  planned_delete_count:.*$", "  planned_delete_count: 0", text, flags=re.MULTILINE)
 text = re.sub(r"^  planned_dump_count:.*$", "  planned_dump_count: 1", text, flags=re.MULTILINE)
@@ -3305,12 +3332,25 @@ with open(sys.argv[1], encoding="utf-8") as handle:
 actual = [(candidate["execution_bucket"], candidate["due"], candidate["scheduled"], candidate["tags"]) for candidate in candidates]
 expected = [
     ("do", "2026-07-26T18:00", "", ["6d/do", "AI"]),
-    ("defer", "", "", ["6d/defer", "AI"]),
+    ("do", "", "", ["6d/do", "AI"]),
     ("do", "", "", ["6d/do", "AI"]),
     ("dump", "2026-07-27T23:59", "", ["6d/dump", "AI"]),
 ]
 assert actual == expected, actual
 assert candidates[0]["definition_of_done"] == "Delivered result", candidates
+PY
+legacy_deadline_policy_report="$properties_v3_workspace/personal-ops/check-ins/2026/2026-07-25.md"
+sed 's/2026-07-26/__SESSION_DATE__/g; s/2026-07-25/2026-07-24/g; s/__SESSION_DATE__/2026-07-25/g; s/commitment-first-6d-v1/deadline-aware-6d-v1/g; s/  planned_do_count: 3/  planned_do_count: 2/; s/  planned_defer_count: 0/  planned_defer_count: 1/' "$deadline_policy_report" > "$legacy_deadline_policy_report"
+"$copy_repo/.systems/scripts/propose-task-candidates" --workspace "$properties_v3_workspace" --check-in "$legacy_deadline_policy_report" --task-vault "$properties_v3_vault" --json > "$tmp/personal-ops-legacy-deadline-policy-candidates.json"
+python3 - "$tmp/personal-ops-legacy-deadline-policy-candidates.json" <<'PY'
+import json
+import sys
+
+candidates = json.load(open(sys.argv[1], encoding="utf-8"))
+no_deadline = next(candidate for candidate in candidates if candidate["source_plan_item_id"] == "deliver-01")
+assert no_deadline["execution_bucket"] == "defer", no_deadline
+assert no_deadline["tags"] == ["6d/defer", "AI"], no_deadline
+assert no_deadline["due"] == "", no_deadline
 PY
 cp "$deadline_policy_report" "$deadline_policy_report.valid"
 perl -0pi -e 's/2026-07-26T18:00/not-a-deadline/' "$deadline_policy_report"

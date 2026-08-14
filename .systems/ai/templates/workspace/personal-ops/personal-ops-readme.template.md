@@ -41,4 +41,4 @@ personal-ops/check-ins/import-profiles/manual-daily-check-in.md
 
 for native AI System daily check-ins.
 
-V3 uses one session report per day: current plan/morning state plus previous-day closure. It does not rewrite historical daily Markdown. New `deadline-aware-6d-v1` reports use linked or standalone WIG for closure, informational overload state, and a `detailed-private` or `redacted` index policy. Every valid professional plan item becomes one TaskNote: explicit `task_bucket` wins, otherwise deadline means `6d/do` and no deadline means `6d/defer`; WIG itself never creates a task.
+V3 uses one session report per day: current plan/morning state plus previous-day closure. It does not rewrite historical daily Markdown. New `commitment-first-6d-v1` reports use linked or standalone WIG for closure, informational overload state, and a `detailed-private` or `redacted` index policy. Every valid professional plan item becomes one TaskNote: explicit `task_bucket` wins, otherwise the item defaults to `6d/do` whether or not it has a deadline; WIG itself never creates a task. Existing `deadline-aware-6d-v1` reports retain their historical defaults.

@@ -44,7 +44,7 @@ Reports require:
 - matching filename, `report_id`, top-level `session_date`, and `properties.session_date`;
 - a `closure_date` exactly one day before `session_date`;
 - `privacy: private-sensitive` and a `private_index_policy` of `detailed-private` or `redacted`;
-- `task_generation_policy: deadline-aware-6d-v1` for new native reports.
+- `task_generation_policy: commitment-first-6d-v1` for new native reports.
 
 `detailed-private` retains normalized local private values in detailed indexes. `redacted` blanks properties marked private by the schema. Neither setting permits commits, mirroring, exporting, or exposure without separate privacy-classified owner approval. Indexes never contain binary assets.
 
@@ -60,7 +60,7 @@ Daily Check-In items may link to a Saturday weekly plan with `source_week_id` an
 
 `plan_readiness` is `ready` only for a valid linked or standalone WIG; otherwise it is `needs-prioritization`. `overload_status: warning` records excessive professional plan items or invalid/missing WIG. These are analytical flags and never prevent canonical storage.
 
-For `deadline-aware-6d-v1`, every valid professional `build-*`, `deliver-*`, and `promote-*` plan item is one TaskNote candidate. An explicit `task_bucket` wins; otherwise a parseable deadline defaults to `6d/do`, and no deadline defaults to `6d/defer`. In short: deadline defaults to `6d/do`; no deadline defaults to `6d/defer`. `definition_of_done` is preserved in the candidate. `self` and `close` items, actual closure items, raw text, OCR, lessons, and quotations never create TaskNotes. One exact owner-approved V3 check-in write can create the initial candidates through the configured local vault; historical reports using the retired policy are not regenerated and never creates retrospective TaskNotes.
+For `commitment-first-6d-v1`, every valid professional `build-*`, `deliver-*`, and `promote-*` plan item is one TaskNote candidate. An explicit `task_bucket` wins; otherwise every item defaults to `6d/do`, including items without a deadline. A deadline sets `due`; no deadline leaves `due` and `scheduled` empty. `definition_of_done` is preserved in the candidate. `self` and `close` items, actual closure items, raw text, OCR, lessons, and quotations never create TaskNotes. Existing `deadline-aware-6d-v1` reports retain their historical deadline-to-DO and no-deadline-to-DEFER behavior and are not rewritten. One exact owner-approved V3 check-in write can create the initial candidates through the configured local vault. Historical migration never creates retrospective TaskNotes, and historical reports are not regenerated.
 
 ## V3 Sync
 

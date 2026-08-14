@@ -98,8 +98,9 @@ for term in \
   'deliver-financial-impact' \
   'adapt-promote-deliver' \
   'exactly one weekly WIG' \
-  'deadline without a category resolves to `do`' \
-  'no deadline and no category resolves to `defer`' \
+  'task_generation_policy: commitment-first-6d-v1' \
+  'every professional item without a category resolves to `do`' \
+  'Legacy weekly plans without `task_generation_policy`' \
   'overload_acknowledged' \
   'source_week_id + source_week_item_id' \
   'Daily Check-In' \
@@ -111,6 +112,7 @@ done
 
 for term in \
   'type: weekly-plan' \
+  'task_generation_policy: commitment-first-6d-v1' \
   'daily_blocks_json:' \
   'weekly_plan_items_json:' \
   'wig_kind:' \
@@ -191,6 +193,9 @@ for line in frontmatter:
     if ":" in line and not line.startswith(" "):
         key, value = line.split(":", 1)
         values[key.strip()] = value.strip().strip('"')
+policy = values.get("task_generation_policy", "") or "deadline-aware-6d-v1"
+if policy not in {"commitment-first-6d-v1", "deadline-aware-6d-v1"}:
+    raise SystemExit("unsupported weekly task_generation_policy")
 for key in ("daily_blocks_json", "weekly_plan_items_json"):
     value = values.get(key, "")
     try:

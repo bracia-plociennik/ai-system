@@ -260,10 +260,11 @@ for term in \
   'reads plain frontmatter `projects:` values and historical wiki links' \
   'does not initialize TaskForge vault structure' \
   'Personal Ops V3 Initial Task Creation' \
-  'task_generation_policy: deadline-aware-6d-v1' \
+  'task_generation_policy: commitment-first-6d-v1' \
   'explicit `task_bucket` wins' \
-  'deadline defaults to `6d/do`' \
-  'no deadline defaults to `6d/defer`' \
+  'including items without a deadline' \
+  'Existing `deadline-aware-6d-v1` sources retain' \
+  'default to `6d/dump`' \
   '`definition_of_done` is preserved' \
   'Missing WIG or overload warning does not suppress candidates' \
   'source_session_date + source_plan_item_id' \

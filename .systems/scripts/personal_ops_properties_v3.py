@@ -13,7 +13,8 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCHEMA_PATH = REPO_ROOT / ".systems/ai/templates/workspace/personal-ops/check-in-properties-v3.schema.json"
 
-CURRENT_TASK_GENERATION_POLICY = "deadline-aware-6d-v1"
+CURRENT_TASK_GENERATION_POLICY = "commitment-first-6d-v1"
+PREVIOUS_TASK_GENERATION_POLICY = "deadline-aware-6d-v1"
 HISTORICAL_TASK_GENERATION_POLICY = "all-professional-do-v1"
 HISTORICAL_NATIVE_CUTOFF = date(2026, 7, 17)
 LEGACY_ADDITIVE_PROPERTY_KEYS = frozenset({
@@ -293,7 +294,7 @@ def _normalize_deadline(value: Any, source: Path, item_id: str) -> str:
     return parsed.isoformat(timespec=timespec)
 
 
-def _planned_task_metrics(items: list[dict[str, Any]], source: Path) -> dict[str, Any]:
+def _planned_task_metrics(items: list[dict[str, Any]], source: Path, policy: str) -> dict[str, Any]:
     metrics: dict[str, Any] = {
         "planned_do_count": 0,
         "planned_defer_count": 0,
@@ -313,7 +314,8 @@ def _planned_task_metrics(items: list[dict[str, Any]], source: Path) -> dict[str
         item_id = str(item.get("id", "")).strip()
         deadline = _normalize_deadline(item.get("deadline", ""), source, item_id)
         bucket = _normalize_task_bucket(item.get("task_bucket", ""), source, item_id)
-        bucket = bucket or ("do" if deadline else "defer")
+        if not bucket:
+            bucket = "do" if policy == CURRENT_TASK_GENERATION_POLICY else ("do" if deadline else "defer")
         metrics[f"planned_{bucket}_count"] += 1
         if deadline:
             metrics["planned_with_deadline_count"] += 1
@@ -327,7 +329,7 @@ def _planned_task_metrics(items: list[dict[str, Any]], source: Path) -> dict[str
 
 
 def _validate_planned_task_metrics(properties: dict[str, Any], items: list[dict[str, Any]], source: Path) -> None:
-    expected = _planned_task_metrics(items, source)
+    expected = _planned_task_metrics(items, source, str(properties["task_generation_policy"]))
     for key, value in expected.items():
         actual = str(properties[key])
         expected_value = str(value)
@@ -362,7 +364,8 @@ def _validate_task_candidate_eligible_count(properties: dict[str, Any], source: 
     if any(not item_id for item_id in item_ids) or len(item_ids) != len(set(item_ids)):
         raise ValueError(f"planned_items_json requires unique non-empty item IDs in {source}")
     policy = str(properties["task_generation_policy"])
-    if policy != CURRENT_TASK_GENERATION_POLICY and not (historical and policy == HISTORICAL_TASK_GENERATION_POLICY):
+    supported_policies = {CURRENT_TASK_GENERATION_POLICY, PREVIOUS_TASK_GENERATION_POLICY}
+    if policy not in supported_policies and not (historical and policy == HISTORICAL_TASK_GENERATION_POLICY):
         raise ValueError(f"Unsupported V3 task_generation_policy in {source}: {policy}")
     wig_kind = str(properties["wig_kind"])
     wig_id = str(properties["wig_id"]).strip()

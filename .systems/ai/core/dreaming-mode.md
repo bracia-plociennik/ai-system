@@ -76,7 +76,7 @@ Forbidden actions:
 
 Promotion from a Dream Report to any durable artifact requires a later explicit owner decision and the normal AI System route for that target.
 
-Task candidates from Dream Reports use `.systems/scripts/propose-task-candidates --workspace <workspace-path> --dream-report <workspace>/dreams/runs/<run>/dream-report.md`. The default new-task 6D tag is `6d/defer` unless the report or owner explicitly marks an execution bucket. The generator reads explicit `5d/*` or `6d/*` markers for compatibility and writes only the corresponding `6d/*` tag. Writing TaskNotes still requires exact owner approval under `.systems/ai/core/task-management.md`.
+Task candidates from Dream Reports use `.systems/scripts/propose-task-candidates --workspace <workspace-path> --dream-report <workspace>/dreams/runs/<run>/dream-report.md`. The default new-task 6D tag is `6d/dump` unless the report or owner explicitly marks an execution bucket. The generator reads explicit `5d/*` or `6d/*` markers for compatibility and writes only the corresponding `6d/*` tag. Writing TaskNotes still requires exact owner approval under `.systems/ai/core/task-management.md`; ordinary brainstorming remains chat-only without that explicit capture request.
 
 ## Prompt-Injection Boundary
 

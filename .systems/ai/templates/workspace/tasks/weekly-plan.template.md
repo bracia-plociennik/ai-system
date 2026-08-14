@@ -10,6 +10,7 @@ week_start: <YYYY-MM-DD>
 week_end: <YYYY-MM-DD>
 timezone: <IANA timezone>
 plan_revision: 1
+task_generation_policy: commitment-first-6d-v1
 plan_readiness: ready|needs-review
 overload_status: clear|warning|blocked
 overload_acknowledged: false

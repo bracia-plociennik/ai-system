@@ -11,7 +11,12 @@ import sys
 import unicodedata
 from pathlib import Path
 
-from personal_ops_properties_v3 import parse_frontmatter_and_properties, validate_properties
+from personal_ops_properties_v3 import (
+    CURRENT_TASK_GENERATION_POLICY,
+    PREVIOUS_TASK_GENERATION_POLICY,
+    parse_frontmatter_and_properties,
+    validate_properties,
+)
 
 
 CHECK_IN_FIELDS = {
@@ -427,8 +432,9 @@ def candidates_from_index_v3_check_in(path: Path, workspace: Path, labels: dict[
     item_ids = [str(item.get("id", "")).strip() for item in items if isinstance(item, dict)]
     if len(item_ids) != len(set(item_ids)):
         raise SystemExit(f"V3 planned_items_json has duplicate item IDs in {path}")
-    if str(properties["task_generation_policy"]) != "deadline-aware-6d-v1":
-        raise SystemExit(f"V3 requires task_generation_policy: deadline-aware-6d-v1 in {path}")
+    task_generation_policy = str(properties["task_generation_policy"])
+    if task_generation_policy not in {CURRENT_TASK_GENERATION_POLICY, PREVIOUS_TASK_GENERATION_POLICY}:
+        raise SystemExit(f"V3 has unsupported task_generation_policy in {path}: {task_generation_policy}")
 
     candidates: list[dict[str, object]] = []
     for item in items:
@@ -446,7 +452,12 @@ def candidates_from_index_v3_check_in(path: Path, workspace: Path, labels: dict[
             explicit_bucket = normalize_task_bucket(item.get("task_bucket", ""))
         except ValueError as exc:
             raise SystemExit(str(exc)) from exc
-        bucket = explicit_bucket or ("do" if deadline else "defer")
+        if explicit_bucket:
+            bucket = explicit_bucket
+        elif task_generation_policy == CURRENT_TASK_GENERATION_POLICY:
+            bucket = "do"
+        else:
+            bucket = "do" if deadline else "defer"
         definition_of_done = str(item.get("definition_of_done", "")).strip()
         candidate: dict[str, object] = {
             "type": "task",
@@ -521,6 +532,9 @@ def candidates_from_weekly_plan(path: Path, workspace: Path, labels: dict[str, l
     week_start = str(fm.get("week_start", "")).strip()
     if not week_id or not week_start:
         raise SystemExit(f"Weekly plan requires week_id and week_start in {path}")
+    task_generation_policy = str(fm.get("task_generation_policy", "")).strip() or PREVIOUS_TASK_GENERATION_POLICY
+    if task_generation_policy not in {CURRENT_TASK_GENERATION_POLICY, PREVIOUS_TASK_GENERATION_POLICY}:
+        raise SystemExit(f"Weekly plan has unsupported task_generation_policy in {path}: {task_generation_policy}")
     try:
         dt.date.fromisoformat(week_start)
     except ValueError as exc:
@@ -556,7 +570,12 @@ def candidates_from_weekly_plan(path: Path, workspace: Path, labels: dict[str, l
             explicit_bucket = normalize_task_bucket(item.get("task_bucket", ""))
         except ValueError as exc:
             raise SystemExit(str(exc)) from exc
-        bucket = explicit_bucket or ("do" if deadline else "defer")
+        if explicit_bucket:
+            bucket = explicit_bucket
+        elif task_generation_policy == CURRENT_TASK_GENERATION_POLICY:
+            bucket = "do"
+        else:
+            bucket = "do" if deadline else "defer"
         planned_date = first_weekly_date(item)
         if planned_date:
             try:
@@ -605,7 +624,7 @@ def execution_bucket_from_text(text: str) -> str:
     }
     if len(matches) == 1:
         return matches.pop()
-    return "defer"
+    return "dump"
 
 
 def candidates_from_dream_report(path: Path, workspace: Path, labels: dict[str, list[tuple[str, str]]]) -> list[dict[str, object]]:

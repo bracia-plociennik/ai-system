@@ -55,18 +55,20 @@ Each Monday-Friday has four blocks:
 
 ## Task Resolution
 
-Each item in `weekly_plan_items_json` has a stable `id`, `stream`, `title`, `definition_of_done`, `estimated_minutes`, optional `planned_date`, optional `deadline`, optional `task_bucket`, optional mappings, and `planned_allocations`.
+Each new weekly plan declares `task_generation_policy: commitment-first-6d-v1`. Each item in `weekly_plan_items_json` has a stable `id`, `stream`, `title`, `definition_of_done`, `estimated_minutes`, optional `planned_date`, optional `deadline`, optional `task_bucket`, optional mappings, and `planned_allocations`. Existing weekly plans without the policy field retain legacy `deadline-aware-6d-v1` behavior.
 
 ### Explicit Mapping Precedence
 
 An item's optional `mapping` object is canonical routing metadata. Supported fields are `workspace`, `client`, `owned_asset`, `project`, `project_state`, and advisory `scope`. A mapping must be an object; an unsupported field, a client/owned-asset combination, or a workspace different from the active workspace stops TaskNote generation before any write. Explicit values are applied directly to candidate scalar fields and contexts: `client` sets `owner_scope: client` and `contexts: [client/<client>]`, `owned_asset` sets the corresponding owned-asset scope, and `project` is preserved even when no exact TaskForge project wiki link exists. Heuristics may fill only fields left empty and never overwrite explicit mapping. A missing mapping retains the existing heuristic fallback and its review note when no unambiguous result exists. `scope` is preserved as advisory metadata and does not change routing.
 
-Bucket precedence is deterministic:
+Under `commitment-first-6d-v1`, bucket precedence is deterministic:
 
 1. explicit category wins;
-2. a deadline without a category resolves to `do`;
-3. no deadline and no category resolves to `defer`;
-4. a planned date alone never changes `defer` to `do`.
+2. every professional item without a category resolves to `do`;
+3. deadline presence changes only `due`, not the bucket;
+4. no deadline leaves `due` empty, while the item remains `do`.
+
+Legacy weekly plans without `task_generation_policy` use `deadline-aware-6d-v1`: deadline defaults to `do`, while no deadline defaults to `defer`. They are never rewritten merely to adopt the new policy.
 
 Canonical TaskNote output uses `6d/<bucket>`. A deadline creates `due`; an allocation creates `scheduled` using the first allocated day. DoD, estimate, weekly source IDs, and the full block allocation remain in the TaskNote.
 
