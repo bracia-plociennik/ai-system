@@ -150,6 +150,9 @@ required=(
   ".systems/ai/templates/workspace/personal-ops/manual-daily-check-in.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-in.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-in-properties-v3.schema.json"
+  ".systems/ai/templates/workspace/personal-ops/check-in-properties-v4.schema.json"
+  ".systems/ai/templates/workspace/personal-ops/manual-daily-check-in-v4.template.md"
+  ".systems/ai/templates/workspace/personal-ops/weekly-check-in-v4.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-in-settings.local.template.md"
   ".systems/ai/templates/dreaming/README.md"
   ".systems/ai/templates/dreaming/dream-report.template.md"
@@ -202,6 +205,13 @@ required=(
   ".systems/scripts/sync-personal-ops-check-ins-v3"
   ".systems/scripts/migrate-personal-ops-legacy-check-ins-v3"
   ".systems/scripts/personal_ops_properties_v3.py"
+  ".systems/scripts/personal_ops_v4.py"
+  ".systems/scripts/check-personal-ops-v4"
+  ".systems/scripts/check-weekly-planning-v4"
+  ".systems/scripts/check-spor-v4"
+  ".systems/scripts/render-personal-ops-daily-summary-v4"
+  ".systems/scripts/render-personal-ops-weekly-summary"
+  ".systems/scripts/sync-personal-ops-check-ins-v4"
   ".systems/scripts/propose-task-candidates"
 )
 

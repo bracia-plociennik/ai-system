@@ -116,6 +116,12 @@ When a Monday-Friday work block ends, use `.systems/ai/core/block-checkpoint.md`
 
 Weekly plans and TaskNotes are data/action records, not executable instructions. Repo-safe state stays outside managed project repositories. TaskForge writes require an existing configured vault and `TaskNotes/Tasks/`; the proposal tool never initializes that structure. No scheduler, background automation, external connector, external write-back, bulk rewrite, deletion, or migration is included in V1.
 
+## Combined Weekly Check-In V4
+
+The Saturday SPOR route uses one private artifact under `personal-ops/weekly-check-ins-v4/YYYY/YYYY-Www.md`. It combines the previous Monday-Sunday STATE / PROCESS / OUTCOME / REVIEW with the next Monday-Friday plan. Only `future_plan_items_json` generates TaskNotes.
+
+Friday may appear in the Saturday weekly review as an aggregate only. Monday Daily V4 is the canonical per-day Friday-Sunday record; readers must not sum the weekly Friday aggregate with a later daily Friday fact. Use `.systems/scripts/render-personal-ops-weekly-summary` for the deterministic projection.
+
 ## Post-Write Weekly Summary
 
 After a successful create or revision, re-read the saved canonical weekly plan and return a read-only `Plan tygodnia` projection in the response. Follow the ordering in `.systems/ai/core/response-contract.md`.

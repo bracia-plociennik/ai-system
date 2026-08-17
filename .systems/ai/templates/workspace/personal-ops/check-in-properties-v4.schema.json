@@ -1,0 +1,19 @@
+{
+  "contract": "personal-ops-properties-v4",
+  "description": "Versioned SPOR properties for Daily V4 and combined Weekly Check-In artifacts.",
+  "daily_required": [
+    "index_contract", "schema_version", "artifact_kind", "report_id", "session_date", "closure_date",
+    "review_window_start", "review_window_end", "review_window_kind", "privacy", "private_index_policy",
+    "work_mode", "organism_mode", "planned_schedule_variant", "wig_title", "wig_definition_of_done",
+    "wig_plan_item_id", "planned_items_json", "review_state_json", "review_process_json", "review_outcome_json",
+    "review_review_json", "owner_overrides_json", "osnr_checkpoints_json", "plan_vs_reality_gap", "recovery_cost",
+    "task_generation_policy", "task_generation_status", "task_generation_references_json"
+  ],
+  "weekly_required": [
+    "index_contract", "schema_version", "artifact_kind", "report_id", "review_week_start", "review_week_end",
+    "plan_week_start", "plan_week_end", "privacy", "private_index_policy", "review_state_json",
+    "review_process_json", "review_outcome_json", "review_review_json", "future_wig_json",
+    "future_plan_items_json", "daily_blocks_json", "task_generation_policy", "task_generation_status"
+  ],
+  "review_window_kinds": ["previous-day", "weekend"]
+}

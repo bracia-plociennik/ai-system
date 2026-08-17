@@ -284,6 +284,14 @@ def main() -> int:
     try:
         report_date = parse_date(args.date)
         workspace = args.workspace.resolve()
+        v4_path = workspace / "personal-ops/check-ins-v4" / report_date.strftime("%Y") / f"{report_date.isoformat()}.md"
+        if v4_path.is_file():
+            v4_renderer = Path(__file__).with_name("render-personal-ops-daily-summary-v4")
+            command = [sys.executable, str(v4_renderer), "--workspace", str(workspace), "--date", report_date.isoformat()]
+            if args.check_file:
+                command.extend(["--check-file", str(args.check_file)])
+            result = subprocess.run(command, check=False)
+            return result.returncode
         properties = load_check_in(workspace, report_date)
         expected = render(properties, budget_report(workspace, report_date))
         if args.check_file:

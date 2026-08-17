@@ -41,9 +41,17 @@ required_files=(
   ".systems/ai/templates/workspace/personal-ops/manual-daily-check-in.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-in.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-in-properties-v3.schema.json"
+  ".systems/ai/templates/workspace/personal-ops/check-in-properties-v4.schema.json"
+  ".systems/ai/templates/workspace/personal-ops/manual-daily-check-in-v4.template.md"
+  ".systems/ai/templates/workspace/personal-ops/weekly-check-in-v4.template.md"
   ".systems/ai/templates/workspace/personal-ops/check-in-settings.local.template.md"
   ".systems/scripts/check-personal-ops"
   ".systems/scripts/personal_ops_properties_v3.py"
+  ".systems/scripts/personal_ops_v4.py"
+  ".systems/scripts/check-personal-ops-v4"
+  ".systems/scripts/render-personal-ops-daily-summary-v4"
+  ".systems/scripts/render-personal-ops-weekly-summary"
+  ".systems/scripts/sync-personal-ops-check-ins-v4"
   ".systems/scripts/sync-personal-ops-check-ins-v3"
   ".systems/scripts/calculate-personal-ops-budgets"
   ".systems/scripts/migrate-personal-ops-legacy-check-ins-v3"
@@ -61,6 +69,22 @@ for path in \
   ".systems/scripts/map-notion-check-ins"
 do
   require_executable "$path"
+done
+
+require_executable ".systems/scripts/check-spor-v4"
+require_executable ".systems/scripts/check-weekly-planning-v4"
+
+for term in \
+  'review_window_start' \
+  'review_window_kind' \
+  'owner_overrides_json' \
+  'osnr_checkpoints_json' \
+  'plan_vs_reality_gap' \
+  'recovery_cost' \
+  'Saturday and Sunday do not create Daily V4 artifacts' \
+  'duplicate effective session_date'
+do
+  require_ref ".systems/ai/core/personal-ops.md" "$term"
 done
 
 for file in \

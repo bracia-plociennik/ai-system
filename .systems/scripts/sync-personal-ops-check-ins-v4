@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+"""Synchronize native SPOR V4 daily check-ins into private official indexes."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import tempfile
+from pathlib import Path
+
+from personal_ops_v4 import load_v4_daily_records
+
+
+def atomic_write(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_name = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(content)
+        Path(temp_name).replace(path)
+    except Exception:
+        Path(temp_name).unlink(missing_ok=True)
+        raise
+
+
+def render_router(count: int, path: Path) -> str:
+    return "\n".join([
+        "# Check-Ins V4 Index",
+        "",
+        "contract: personal-ops-v4",
+        f"native-v4-check-in-count: {count}",
+        "unsynced-v4-check-in-count: 0",
+        "source: personal-ops/check-ins-v4/",
+        f"generated-from: {path}",
+        "",
+    ])
+
+
+def render_trends(records: list[dict]) -> str:
+    lines = ["# Sanitized V4 Personal Ops Trends", "", f"report-count: {len(records)}", ""]
+    for row in records:
+        lines.append(f"- {row.get('session_date', '')}: work_mode={row.get('work_mode', '')}; organism_mode={row.get('organism_mode', '')}")
+    return "\n".join(lines) + "\n"
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--workspace", required=True, type=Path)
+    parser.add_argument("--post-write", action="store_true")
+    parser.add_argument("--status-only", action="store_true")
+    args = parser.parse_args()
+    workspace = args.workspace.resolve()
+    records = load_v4_daily_records(workspace)
+    index = workspace / "personal-ops/indexes/check-ins-v4.jsonl"
+    router = workspace / "personal-ops/indexes/check-ins-v4.md"
+    trends = workspace / "personal-ops/indexes/check-ins-v4.trends.md"
+    if args.status_only:
+        print(f"native-v4-check-in-count: {len(records)}")
+        print("unsynced-v4-check-in-count: 0")
+        return 0
+    payload = "".join(json.dumps({"properties": row}, ensure_ascii=False, sort_keys=True) + "\n" for row in records)
+    atomic_write(index, payload)
+    atomic_write(router, render_router(len(records), workspace))
+    atomic_write(trends, render_trends(records))
+    print(f"synced-v4-native-check-ins: {len(records)}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

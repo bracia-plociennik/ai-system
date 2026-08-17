@@ -1,0 +1,69 @@
+#!/usr/bin/env python3
+"""Render the deterministic combined SPOR Weekly Check-In projection."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from datetime import date
+from pathlib import Path
+
+from personal_ops_v4 import json_value, load_weekly
+
+
+def render(properties: dict) -> str:
+    future_wig = json_value(properties, "future_wig_json", {})
+    items = json_value(properties, "future_plan_items_json", [])
+    blocks = json_value(properties, "daily_blocks_json", [])
+    lines = [
+        "Plan tygodnia (read-only)",
+        f"Zakres retrospektywy: {properties.get('review_week_start', '')} - {properties.get('review_week_end', '')}",
+        f"Zakres planu: {properties.get('plan_week_start', '')} - {properties.get('plan_week_end', '')}",
+        "",
+        "## Miniony tydzień",
+        f"- STATE: {properties.get('review_state_json', '{}')}",
+        f"- PROCESS: {properties.get('review_process_json', '{}')}",
+        f"- OUTCOME: {properties.get('review_outcome_json', '{}')}",
+        f"- REVIEW: {properties.get('review_review_json', '{}')}",
+        "",
+        "## Przyszły tydzień",
+        f"- WIG: {future_wig.get('title', '')}",
+        f"- DoD: {future_wig.get('definition_of_done', '')}",
+        f"- Deadline: {future_wig.get('deadline', 'bez deadlineu')}",
+        "",
+        "| Dzień | Blok | Rezultat | DoD | DL |",
+        "| --- | --- | --- | --- | --- |",
+    ]
+    item_map = {str(item.get("id")): item for item in items if isinstance(item, dict)}
+    for block in sorted(blocks, key=lambda row: (str(row.get("date", "")), str(row.get("start", "")))):
+        for slice_item in block.get("work_slices", []) or [{}]:
+            item = item_map.get(str(slice_item.get("item_id", "")), {})
+            lines.append(f"| {block.get('date', '')} | {block.get('block_id', '')} | {item.get('title', slice_item.get('label', 'bufor'))} | {item.get('definition_of_done', '')} | {item.get('deadline', '—')} |")
+    lines.extend(["", f"TaskNotes: {properties.get('task_generation_status', 'unknown')}", "Plan jest read-only; nie wykonuje wdrożeń, komunikacji ani innych działań zewnętrznych."])
+    return "\n".join(lines) + "\n"
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--workspace", required=True, type=Path)
+    parser.add_argument("--week", required=True)
+    parser.add_argument("--check-file", type=Path)
+    args = parser.parse_args()
+    try:
+        _, properties, _ = load_weekly(args.workspace.resolve(), args.week)
+        expected = render(properties)
+        if args.check_file:
+            if args.check_file.read_text(encoding="utf-8").rstrip("\n") != expected.rstrip("\n"):
+                print("weekly V4 summary mismatch", file=sys.stderr)
+                return 1
+        else:
+            sys.stdout.write(expected)
+        return 0
+    except Exception as exc:  # noqa: BLE001
+        print(f"STOP: {exc}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

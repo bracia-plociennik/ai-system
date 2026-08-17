@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+python3 - "$repo_root" <<'PY'
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+required = [
+    ".systems/ai/templates/workspace/personal-ops/check-in-properties-v4.schema.json",
+    ".systems/ai/templates/workspace/personal-ops/manual-daily-check-in-v4.template.md",
+    ".systems/scripts/personal_ops_v4.py",
+    ".systems/scripts/sync-personal-ops-check-ins-v4",
+    ".systems/scripts/render-personal-ops-daily-summary-v4",
+]
+missing = [str(root / path) for path in required if not (root / path).is_file()]
+if missing:
+    raise SystemExit("Missing V4 Personal Ops artifacts: " + ", ".join(missing))
+print("Personal Ops V4 contract artifacts: OK")
+PY

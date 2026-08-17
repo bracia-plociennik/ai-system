@@ -59,3 +59,5 @@ Validation scripts for AI System live here.
 `validate-ai-system` emits `AI_SYSTEM_VALIDATION_RESULT` on every run and accepts `--evidence-file <runtime-path>` for an atomic Validation Execution Record. Both are supporting script evidence only; they never issue semantic PASS or final acceptance. Historical Dream Reports may use the workspace-local `dreams/legacy-dream-reports-v1.md` registry with exact path and SHA-256 while still undergoing privacy and secret scanning.
 
 `check-naming` validates strict Markdown filenames while allowing canonical `SKILL.md` contracts and legacy/context source material.
+
+SPOR V4 daily artifacts use `sync-personal-ops-check-ins-v4` and the V4-aware daily renderer. The compatibility read model combines fresh V3 and V4 records without rewriting either source. Combined weekly artifacts use `render-personal-ops-weekly-summary`; private V4 trends exclude raw review, finance, calorie, macro, sleep, and client details.

@@ -48,11 +48,19 @@ for path in \
   ".systems/ai/core/weekly-planning.md" \
   ".systems/ai/core/response-contract.md" \
   ".systems/ai/templates/workspace/tasks/weekly-plan.template.md" \
+  ".systems/ai/templates/workspace/personal-ops/weekly-check-in-v4.template.md" \
   ".systems/scripts/propose-task-candidates" \
-  ".systems/scripts/check-weekly-planning"
+  ".systems/scripts/check-weekly-planning" \
+  ".systems/scripts/check-weekly-planning-v4" \
+  ".systems/scripts/render-personal-ops-weekly-summary"
 do
   require_file "$path"
 done
+
+require_ref ".systems/ai/core/weekly-planning.md" 'Combined Weekly Check-In V4'
+require_ref ".systems/ai/core/weekly-planning.md" 'Only `future_plan_items_json` generates TaskNotes'
+require_ref ".systems/ai/templates/workspace/personal-ops/weekly-check-in-v4.template.md" 'future_plan_items_json'
+require_ref ".systems/scripts/render-personal-ops-weekly-summary" '--check-file'
 
 for path in \
   ".systems/ai/core/weekly-planning.md" \

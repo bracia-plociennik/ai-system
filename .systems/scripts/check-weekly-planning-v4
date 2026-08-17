@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+python3 - "$repo_root" <<'PY'
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+required = [
+    ".systems/ai/templates/workspace/personal-ops/weekly-check-in-v4.template.md",
+    ".systems/scripts/render-personal-ops-weekly-summary",
+]
+missing = [str(root / path) for path in required if not (root / path).is_file()]
+if missing:
+    raise SystemExit("Missing V4 Weekly artifacts: " + ", ".join(missing))
+print("Weekly Check-In V4 contract artifacts: OK")
+PY

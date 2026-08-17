@@ -175,6 +175,16 @@ Walidacja targeted:
 
 This summary does not execute tasks, authorize deploys, or send external communication.
 
+## SPOR Daily V4
+
+New SPOR Daily artifacts use `index_contract: 4` under `personal-ops/check-ins-v4/YYYY/`. Tuesday-Friday review one previous day; Monday reviews Friday-Sunday. Saturday and Sunday do not create Daily V4 artifacts. V3 remains immutable and is read through the compatibility model without migration.
+
+V4 preserves STATE, PROCESS, OUTCOME, and REVIEW, plus `owner_overrides_json`, `osnr_checkpoints_json`, `plan_vs_reality_gap`, `recovery_cost`, and explicit `planned_schedule_variant`. Professional items may set `block_id`; missing allocation is rendered as unallocated rather than guessed.
+
+The structured V4 properties include `review_window_start`, `review_window_end`, and `review_window_kind`. The compatibility adapter rejects any duplicate effective session_date across V3 and V4 instead of silently double-counting it.
+
+The canonical V4 response uses `.systems/scripts/render-personal-ops-daily-summary --workspace <workspace> --date YYYY-MM-DD` and renders `Czas | Element | DoD | DL` before IF, six macro blocks, budget, weekly calories, training/NSDR, habits, warnings, and deferred scope. `--check-file` is deterministic and read-only.
+
 ## Validation
 
 For routine native V3 check-in writes, use targeted validation by default:

@@ -13,6 +13,8 @@ from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation, ROUND_CEILING, ROUND_HALF_UP
 from pathlib import Path
 
+from personal_ops_v4 import load_current_records
+
 
 CONFIG_RELATIVE = "personal-ops/check-ins/check-in-settings.local.md"
 INDEX_RELATIVE = "personal-ops/indexes/check-ins-v3.jsonl"
@@ -381,41 +383,8 @@ def food_schedule_report(records: list[dict], target: date, config: dict[str, st
 
 
 def load_official_records(workspace: Path) -> list[dict]:
-    router = workspace / ROUTER_RELATIVE
-    if not router.is_file():
-        stop(f"Missing official V3 router: {router}")
-    router_text = router.read_text(encoding="utf-8")
-    stale_match = re.search(r"^unsynced-native-check-in-count:\s*(\d+)\s*$", router_text, re.MULTILINE)
-    if not stale_match:
-        stop(f"Official V3 router has no freshness value: {router}")
-    if int(stale_match.group(1)) != 0:
-        stop(f"Official V3 indexes are stale; refresh is required before budget calculation: {router}")
-    index = workspace / INDEX_RELATIVE
-    if not index.is_file():
-        stop(f"Missing official V3 JSONL index: {index}")
-    records: list[dict] = []
-    seen: set[str] = set()
-    for line_number, line in enumerate(index.read_text(encoding="utf-8").splitlines(), start=1):
-        if not line.strip():
-            continue
-        try:
-            payload = json.loads(line)
-        except json.JSONDecodeError as exc:
-            stop(f"Malformed official V3 JSONL at line {line_number}: {index}")
-            raise AssertionError from exc
-        properties = payload.get("properties") if isinstance(payload, dict) else None
-        if not isinstance(properties, dict):
-            stop(f"Official V3 JSONL row has no properties at line {line_number}: {index}")
-        if str(properties.get("private_index_policy", "")) == "redacted":
-            stop(f"Official V3 detailed values are unavailable under redacted index policy: {index}")
-        session = str(properties.get("session_date", ""))
-        if not session:
-            stop(f"Official V3 JSONL row has no session_date at line {line_number}: {index}")
-        if session in seen:
-            stop(f"Duplicate session_date in official V3 JSONL: {session}")
-        seen.add(session)
-        records.append(properties)
-    return records
+    """Read the version-aware V3+V4 official model without rewriting either source."""
+    return load_current_records(workspace)
 
 
 def monthly_report(records: list[dict], target: date, config: dict[str, str]) -> dict:

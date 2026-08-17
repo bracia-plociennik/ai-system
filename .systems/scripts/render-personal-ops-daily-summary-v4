@@ -1,0 +1,200 @@
+#!/usr/bin/env python3
+"""Render the deterministic SPOR Daily V4 read-only plan."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import subprocess
+import sys
+from datetime import date
+from decimal import Decimal
+from pathlib import Path
+
+from personal_ops_v4 import json_value, load_daily
+
+
+CALCULATOR = Path(__file__).with_name("calculate-personal-ops-budgets")
+FOOD_TIMES = ("09:00-11:00", "11:00-13:00", "13:00-15:00", "15:00-17:00", "17:00-19:00", "19:00-21:00")
+
+
+def number(value: object) -> str:
+    if value is None or str(value) == "":
+        return "unknown"
+    return format(Decimal(str(value)).quantize(Decimal("0.01")), "f").rstrip("0").rstrip(".") or "0"
+
+
+def display_deadline(value: object, fallback: str = "—") -> str:
+    raw = str(value or "").strip()
+    if not raw:
+        return fallback
+    if "T" in raw:
+        return raw.split("T", 1)[1][:5]
+    if " " in raw and len(raw.split(" ", 1)[1]) >= 5:
+        return raw.split(" ", 1)[1][:5]
+    return raw
+
+
+def read_config(workspace: Path) -> dict[str, str]:
+    path = workspace / "personal-ops/check-ins/check-in-settings.local.md"
+    values: dict[str, str] = {}
+    in_frontmatter = False
+    if not path.is_file():
+        return values
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.strip() == "---":
+            in_frontmatter = not in_frontmatter
+            continue
+        if not in_frontmatter or not line.strip() or line.lstrip().startswith("#") or ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        values[key.strip()] = value.strip().strip('"')
+    return values
+
+
+def budget(workspace: Path, target: date) -> dict:
+    result = subprocess.run([sys.executable, str(CALCULATOR), "--workspace", str(workspace), "--date", target.isoformat(), "--json"], capture_output=True, text=True)
+    if result.returncode:
+        raise ValueError(result.stderr.strip() or result.stdout.strip() or "budget calculator failed")
+    return json.loads(result.stdout)
+
+
+def schedule_rows(workspace: Path, properties: dict) -> list[dict]:
+    config = read_config(workspace)
+    variant = str(properties.get("planned_schedule_variant", "standard"))
+    key = "schedule_merged_adapt_shifted_json" if variant == "merged-adapt-shifted" else "schedule_standard_json"
+    raw = config.get(key, "")
+    if not raw:
+        raise ValueError(f"missing local schedule configuration: {key}")
+    rows = json.loads(raw)
+    if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+        raise ValueError(f"invalid local schedule configuration: {key}")
+    return rows
+
+
+def render_food(schedule: dict) -> list[str]:
+    lines = ["## Harmonogram makro", f"Cel: {number(schedule.get('planned_calorie_target'))} kcal | profil: {schedule.get('day_type', 'unknown')}"]
+    if schedule.get("status") != "available":
+        lines.append(f"Status: {schedule.get('status', 'unknown')} — {schedule.get('reason', 'brak projekcji')}")
+        return lines
+    blocks = {str(block.get("time")): block for block in schedule.get("food_blocks", [])}
+    if set(blocks) != set(FOOD_TIMES):
+        raise ValueError("V4 summary requires exactly six macro blocks")
+    for time in FOOD_TIMES:
+        block = blocks[time]
+        if block.get("status") == "empty":
+            lines.append(f"- {time}: empty")
+        elif block.get("status") == "configured":
+            lines.append(f"- {time}: ~{number(block.get('calorie_target'))} kcal | B {number(block.get('protein_g'))} g | T {number(block.get('fat_g'))} g | W {number(block.get('carbohydrates_g'))} g")
+        else:
+            raise ValueError(f"invalid macro block status: {time}")
+    totals = schedule.get("totals", {})
+    lines.append(f"Suma: {number(schedule.get('daily_calorie_target'))} kcal | B {number(totals.get('protein_g'))} g | T {number(totals.get('fat_g'))} g | W {number(totals.get('carbohydrates_g'))} g")
+    return lines
+
+
+def render(properties: dict, rows: list[dict], budget_report: dict) -> str:
+    items = json_value(properties, "planned_items_json", [])
+    by_block: dict[str, list[dict]] = {}
+    unallocated: list[dict] = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        block_id = str(item.get("block_id", "")).strip()
+        if block_id:
+            by_block.setdefault(block_id, []).append(item)
+        elif str(item.get("stream", "")) in {"build", "deliver", "promote"}:
+            unallocated.append(item)
+
+    table = ["| Czas | Element | DoD | DL |", "| --- | --- | --- | --- |"]
+    rendered_items: set[int] = set()
+    for row in sorted(rows, key=lambda value: str(value.get("start", ""))):
+        start, end = str(row.get("start", "")), str(row.get("end", ""))
+        block_id = str(row.get("block_id", ""))
+        matched = by_block.get(block_id, [])
+        if matched:
+            for item in matched:
+                rendered_items.add(id(item))
+                table.append(f"| {start}-{end} | {item.get('title', row.get('label', ''))} | {item.get('definition_of_done', '') or row.get('dod', '')} | {display_deadline(item.get('deadline', '') or row.get('deadline', '—'))} |")
+        else:
+            table.append(f"| {start}-{end} | {row.get('label', '')} | {row.get('dod', '')} | {display_deadline(row.get('deadline', '—'))} |")
+
+    lines = ["Plan na dziś (read-only)", f"Data: {properties.get('session_date', '')}", "", "## Harmonogram", *table]
+    if unallocated:
+        lines.extend(["", "## Niezaalokowane"])
+        for item in unallocated:
+            lines.append(f"- {item.get('title', '')} | DoD: {item.get('definition_of_done', '')} | DL: {display_deadline(item.get('deadline', ''), 'bez deadlineu')}")
+    hidden_allocations = [item for item in items if isinstance(item, dict) and str(item.get("stream", "")) in {"build", "deliver", "promote"} and id(item) not in rendered_items and str(item.get("block_id", "")).strip()]
+    if hidden_allocations:
+        if not unallocated:
+            lines.extend(["", "## Niezaalokowane"])
+        for item in hidden_allocations:
+            lines.append(f"- {item.get('title', '')} | DoD: {item.get('definition_of_done', '')} | DL: {display_deadline(item.get('deadline', ''), 'bez deadlineu')}")
+    if properties.get("wig_title"):
+        wig_item_id = str(properties.get("wig_plan_item_id", "")).strip()
+        wig_deadline_value = ""
+        for item in items:
+            if isinstance(item, dict) and str(item.get("id", "")).strip() == wig_item_id:
+                wig_deadline_value = str(item.get("deadline", "")).strip()
+                break
+        lines.extend(["", "## WIG", f"- WIG: {properties.get('wig_title')}", f"- DoD: {properties.get('wig_definition_of_done', '')}", f"- Deadline: {display_deadline(wig_deadline_value, 'bez deadlineu')}"])
+    if properties.get("planned_if_start") and properties.get("planned_if_end"):
+        lines.extend(["", f"## IF: {properties.get('planned_if_start')}-{properties.get('planned_if_end')}"])
+    lines.extend(["", *render_food(budget_report["weekly_calories"]["food_schedule"])])
+    monthly = budget_report["monthly_spending"]
+    weekly = budget_report["weekly_calories"]
+    lines.extend([
+        "", "## Budżet",
+        f"- Dzienny limit: {properties.get('planned_budget_max', 'unknown')} {properties.get('planned_budget_currency', monthly.get('currency', ''))}".rstrip(),
+        f"- Miesięczny bazowy: {number(monthly.get('base_budget'))} {monthly.get('currency', '')}".rstrip(),
+        f"- Bufor: {number(monthly.get('buffer'))} {monthly.get('currency', '')}".rstrip(),
+        f"- Wydatki: {number(monthly.get('current_spending'))} {monthly.get('currency', '')}".rstrip(),
+        f"- Pozostało: {number(monthly.get('remaining_base_budget'))} {monthly.get('currency', '')}".rstrip(),
+        "", "## Budżet kalorii tygodnia",
+        f"- Limit: {number(weekly.get('weekly_budget'))} kcal",
+        f"- Zjedzone: {number(weekly.get('actual_consumed'))} kcal",
+        f"- Pozostało przed dziś: {number(weekly.get('remaining_before_today'))} kcal",
+        f"- Po planie: {number(weekly.get('remaining_after_today'))} kcal",
+    ])
+    if properties.get("planned_training_start") and properties.get("planned_training_end"):
+        lines.append(f"- Trening: {properties.get('planned_training_start')}-{properties.get('planned_training_end')} ({properties.get('planned_training_type', '')})")
+    if properties.get("planned_nsdr_start") and properties.get("planned_nsdr_end"):
+        lines.append(f"- NSDR: {properties.get('planned_nsdr_start')}-{properties.get('planned_nsdr_end')}")
+    warnings = []
+    for label, key in (("mental", "mental_clarity_score"), ("ciało", "body_readiness_score")):
+        if str(properties.get(key, "")) and int(str(properties[key])) <= 3:
+            warnings.append(f"{label} {properties[key]}/5")
+    if properties.get("organism_mode") == "recovery":
+        warnings.append("tryb recovery")
+    if warnings:
+        lines.append(f"Ostrzeżenie: {', '.join(warnings)}")
+    lines.append("Zapis jest read-only planem; nie wykonuje zadań ani działań zewnętrznych.")
+    return "\n".join(lines) + "\n"
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--workspace", required=True, type=Path)
+    parser.add_argument("--date", required=True)
+    parser.add_argument("--check-file", type=Path)
+    args = parser.parse_args()
+    try:
+        target = date.fromisoformat(args.date)
+        workspace = args.workspace.resolve()
+        _, properties, _ = load_daily(workspace, target)
+        expected = render(properties, schedule_rows(workspace, properties), budget(workspace, target))
+        if args.check_file:
+            actual = args.check_file.read_text(encoding="utf-8")
+            if actual.rstrip("\n") != expected.rstrip("\n"):
+                print("daily V4 summary mismatch", file=sys.stderr)
+                return 1
+        else:
+            sys.stdout.write(expected)
+        return 0
+    except Exception as exc:  # noqa: BLE001
+        print(f"STOP: {exc}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

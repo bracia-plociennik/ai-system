@@ -2,6 +2,8 @@
 
 This is a neutral template. It is not a TaskNote and must not be scanned as one.
 
+The Saturday SPOR route uses `personal-ops/weekly-check-ins-v4/YYYY/YYYY-Www.md` for the combined retrospective and future plan. Only `future_plan_items_json` is actionable.
+
 ```md
 ---
 type: weekly-plan

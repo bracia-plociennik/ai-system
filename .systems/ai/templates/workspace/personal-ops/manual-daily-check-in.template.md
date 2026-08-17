@@ -1,5 +1,7 @@
 # Manual Daily Check-In: Properties + Raw Audit v3
 
+SPOR V4 uses `manual-daily-check-in-v4.template.md` and writes to `personal-ops/check-ins-v4/YYYY/YYYY-MM-DD.md`. Its response must use the chronological `Czas | Element | DoD | DL` renderer.
+
 ## Purpose
 
 Use this brief for a manual, voice, partially structured, or already interpreted daily check-in. It produces one canonical report at `personal-ops/check-ins/YYYY/YYYY-MM-DD.md` with `schema_version: 3` and `index_contract: 3`.

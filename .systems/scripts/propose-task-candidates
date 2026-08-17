@@ -17,6 +17,12 @@ from personal_ops_properties_v3 import (
     parse_frontmatter_and_properties,
     validate_properties,
 )
+from personal_ops_v4 import (
+    json_value as v4_json_value,
+    parse_frontmatter as parse_v4_frontmatter,
+    validate_daily as validate_v4_daily,
+    validate_weekly as validate_v4_weekly,
+)
 
 
 CHECK_IN_FIELDS = {
@@ -492,6 +498,74 @@ def candidates_from_index_v3_check_in(path: Path, workspace: Path, labels: dict[
     return candidates
 
 
+def candidates_from_v4_daily(path: Path, workspace: Path, labels: dict[str, list[tuple[str, str]]]) -> list[dict[str, object]]:
+    top, properties, _ = parse_v4_frontmatter(path)
+    validate_v4_daily(top, properties, path)
+    session_date = str(properties["session_date"])
+    items = v4_json_value(properties, "planned_items_json", [])
+    candidates: list[dict[str, object]] = []
+    for item in items:
+        stream = str(item.get("stream", "")).strip().lower()
+        if stream not in {"build", "deliver", "promote"}:
+            continue
+        item_id = str(item.get("id", "")).strip()
+        title = normalize_title(str(item.get("task_title", "")) or str(item.get("title", "")))
+        deadline = normalize_deadline(item.get("deadline", ""), session_date, item_id, path)
+        bucket = normalize_task_bucket(item.get("task_bucket", "")) or "do"
+        candidate: dict[str, object] = {
+            "type": "task", "title": title, "due": deadline, "scheduled": "",
+            "contexts": [], "projects": [], "workspace": workspace.name, "owner_scope": "workspace",
+            "client": "", "owned_asset": "", "project": "", "project_state": "",
+            "source_system": "ai-system", "source_type": "check-in-v4",
+            "source_session_date": session_date, "source_check_in_date": session_date,
+            "source_check_in_field": stream, "source_plan_item_id": item_id, "source_path": str(path),
+            "raw_value": title, "definition_of_done": str(item.get("definition_of_done", "")),
+            "candidate_key": f"{session_date}:{item_id}",
+        }
+        mapping = explicit_item_mapping(item, workspace, path, "V4 planned item")
+        apply_explicit_item_mapping(candidate, mapping)
+        apply_execution_classification(candidate, bucket)
+        apply_mapping(candidate, labels)
+        finalize_candidate_routing(candidate)
+        candidates.append(candidate)
+    return candidates
+
+
+def candidates_from_v4_weekly(path: Path, workspace: Path, labels: dict[str, list[tuple[str, str]]]) -> list[dict[str, object]]:
+    top, properties, _ = parse_v4_frontmatter(path)
+    validate_v4_weekly(top, properties, path)
+    week_id = str(properties["report_id"])
+    items = v4_json_value(properties, "future_plan_items_json", [])
+    candidates: list[dict[str, object]] = []
+    for item in items:
+        stream = str(item.get("stream", "")).strip().lower()
+        if stream not in {"build", "deliver", "promote"}:
+            continue
+        item_id = str(item.get("id", "")).strip()
+        title = normalize_title(str(item.get("task_title", "")) or str(item.get("title", "")))
+        deadline = normalize_deadline(item.get("deadline", ""), str(properties["plan_week_start"]), item_id, path)
+        bucket = normalize_task_bucket(item.get("task_bucket", "")) or "do"
+        allocations = item.get("planned_allocations", [])
+        planned_date = str(allocations[0].get("date", "")) if isinstance(allocations, list) and allocations and isinstance(allocations[0], dict) else ""
+        candidate: dict[str, object] = {
+            "type": "task", "title": title, "due": deadline, "scheduled": planned_date,
+            "contexts": [], "projects": [], "workspace": workspace.name, "owner_scope": "workspace",
+            "client": "", "owned_asset": "", "project": "", "project_state": "",
+            "source_system": "ai-system", "source_type": "weekly-check-in-v4",
+            "source_week_id": week_id, "source_week_item_id": item_id, "source_week_plan": str(path),
+            "source_path": str(path), "raw_value": title, "definition_of_done": str(item.get("definition_of_done", "")),
+            "estimated_minutes": str(item.get("estimated_minutes", "")),
+            "weekly_allocations_json": json.dumps(allocations, ensure_ascii=False),
+        }
+        mapping = explicit_item_mapping(item, workspace, path, "V4 weekly item")
+        apply_explicit_item_mapping(candidate, mapping)
+        apply_execution_classification(candidate, bucket)
+        apply_mapping(candidate, labels)
+        finalize_candidate_routing(candidate)
+        candidates.append(candidate)
+    return candidates
+
+
 def json_frontmatter_value(frontmatter: dict[str, str], key: str, source: Path) -> object:
     raw = str(frontmatter.get(key, "")).strip()
     if not raw:
@@ -812,7 +886,8 @@ def find_similar_parent(candidate: dict[str, object], task_dir: Path) -> Path | 
 def append_subtask(parent_path: Path, candidate: dict[str, object]) -> bool:
     kind, first, second = source_identity(candidate)
     if kind == "check-in":
-        marker = f"ai-system:v3:{first}:{second}"
+        marker_version = "v4" if str(candidate.get("source_type", "")).endswith("-v4") else "v3"
+        marker = f"ai-system:{marker_version}:{first}:{second}"
     else:
         marker = f"ai-system:{kind}:{first}:{second}"
     text = read_text(parent_path)
@@ -1093,11 +1168,13 @@ def main() -> int:
     if args.write and not args.owner_approved:
         raise SystemExit("--write requires --owner-approved")
     is_v3_check_in = False
+    is_v4_check_in = False
     unsupported_v3_check_in = False
     task_generation_gate = ""
     if args.check_in:
         check_in_frontmatter = parse_frontmatter(read_text(args.check_in.resolve()))
         is_v3_check_in = check_in_frontmatter.get("index_contract") == "3"
+        is_v4_check_in = check_in_frontmatter.get("index_contract") == "4"
         unsupported_v3_check_in = (
             check_in_frontmatter.get("schema_version") == "3" and not is_v3_check_in
         )
@@ -1129,11 +1206,18 @@ def main() -> int:
 
     labels = discover_labels(workspace, task_vault)
     if args.check_in:
-        candidates = candidates_from_check_in(args.check_in.resolve(), workspace, labels)
+        if is_v4_check_in:
+            candidates = candidates_from_v4_daily(args.check_in.resolve(), workspace, labels)
+        else:
+            candidates = candidates_from_check_in(args.check_in.resolve(), workspace, labels)
     elif args.dream_report:
         candidates = candidates_from_dream_report(args.dream_report.resolve(), workspace, labels)
     else:
-        candidates = candidates_from_weekly_plan(args.weekly_plan.resolve(), workspace, labels)
+        weekly_frontmatter = parse_frontmatter(read_text(args.weekly_plan.resolve()))
+        if weekly_frontmatter.get("index_contract") == "4":
+            candidates = candidates_from_v4_weekly(args.weekly_plan.resolve(), workspace, labels)
+        else:
+            candidates = candidates_from_weekly_plan(args.weekly_plan.resolve(), workspace, labels)
 
     if args.write:
         try:

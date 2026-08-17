@@ -132,6 +132,8 @@ Napisz:
 ```
 ````
 
+For V4 artifacts, paste the output of the canonical renderer verbatim. Do not reconstruct the chronological table or weekly scorecard from chat memory. Preserve unknown values and omit Raw Check-In, OCR, attachments, and historical private detail from the read-only projection.
+
 ## Recommendation Sources
 
 Choose the recommendation from the highest applicable source:

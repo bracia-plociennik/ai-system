@@ -255,6 +255,8 @@ The V2 Notion check-in importer is retired. Preserve future exports as raw conte
 
 After a successful daily write or update, AI System re-reads the saved check-in and returns a chat-only `Plan na dziś` summary before reporting the actual targeted validation result. It omits prior-day closure, Raw Check-In, OCR, and attachments, and it does not execute the recorded plan.
 
+SPOR Daily V4 is an additive route under `personal-ops/check-ins-v4/YYYY/`: Monday reviews Friday-Sunday, Tuesday-Friday review one prior day, and Saturday/Sunday do not create Daily V4 artifacts. The combined Weekly Check-In V4 keeps the prior-week retrospective and next Monday-Friday plan together; only future professional items can create TaskNotes. V3 remains unchanged.
+
 ## Weekly Planning
 
 On Saturday, use `zaplanuj tydzień` to create the next Monday-Friday plan under:
