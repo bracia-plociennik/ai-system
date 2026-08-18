@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import re
 from datetime import date, timedelta
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
@@ -32,6 +33,52 @@ def json_value(properties: dict[str, Any], key: str, default: Any) -> Any:
         return json.loads(raw)
     except json.JSONDecodeError as exc:
         raise ValueError(f"malformed {key}") from exc
+
+
+def _numeric_json_value(value: Any) -> str | None:
+    if isinstance(value, bool) or value is None:
+        return None
+    try:
+        return str(Decimal(str(value)))
+    except (InvalidOperation, ValueError):
+        return None
+
+
+def normalize_budget_facts(properties: dict[str, Any]) -> dict[str, Any]:
+    """Project V4 review facts onto the legacy budget fields used by reports.
+
+    V3 scalar properties remain canonical when present. V4 review data only
+    fills missing closure facts, so mixed V3+V4 records cannot double-count or
+    override an existing normalized value.
+    """
+    normalized = dict(properties)
+    review_process = json_value(properties, "review_process_json", {})
+    if not isinstance(review_process, dict):
+        return normalized
+
+    finance = review_process.get("finance")
+    if (
+        not str(normalized.get("previous_day_finance_amount", "") or "").strip()
+        and isinstance(finance, dict)
+    ):
+        amount = _numeric_json_value(finance.get("amount"))
+        if amount is not None:
+            normalized["previous_day_finance_amount"] = amount
+            if "currency" in finance:
+                normalized["previous_day_finance_currency"] = str(finance["currency"])
+            if "approximate" in finance:
+                normalized["previous_day_finance_approximate"] = str(finance["approximate"]).lower()
+
+    if not str(normalized.get("previous_day_actual_calories_representative", "") or "").strip():
+        if_data = review_process.get("if")
+        if isinstance(if_data, dict):
+            calories = _numeric_json_value(if_data.get("calories"))
+            if calories is not None:
+                normalized["previous_day_actual_calories_representative"] = calories
+                if "approximate" in if_data:
+                    normalized["previous_day_actual_calories_approximate"] = str(if_data["approximate"]).lower()
+
+    return normalized
 
 
 def required_schema(kind: str) -> list[str]:

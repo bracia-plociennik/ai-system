@@ -13,7 +13,7 @@ from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation, ROUND_CEILING, ROUND_HALF_UP
 from pathlib import Path
 
-from personal_ops_v4 import load_current_records
+from personal_ops_v4 import load_current_records, normalize_budget_facts
 
 
 CONFIG_RELATIVE = "personal-ops/check-ins/check-in-settings.local.md"
@@ -384,7 +384,7 @@ def food_schedule_report(records: list[dict], target: date, config: dict[str, st
 
 def load_official_records(workspace: Path) -> list[dict]:
     """Read the version-aware V3+V4 official model without rewriting either source."""
-    return load_current_records(workspace)
+    return [normalize_budget_facts(properties) for properties in load_current_records(workspace)]
 
 
 def monthly_report(records: list[dict], target: date, config: dict[str, str]) -> dict:

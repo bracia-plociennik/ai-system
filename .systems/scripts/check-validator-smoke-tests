@@ -1283,6 +1283,14 @@ cat > "$budget_workspace/personal-ops/indexes/check-ins-v3.jsonl" <<'JSONL'
 {"properties":{"session_date":"2026-08-06","closure_date":"2026-08-05","previous_day_actual_calories_representative":"","previous_day_finance_amount":"0","planned_calories_representative":"2500","planned_training_type":"full_body_A","planned_training_start":"2026-08-06T13:00","planned_training_end":"2026-08-06T15:00","planned_if_start":"2026-08-06T11:00","planned_if_end":"2026-08-06T21:00"}}
 {"properties":{"session_date":"2026-08-07","closure_date":"2026-08-06","previous_day_actual_calories_representative":"","previous_day_finance_amount":"0","planned_calories_representative":"2300","planned_if_start":"2026-08-07T11:00","planned_if_end":"2026-08-07T21:00"}}
 JSONL
+cat > "$budget_workspace/personal-ops/indexes/check-ins-v4.md" <<'MD'
+# Check-Ins v4 Index
+native-v4-check-in-count: 1
+unsynced-v4-check-in-count: 0
+MD
+cat > "$budget_workspace/personal-ops/indexes/check-ins-v4.jsonl" <<'JSONL'
+{"properties":{"index_contract":"4","schema_version":"4","artifact_kind":"daily","session_date":"2026-08-18","closure_date":"2026-08-17","planned_calories_representative":"2300","planned_training_type":"rest","planned_if_start":"2026-08-18T11:00","planned_if_end":"2026-08-18T21:00","planned_budget_max":"420","review_process_json":"{\"if\":{\"calories\":2500},\"finance\":{\"amount\":420,\"currency\":\"PLN\",\"approximate\":false}}"}}
+JSONL
 budget_report="$tmp/personal-ops-budget-report.json"
 run_must_pass_capture "personal-ops-budget-august-calculation" "$budget_report" "$budget_calculator" --workspace "$budget_workspace" --date 2026-08-03 --json
 python3 - "$budget_report" <<'PY'
@@ -1316,6 +1324,49 @@ assert Decimal(str(food["block_calorie_sum"])) == Decimal("2300"), food
 assert food["if_conflicts"] == [], food
 assert [block["status"] for block in food["food_blocks"]] == ["empty", "configured", "empty", "configured", "empty", "configured"], food
 PY
+v4_report="$tmp/personal-ops-budget-v4-report.json"
+run_must_pass_capture "personal-ops-budget-v4-closure-normalization" "$v4_report" "$budget_calculator" --workspace "$budget_workspace" --date 2026-08-18 --json
+python3 - "$v4_report" <<'PY'
+import json
+import sys
+from decimal import Decimal
+
+report = json.loads(open(sys.argv[1], encoding="utf-8").read())
+monthly = report["monthly_spending"]
+weekly = report["weekly_calories"]
+assert Decimal(str(monthly["current_spending"])) == Decimal("840"), monthly
+assert Decimal(str(weekly["actual_consumed"])) == Decimal("2500"), weekly
+assert Decimal(str(weekly["remaining_before_today"])) == Decimal("14300"), weekly
+assert Decimal(str(weekly["remaining_after_today"])) == Decimal("12000"), weekly
+assert Decimal(str(weekly["mechanical_limit_after_today"])) == Decimal("2400"), weekly
+PY
+python3 - "$copy_repo/.systems/scripts/personal_ops_v4.py" <<'PY'
+import importlib.util
+import json
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+sys.path.insert(0, str(path.parent))
+spec = importlib.util.spec_from_file_location("personal_ops_v4", path)
+module = importlib.util.module_from_spec(spec)
+assert spec.loader is not None
+spec.loader.exec_module(module)
+
+v4 = module.normalize_budget_facts({
+    "review_process_json": json.dumps({"if": {"calories": 2500}, "finance": {"amount": 420}}),
+})
+assert v4["previous_day_actual_calories_representative"] == "2500", v4
+assert v4["previous_day_finance_amount"] == "420", v4
+v3 = module.normalize_budget_facts({
+    "previous_day_actual_calories_representative": "2300",
+    "previous_day_finance_amount": "70",
+    "review_process_json": json.dumps({"if": {"calories": 9999}, "finance": {"amount": 9999}}),
+})
+assert v3["previous_day_actual_calories_representative"] == "2300", v3
+assert v3["previous_day_finance_amount"] == "70", v3
+PY
+rm -f "$budget_workspace/personal-ops/indexes/check-ins-v4.md" "$budget_workspace/personal-ops/indexes/check-ins-v4.jsonl"
 rest_report="$tmp/personal-ops-budget-rest-report.json"
 run_must_pass_capture "personal-ops-budget-rest-schedule" "$rest_report" "$budget_calculator" --workspace "$budget_workspace" --date 2026-08-04 --json
 python3 - "$rest_report" <<'PY'
