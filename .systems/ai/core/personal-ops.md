@@ -183,7 +183,11 @@ V4 preserves STATE, PROCESS, OUTCOME, and REVIEW, plus `owner_overrides_json`, `
 
 The structured V4 properties include `review_window_start`, `review_window_end`, and `review_window_kind`. The compatibility adapter rejects any duplicate effective session_date across V3 and V4 instead of silently double-counting it.
 
-The canonical V4 response uses `.systems/scripts/render-personal-ops-daily-summary --workspace <workspace> --date YYYY-MM-DD` and renders `Czas | Element | DoD | DL` before IF, six macro blocks, budget, weekly calories, training/NSDR, habits, warnings, and deferred scope. `--check-file` is deterministic and read-only.
+The canonical V4 response uses `.systems/scripts/render-personal-ops-daily-summary-v4 --workspace <workspace> --date YYYY-MM-DD` and renders a Polish-date heading plus `Czas | Element | DoD | DL`. Each item retains its explicit `Build`, `Deliver`, `Promote`, `Self`, or `Close ones` marker; the linked item has both `WIG` and its stream marker. Configured meals are projected into the chronological table, including a deterministic free interval when the local schedule omits a meal row.
+
+Between the table and WIG, render private current `Stan i kierunek dnia` from optional `current_state_json`: mental, body, constraints with mitigations, work/organism modes with reasons, Self, and Close ones. Scores receive deterministic operational guidance. Never substitute prior-day `review_state_json` or Raw Check-In when current state is missing; historical records show `nie podano`.
+
+Below `Stan i kierunek dnia`, preserve WIG/DoD/DL, standalone IF, exactly six macro blocks and totals, full monthly spending calculations, full weekly calorie calculations, training/NSDR not already represented in the table, TaskNote status, warnings, and deferred scope. Full spending means base, buffer, current spending, remaining base, remaining days inclusive, average per remaining day, pace overrun, no-spend days from today, and resume date. Full calories mean weekly limit, actual before today, remaining before today, planned today, remaining after today, days after today, mechanical and common-sense limits, and unbalanced balance. `--check-file` is deterministic and read-only.
 
 ## Validation
 

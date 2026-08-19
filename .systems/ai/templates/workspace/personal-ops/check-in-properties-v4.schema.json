@@ -9,6 +9,9 @@
     "review_review_json", "owner_overrides_json", "osnr_checkpoints_json", "plan_vs_reality_gap", "recovery_cost",
     "task_generation_policy", "task_generation_status", "task_generation_references_json"
   ],
+  "daily_optional": [
+    "current_state_json"
+  ],
   "weekly_required": [
     "index_contract", "schema_version", "artifact_kind", "report_id", "review_week_start", "review_week_end",
     "plan_week_start", "plan_week_end", "privacy", "private_index_policy", "review_state_json",

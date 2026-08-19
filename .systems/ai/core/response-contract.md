@@ -134,6 +134,14 @@ Napisz:
 
 For V4 artifacts, paste the output of the canonical renderer verbatim. Do not reconstruct the chronological table or weekly scorecard from chat memory. Preserve unknown values and omit Raw Check-In, OCR, attachments, and historical private detail from the read-only projection.
 
+The V4 daily renderer must emit `Plan na dziś - <Polish date>, <Polish weekday>` followed by the chronological `Czas | Element | DoD | DL` table. Table entries use separate inline markers for their explicit stream: `Build`, `Deliver`, `Promote`, `Self`, or `Close ones`. The linked WIG item retains its stream marker and adds a separate `WIG` marker; for example, `WIG` plus `Build`. Missing stream/category metadata is not inferred beyond the system-owned schedule block semantics.
+
+Immediately after the table and unallocated items, render `Stan i kierunek dnia` from private canonical `current_state_json`, never from review data or Raw Check-In. It includes mental and body scores with source notes and deterministic operational guidance, constraints with explicit mitigations, work and organism modes with source reasons, and the planned `Self` and `Close ones` outcomes. Historical V4 artifacts without this optional object show `nie podano`; the renderer must not backfill current state from the prior-day review.
+
+The table includes configured meals with their projected kcal and macros. When a configured food block has no explicit meal row, the renderer uses the free interval at the beginning of that block and clips it at the next scheduled event. If no free interval exists, it preserves the configured food interval and exposes a schedule conflict instead of hiding nutrition data.
+
+Below the table, V4 must retain the WIG/DoD/DL, standalone IF window, exactly six macro rows and totals, TaskNote status, warnings, and the complete private budget projections returned by `calculate-personal-ops-budgets`. Spending includes the daily limit, monthly base, buffer, current spending, remaining base, remaining days inclusive, average per remaining day, pace overrun, no-spend days from today, and standard-spend resume date. Calories include the weekly limit, actual intake before today, remaining before today, today's plan, remaining after today, remaining days after today, mechanical limit, common-sense limit, and unbalanced balance. Training and NSDR remain outside the budget sections.
+
 ## Recommendation Sources
 
 Choose the recommendation from the highest applicable source:

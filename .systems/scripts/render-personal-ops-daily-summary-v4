@@ -16,23 +16,202 @@ from personal_ops_v4 import json_value, load_daily
 
 CALCULATOR = Path(__file__).with_name("calculate-personal-ops-budgets")
 FOOD_TIMES = ("09:00-11:00", "11:00-13:00", "13:00-15:00", "15:00-17:00", "17:00-19:00", "19:00-21:00")
+POLISH_MONTHS = ("", "stycznia", "lutego", "marca", "kwietnia", "maja", "czerwca", "lipca", "sierpnia", "września", "października", "listopada", "grudnia")
+POLISH_WEEKDAYS = ("poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota", "niedziela")
+CATEGORY_LABELS = {
+    "build": "Build",
+    "deliver": "Deliver",
+    "promote": "Promote",
+    "self": "Self",
+    "close": "Close ones",
+    "close-ones": "Close ones",
+    "close_ones": "Close ones",
+}
+PLAN_STREAMS = set(CATEGORY_LABELS)
 
 
 def number(value: object) -> str:
     if value is None or str(value) == "":
-        return "unknown"
-    return format(Decimal(str(value)).quantize(Decimal("0.01")), "f").rstrip("0").rstrip(".") or "0"
+        return "nie podano"
+    raw = format(Decimal(str(value)).quantize(Decimal("0.01")), "f").rstrip("0").rstrip(".") or "0"
+    integer, separator, fraction = raw.partition(".")
+    grouped = f"{int(integer):,}".replace(",", " ")
+    return f"{grouped},{fraction}" if separator else grouped
 
 
-def display_deadline(value: object, fallback: str = "—") -> str:
+def display_deadline(value: object, fallback: str = "-") -> str:
     raw = str(value or "").strip()
-    if not raw:
+    if not raw or raw in {"-", "—"}:
         return fallback
     if "T" in raw:
         return raw.split("T", 1)[1][:5]
     if " " in raw and len(raw.split(" ", 1)[1]) >= 5:
         return raw.split(" ", 1)[1][:5]
     return raw
+
+
+def display_date(value: object) -> str:
+    target = date.fromisoformat(str(value))
+    return f"{target.day} {POLISH_MONTHS[target.month]} {target.year}, {POLISH_WEEKDAYS[target.weekday()]}"
+
+
+def display_range(start: object, end: object) -> str:
+    return f"{start}–{end}"
+
+
+def markdown_cell(value: object) -> str:
+    return str(value or "-").replace("|", "\\|").replace("\n", " ").strip() or "-"
+
+
+def minutes(value: object) -> int:
+    hours, minute = str(value).split(":", 1)
+    return int(hours) * 60 + int(minute)
+
+
+def row_category(row: dict) -> str:
+    explicit = str(row.get("stream") or row.get("category") or "").strip().lower()
+    if explicit in CATEGORY_LABELS:
+        return explicit
+    block_id = str(row.get("block_id", "")).strip().lower()
+    for prefix, category in (
+        ("build", "build"),
+        ("deliver", "deliver"),
+        ("promote", "promote"),
+        ("meal", "self"),
+        ("routine", "self"),
+        ("training", "self"),
+        ("nsdr", "self"),
+        ("shutdown", "self"),
+        ("close", "close"),
+    ):
+        if block_id.startswith(prefix):
+            return category
+    return ""
+
+
+def prefixed_title(title: object, stream: object = "", wig: bool = False) -> str:
+    parts = []
+    if wig:
+        parts.append("`WIG`")
+    label = CATEGORY_LABELS.get(str(stream or "").strip().lower(), "")
+    if label:
+        parts.append(f"`{label}`")
+    parts.append(str(title or "").strip())
+    return " ".join(part for part in parts if part)
+
+
+def task_bucket(item: dict) -> str:
+    raw = str(item.get("task_bucket") or item.get("category") or "").strip().lower()
+    return raw.removeprefix("6d/")
+
+
+def score_advice(kind: str, score: object) -> str:
+    try:
+        value = int(str(score))
+    except (TypeError, ValueError):
+        return "brak wskazówki bez wyniku skali"
+    guidance = {
+        "mental": {
+            1: "ogranicz plan do minimum i chroń podstawową regenerację",
+            2: "wybierz jeden priorytet i ogranicz przełączanie kontekstu",
+            3: "pracuj w zamkniętych blokach i pilnuj przerw",
+            4: "utrzymaj standardowy plan bez rozszerzania zakresu",
+            5: "wykorzystaj klarowność, ale zachowaj ustalone granice bloków",
+        },
+        "body": {
+            1: "przejdź na minimum dnia i nie dokładaj obciążenia",
+            2: "zmniejsz obciążenie i potraktuj regenerację priorytetowo",
+            3: "zachowaj adaptacyjność treningu i pilnuj NSDR",
+            4: "realizuj standardowy plan, obserwując drobne ograniczenia",
+            5: "pełna gotowość nie zmienia ustalonych limitów dnia",
+        },
+    }
+    return guidance.get(kind, {}).get(value, "wynik poza skalą 1–5")
+
+
+def state_note(value: object) -> str:
+    if isinstance(value, dict):
+        return str(value.get("note") or "nie podano")
+    return "nie podano"
+
+
+def state_score(properties: dict, current: dict, name: str, fallback_key: str) -> object:
+    value = current.get(name)
+    if isinstance(value, dict) and str(value.get("score", "")).strip():
+        return value.get("score")
+    return properties.get(fallback_key, "")
+
+
+def state_items(value: object, fallback: list[str]) -> str:
+    rows = value if isinstance(value, list) else []
+    labels = []
+    for row in rows:
+        if isinstance(row, dict):
+            label = str(row.get("title") or row.get("outcome") or "").strip()
+        else:
+            label = str(row).strip()
+        if label:
+            labels.append(label)
+    seen = {label.casefold() for label in labels}
+    for label in fallback:
+        if label.casefold() not in seen:
+            labels.append(label)
+            seen.add(label.casefold())
+    return "; ".join(labels) if labels else "nie podano"
+
+
+def render_state(properties: dict, items: list[dict]) -> list[str]:
+    current = json_value(properties, "current_state_json", {})
+    if not isinstance(current, dict):
+        raise ValueError("current_state_json must be an object")
+    mental = state_score(properties, current, "mental", "mental_clarity_score")
+    body = state_score(properties, current, "body", "body_readiness_score")
+    mental_display = f"{mental}/5" if str(mental).strip() else "nie podano"
+    body_display = f"{body}/5" if str(body).strip() else "nie podano"
+    constraints = []
+    for constraint in current.get("constraints", []) if isinstance(current.get("constraints"), list) else []:
+        if isinstance(constraint, dict):
+            title = str(constraint.get("title") or "nie podano").strip()
+            mitigation = str(constraint.get("mitigation") or "mitygacja nie podana").strip()
+            constraints.append(f"{title} — {mitigation}")
+        elif str(constraint).strip():
+            constraints.append(str(constraint).strip())
+    self_fallback = [str(item.get("title", "")).strip() for item in items if str(item.get("stream", "")).strip().lower() == "self"]
+    close_fallback = [str(item.get("title", "")).strip() for item in items if str(item.get("stream", "")).strip().lower() in {"close", "close-ones", "close_ones"}]
+    return [
+        "### Stan i kierunek dnia",
+        f"- **Mental:** `{mental_display}` — {state_note(current.get('mental'))}. Wskazówka operacyjna: {score_advice('mental', mental)}.",
+        f"- **Ciało:** `{body_display}` — {state_note(current.get('body'))}. Wskazówka operacyjna: {score_advice('body', body)}.",
+        f"- **Ograniczenia / zagrożenia:** {'; '.join(constraints) if constraints else 'nie podano'}.",
+        f"- **Tryb pracy:** `{properties.get('work_mode') or 'nie podano'}` — {current.get('work_mode_reason') or 'powód nie podany'}.",
+        f"- **Tryb organizmu:** `{properties.get('organism_mode') or 'nie podano'}` — {current.get('organism_mode_reason') or 'powód nie podany'}.",
+        f"- **Self:** {state_items(current.get('self'), self_fallback)}.",
+        f"- **Close ones:** {state_items(current.get('close_ones'), close_fallback)}.",
+    ]
+
+
+def food_detail(block: dict) -> str:
+    return f"~{number(block.get('calorie_target'))} kcal, B {number(block.get('protein_g'))} g, T {number(block.get('fat_g'))} g, W {number(block.get('carbohydrates_g'))} g"
+
+
+def is_meal_row(row: dict) -> bool:
+    block_id = str(row.get("block_id", "")).lower()
+    label = str(row.get("label", "")).lower()
+    return block_id.startswith("meal") or any(word in label for word in ("posił", "śniadan", "kolac", "obiad"))
+
+
+def matching_food_block(row: dict, blocks: dict[str, dict]) -> tuple[str, dict] | None:
+    if not is_meal_row(row):
+        return None
+    row_start = minutes(row.get("start"))
+    for time in FOOD_TIMES:
+        block = blocks.get(time, {})
+        if block.get("status") != "configured":
+            continue
+        start, end = (minutes(value) for value in time.split("-", 1))
+        if start <= row_start < end:
+            return time, block
+    return None
 
 
 def read_config(workspace: Path) -> dict[str, str]:
@@ -73,7 +252,7 @@ def schedule_rows(workspace: Path, properties: dict) -> list[dict]:
 
 
 def render_food(schedule: dict) -> list[str]:
-    lines = ["## Harmonogram makro", f"Cel: {number(schedule.get('planned_calorie_target'))} kcal | profil: {schedule.get('day_type', 'unknown')}"]
+    lines = ["### Makro", f"**Cel:** {number(schedule.get('planned_calorie_target'))} kcal | **profil:** {schedule.get('day_type', 'unknown')}"]
     if schedule.get("status") != "available":
         lines.append(f"Status: {schedule.get('status', 'unknown')} — {schedule.get('reason', 'brak projekcji')}")
         return lines
@@ -83,13 +262,13 @@ def render_food(schedule: dict) -> list[str]:
     for time in FOOD_TIMES:
         block = blocks[time]
         if block.get("status") == "empty":
-            lines.append(f"- {time}: empty")
+            lines.append(f"- `{time.replace('-', '–')}`: empty")
         elif block.get("status") == "configured":
-            lines.append(f"- {time}: ~{number(block.get('calorie_target'))} kcal | B {number(block.get('protein_g'))} g | T {number(block.get('fat_g'))} g | W {number(block.get('carbohydrates_g'))} g")
+            lines.append(f"- `{time.replace('-', '–')}`: `~{number(block.get('calorie_target'))} kcal | B {number(block.get('protein_g'))} g | T {number(block.get('fat_g'))} g | W {number(block.get('carbohydrates_g'))} g`")
         else:
             raise ValueError(f"invalid macro block status: {time}")
     totals = schedule.get("totals", {})
-    lines.append(f"Suma: {number(schedule.get('daily_calorie_target'))} kcal | B {number(totals.get('protein_g'))} g | T {number(totals.get('fat_g'))} g | W {number(totals.get('carbohydrates_g'))} g")
+    lines.append(f"**Suma:** `~{number(schedule.get('daily_calorie_target'))} kcal | B {number(totals.get('protein_g'))} g | T {number(totals.get('fat_g'))} g | W {number(totals.get('carbohydrates_g'))} g`")
     return lines
 
 
@@ -103,72 +282,157 @@ def render(properties: dict, rows: list[dict], budget_report: dict) -> str:
         block_id = str(item.get("block_id", "")).strip()
         if block_id:
             by_block.setdefault(block_id, []).append(item)
-        elif str(item.get("stream", "")) in {"build", "deliver", "promote"}:
+        elif str(item.get("stream", "")).strip().lower() in PLAN_STREAMS:
             unallocated.append(item)
 
-    table = ["| Czas | Element | DoD | DL |", "| --- | --- | --- | --- |"]
+    food_schedule = budget_report["weekly_calories"]["food_schedule"]
+    food_blocks = {str(block.get("time")): block for block in food_schedule.get("food_blocks", [])} if food_schedule.get("status") == "available" else {}
+    represented_food: set[str] = set()
+    table_records: list[dict] = []
     rendered_items: set[int] = set()
-    for row in sorted(rows, key=lambda value: str(value.get("start", ""))):
+    wig_item_id = str(properties.get("wig_plan_item_id", "")).strip()
+    for order, row in enumerate(rows):
         start, end = str(row.get("start", "")), str(row.get("end", ""))
         block_id = str(row.get("block_id", ""))
         matched = by_block.get(block_id, [])
+        food_match = matching_food_block(row, food_blocks)
+        if food_match:
+            represented_food.add(food_match[0])
         if matched:
             for item in matched:
                 rendered_items.add(id(item))
-                table.append(f"| {start}-{end} | {item.get('title', row.get('label', ''))} | {item.get('definition_of_done', '') or row.get('dod', '')} | {display_deadline(item.get('deadline', '') or row.get('deadline', '—'))} |")
+                stream = str(item.get("stream", ""))
+                table_records.append({
+                    "start": start,
+                    "end": end,
+                    "order": order,
+                    "title": prefixed_title(item.get("title", row.get("label", "")), stream, str(item.get("id", "")).strip() == wig_item_id),
+                    "dod": item.get("definition_of_done", "") or row.get("dod", ""),
+                    "deadline": item.get("deadline", "") or row.get("deadline", "-"),
+                })
         else:
-            table.append(f"| {start}-{end} | {row.get('label', '')} | {row.get('dod', '')} | {display_deadline(row.get('deadline', '—'))} |")
+            stream = row_category(row)
+            table_records.append({
+                "start": start,
+                "end": end,
+                "order": order,
+                "title": prefixed_title(row.get("label", ""), stream),
+                "dod": food_detail(food_match[1]) if food_match else row.get("dod", ""),
+                "deadline": row.get("deadline", "-"),
+            })
 
-    lines = ["Plan na dziś (read-only)", f"Data: {properties.get('session_date', '')}", "", "## Harmonogram", *table]
+    schedule_warnings: list[str] = []
+    if food_schedule.get("status") == "available":
+        for index, time in enumerate(FOOD_TIMES):
+            block = food_blocks.get(time, {})
+            if block.get("status") != "configured" or time in represented_food:
+                continue
+            start, configured_end = time.split("-", 1)
+            start_minute, end_minute = minutes(start), minutes(configured_end)
+            overlapping = [record for record in table_records if minutes(record["start"]) <= start_minute < minutes(record["end"])]
+            later_starts = [minutes(record["start"]) for record in table_records if start_minute < minutes(record["start"]) < end_minute]
+            rendered_end = configured_end
+            if not overlapping and later_starts:
+                clipped = min(later_starts)
+                rendered_end = f"{clipped // 60:02d}:{clipped % 60:02d}"
+            elif overlapping:
+                schedule_warnings.append(f"konflikt posiłku {time.replace('-', '–')} z harmonogramem")
+            table_records.append({
+                "start": start,
+                "end": rendered_end,
+                "order": len(rows) + index,
+                "title": prefixed_title("Posiłek", "self"),
+                "dod": food_detail(block),
+                "deadline": "-",
+            })
+
+    table = ["| Czas | Element | DoD | DL |", "|---|---|---|---|"]
+    for record in sorted(table_records, key=lambda value: (minutes(value["start"]), value["order"])):
+        table.append(
+            f"| {display_range(record['start'], record['end'])} | {markdown_cell(record['title'])} | {markdown_cell(record['dod'])} | {markdown_cell(display_deadline(record['deadline']))} |"
+        )
+
+    lines = [f"## Plan na dziś - {display_date(properties.get('session_date'))}", "", *table]
     if unallocated:
         lines.extend(["", "## Niezaalokowane"])
         for item in unallocated:
-            lines.append(f"- {item.get('title', '')} | DoD: {item.get('definition_of_done', '')} | DL: {display_deadline(item.get('deadline', ''), 'bez deadlineu')}")
-    hidden_allocations = [item for item in items if isinstance(item, dict) and str(item.get("stream", "")) in {"build", "deliver", "promote"} and id(item) not in rendered_items and str(item.get("block_id", "")).strip()]
+            lines.append(f"- {prefixed_title(item.get('title', ''), item.get('stream', ''))} | DoD: {item.get('definition_of_done', '')} | DL: {display_deadline(item.get('deadline', ''), 'bez deadlineu')}")
+    hidden_allocations = [item for item in items if isinstance(item, dict) and str(item.get("stream", "")).strip().lower() in PLAN_STREAMS and id(item) not in rendered_items and str(item.get("block_id", "")).strip()]
     if hidden_allocations:
         if not unallocated:
             lines.extend(["", "## Niezaalokowane"])
         for item in hidden_allocations:
-            lines.append(f"- {item.get('title', '')} | DoD: {item.get('definition_of_done', '')} | DL: {display_deadline(item.get('deadline', ''), 'bez deadlineu')}")
+            lines.append(f"- {prefixed_title(item.get('title', ''), item.get('stream', ''))} | DoD: {item.get('definition_of_done', '')} | DL: {display_deadline(item.get('deadline', ''), 'bez deadlineu')}")
+    lines.extend(["", *render_state(properties, [item for item in items if isinstance(item, dict)])])
     if properties.get("wig_title"):
-        wig_item_id = str(properties.get("wig_plan_item_id", "")).strip()
         wig_deadline_value = ""
         for item in items:
             if isinstance(item, dict) and str(item.get("id", "")).strip() == wig_item_id:
                 wig_deadline_value = str(item.get("deadline", "")).strip()
                 break
-        lines.extend(["", "## WIG", f"- WIG: {properties.get('wig_title')}", f"- DoD: {properties.get('wig_definition_of_done', '')}", f"- Deadline: {display_deadline(wig_deadline_value, 'bez deadlineu')}"])
+        lines.extend(["", "### WIG", f"**WIG:** {properties.get('wig_title')}", f"**DoD:** {properties.get('wig_definition_of_done', '') or 'nie podano'}", f"**DL:** {display_deadline(wig_deadline_value, 'bez deadlineu')}"])
     if properties.get("planned_if_start") and properties.get("planned_if_end"):
-        lines.extend(["", f"## IF: {properties.get('planned_if_start')}-{properties.get('planned_if_end')}"])
-    lines.extend(["", *render_food(budget_report["weekly_calories"]["food_schedule"])])
+        lines.extend(["", "### IF", f"**Okno:** {display_range(properties.get('planned_if_start'), properties.get('planned_if_end'))}"])
+    lines.extend(["", *render_food(food_schedule)])
     monthly = budget_report["monthly_spending"]
     weekly = budget_report["weekly_calories"]
+    currency = monthly.get("currency", properties.get("planned_budget_currency", ""))
     lines.extend([
-        "", "## Budżet",
-        f"- Dzienny limit: {properties.get('planned_budget_max', 'unknown')} {properties.get('planned_budget_currency', monthly.get('currency', ''))}".rstrip(),
-        f"- Miesięczny bazowy: {number(monthly.get('base_budget'))} {monthly.get('currency', '')}".rstrip(),
-        f"- Bufor: {number(monthly.get('buffer'))} {monthly.get('currency', '')}".rstrip(),
-        f"- Wydatki: {number(monthly.get('current_spending'))} {monthly.get('currency', '')}".rstrip(),
-        f"- Pozostało: {number(monthly.get('remaining_base_budget'))} {monthly.get('currency', '')}".rstrip(),
-        "", "## Budżet kalorii tygodnia",
-        f"- Limit: {number(weekly.get('weekly_budget'))} kcal",
-        f"- Zjedzone: {number(weekly.get('actual_consumed'))} kcal",
-        f"- Pozostało przed dziś: {number(weekly.get('remaining_before_today'))} kcal",
-        f"- Po planie: {number(weekly.get('remaining_after_today'))} kcal",
+        "", "### Budżet wydatków",
+        f"- Limit dnia: `{number(properties.get('planned_budget_max'))} {properties.get('planned_budget_currency', currency)}`",
+        f"- Budżet bazowy: `{number(monthly.get('base_budget'))} {currency}`",
+        f"- Bufor: `{number(monthly.get('buffer'))} {currency}`",
+        f"- Wydatki: `{number(monthly.get('current_spending'))} {currency}`",
+        f"- Pozostało: `{number(monthly.get('remaining_base_budget'))} {currency}`",
+        f"- Pozostałe dni włącznie z dzisiaj: `{number(monthly.get('remaining_days_inclusive'))}`",
+        f"- Średnia na pozostały dzień: `{number(monthly.get('average_available_per_remaining_day'))} {currency}`",
+        f"- Przekroczenie tempa: `{number(monthly.get('pace_overrun'))} {currency}`",
+        f"- Dni bez wydatków od dziś: `{number(monthly.get('no_spend_days_from_today'))}`",
+        f"- Powrót do limitu: `{monthly.get('standard_spend_resume_date') or 'nie podano'}`",
     ])
-    if properties.get("planned_training_start") and properties.get("planned_training_end"):
-        lines.append(f"- Trening: {properties.get('planned_training_start')}-{properties.get('planned_training_end')} ({properties.get('planned_training_type', '')})")
-    if properties.get("planned_nsdr_start") and properties.get("planned_nsdr_end"):
-        lines.append(f"- NSDR: {properties.get('planned_nsdr_start')}-{properties.get('planned_nsdr_end')}")
+    if monthly.get("approximate"):
+        lines.append("- Status danych: `wartości przybliżone`")
+    lines.extend([
+        "", "### Budżet kalorii",
+        f"- Tygodniowy limit: `{number(weekly.get('weekly_budget'))} kcal`",
+        f"- Zjedzone przed dzisiaj: `{number(weekly.get('actual_consumed'))} kcal`",
+        f"- Pozostało przed dzisiaj: `{number(weekly.get('remaining_before_today'))} kcal`",
+        f"- Plan na dzisiaj: `{number(weekly.get('planned_today'))} kcal`",
+        f"- Pozostało po dzisiaj: `{number(weekly.get('remaining_after_today'))} kcal`",
+        f"- Pozostałe dni po dzisiaj: `{number(weekly.get('remaining_days_after_today'))}`",
+        f"- Mechanicznie na pozostały dzień: `{number(weekly.get('mechanical_limit_after_today'))} kcal`",
+        f"- Limit zdroworozsądkowy: `{number(weekly.get('common_sense_limit_after_today'))} kcal`",
+        f"- Niewyrównane saldo: `{number(weekly.get('unbalanced_balance'))} kcal`",
+    ])
+    if weekly.get("approximate"):
+        lines.append("- Status danych: `wartości przybliżone`")
+    activity = []
+    represented_ids = {str(row.get("block_id", "")).lower() for row in rows}
+    if properties.get("planned_training_start") and properties.get("planned_training_end") and not any(value.startswith("training") for value in represented_ids):
+        activity.append(f"- Self · Trening: {display_range(properties.get('planned_training_start'), properties.get('planned_training_end'))} ({properties.get('planned_training_type', 'nie podano')})")
+    if properties.get("planned_nsdr_start") and properties.get("planned_nsdr_end") and not any(value.startswith("nsdr") for value in represented_ids):
+        activity.append(f"- Self · NSDR: {display_range(properties.get('planned_nsdr_start'), properties.get('planned_nsdr_end'))}")
+    if activity:
+        lines.extend(["", "### Aktywność i regeneracja", *activity])
+    deferred = [item for item in items if isinstance(item, dict) and task_bucket(item) == "defer"]
+    if deferred:
+        lines.extend(["", "### Odroczone", *[f"- {prefixed_title(item.get('title', ''), item.get('stream', ''))}" for item in deferred]])
+    if properties.get("task_generation_status"):
+        lines.extend(["", "### TaskNotes", f"- Status: {properties.get('task_generation_status')}"])
     warnings = []
     for label, key in (("mental", "mental_clarity_score"), ("ciało", "body_readiness_score")):
-        if str(properties.get(key, "")) and int(str(properties[key])) <= 3:
-            warnings.append(f"{label} {properties[key]}/5")
+        try:
+            if str(properties.get(key, "")) and Decimal(str(properties[key])) <= 3:
+                warnings.append(f"{label} {properties[key]}/5")
+        except Exception:  # noqa: BLE001
+            warnings.append(f"{label} nie podano")
     if properties.get("organism_mode") == "recovery":
         warnings.append("tryb recovery")
+    warnings.extend(schedule_warnings)
+    warnings.extend(f"konflikt IF: {value.replace('-', '–')}" for value in food_schedule.get("if_conflicts", []))
     if warnings:
-        lines.append(f"Ostrzeżenie: {', '.join(warnings)}")
-    lines.append("Zapis jest read-only planem; nie wykonuje zadań ani działań zewnętrznych.")
+        lines.extend(["", "### Ostrzeżenia", *[f"- {warning}" for warning in warnings]])
+    lines.extend(["", "Zapis jest read-only planem; nie wykonuje zadań ani działań zewnętrznych."])
     return "\n".join(lines) + "\n"
 
 

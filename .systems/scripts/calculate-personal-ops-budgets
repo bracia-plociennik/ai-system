@@ -387,6 +387,16 @@ def load_official_records(workspace: Path) -> list[dict]:
     return [normalize_budget_facts(properties) for properties in load_current_records(workspace)]
 
 
+def records_available_as_of(records: list[dict], target: date) -> list[dict]:
+    """Exclude facts recorded by check-ins created after the rendered plan date."""
+    available = []
+    for properties in records:
+        session = str(properties.get("session_date", "")).strip()
+        if session and parse_date(session, "session_date") <= target:
+            available.append(properties)
+    return available
+
+
 def monthly_report(records: list[dict], target: date, config: dict[str, str]) -> dict:
     base = positive(decimal(config.get("monthly_base_budget"), "monthly_base_budget", True), "monthly_base_budget")
     buffer = positive(decimal(config.get("monthly_buffer"), "monthly_buffer", True), "monthly_buffer")
@@ -487,7 +497,7 @@ def calorie_report(records: list[dict], target: date, config: dict[str, str]) ->
 
 def calculate(workspace: Path, target: date) -> dict:
     config = parse_frontmatter(workspace / CONFIG_RELATIVE)
-    records = load_official_records(workspace)
+    records = records_available_as_of(load_official_records(workspace), target)
     return {
         "report_date": target.isoformat(),
         "privacy": "private-sensitive",

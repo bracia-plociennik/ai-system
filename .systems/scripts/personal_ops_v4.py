@@ -117,6 +117,10 @@ def validate_daily(top: dict[str, Any], properties: dict[str, Any], path: Path) 
         value = json_value(properties, key, None)
         if value is None:
             raise ValueError(f"{key} must be valid JSON: {path}")
+    if "current_state_json" in properties:
+        current_state = json_value(properties, "current_state_json", None)
+        if not isinstance(current_state, dict):
+            raise ValueError(f"current_state_json must be an object: {path}")
     items = json_value(properties, "planned_items_json", [])
     if not isinstance(items, list) or any(not isinstance(item, dict) for item in items):
         raise ValueError(f"planned_items_json must be an array of objects: {path}")

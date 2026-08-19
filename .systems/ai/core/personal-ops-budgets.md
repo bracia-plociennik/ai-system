@@ -61,6 +61,7 @@ The summary compares the primary daily calorie target with calories derived from
 
 For a report date `D` in the configured timezone:
 
+- calculations use only indexed records whose `session_date` is on or before `D`; a later check-in may close `D`, but it must not retroactively change a historical plan projection rendered for `D`;
 - `current_spending` is the sum of `previous_day_finance_amount` for indexed closure dates in the current calendar month through `D`;
 - `remaining_base_budget = monthly_base_budget - current_spending`;
 - `remaining_days_inclusive` includes `D` and all later calendar days in the month;
@@ -77,6 +78,7 @@ The configured buffer is reported separately. It does not silently increase the 
 
 Each reporting week is Monday through Sunday. Saturday and Sunday from the previous week are never included in a new weekly balance.
 
+- the report is an `as-of D` projection and uses only records available by `D`, identified by `session_date <= D`;
 - actual consumed calories come from indexed closure properties whose `closure_date` is in the current Monday-Sunday week;
 - the current planned calorie value is shown separately and may be used for projection;
 - `projected_remaining_after_today = weekly_calorie_budget - actual_consumed - planned_today`;

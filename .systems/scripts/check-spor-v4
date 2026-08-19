@@ -50,13 +50,13 @@ macro_rest_block_19_21_status: configured
 macro_rest_block_19_21_protein_share_percent: 36
 macro_rest_block_19_21_fat_share_percent: 44
 macro_rest_block_19_21_carbohydrates_share_percent: 46
-schedule_standard_json: [{"block_id":"routine","start":"07:30","end":"09:00","label":"Rutyna","dod":"Rutyna wykonana","deadline":"—"},{"block_id":"build-01","start":"09:10","end":"10:40","label":"Build","dod":"Build done","deadline":"2026-08-17T10:40"},{"block_id":"adapt-01","start":"11:40","end":"12:40","label":"Adaptacja","dod":"Adaptacja done","deadline":"—"}]
-schedule_merged_adapt_shifted_json: [{"block_id":"routine","start":"07:30","end":"09:00","label":"Rutyna","dod":"Rutyna wykonana","deadline":"—"},{"block_id":"build-01","start":"09:10","end":"10:40","label":"Build","dod":"Build done","deadline":"2026-08-17T10:40"},{"block_id":"adapt-merged","start":"11:40","end":"13:40","label":"Adaptacja scalona","dod":"Adaptacja done","deadline":"—"}]
+schedule_standard_json: [{"block_id":"routine","start":"07:30","end":"09:00","label":"Rutyna","dod":"Rutyna wykonana","deadline":"—"},{"block_id":"build-01","start":"09:10","end":"10:40","label":"Build","dod":"Build done","deadline":"2026-08-17T10:40"},{"block_id":"meal-01","start":"11:00","end":"11:30","label":"Śniadanie","dod":"Posiłek","deadline":"—"},{"block_id":"adapt-01","start":"11:40","end":"12:40","label":"Adaptacja","dod":"Adaptacja done","deadline":"—"},{"block_id":"nsdr-01","start":"16:30","end":"17:00","label":"NSDR","dod":"Sesja wykonana","deadline":"—"},{"block_id":"promote-01","start":"17:30","end":"18:00","label":"Promocja","dod":"Promocja gotowa","deadline":"—"},{"block_id":"meal-02","start":"19:00","end":"21:00","label":"Obiado-kolacja","dod":"Posiłek","deadline":"—"},{"block_id":"close-01","start":"21:00","end":"21:30","label":"Czas z bliskimi","dod":"Obecność","deadline":"—"}]
+schedule_merged_adapt_shifted_json: [{"block_id":"routine","start":"07:30","end":"09:00","label":"Rutyna","dod":"Rutyna wykonana","deadline":"—"},{"block_id":"build-01","start":"09:10","end":"10:40","label":"Build","dod":"Build done","deadline":"2026-08-17T10:40"},{"block_id":"meal-01","start":"11:00","end":"11:30","label":"Śniadanie","dod":"Posiłek","deadline":"—"},{"block_id":"adapt-merged","start":"11:40","end":"13:40","label":"Adaptacja scalona","dod":"Adaptacja done","deadline":"—"},{"block_id":"nsdr-01","start":"16:30","end":"17:00","label":"NSDR","dod":"Sesja wykonana","deadline":"—"},{"block_id":"meal-02","start":"19:00","end":"21:00","label":"Obiado-kolacja","dod":"Posiłek","deadline":"—"}]
 ---
 EOF
 
 cat > "$workspace/personal-ops/indexes/check-ins-v3.jsonl" <<'EOF'
-{"properties":{"index_contract":"3","private_index_policy":"detailed-private","session_date":"2026-08-12","closure_date":"2026-08-11","previous_day_actual_calories_representative":"2300","previous_day_finance_amount":"0"}}
+{"properties":{"index_contract":"3","private_index_policy":"detailed-private","session_date":"2026-08-12","closure_date":"2026-08-11","previous_day_actual_calories_representative":"2300","previous_day_finance_amount":"840"}}
 EOF
 cat > "$workspace/personal-ops/indexes/check-ins-v3.md" <<'EOF'
 # Check-Ins V3 Index
@@ -64,7 +64,8 @@ unsynced-native-check-in-count: 0
 EOF
 
 write_daily() {
-  local day="$1" kind="$2" variant="$3"
+  local day="$1" kind="$2" variant="$3" review_process="$4"
+  local review_process_escaped="${review_process//\"/\\\"}"
   cat > "$workspace/personal-ops/check-ins-v4/2026/${day}.md" <<EOF
 ---
 type: daily-check-in-v4
@@ -87,12 +88,13 @@ properties:
   work_mode: growth
   organism_mode: normal
   planned_schedule_variant: ${variant}
+  current_state_json: "{\"mental\":{\"score\":4,\"note\":\"klarowność dobra\"},\"body\":{\"score\":3,\"note\":\"lekka ciężkość\"},\"constraints\":[{\"title\":\"przełączanie kontekstu\",\"mitigation\":\"zamknąć blok przed zmianą\"}],\"work_mode_reason\":\"rozwój produktu\",\"organism_mode_reason\":\"standardowa gotowość\",\"self\":[\"trening\"],\"close_ones\":[\"czas z bliskimi\"]}"
   wig_title: Partner Dashboard
   wig_definition_of_done: Link gotowy do wysłania
   wig_plan_item_id: build-01
-  planned_items_json: "[{\"id\":\"build-01\",\"stream\":\"build\",\"title\":\"Partner Dashboard\",\"definition_of_done\":\"Dashboard done\",\"deadline\":\"${day}T10:40\",\"block_id\":\"build-01\",\"mapping\":{\"client\":\"tokenuj\",\"project\":\"TechGrow\"}} , {\"id\":\"free-01\",\"stream\":\"deliver\",\"title\":\"Unallocated work\",\"definition_of_done\":\"Review\",\"deadline\":\"\"}]"
+  planned_items_json: "[{\"id\":\"build-01\",\"stream\":\"build\",\"title\":\"Partner Dashboard\",\"definition_of_done\":\"Dashboard done\",\"deadline\":\"${day}T10:40\",\"block_id\":\"build-01\",\"mapping\":{\"client\":\"tokenuj\",\"project\":\"TechGrow\"}},{\"id\":\"deliver-01\",\"stream\":\"deliver\",\"title\":\"Client delivery\",\"definition_of_done\":\"Delivered\",\"deadline\":\"${day}T12:40\",\"block_id\":\"adapt-01\"},{\"id\":\"promote-01\",\"stream\":\"promote\",\"title\":\"Promotion\",\"definition_of_done\":\"Published\",\"deadline\":\"\",\"block_id\":\"promote-01\"},{\"id\":\"close-01\",\"stream\":\"close\",\"title\":\"Czas z bliskimi\",\"definition_of_done\":\"Obecność\",\"deadline\":\"\",\"block_id\":\"close-01\"},{\"id\":\"free-01\",\"stream\":\"deliver\",\"title\":\"Unallocated work\",\"definition_of_done\":\"Review\",\"deadline\":\"\"}]"
   review_state_json: "{}"
-  review_process_json: "{}"
+  review_process_json: "${review_process_escaped}"
   review_outcome_json: "{}"
   review_review_json: "{}"
   owner_overrides_json: "[]"
@@ -119,8 +121,9 @@ fixture
 EOF
 }
 
-write_daily 2026-08-17 weekend standard
-write_daily 2026-08-18 previous-day merged-adapt-shifted
+write_daily 2026-08-17 weekend standard '{}'
+write_daily 2026-08-18 previous-day merged-adapt-shifted '{"if":{"calories":2500},"finance":{"amount":0,"currency":"PLN"}}'
+write_daily 2026-08-19 previous-day standard '{"if":{"calories":2600,"approximate":true},"finance":{"amount":70,"currency":"PLN"}}'
 
 if "$repo_root/.systems/scripts/check-personal-ops-v4" >/dev/null; then :; else
   echo "V4 Personal Ops validator failed" >&2
@@ -136,11 +139,22 @@ import sys
 from datetime import date
 from pathlib import Path
 sys.path.insert(0, str(Path(sys.argv[1]) / ".systems/scripts"))
-from personal_ops_v4 import load_current_records, load_daily
+from personal_ops_v4 import load_current_records, load_daily, validate_daily
 
 workspace = Path(sys.argv[2])
 load_daily(workspace, date(2026, 8, 17))
 load_daily(workspace, date(2026, 8, 18))
+daily_path = workspace / "personal-ops/check-ins-v4/2026/2026-08-18.md"
+top, properties, _body = load_daily(workspace, date(2026, 8, 18))
+invalid_state = dict(properties)
+invalid_state["current_state_json"] = "[]"
+try:
+    validate_daily(top, invalid_state, daily_path)
+except ValueError as exc:
+    if "current_state_json must be an object" not in str(exc):
+        raise
+else:
+    raise SystemExit("non-object current_state_json was accepted")
 try:
     load_daily(workspace, date(2026, 8, 16))
 except ValueError:
@@ -167,17 +181,53 @@ PY
 
 daily_output="$tmp_root/daily-summary.md"
 python3 "$repo_root/.systems/scripts/render-personal-ops-daily-summary-v4" --workspace "$workspace" --date 2026-08-17 > "$daily_output"
+grep -q '^## Plan na dziś - 17 sierpnia 2026, poniedziałek$' "$daily_output"
 grep -q '^| Czas | Element | DoD | DL |$' "$daily_output"
 grep -q '^## Niezaalokowane$' "$daily_output"
-grep -q '^## WIG$' "$daily_output"
-grep -q '^- Deadline: 10:40$' "$daily_output"
-test "$(grep -cE '^- (09:00-11:00|11:00-13:00|13:00-15:00|15:00-17:00|17:00-19:00|19:00-21:00):' "$daily_output")" -eq 6
+grep -q '^### Stan i kierunek dnia$' "$daily_output"
+grep -Fq '**Mental:** `4/5` — klarowność dobra.' "$daily_output"
+grep -Fq '**Ciało:** `3/5` — lekka ciężkość.' "$daily_output"
+grep -Fq '**Ograniczenia / zagrożenia:** przełączanie kontekstu — zamknąć blok przed zmianą.' "$daily_output"
+grep -Fq '**Tryb pracy:** `growth` — rozwój produktu.' "$daily_output"
+grep -Fq '**Tryb organizmu:** `normal` — standardowa gotowość.' "$daily_output"
+grep -Fq '**Self:** trening.' "$daily_output"
+grep -Fq '**Close ones:** czas z bliskimi.' "$daily_output"
+grep -q '^### WIG$' "$daily_output"
+grep -q '^\*\*DL:\*\* 10:40$' "$daily_output"
+grep -Fq '`WIG` `Build` Partner Dashboard' "$daily_output"
+grep -Fq '`Deliver` Client delivery' "$daily_output"
+grep -Fq '`Promote` Promotion' "$daily_output"
+grep -Fq '`Self` Śniadanie' "$daily_output"
+grep -Fq '`Close ones` Czas z bliskimi' "$daily_output"
+grep -Fq '`Deliver` Unallocated work' "$daily_output"
+grep -Fq '| 15:00–16:30 | `Self` Posiłek |' "$daily_output"
+test "$(grep -cE '^- `?(09:00–11:00|11:00–13:00|13:00–15:00|15:00–17:00|17:00–19:00|19:00–21:00)`?:' "$daily_output")" -eq 6
+grep -q '^- Pozostałe dni włącznie z dzisiaj:' "$daily_output"
+grep -q '^- Średnia na pozostały dzień:' "$daily_output"
+grep -q '^- Przekroczenie tempa:' "$daily_output"
+grep -q '^- Dni bez wydatków od dziś:' "$daily_output"
+grep -q '^- Powrót do limitu:' "$daily_output"
+grep -q '^- Plan na dzisiaj:' "$daily_output"
+grep -q '^- Pozostałe dni po dzisiaj:' "$daily_output"
+grep -q '^- Mechanicznie na pozostały dzień:' "$daily_output"
+grep -q '^- Limit zdroworozsądkowy:' "$daily_output"
+grep -q '^- Niewyrównane saldo:' "$daily_output"
 python3 "$repo_root/.systems/scripts/render-personal-ops-daily-summary-v4" --workspace "$workspace" --date 2026-08-17 --check-file "$daily_output"
 sed '$d' "$daily_output" > "$tmp_root/daily-summary-bad.md"
 if python3 "$repo_root/.systems/scripts/render-personal-ops-daily-summary-v4" --workspace "$workspace" --date 2026-08-17 --check-file "$tmp_root/daily-summary-bad.md"; then
   echo "Daily --check-file accepted truncated output" >&2
   exit 1
 fi
+
+budget_output="$tmp_root/daily-summary-budget.md"
+python3 "$repo_root/.systems/scripts/render-personal-ops-daily-summary-v4" --workspace "$workspace" --date 2026-08-18 > "$budget_output"
+grep -Fq -- '- Wydatki: `840 PLN`' "$budget_output"
+grep -Fq -- '- Pozostało: `1 260 PLN`' "$budget_output"
+grep -Fq -- '- Średnia na pozostały dzień: `90 PLN`' "$budget_output"
+grep -Fq -- '- Zjedzone przed dzisiaj: `2 500 kcal`' "$budget_output"
+grep -Fq -- '- Pozostało po dzisiaj: `12 000 kcal`' "$budget_output"
+grep -Fq -- '- Mechanicznie na pozostały dzień: `2 400 kcal`' "$budget_output"
+grep -Fq -- '- Limit zdroworozsądkowy: `2 400 kcal`' "$budget_output"
 
 cat > "$workspace/personal-ops/weekly-check-ins-v4/2026/2026-W34.md" <<'EOF'
 ---
