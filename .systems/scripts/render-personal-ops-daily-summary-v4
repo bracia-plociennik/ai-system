@@ -239,7 +239,25 @@ def budget(workspace: Path, target: date) -> dict:
 
 
 def schedule_rows(workspace: Path, properties: dict) -> list[dict]:
+    if str(properties.get("daily_plan_contract", "")).strip() == "per-day-schedule-v1":
+        rows = json_value(properties, "planned_schedule_json", None)
+        if not isinstance(rows, list) or not rows or any(not isinstance(row, dict) for row in rows):
+            raise ValueError("invalid planned_schedule_json for per-day-schedule-v1")
+        return rows
+
     config = read_config(workspace)
+    session_date = str(properties.get("session_date", "")).strip()
+    raw_overrides = config.get("schedule_historical_overrides_json", "")
+    if raw_overrides:
+        overrides = json.loads(raw_overrides)
+        if not isinstance(overrides, dict):
+            raise ValueError("invalid local schedule configuration: schedule_historical_overrides_json")
+        if session_date in overrides:
+            rows = overrides[session_date]
+            if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+                raise ValueError(f"invalid historical schedule override: {session_date}")
+            return rows
+
     variant = str(properties.get("planned_schedule_variant", "standard"))
     key = "schedule_merged_adapt_shifted_json" if variant == "merged-adapt-shifted" else "schedule_standard_json"
     raw = config.get(key, "")

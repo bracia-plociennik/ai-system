@@ -101,7 +101,71 @@ def validate_common(top: dict[str, Any], properties: dict[str, Any], path: Path,
         raise ValueError(f"invalid private_index_policy: {path}")
 
 
-def validate_daily(top: dict[str, Any], properties: dict[str, Any], path: Path) -> None:
+def _clock_minutes(value: Any, label: str, path: Path) -> int:
+    match = re.fullmatch(r"(\d{2}):(\d{2})", str(value or ""))
+    if not match:
+        raise ValueError(f"{label} must use HH:MM: {path}")
+    hour, minute = int(match.group(1)), int(match.group(2))
+    if hour > 23 or minute > 59:
+        raise ValueError(f"{label} must use a valid clock time: {path}")
+    return hour * 60 + minute
+
+
+def _validate_planned_schedule(properties: dict[str, Any], items: list[dict], path: Path) -> None:
+    contract = str(properties.get("daily_plan_contract", "") or "").strip()
+    if not contract:
+        return
+    if contract != "per-day-schedule-v1":
+        raise ValueError(f"unsupported daily_plan_contract: {path}")
+    rows = json_value(properties, "planned_schedule_json", None)
+    if not isinstance(rows, list) or not rows or any(not isinstance(row, dict) for row in rows):
+        raise ValueError(f"planned_schedule_json must be a non-empty array of objects: {path}")
+    block_ids: set[str] = set()
+    meal_slots: set[int] = set()
+    for row in rows:
+        block_id = str(row.get("block_id", "")).strip()
+        kind = str(row.get("kind", "")).strip()
+        label = str(row.get("label", "")).strip()
+        if not block_id or block_id in block_ids:
+            raise ValueError(f"planned_schedule_json contains missing or duplicate block_id: {path}")
+        if not kind or not label:
+            raise ValueError(f"planned_schedule_json rows require kind and label: {path}")
+        start = _clock_minutes(row.get("start"), f"{block_id}.start", path)
+        end = _clock_minutes(row.get("end"), f"{block_id}.end", path)
+        if end <= start:
+            raise ValueError(f"planned_schedule_json row must end after it starts: {block_id}: {path}")
+        block_ids.add(block_id)
+        if kind == "meal":
+            slot = row.get("meal_slot")
+            if isinstance(slot, bool) or not isinstance(slot, int) or slot not in {1, 2, 3} or slot in meal_slots:
+                raise ValueError(f"meal rows require unique meal_slot 1..3: {path}")
+            meal_slots.add(slot)
+        elif "meal_slot" in row:
+            raise ValueError(f"meal_slot is allowed only for meal rows: {path}")
+    if meal_slots != {1, 2, 3}:
+        raise ValueError(f"per-day schedule requires meal_slot 1, 2, and 3: {path}")
+    missing_blocks = [
+        str(item.get("block_id", "")).strip()
+        for item in items
+        if str(item.get("block_id", "")).strip() and str(item.get("block_id", "")).strip() not in block_ids
+    ]
+    if missing_blocks:
+        raise ValueError(f"planned item references unknown per-day block_id: {', '.join(missing_blocks)}: {path}")
+
+
+def _validate_readable_body(properties: dict[str, Any], body: str, path: Path) -> None:
+    contract = str(properties.get("readable_body_contract", "") or "").strip()
+    if not contract:
+        return
+    if contract != "spor-readable-v1":
+        raise ValueError(f"unsupported readable_body_contract: {path}")
+    for heading in ("Plan na dziś", "STATE", "PROCESS", "OUTCOME", "REVIEW"):
+        match = re.search(rf"(?ms)^## {re.escape(heading)}\s*$\n(.*?)(?=^## |\Z)", body)
+        if not match or not match.group(1).strip():
+            raise ValueError(f"readable body section is missing or empty: {heading}: {path}")
+
+
+def validate_daily(top: dict[str, Any], properties: dict[str, Any], path: Path, body: str = "") -> None:
     validate_common(top, properties, path, "daily")
     session = date.fromisoformat(str(properties["session_date"]))
     closure = date.fromisoformat(str(properties["closure_date"]))
@@ -127,6 +191,8 @@ def validate_daily(top: dict[str, Any], properties: dict[str, Any], path: Path) 
     ids = [str(item.get("id", "")) for item in items]
     if any(not item_id for item_id in ids) or len(ids) != len(set(ids)):
         raise ValueError(f"planned_items_json contains missing or duplicate IDs: {path}")
+    _validate_planned_schedule(properties, items, path)
+    _validate_readable_body(properties, body, path)
     if properties.get("plan_vs_reality_gap", "") != "":
         gap = int(str(properties["plan_vs_reality_gap"]))
         if gap < 0 or gap > 5:
@@ -173,7 +239,7 @@ def load_daily(workspace: Path, report_date: date) -> tuple[dict[str, Any], dict
     if not path.is_file():
         raise ValueError(f"missing V4 daily check-in: {path}")
     top, properties, body = parse_frontmatter(path)
-    validate_daily(top, properties, path)
+    validate_daily(top, properties, path, body)
     if str(properties.get("session_date")) != report_date.isoformat():
         raise ValueError(f"V4 daily session date mismatch: {path}")
     return top, properties, body
@@ -200,8 +266,8 @@ def load_v4_daily_records(workspace: Path) -> list[dict[str, Any]]:
     records = []
     seen: set[str] = set()
     for path in sorted(root.glob("*/*.md")):
-        top, properties, _ = parse_frontmatter(path)
-        validate_daily(top, properties, path)
+        top, properties, body = parse_frontmatter(path)
+        validate_daily(top, properties, path, body)
         session = str(properties["session_date"])
         if session in seen:
             raise ValueError(f"duplicate V4 session_date: {session}")

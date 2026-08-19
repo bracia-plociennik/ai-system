@@ -52,6 +52,7 @@ macro_rest_block_19_21_fat_share_percent: 44
 macro_rest_block_19_21_carbohydrates_share_percent: 46
 schedule_standard_json: [{"block_id":"routine","start":"07:30","end":"09:00","label":"Rutyna","dod":"Rutyna wykonana","deadline":"—"},{"block_id":"build-01","start":"09:10","end":"10:40","label":"Build","dod":"Build done","deadline":"2026-08-17T10:40"},{"block_id":"meal-01","start":"11:00","end":"11:30","label":"Śniadanie","dod":"Posiłek","deadline":"—"},{"block_id":"adapt-01","start":"11:40","end":"12:40","label":"Adaptacja","dod":"Adaptacja done","deadline":"—"},{"block_id":"nsdr-01","start":"16:30","end":"17:00","label":"NSDR","dod":"Sesja wykonana","deadline":"—"},{"block_id":"promote-01","start":"17:30","end":"18:00","label":"Promocja","dod":"Promocja gotowa","deadline":"—"},{"block_id":"meal-02","start":"19:00","end":"21:00","label":"Obiado-kolacja","dod":"Posiłek","deadline":"—"},{"block_id":"close-01","start":"21:00","end":"21:30","label":"Czas z bliskimi","dod":"Obecność","deadline":"—"}]
 schedule_merged_adapt_shifted_json: [{"block_id":"routine","start":"07:30","end":"09:00","label":"Rutyna","dod":"Rutyna wykonana","deadline":"—"},{"block_id":"build-01","start":"09:10","end":"10:40","label":"Build","dod":"Build done","deadline":"2026-08-17T10:40"},{"block_id":"meal-01","start":"11:00","end":"11:30","label":"Śniadanie","dod":"Posiłek","deadline":"—"},{"block_id":"adapt-merged","start":"11:40","end":"13:40","label":"Adaptacja scalona","dod":"Adaptacja done","deadline":"—"},{"block_id":"nsdr-01","start":"16:30","end":"17:00","label":"NSDR","dod":"Sesja wykonana","deadline":"—"},{"block_id":"meal-02","start":"19:00","end":"21:00","label":"Obiado-kolacja","dod":"Posiłek","deadline":"—"}]
+schedule_historical_overrides_json: {"2026-08-18":[{"block_id":"history-18","start":"08:50","end":"09:00","label":"Tylko 18 sierpnia","dod":"Historyczny override","deadline":"—"},{"block_id":"build-01","start":"09:10","end":"10:40","label":"Build","dod":"Build done","deadline":"—"},{"block_id":"adapt-01","start":"11:40","end":"12:40","label":"Adaptacja","dod":"Adaptacja done","deadline":"—"},{"block_id":"promote-01","start":"17:30","end":"18:00","label":"Promocja","dod":"Promocja gotowa","deadline":"—"},{"block_id":"close-01","start":"21:00","end":"21:30","label":"Czas z bliskimi","dod":"Obecność","deadline":"—"}]}
 ---
 EOF
 
@@ -125,6 +126,25 @@ write_daily 2026-08-17 weekend standard '{}'
 write_daily 2026-08-18 previous-day merged-adapt-shifted '{"if":{"calories":2500},"finance":{"amount":0,"currency":"PLN"}}'
 write_daily 2026-08-19 previous-day standard '{"if":{"calories":2600,"approximate":true},"finance":{"amount":70,"currency":"PLN"}}'
 
+python3 - "$workspace/personal-ops/check-ins-v4/2026/2026-08-19.md" <<'PY'
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+schedule = '[{"block_id":"build-01","start":"09:10","end":"10:40","kind":"work","stream":"build","label":"Build"},{"block_id":"adapt-01","start":"11:40","end":"12:40","kind":"work","stream":"deliver","label":"Adaptacja"},{"block_id":"meal-01","start":"14:00","end":"15:00","kind":"meal","stream":"self","label":"Pierwszy posiłek","meal_slot":1},{"block_id":"meal-02","start":"17:00","end":"17:50","kind":"meal","stream":"self","label":"Drugi posiłek","meal_slot":2},{"block_id":"promote-01","start":"17:50","end":"18:50","kind":"work","stream":"promote","label":"Promocja"},{"block_id":"meal-03","start":"19:00","end":"21:00","kind":"meal","stream":"self","label":"Obiado-kolacja","meal_slot":3},{"block_id":"close-01","start":"21:00","end":"21:30","kind":"close","stream":"close","label":"Czas z bliskimi"}]'
+text = text.replace(
+    "  planned_schedule_variant: standard\n",
+    "  planned_schedule_variant: standard\n  daily_plan_contract: per-day-schedule-v1\n  planned_schedule_json: \"" + schedule.replace('"', '\\\"') + "\"\n  readable_body_contract: spor-readable-v1\n",
+)
+text = text.replace("  planned_if_start: 11:00\n", "  planned_if_start: 14:00\n")
+text = text.replace(
+    "# Daily V4 fixture 2026-08-19\n## Raw Check-In\nfixture\n",
+    "# Daily V4 fixture 2026-08-19\n## Plan na dziś\nPlan per-day.\n## STATE\nStan bieżący.\n## PROCESS\nProces dnia poprzedniego.\n## OUTCOME\nRezultaty dnia poprzedniego.\n## REVIEW\nReview dnia poprzedniego.\n## Raw Check-In\nfixture\n",
+)
+path.write_text(text, encoding="utf-8")
+PY
+
 if "$repo_root/.systems/scripts/check-personal-ops-v4" >/dev/null; then :; else
   echo "V4 Personal Ops validator failed" >&2
   exit 1
@@ -144,6 +164,7 @@ from personal_ops_v4 import load_current_records, load_daily, validate_daily
 workspace = Path(sys.argv[2])
 load_daily(workspace, date(2026, 8, 17))
 load_daily(workspace, date(2026, 8, 18))
+load_daily(workspace, date(2026, 8, 19))
 daily_path = workspace / "personal-ops/check-ins-v4/2026/2026-08-18.md"
 top, properties, _body = load_daily(workspace, date(2026, 8, 18))
 invalid_state = dict(properties)
@@ -155,6 +176,27 @@ except ValueError as exc:
         raise
 else:
     raise SystemExit("non-object current_state_json was accepted")
+
+per_day_path = workspace / "personal-ops/check-ins-v4/2026/2026-08-19.md"
+per_day_top, per_day_properties, per_day_body = load_daily(workspace, date(2026, 8, 19))
+invalid_schedule = dict(per_day_properties)
+invalid_schedule["planned_schedule_json"] = "[]"
+try:
+    validate_daily(per_day_top, invalid_schedule, per_day_path, per_day_body)
+except ValueError as exc:
+    if "planned_schedule_json must be a non-empty" not in str(exc):
+        raise
+else:
+    raise SystemExit("empty per-day schedule was accepted")
+
+empty_body = per_day_body.replace("## STATE\nStan bieżący.", "## STATE\n")
+try:
+    validate_daily(per_day_top, per_day_properties, per_day_path, empty_body)
+except ValueError as exc:
+    if "readable body section is missing or empty: STATE" not in str(exc):
+        raise
+else:
+    raise SystemExit("empty readable STATE section was accepted")
 try:
     load_daily(workspace, date(2026, 8, 16))
 except ValueError:
@@ -228,6 +270,42 @@ grep -Fq -- '- Zjedzone przed dzisiaj: `2 500 kcal`' "$budget_output"
 grep -Fq -- '- Pozostało po dzisiaj: `12 000 kcal`' "$budget_output"
 grep -Fq -- '- Mechanicznie na pozostały dzień: `2 400 kcal`' "$budget_output"
 grep -Fq -- '- Limit zdroworozsądkowy: `2 400 kcal`' "$budget_output"
+grep -Fq 'Tylko 18 sierpnia' "$budget_output"
+
+per_day_output="$tmp_root/daily-summary-per-day.md"
+python3 "$repo_root/.systems/scripts/render-personal-ops-daily-summary-v4" --workspace "$workspace" --date 2026-08-19 > "$per_day_output"
+if grep -Fq 'Tylko 18 sierpnia' "$per_day_output"; then
+  echo "Historical 18 August schedule leaked into 19 August" >&2
+  exit 1
+fi
+grep -Fq '| 14:00–15:00 | `Self` Pierwszy posiłek |' "$per_day_output"
+grep -Fq '| 17:00–17:50 | `Self` Drugi posiłek |' "$per_day_output"
+grep -Fq '| 19:00–21:00 | `Self` Obiado-kolacja |' "$per_day_output"
+grep -Fq -- '- `11:00–13:00`: empty' "$per_day_output"
+grep -Fq -- '- `13:00–15:00`: `~' "$per_day_output"
+grep -Fq -- '- `15:00–17:00`: empty' "$per_day_output"
+grep -Fq -- '- `17:00–19:00`: `~' "$per_day_output"
+grep -Fq -- '**Suma:** `~2 300 kcal | B 180 g | T 80 g | W 215 g`' "$per_day_output"
+if grep -Fq 'konflikt IF' "$per_day_output"; then
+  echo "Actual meal windows inside IF produced a false conflict" >&2
+  exit 1
+fi
+python3 "$repo_root/.systems/scripts/render-personal-ops-daily-summary-v4" --workspace "$workspace" --date 2026-08-19 --check-file "$per_day_output"
+python3 "$repo_root/.systems/scripts/calculate-personal-ops-budgets" --workspace "$workspace" --date 2026-08-19 --json > "$tmp_root/per-day-budget.json"
+python3 - "$tmp_root/per-day-budget.json" <<'PY'
+import json, sys
+report = json.load(open(sys.argv[1], encoding="utf-8"))
+food = report["weekly_calories"]["food_schedule"]
+blocks = {row["time"]: row for row in food["food_blocks"]}
+assert blocks["11:00-13:00"]["status"] == "empty", blocks
+assert blocks["13:00-15:00"]["meal_slot"] == 1, blocks
+assert (blocks["13:00-15:00"]["planned_start"], blocks["13:00-15:00"]["planned_end"]) == ("14:00", "15:00"), blocks
+assert blocks["15:00-17:00"]["status"] == "empty", blocks
+assert blocks["17:00-19:00"]["meal_slot"] == 2, blocks
+assert blocks["19:00-21:00"]["meal_slot"] == 3, blocks
+assert food["totals"] == {"protein_g": 180.0, "fat_g": 80.0, "carbohydrates_g": 215.0}, food
+assert food["if_conflicts"] == [], food
+PY
 
 cat > "$workspace/personal-ops/weekly-check-ins-v4/2026/2026-W34.md" <<'EOF'
 ---

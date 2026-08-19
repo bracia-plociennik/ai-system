@@ -107,9 +107,22 @@ def nonnegative(value: object, label: str, required: bool = False) -> Decimal | 
     return parsed
 
 
+def clock_minutes(value: str) -> int | None:
+    match = re.search(r"(?:T|\s)?(\d{2}):(\d{2})", value)
+    if not match:
+        return None
+    hour, minute = int(match.group(1)), int(match.group(2))
+    if hour > 23 or minute > 59:
+        return None
+    return hour * 60 + minute
+
+
 def block_time(label: str) -> tuple[int, int]:
     start, end = label.split("-", 1)
-    return int(start.split(":", 1)[0]), int(end.split(":", 1)[0])
+    start_minutes, end_minutes = clock_minutes(start), clock_minutes(end)
+    if start_minutes is None or end_minutes is None:
+        stop(f"Invalid macro block time: {label}")
+    return start_minutes, end_minutes
 
 
 def unavailable_food_schedule(
@@ -331,25 +344,79 @@ def configured_macro_profiles(config: dict[str, str]) -> list[str]:
     return sorted(profiles)
 
 
-def clock_hour(value: str) -> int | None:
-    match = re.search(r"(?:T|\s)(\d{2}):\d{2}", value)
-    if not match:
-        match = re.match(r"^(\d{2}):\d{2}", value)
-    return int(match.group(1)) if match else None
+def relocate_food_schedule(properties: dict, schedule: dict) -> dict:
+    if str(properties.get("daily_plan_contract", "")).strip() != "per-day-schedule-v1" or schedule.get("status") != "available":
+        return schedule
+    try:
+        rows = json.loads(str(properties.get("planned_schedule_json", "")))
+    except json.JSONDecodeError:
+        return unavailable_food_schedule(
+            Decimal(str(schedule.get("planned_calorie_target"))),
+            str(schedule.get("day_type", "")),
+            "per-day meal schedule is malformed",
+            ["planned_schedule_json"],
+        )
+    meals = sorted(
+        (row for row in rows if isinstance(row, dict) and row.get("kind") == "meal"),
+        key=lambda row: row.get("meal_slot", 0),
+    ) if isinstance(rows, list) else []
+    configured = [block for block in schedule["food_blocks"] if block.get("status") == "configured"]
+    if len(meals) != 3 or [row.get("meal_slot") for row in meals] != [1, 2, 3] or len(configured) != 3:
+        return unavailable_food_schedule(
+            Decimal(str(schedule.get("planned_calorie_target"))),
+            str(schedule.get("day_type", "")),
+            "per-day meal schedule must map three meal slots onto three configured macro packages",
+            ["planned_schedule_json", "meal_slot"],
+        )
+
+    relocated = [{"id": block_id, "time": time_range, "status": "empty"} for block_id, time_range in FOOD_BLOCKS]
+    used_targets: set[int] = set()
+    for meal, package in zip(meals, configured):
+        start, end = clock_minutes(str(meal.get("start", ""))), clock_minutes(str(meal.get("end", "")))
+        target_index = next((
+            index for index, (_block_id, time_range) in enumerate(FOOD_BLOCKS)
+            if start is not None and end is not None and block_time(time_range)[0] <= start < end <= block_time(time_range)[1]
+        ), None)
+        if target_index is None or target_index in used_targets:
+            return unavailable_food_schedule(
+                Decimal(str(schedule.get("planned_calorie_target"))),
+                str(schedule.get("day_type", "")),
+                "each per-day meal must fit one unique macro block",
+                [f"meal_slot_{meal.get('meal_slot')}_time"],
+            )
+        used_targets.add(target_index)
+        target = dict(package)
+        target.update({
+            "id": FOOD_BLOCKS[target_index][0],
+            "time": FOOD_BLOCKS[target_index][1],
+            "planned_start": str(meal["start"]),
+            "planned_end": str(meal["end"]),
+            "meal_slot": meal["meal_slot"],
+        })
+        relocated[target_index] = target
+    result = dict(schedule)
+    result["food_blocks"] = relocated
+    result["configured_block_count"] = 3
+    result["empty_block_count"] = len(FOOD_BLOCKS) - 3
+    result["schedule_basis"] = "per-day-meal-slots"
+    return result
 
 
 def food_if_conflicts(properties: dict, schedule: dict) -> list[str]:
-    if_start = clock_hour(str(properties.get("planned_if_start", "")))
-    if_end = clock_hour(str(properties.get("planned_if_end", "")))
+    if_start = clock_minutes(str(properties.get("planned_if_start", "")))
+    if_end = clock_minutes(str(properties.get("planned_if_end", "")))
     if if_start is None or if_end is None or schedule.get("status") != "available":
         return []
     conflicts = []
     for block in schedule["food_blocks"]:
         if block["status"] != "configured":
             continue
-        block_start, block_end = block_time(block["time"])
+        block_start = clock_minutes(str(block.get("planned_start", "")))
+        block_end = clock_minutes(str(block.get("planned_end", "")))
+        if block_start is None or block_end is None:
+            block_start, block_end = block_time(block["time"])
         if block_start < if_start or block_end > if_end:
-            conflicts.append(block["time"])
+            conflicts.append(f"{block_start // 60:02d}:{block_start % 60:02d}-{block_end // 60:02d}:{block_end % 60:02d}")
     return conflicts
 
 
@@ -377,7 +444,7 @@ def food_schedule_report(records: list[dict], target: date, config: dict[str, st
             "available_profiles": configured_macro_profiles(config),
             "if_conflicts": [],
         }
-    schedule = configured_food_schedule(config, planned_calories, profile)
+    schedule = relocate_food_schedule(properties, configured_food_schedule(config, planned_calories, profile))
     schedule["if_conflicts"] = food_if_conflicts(properties, schedule)
     return schedule
 

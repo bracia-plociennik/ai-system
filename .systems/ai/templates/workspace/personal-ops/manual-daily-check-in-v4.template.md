@@ -19,6 +19,9 @@ properties:
   work_mode:
   organism_mode:
   planned_schedule_variant: standard
+  daily_plan_contract: per-day-schedule-v1
+  planned_schedule_json: "[]"
+  readable_body_contract: spor-readable-v1
   current_state_json: "{}"
   wig_title:
   wig_definition_of_done:
@@ -41,7 +44,7 @@ properties:
 
 ## Plan na dziś
 
-Use `planned_items_json` as the machine-readable source. Each professional item may include `block_id`, `definition_of_done`, `deadline`, and `mapping`.
+Use `planned_items_json` as the machine-readable source. Each professional item must reference a `block_id` from `planned_schedule_json` and may include `definition_of_done`, `deadline`, and `mapping`. The per-day schedule is canonical for this date; local variants are legacy fallback only. Meal rows use `kind: meal` and unique `meal_slot` values `1`, `2`, and `3`.
 
 After a successful post-write refresh, render the chat-only plan with:
 
@@ -53,7 +56,7 @@ Paste its output verbatim. The linked WIG receives separate `WIG` and stream mar
 
 ## STATE
 
-Current state and previous review window are kept in the JSON properties above.
+Current state and previous review window are kept in the JSON properties above. Add a concise, non-empty readable summary for the current STATE here.
 
 `current_state_json` is the private source for the post-write `Stan i kierunek dnia` projection. Use this shape without filling missing values from Raw Check-In:
 
@@ -63,15 +66,15 @@ Current state and previous review window are kept in the JSON properties above.
 
 ## PROCESS
 
-Training, NSDR, IF, nutrition, budget, habits, checkpoints, and Owner's Overrides remain private-sensitive.
+Summarize the reviewed PROCESS here. Training, NSDR, IF, nutrition, budget, habits, checkpoints, and Owner's Overrides remain private-sensitive.
 
 ## OUTCOME
 
-Record facts for the review window without reinterpreting missing values.
+Record readable outcome facts for the review window without reinterpreting missing values.
 
 ## REVIEW
 
-Keep the full owner message in `## Raw Check-In`. Quotes and external references remain advisory unless separately verified.
+Summarize REVIEW here. Keep the full owner message in `## Raw Check-In`; quotes and external references remain advisory unless separately verified.
 
 ## Raw Check-In
 

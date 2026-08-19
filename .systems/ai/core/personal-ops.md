@@ -179,7 +179,9 @@ This summary does not execute tasks, authorize deploys, or send external communi
 
 New SPOR Daily artifacts use `index_contract: 4` under `personal-ops/check-ins-v4/YYYY/`. Tuesday-Friday review one previous day; Monday reviews Friday-Sunday. Saturday and Sunday do not create Daily V4 artifacts. V3 remains immutable and is read through the compatibility model without migration.
 
-V4 preserves STATE, PROCESS, OUTCOME, and REVIEW, plus `owner_overrides_json`, `osnr_checkpoints_json`, `plan_vs_reality_gap`, `recovery_cost`, and explicit `planned_schedule_variant`. Professional items may set `block_id`; missing allocation is rendered as unallocated rather than guessed.
+V4 preserves STATE, PROCESS, OUTCOME, and REVIEW, plus `owner_overrides_json`, `osnr_checkpoints_json`, `plan_vs_reality_gap`, `recovery_cost`, and explicit `planned_schedule_variant`. New artifacts set `daily_plan_contract: per-day-schedule-v1`: `planned_schedule_json` is the canonical schedule for that date and every professional item references one of its `block_id` values. Rendering falls back first to an explicit date-keyed historical override and then to a generic local variant for legacy artifacts only. A fallback must not contain client-specific or dated work.
+
+Per-day meal rows use `kind: meal` and unique `meal_slot` values `1`, `2`, and `3`. The budget projection moves the three configured macro packages to the fixed macro blocks containing the actual meal windows. IF conflicts use those actual windows, while calorie and macro totals remain unchanged. New artifacts also set `readable_body_contract: spor-readable-v1`, which requires non-empty `Plan na dziś`, `STATE`, `PROCESS`, `OUTCOME`, and `REVIEW` sections. Unmarked historical V4 remains valid.
 
 The structured V4 properties include `review_window_start`, `review_window_end`, and `review_window_kind`. The compatibility adapter rejects any duplicate effective session_date across V3 and V4 instead of silently double-counting it.
 

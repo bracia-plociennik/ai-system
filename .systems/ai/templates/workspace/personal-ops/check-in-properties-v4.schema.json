@@ -10,7 +10,7 @@
     "task_generation_policy", "task_generation_status", "task_generation_references_json"
   ],
   "daily_optional": [
-    "current_state_json"
+    "current_state_json", "daily_plan_contract", "planned_schedule_json", "readable_body_contract"
   ],
   "weekly_required": [
     "index_contract", "schema_version", "artifact_kind", "report_id", "review_week_start", "review_week_end",
