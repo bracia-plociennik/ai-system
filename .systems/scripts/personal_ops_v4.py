@@ -18,7 +18,10 @@ V4_SCHEMA = REPO_ROOT / ".systems/ai/templates/workspace/personal-ops/check-in-p
 V4_DAILY_ROOT = "personal-ops/check-ins-v4"
 V4_WEEKLY_ROOT = "personal-ops/weekly-check-ins-v4"
 V4_INDEX = "personal-ops/indexes/check-ins-v4.jsonl"
+V4_CSV_INDEX = "personal-ops/indexes/check-ins-v4.csv"
+V4_METRICS_INDEX = "personal-ops/indexes/check-ins-v4.metrics.csv"
 V4_ROUTER = "personal-ops/indexes/check-ins-v4.md"
+V4_TRENDS = "personal-ops/indexes/check-ins-v4.trends.md"
 
 
 def parse_frontmatter(path: Path) -> tuple[dict[str, Any], dict[str, Any], str]:
@@ -82,8 +85,43 @@ def normalize_budget_facts(properties: dict[str, Any]) -> dict[str, Any]:
 
 
 def required_schema(kind: str) -> list[str]:
-    raw = json.loads(V4_SCHEMA.read_text(encoding="utf-8"))
+    raw = load_schema()
     return list(raw["daily_required" if kind == "daily" else "weekly_required"])
+
+
+def load_schema() -> dict[str, Any]:
+    raw = json.loads(V4_SCHEMA.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        raise ValueError("V4 properties schema must be an object")
+    return raw
+
+
+def daily_index_fields() -> list[dict[str, Any]]:
+    fields = load_schema().get("daily_index_fields")
+    if not isinstance(fields, list) or not fields or any(not isinstance(field, dict) for field in fields):
+        raise ValueError("V4 properties schema must define daily_index_fields")
+    keys = [str(field.get("key", "")).strip() for field in fields]
+    if any(not key for key in keys) or len(keys) != len(set(keys)):
+        raise ValueError("V4 daily_index_fields contain missing or duplicate keys")
+    required = set(required_schema("daily"))
+    missing = required - set(keys)
+    if missing:
+        raise ValueError(f"V4 daily_index_fields omit required properties: {', '.join(sorted(missing))}")
+    return fields
+
+
+def project_index_properties(properties: dict[str, Any], fields: list[dict[str, Any]]) -> dict[str, Any]:
+    """Apply defaults and the V4 private-index policy without exposing unknown fields."""
+    by_key = {str(field["key"]): field for field in fields}
+    projected = dict(properties)
+    for key, field in by_key.items():
+        projected.setdefault(key, field.get("default", ""))
+    if str(properties.get("private_index_policy", "")) == "redacted":
+        for key in list(projected):
+            field = by_key.get(key)
+            if field is None or bool(field.get("private")):
+                projected[key] = ""
+    return projected
 
 
 def validate_common(top: dict[str, Any], properties: dict[str, Any], path: Path, kind: str) -> None:
@@ -277,11 +315,17 @@ def load_v4_daily_records(workspace: Path) -> list[dict[str, Any]]:
 
 
 def load_official_v4_records(workspace: Path) -> list[dict[str, Any]]:
-    router = workspace / V4_ROUTER
-    index = workspace / V4_INDEX
-    if not router.exists() and not index.exists():
+    required_paths = [
+        workspace / V4_ROUTER,
+        workspace / V4_INDEX,
+        workspace / V4_CSV_INDEX,
+        workspace / V4_METRICS_INDEX,
+        workspace / V4_TRENDS,
+    ]
+    router, index = required_paths[0], required_paths[1]
+    if not any(path.exists() for path in required_paths):
         return load_v4_daily_records(workspace)
-    if not router.is_file() or not index.is_file():
+    if any(not path.is_file() for path in required_paths):
         raise ValueError("V4 official index set is incomplete")
     router_text = router.read_text(encoding="utf-8")
     match = re.search(r"^unsynced-v4-check-in-count:\s*(\d+)\s*$", router_text, re.MULTILINE)

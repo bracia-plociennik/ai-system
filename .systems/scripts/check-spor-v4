@@ -221,6 +221,52 @@ else:
 duplicate.unlink()
 PY
 
+v4_task_vault="$tmp_root/v4-task-vault"
+mkdir -p "$v4_task_vault/TaskNotes/Tasks"
+v4_candidates="$tmp_root/v4-daily-candidates.json"
+python3 "$repo_root/.systems/scripts/propose-task-candidates" \
+  --workspace "$workspace" \
+  --check-in "$workspace/personal-ops/check-ins-v4/2026/2026-08-19.md" \
+  --task-vault "$v4_task_vault" \
+  --json > "$v4_candidates"
+python3 - "$v4_candidates" <<'PY'
+import json, sys
+
+candidates = json.load(open(sys.argv[1], encoding="utf-8"))
+assert len(candidates) == 4, candidates
+for candidate in candidates:
+    assert candidate["tags"] == ["6d/do", "AI"], candidate
+    assert candidate["source_type"] == "check-in-v4", candidate
+PY
+python3 "$repo_root/.systems/scripts/propose-task-candidates" \
+  --workspace "$workspace" \
+  --check-in "$workspace/personal-ops/check-ins-v4/2026/2026-08-19.md" \
+  --task-vault "$v4_task_vault" \
+  --owner-approved \
+  --write >/dev/null
+test "$(find "$v4_task_vault/TaskNotes/Tasks" -type f -name '*.md' | wc -l | tr -d ' ')" -eq 4
+grep -Rqs '^## Checkpoint OSNR$' "$v4_task_vault/TaskNotes/Tasks"
+grep -Rqs '^## TODO$' "$v4_task_vault/TaskNotes/Tasks"
+
+invalid_v4_daily="$tmp_root/invalid-readable-v4.md"
+cp "$workspace/personal-ops/check-ins-v4/2026/2026-08-19.md" "$invalid_v4_daily"
+python3 - "$invalid_v4_daily" <<'PY'
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+path.write_text(text.replace("## STATE\nStan bieżący.", "## STATE\n"), encoding="utf-8")
+PY
+if python3 "$repo_root/.systems/scripts/propose-task-candidates" \
+  --workspace "$workspace" \
+  --check-in "$invalid_v4_daily" \
+  --task-vault "$v4_task_vault" \
+  --json > /dev/null 2>&1; then
+  echo "V4 TaskNote generator accepted an empty readable STATE section" >&2
+  exit 1
+fi
+
 daily_output="$tmp_root/daily-summary.md"
 python3 "$repo_root/.systems/scripts/render-personal-ops-daily-summary-v4" --workspace "$workspace" --date 2026-08-17 > "$daily_output"
 grep -q '^## Plan na dziś - 17 sierpnia 2026, poniedziałek$' "$daily_output"
@@ -306,6 +352,105 @@ assert blocks["19:00-21:00"]["meal_slot"] == 3, blocks
 assert food["totals"] == {"protein_g": 180.0, "fat_g": 80.0, "carbohydrates_g": 215.0}, food
 assert food["if_conflicts"] == [], food
 PY
+
+sync_workspace="$tmp_root/sync-workspace"
+cp -R "$workspace" "$sync_workspace"
+python3 - "$sync_workspace/personal-ops/check-ins-v4/2026/2026-08-19.md" <<'PY'
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+text = text.replace("  private_index_policy: detailed-private\n", "  private_index_policy: redacted\n")
+text = text.replace("fixture\n", "RAW-SENTINEL-V4\n")
+path.write_text(text, encoding="utf-8")
+PY
+python3 "$repo_root/.systems/scripts/sync-personal-ops-check-ins-v4" --workspace "$sync_workspace" --post-write >/dev/null
+for name in check-ins-v4.jsonl check-ins-v4.csv check-ins-v4.metrics.csv check-ins-v4.md check-ins-v4.trends.md; do
+  test -f "$sync_workspace/personal-ops/indexes/$name"
+done
+python3 - "$repo_root" "$sync_workspace" <<'PY'
+import csv
+import importlib.machinery
+import importlib.util
+import json
+import sys
+from pathlib import Path
+from unittest.mock import patch
+
+root = Path(sys.argv[1])
+workspace = Path(sys.argv[2])
+sys.path.insert(0, str(root / ".systems/scripts"))
+from personal_ops_v4 import daily_index_fields, load_official_v4_records
+
+index_root = workspace / "personal-ops/indexes"
+fields = daily_index_fields()
+with (index_root / "check-ins-v4.csv").open(encoding="utf-8", newline="") as handle:
+    full_rows = list(csv.DictReader(handle))
+with (index_root / "check-ins-v4.metrics.csv").open(encoding="utf-8", newline="") as handle:
+    metric_rows = list(csv.DictReader(handle))
+assert len(full_rows) == len(metric_rows) == 3
+assert list(full_rows[0]) == [field["key"] for field in fields]
+assert list(metric_rows[0]) == [field["key"] for field in fields if field.get("metric")]
+assert "planned_items_json" in full_rows[0]
+assert "planned_items_json" not in metric_rows[0]
+assert json.loads(full_rows[0]["planned_items_json"])
+redacted = next(row for row in full_rows if row["session_date"] == "2026-08-19")
+assert redacted["planned_items_json"] == ""
+assert redacted["planned_calories_representative"] == ""
+assert redacted["work_mode"] == "growth"
+combined = "\n".join(path.read_text(encoding="utf-8") for path in index_root.glob("check-ins-v4*"))
+assert "RAW-SENTINEL-V4" not in combined
+records = load_official_v4_records(workspace)
+assert len(records) == 3
+redacted_jsonl = next(row for row in records if row["session_date"] == "2026-08-19")
+assert redacted_jsonl["planned_items_json"] == ""
+
+loader = importlib.machinery.SourceFileLoader("sync_v4", str(root / ".systems/scripts/sync-personal-ops-check-ins-v4"))
+spec = importlib.util.spec_from_loader(loader.name, loader)
+module = importlib.util.module_from_spec(spec)
+loader.exec_module(module)
+rollback_root = workspace / "rollback"
+rollback_root.mkdir()
+outputs = {rollback_root / name: f"new-{name}\n" for name in module.INDEX_FILENAMES}
+for path in outputs:
+    path.write_text(f"old-{path.name}\n", encoding="utf-8")
+original_replace = Path.replace
+
+def failing_replace(source, target):
+    if ".check-ins-v4-stage." in source.parent.name and source.name == "check-ins-v4.metrics.csv":
+        raise OSError("forced replacement failure")
+    return original_replace(source, target)
+
+try:
+    with patch.object(Path, "replace", failing_replace):
+        module.write_index_set_atomic(outputs)
+except OSError:
+    pass
+else:
+    raise SystemExit("forced V4 index replacement failure did not fail")
+for path in outputs:
+    assert path.read_text(encoding="utf-8") == f"old-{path.name}\n"
+PY
+
+before_status="$(shasum -a 256 "$sync_workspace"/personal-ops/indexes/check-ins-v4*)"
+status_output="$(python3 "$repo_root/.systems/scripts/sync-personal-ops-check-ins-v4" --workspace "$sync_workspace" --status-only)"
+after_status="$(shasum -a 256 "$sync_workspace"/personal-ops/indexes/check-ins-v4*)"
+test "$before_status" = "$after_status"
+printf '%s\n' "$status_output" | grep -q '^unsynced-v4-check-in-count: 0$'
+
+rm "$sync_workspace/personal-ops/indexes/check-ins-v4.csv"
+if python3 - "$repo_root" "$sync_workspace" 2>/dev/null <<'PY'
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(sys.argv[1]) / ".systems/scripts"))
+from personal_ops_v4 import load_official_v4_records
+load_official_v4_records(Path(sys.argv[2]))
+PY
+then
+  echo "Incomplete V4 official index set was accepted" >&2
+  exit 1
+fi
 
 cat > "$workspace/personal-ops/weekly-check-ins-v4/2026/2026-W34.md" <<'EOF'
 ---

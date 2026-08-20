@@ -60,4 +60,4 @@ Validation scripts for AI System live here.
 
 `check-naming` validates strict Markdown filenames while allowing canonical `SKILL.md` contracts and legacy/context source material.
 
-SPOR V4 daily artifacts use `sync-personal-ops-check-ins-v4` and the V4-aware daily renderer. The compatibility read model combines fresh V3 and V4 records without rewriting either source. Combined weekly artifacts use `render-personal-ops-weekly-summary`; private V4 trends exclude raw review, finance, calorie, macro, sleep, and client details.
+SPOR V4 daily artifacts use `sync-personal-ops-check-ins-v4` and the V4-aware daily renderer. A real refresh atomically writes `check-ins-v4.jsonl`, `check-ins-v4.csv`, `check-ins-v4.metrics.csv`, `check-ins-v4.md`, and `check-ins-v4.trends.md`; `--status-only` is read-only. The compatibility read model combines fresh V3 and V4 records without rewriting either source and stops on a partial V4 official set. Combined weekly artifacts use `render-personal-ops-weekly-summary`; private V4 trends exclude raw review, finance, calorie, macro, sleep, and client details.

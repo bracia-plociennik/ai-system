@@ -4,44 +4,125 @@
 from __future__ import annotations
 
 import argparse
+import csv
+import io
 import json
-import os
+import re
+import shutil
+import sys
 import tempfile
+from datetime import datetime
 from pathlib import Path
+from typing import Any
 
-from personal_ops_v4 import load_v4_daily_records
-
-
-def atomic_write(path: Path, content: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, temp_name = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as handle:
-            handle.write(content)
-        Path(temp_name).replace(path)
-    except Exception:
-        Path(temp_name).unlink(missing_ok=True)
-        raise
+from personal_ops_v4 import daily_index_fields, load_v4_daily_records, project_index_properties
 
 
-def render_router(count: int, path: Path) -> str:
+INDEX_FILENAMES = (
+    "check-ins-v4.jsonl",
+    "check-ins-v4.csv",
+    "check-ins-v4.metrics.csv",
+    "check-ins-v4.md",
+    "check-ins-v4.trends.md",
+)
+
+
+def csv_value(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, (dict, list)):
+        return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return str(value)
+
+
+def render_csv(records: list[dict[str, Any]], fields: list[dict[str, Any]], metrics_only: bool = False) -> str:
+    selected = [field for field in fields if not metrics_only or field.get("metric")]
+    buffer = io.StringIO(newline="")
+    writer = csv.DictWriter(buffer, fieldnames=[str(field["key"]) for field in selected])
+    writer.writeheader()
+    for record in records:
+        writer.writerow({str(field["key"]): csv_value(record.get(str(field["key"]), field.get("default", ""))) for field in selected})
+    return buffer.getvalue()
+
+
+def render_jsonl(records: list[dict[str, Any]]) -> str:
+    rows = [json.dumps({"properties": record}, ensure_ascii=False, sort_keys=True) for record in records]
+    return "\n".join(rows) + ("\n" if rows else "")
+
+
+def render_router(count: int, workspace: Path, source: str) -> str:
     return "\n".join([
         "# Check-Ins V4 Index",
         "",
         "contract: personal-ops-v4",
+        f"last-synced-at: {datetime.now().astimezone().isoformat(timespec='seconds')}",
+        f"last-synced-v4-check-in-count: {count}",
         f"native-v4-check-in-count: {count}",
         "unsynced-v4-check-in-count: 0",
         "source: personal-ops/check-ins-v4/",
-        f"generated-from: {path}",
+        f"last-sync-source: {source}",
+        f"generated-from: {workspace}",
+        "",
+        "- JSONL: `check-ins-v4.jsonl`",
+        "- CSV: `check-ins-v4.csv`",
+        "- Metrics: `check-ins-v4.metrics.csv`",
+        "- Sanitized trends: `check-ins-v4.trends.md`",
         "",
     ])
 
 
-def render_trends(records: list[dict]) -> str:
+def render_trends(records: list[dict[str, Any]]) -> str:
     lines = ["# Sanitized V4 Personal Ops Trends", "", f"report-count: {len(records)}", ""]
     for row in records:
         lines.append(f"- {row.get('session_date', '')}: work_mode={row.get('work_mode', '')}; organism_mode={row.get('organism_mode', '')}")
     return "\n".join(lines) + "\n"
+
+
+def write_index_set_atomic(outputs: dict[Path, str]) -> None:
+    paths = list(outputs)
+    if not paths:
+        return
+    index_root = paths[0].parent
+    if any(path.parent != index_root for path in paths):
+        raise ValueError("V4 index outputs must share one directory")
+    index_root.mkdir(parents=True, exist_ok=True)
+    stage = Path(tempfile.mkdtemp(prefix=".check-ins-v4-stage.", dir=index_root))
+    backup = Path(tempfile.mkdtemp(prefix=".check-ins-v4-backup.", dir=index_root))
+    replaced: list[Path] = []
+    try:
+        for path, content in outputs.items():
+            (stage / path.name).write_text(content, encoding="utf-8", newline="")
+            if path.exists():
+                shutil.copy2(path, backup / path.name)
+        try:
+            for path in paths:
+                (stage / path.name).replace(path)
+                replaced.append(path)
+        except Exception:
+            for path in reversed(replaced):
+                previous = backup / path.name
+                if previous.exists():
+                    previous.replace(path)
+                else:
+                    path.unlink(missing_ok=True)
+            raise
+    finally:
+        shutil.rmtree(stage, ignore_errors=True)
+        shutil.rmtree(backup, ignore_errors=True)
+
+
+def read_last_synced_count(router: Path) -> int:
+    if not router.is_file():
+        return 0
+    match = re.search(r"^last-synced-v4-check-in-count:\s*(\d+)\s*$", router.read_text(encoding="utf-8"), re.MULTILINE)
+    return int(match.group(1)) if match else 0
+
+
+def print_status(count: int, router: Path) -> None:
+    last_synced = read_last_synced_count(router)
+    print(f"native-v4-check-in-count: {count}")
+    print(f"last-synced-v4-check-in-count: {last_synced}")
+    print(f"unsynced-v4-check-in-count: {max(0, count - last_synced)}")
 
 
 def main() -> int:
@@ -50,21 +131,34 @@ def main() -> int:
     parser.add_argument("--post-write", action="store_true")
     parser.add_argument("--status-only", action="store_true")
     args = parser.parse_args()
-    workspace = args.workspace.resolve()
-    records = load_v4_daily_records(workspace)
-    index = workspace / "personal-ops/indexes/check-ins-v4.jsonl"
-    router = workspace / "personal-ops/indexes/check-ins-v4.md"
-    trends = workspace / "personal-ops/indexes/check-ins-v4.trends.md"
-    if args.status_only:
-        print(f"native-v4-check-in-count: {len(records)}")
-        print("unsynced-v4-check-in-count: 0")
+    try:
+        workspace = args.workspace.resolve()
+        raw_records = load_v4_daily_records(workspace)
+        fields = daily_index_fields()
+        records = [project_index_properties(record, fields) for record in raw_records]
+        index_root = workspace / "personal-ops/indexes"
+        router = index_root / "check-ins-v4.md"
+        if args.post_write and args.status_only:
+            raise ValueError("--post-write requires a real index refresh, not --status-only")
+        if args.status_only:
+            print_status(len(records), router)
+            return 0
+        source = "post-write-check-in" if args.post_write else "owner-approved-sync"
+        outputs = {
+            index_root / "check-ins-v4.jsonl": render_jsonl(records),
+            index_root / "check-ins-v4.csv": render_csv(records, fields),
+            index_root / "check-ins-v4.metrics.csv": render_csv(records, fields, metrics_only=True),
+            router: render_router(len(records), workspace, source),
+            index_root / "check-ins-v4.trends.md": render_trends(records),
+        }
+        if tuple(path.name for path in outputs) != INDEX_FILENAMES:
+            raise ValueError("V4 index output set drifted from its contract")
+        write_index_set_atomic(outputs)
+        print(f"synced-v4-native-check-ins: {len(records)}")
         return 0
-    payload = "".join(json.dumps({"properties": row}, ensure_ascii=False, sort_keys=True) + "\n" for row in records)
-    atomic_write(index, payload)
-    atomic_write(router, render_router(len(records), workspace))
-    atomic_write(trends, render_trends(records))
-    print(f"synced-v4-native-check-ins: {len(records)}")
-    return 0
+    except Exception as exc:  # noqa: BLE001
+        print(f"STOP: {exc}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

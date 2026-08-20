@@ -1291,6 +1291,18 @@ MD
 cat > "$budget_workspace/personal-ops/indexes/check-ins-v4.jsonl" <<'JSONL'
 {"properties":{"index_contract":"4","schema_version":"4","artifact_kind":"daily","session_date":"2026-08-18","closure_date":"2026-08-17","planned_calories_representative":"2300","planned_training_type":"rest","planned_if_start":"2026-08-18T11:00","planned_if_end":"2026-08-18T21:00","planned_budget_max":"420","review_process_json":"{\"if\":{\"calories\":2500},\"finance\":{\"amount\":420,\"currency\":\"PLN\",\"approximate\":false}}"}}
 JSONL
+cat > "$budget_workspace/personal-ops/indexes/check-ins-v4.csv" <<'CSV'
+session_date
+2026-08-18
+CSV
+cat > "$budget_workspace/personal-ops/indexes/check-ins-v4.metrics.csv" <<'CSV'
+session_date
+2026-08-18
+CSV
+cat > "$budget_workspace/personal-ops/indexes/check-ins-v4.trends.md" <<'MD'
+# Sanitized V4 Personal Ops Trends
+report-count: 1
+MD
 budget_report="$tmp/personal-ops-budget-report.json"
 run_must_pass_capture "personal-ops-budget-august-calculation" "$budget_report" "$budget_calculator" --workspace "$budget_workspace" --date 2026-08-03 --json
 python3 - "$budget_report" <<'PY'
@@ -1366,7 +1378,12 @@ v3 = module.normalize_budget_facts({
 assert v3["previous_day_actual_calories_representative"] == "2300", v3
 assert v3["previous_day_finance_amount"] == "70", v3
 PY
-rm -f "$budget_workspace/personal-ops/indexes/check-ins-v4.md" "$budget_workspace/personal-ops/indexes/check-ins-v4.jsonl"
+rm -f \
+  "$budget_workspace/personal-ops/indexes/check-ins-v4.md" \
+  "$budget_workspace/personal-ops/indexes/check-ins-v4.jsonl" \
+  "$budget_workspace/personal-ops/indexes/check-ins-v4.csv" \
+  "$budget_workspace/personal-ops/indexes/check-ins-v4.metrics.csv" \
+  "$budget_workspace/personal-ops/indexes/check-ins-v4.trends.md"
 rest_report="$tmp/personal-ops-budget-rest-report.json"
 run_must_pass_capture "personal-ops-budget-rest-schedule" "$rest_report" "$budget_calculator" --workspace "$budget_workspace" --date 2026-08-04 --json
 python3 - "$rest_report" <<'PY'

@@ -17,5 +17,13 @@ required = [
 missing = [str(root / path) for path in required if not (root / path).is_file()]
 if missing:
     raise SystemExit("Missing V4 Personal Ops artifacts: " + ", ".join(missing))
+schema = (root / ".systems/ai/templates/workspace/personal-ops/check-in-properties-v4.schema.json").read_text(encoding="utf-8")
+sync = (root / ".systems/scripts/sync-personal-ops-check-ins-v4").read_text(encoding="utf-8")
+for token in ("daily_index_fields", '"metric":true'):
+    if token not in schema:
+        raise SystemExit(f"V4 index schema contract missing: {token}")
+for token in ("check-ins-v4.csv", "check-ins-v4.metrics.csv", "write_index_set_atomic"):
+    if token not in sync:
+        raise SystemExit(f"V4 synchronizer contract missing: {token}")
 print("Personal Ops V4 contract artifacts: OK")
 PY

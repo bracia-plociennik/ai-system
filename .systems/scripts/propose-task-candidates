@@ -499,8 +499,8 @@ def candidates_from_index_v3_check_in(path: Path, workspace: Path, labels: dict[
 
 
 def candidates_from_v4_daily(path: Path, workspace: Path, labels: dict[str, list[tuple[str, str]]]) -> list[dict[str, object]]:
-    top, properties, _ = parse_v4_frontmatter(path)
-    validate_v4_daily(top, properties, path)
+    top, properties, body = parse_v4_frontmatter(path)
+    validate_v4_daily(top, properties, path, body)
     session_date = str(properties["session_date"])
     items = v4_json_value(properties, "planned_items_json", [])
     candidates: list[dict[str, object]] = []
