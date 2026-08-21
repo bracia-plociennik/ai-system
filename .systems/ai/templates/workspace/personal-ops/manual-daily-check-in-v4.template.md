@@ -79,3 +79,7 @@ Summarize REVIEW here. Keep the full owner message in `## Raw Check-In`; quotes 
 ## Raw Check-In
 
 <paste owner message verbatim>
+
+<!-- ai-system:working-dump:start -->
+## Working Dump
+<!-- ai-system:working-dump:end -->

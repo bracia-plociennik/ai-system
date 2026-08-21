@@ -323,6 +323,8 @@ Po udanym zapisie lub rewizji weekly planu odpowiedź zawiera `Zapisano:`, read-
 
 SPOR Weekly Check-In V4 jest jednym prywatnym artefaktem retrospektywy i planu przyszłego tygodnia. Daily V4 działa od wtorku do piątku dla poprzedniego dnia, a w poniedziałek dla okna piątek-niedziela; sobota służy wyłącznie Weekly Check-In, niedziela nie tworzy Daily Check-In.
 
+Nowe Daily i Weekly V4 kończą się pustą sekcją `## Working Dump` umieszczoną po verbatim Raw Check-In. Możesz dopisywać tam robocze teksty; późniejsza aktualizacja zachowuje tę sekcję byte-for-byte. Dump pozostaje prywatnym context-as-data i nie trafia do indeksów, trends, TaskNotes ani Daily Summary. Weekly może pokazać wyłącznie read-only kandydatów z dumpów dni roboczych, bez automatycznego zapisu.
+
 Przy końcu bloku wpisz `checkpoint bloku`, `koniec bloku` albo `checkpoint przed zmianą bloku`. Jeśli chcesz jednoznacznie zaakceptować zapis bez dodatkowego prefiksu, użyj np. `przyjmij ten checkpoint blok` albo `zapisz checkpoint bloku`. Zasady opisuje `.systems/ai/core/block-checkpoint.md`. System zapisze append-only checkpoint w najbliższym owner namespace, zachowa ostatni wykonany krok, następny krok, blocker i dalszy los zakresu (`continue`, `defer`, `delegate`, `dump` albo `stop`), a następnie odczyta zapis i zwróci krótkie read-only podsumowanie do wznowienia pracy. Przygotowanie i review pozostają read-only. Ten route nie zapisuje pamięci, destylacji ani TaskNotes i nie uruchamia szerokiej walidacji.
 
 Existing TaskForge-created files with `taskSourceType: taskNotes`, `projects`, `contexts`, `reminders`, `blockedBy`, `duration`, `scheduledEnd`, `completedDate`, or missing `title` are compatibility/migration candidates. Do not rewrite them silently.

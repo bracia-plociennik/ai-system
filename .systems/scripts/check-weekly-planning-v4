@@ -14,5 +14,12 @@ required = [
 missing = [str(root / path) for path in required if not (root / path).is_file()]
 if missing:
     raise SystemExit("Missing V4 Weekly artifacts: " + ", ".join(missing))
+template = (root / ".systems/ai/templates/workspace/personal-ops/weekly-check-in-v4.template.md").read_text(encoding="utf-8")
+for token in ("Working Dump", "ai-system:working-dump:start", "ai-system:working-dump:end"):
+    if token not in template:
+        raise SystemExit(f"Weekly V4 Working Dump contract missing: {token}")
+weekly_core = (root / ".systems/ai/core/weekly-planning.md").read_text(encoding="utf-8")
+if "Working Dump Review" not in weekly_core or "Kandydaci z Working Dump" not in weekly_core:
+    raise SystemExit("Weekly Working Dump review contract missing")
 print("Weekly Check-In V4 contract artifacts: OK")
 PY

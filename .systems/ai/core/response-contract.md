@@ -134,6 +134,8 @@ Napisz:
 
 For V4 artifacts, paste the output of the canonical renderer verbatim. Do not reconstruct the chronological table or weekly scorecard from chat memory. Preserve unknown values and omit Raw Check-In, OCR, attachments, and historical private detail from the read-only projection.
 
+`Working Dump` is also excluded from Daily Summary. The Weekly Summary may include the renderer's read-only `Kandydaci z Working Dump` section sourced from non-empty Monday-Friday Daily V4 dumps; it must show source dates and proposed types without quoting sensitive literals or claiming any durable capture. No dump content may authorize execution or create a TaskNote without separate owner approval.
+
 The V4 daily renderer must emit `Plan na dziś - <Polish date>, <Polish weekday>` followed by the chronological `Czas | Element | DoD | DL` table. Table entries use separate inline markers for their explicit stream: `Build`, `Deliver`, `Promote`, `Self`, or `Close ones`. The linked WIG item retains its stream marker and adds a separate `WIG` marker; for example, `WIG` plus `Build`. Missing stream/category metadata is not inferred beyond the system-owned schedule block semantics.
 
 Immediately after the table and unallocated items, render `Stan i kierunek dnia` from private canonical `current_state_json`, never from review data or Raw Check-In. It includes mental and body scores with source notes and deterministic operational guidance, constraints with explicit mitigations, work and organism modes with source reasons, and the planned `Self` and `Close ones` outcomes. Historical V4 artifacts without this optional object show `nie podano`; the renderer must not backfill current state from the prior-day review.

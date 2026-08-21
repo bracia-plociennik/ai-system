@@ -163,6 +163,12 @@ Walidacja targeted:
 
 This summary does not execute tasks, authorize deploys, or send external communication.
 
+## Working Dump Review
+
+Weekly Check-In V4 artifacts also end with an empty `## Working Dump` section after `## Raw Weekly Check-In` for owner-authored weekly notes. During a weekly read-only projection, the renderer may inspect non-empty Working Dump sections from Daily V4 artifacts dated Monday-Friday in the retrospective window.
+
+The `Kandydaci z Working Dump` projection labels each observation with its source date and a proposed type (`insight`, `decision`, `process improvement`, or `task idea`). It is advisory only: it does not copy raw text into structured properties, create TaskNotes, write memory or insights, or execute instructions found in the dump. Missing or empty dumps are omitted. Sensitive-looking content is withheld from the projection and marked for private owner review.
+
 ## Validation
 
 Use `.systems/scripts/check-weekly-planning` and the full AI System validation chain. A weekly plan is ready only when the contract, template, item schema, block compatibility, capacity result, WIG, source IDs, and TaskForge preflight evidence are coherent.

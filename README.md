@@ -257,6 +257,8 @@ After a successful daily write or update, AI System re-reads the saved check-in 
 
 SPOR Daily V4 is an additive route under `personal-ops/check-ins-v4/YYYY/`: Monday reviews Friday-Sunday, Tuesday-Friday review one prior day, and Saturday/Sunday do not create Daily V4 artifacts. The combined Weekly Check-In V4 keeps the prior-week retrospective and next Monday-Friday plan together; only future professional items can create TaskNotes. V3 remains unchanged.
 
+New V4 Daily and Weekly Markdown artifacts end with an empty `## Working Dump` after the verbatim Raw Check-In section. It is a private owner-authored notebook; later rewrites preserve it byte-for-byte, and it is excluded from indexes, trends, TaskNotes, and Daily Summary. Weekly read-only summaries may show dated candidates from non-empty Monday-Friday Daily dumps, but no candidate is persisted without separate owner approval.
+
 Daily V4 post-write synchronization maintains a private atomic five-file index set: JSONL, full CSV, metrics CSV, router, and sanitized trends. CSV columns come from the V4 schema contract; body Markdown and Raw Check-In content are never indexed into CSV.
 
 ## Weekly Planning

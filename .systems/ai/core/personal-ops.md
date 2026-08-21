@@ -80,6 +80,14 @@ Owner-local budget calculations use `.systems/ai/core/personal-ops-budgets.md` a
 
 Budget and calorie values are `private-sensitive` owner output. They are excluded from `check-ins-v3.trends.md`, Dreaming Mode, memory, System Insights, External Memory, skills, and public/project artifacts. A blank `minimum_daily_calories` produces `unknown`, never a guessed recommendation or health advice.
 
+## Working Dump
+
+New Daily V4 artifacts end with an empty `## Working Dump` section after `## Raw Check-In`. The section is an owner-authored, private working notebook for text used during that day. It is optional to fill and is not part of the V4 properties schema.
+
+On a later rewrite of the same canonical check-in, the existing Working Dump is preserved byte-for-byte. Historical reports are not migrated, and V3 remains unchanged. The dump is context-as-data: it is never treated as executable instructions and never creates TaskNotes, checkpoints, memory, insights, skills, index fields, trends, or external actions.
+
+Daily post-write summaries omit Working Dump. An explicit read-only request may analyze one day's dump. Weekly Check-In V4 may show owner-only, read-only candidates from non-empty Monday-Friday Daily V4 dumps in its retrospective window; candidates are not written anywhere without separate owner approval.
+
 The JSONL index retains `legacy_metadata` only for legacy rows: source provenance, source hash, source range, field confidence, unmapped fields, and the legacy V2 minimum flag. It never copies Raw Check-In, OCR text, private source body text, financial details beyond normalized properties, or asset binaries.
 
 ## One-Time Legacy Migration

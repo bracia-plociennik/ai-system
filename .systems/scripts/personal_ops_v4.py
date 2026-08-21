@@ -22,10 +22,67 @@ V4_CSV_INDEX = "personal-ops/indexes/check-ins-v4.csv"
 V4_METRICS_INDEX = "personal-ops/indexes/check-ins-v4.metrics.csv"
 V4_ROUTER = "personal-ops/indexes/check-ins-v4.md"
 V4_TRENDS = "personal-ops/indexes/check-ins-v4.trends.md"
+WORKING_DUMP_START = "<!-- ai-system:working-dump:start -->"
+WORKING_DUMP_END = "<!-- ai-system:working-dump:end -->"
+WORKING_DUMP_HEADING = "## Working Dump"
 
 
 def parse_frontmatter(path: Path) -> tuple[dict[str, Any], dict[str, Any], str]:
     return parse_frontmatter_and_properties(path.read_text(encoding="utf-8"), path)
+
+
+def _working_dump_marked_block(body: str) -> re.Match[str] | None:
+    pattern = re.compile(
+        rf"(?ms)^{re.escape(WORKING_DUMP_START)}\n{re.escape(WORKING_DUMP_HEADING)}\n.*?^{re.escape(WORKING_DUMP_END)}\n?"
+    )
+    return pattern.search(body)
+
+
+def working_dump_block(body: str) -> str | None:
+    """Return the exact Working Dump section, preserving manual bytes."""
+    marked = _working_dump_marked_block(body)
+    if marked:
+        return marked.group(0)
+    heading = re.search(r"(?m)^## Working Dump[ \t]*\n", body)
+    return body[heading.start():] if heading else None
+
+
+def working_dump_text(body: str) -> str:
+    """Read only the user-authored content inside Working Dump."""
+    block = working_dump_block(body)
+    if block is None:
+        return ""
+    content = re.sub(rf"(?m)^{re.escape(WORKING_DUMP_START)}\n", "", block, count=1)
+    content = re.sub(rf"(?m)^{re.escape(WORKING_DUMP_END)}\n?\Z", "", content, count=1)
+    content = re.sub(r"(?m)^## Working Dump[ \t]*\n", "", content, count=1)
+    return content.strip("\n")
+
+
+def ensure_working_dump(body: str) -> str:
+    """Append an empty dump to a newly rendered artifact without rewriting it."""
+    if working_dump_block(body) is not None:
+        return body
+    return (
+        body.rstrip("\n")
+        + "\n\n"
+        + WORKING_DUMP_START
+        + "\n"
+        + WORKING_DUMP_HEADING
+        + "\n"
+        + WORKING_DUMP_END
+        + "\n"
+    )
+
+
+def preserve_working_dump(existing_body: str, replacement_body: str) -> str:
+    """Keep an existing manual dump byte-for-byte across canonical rewrites."""
+    existing = working_dump_block(existing_body)
+    if existing is None:
+        return ensure_working_dump(replacement_body)
+    replacement_block = working_dump_block(replacement_body)
+    if replacement_block is not None:
+        replacement_body = replacement_body[: replacement_body.index(replacement_block)]
+    return replacement_body.rstrip("\n") + "\n\n" + existing
 
 
 def json_value(properties: dict[str, Any], key: str, default: Any) -> Any:

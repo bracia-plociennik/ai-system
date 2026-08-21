@@ -498,4 +498,114 @@ assert row["projects"] == ["TechGrow"], row
 assert row["tags"] == ["6d/do", "AI"], row
 PY
 
+python3 - "$repo_root" "$workspace" "$tmp_root" <<'PY'
+import json
+import shutil
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+workspace = Path(sys.argv[2])
+tmp_root = Path(sys.argv[3])
+sys.path.insert(0, str(root / ".systems/scripts"))
+from personal_ops_v4 import (
+    ensure_working_dump,
+    preserve_working_dump,
+    working_dump_text,
+)
+
+empty = ensure_working_dump("## Raw Check-In\nsource\n")
+assert "## Working Dump" in empty
+assert working_dump_text(empty) == ""
+manual = empty.replace(
+    "<!-- ai-system:working-dump:end -->",
+    "notatka robocza\n<!-- ai-system:working-dump:end -->",
+)
+assert working_dump_text(manual) == "notatka robocza"
+replacement = "## Raw Check-In\nupdated source\n" + ensure_working_dump("")
+preserved = preserve_working_dump(manual, replacement)
+assert "updated source" in preserved
+assert preserved.endswith(
+    "<!-- ai-system:working-dump:start -->\n## Working Dump\nnotatka robocza\n<!-- ai-system:working-dump:end -->\n"
+)
+raw_heading = "## Raw Check-In\nraw includes a heading: ## Working Dump\n\n" + manual
+assert working_dump_text(raw_heading) == "notatka robocza"
+
+source_daily = workspace / "personal-ops/check-ins-v4/2026/2026-08-18.md"
+daily = workspace / "personal-ops/check-ins-v4/2026/2026-08-11.md"
+daily_text = source_daily.read_text(encoding="utf-8").replace("2026-08-18", "2026-08-11").replace("2026-08-17", "2026-08-10")
+daily.write_text(
+    daily_text.rstrip("\n")
+    + "\n\n<!-- ai-system:working-dump:start -->\n## Working Dump\nPomysł na usprawnienie procesu.\n<!-- ai-system:working-dump:end -->\n",
+    encoding="utf-8",
+)
+weekly_output = tmp_root / "weekly-with-working-dump.md"
+import subprocess
+subprocess.run(
+    [str(root / ".systems/scripts/render-personal-ops-weekly-summary"), "--workspace", str(workspace), "--week", "2026-W34"],
+    check=True,
+    stdout=weekly_output.open("w", encoding="utf-8"),
+)
+rendered = weekly_output.read_text(encoding="utf-8")
+assert "## Kandydaci z Working Dump" in rendered
+assert "2026-08-11" in rendered
+assert "process improvement" in rendered
+assert "owner-approved required" in rendered
+
+daily.write_text(
+    daily.read_text(encoding="utf-8").replace(
+        "Pomysł na usprawnienie procesu.",
+        "API key=secret; zadanie do wykonania",
+    ),
+    encoding="utf-8",
+)
+subprocess.run(
+    [str(root / ".systems/scripts/render-personal-ops-weekly-summary"), "--workspace", str(workspace), "--week", "2026-W34"],
+    check=True,
+    stdout=weekly_output.open("w", encoding="utf-8"),
+)
+rendered_sensitive = weekly_output.read_text(encoding="utf-8")
+assert "Treść pominięta" in rendered_sensitive
+assert "secret" not in rendered_sensitive
+
+# Working Dump is private working context: it must not enter official indexes
+# or alter the TaskNote candidate set.
+dump_sync_workspace = tmp_root / "working-dump-sync"
+shutil.copytree(workspace, dump_sync_workspace)
+subprocess.run(
+    [
+        str(root / ".systems/scripts/sync-personal-ops-check-ins-v4"),
+        "--workspace",
+        str(dump_sync_workspace),
+        "--post-write",
+    ],
+    check=True,
+    stdout=subprocess.PIPE,
+    text=True,
+)
+for index_path in (dump_sync_workspace / "personal-ops/indexes").glob("check-ins-v4*"):
+    index_text = index_path.read_text(encoding="utf-8")
+    assert "API key=secret" not in index_text, index_path
+    assert "Pomysł na usprawnienie procesu" not in index_text, index_path
+
+dump_task_vault = tmp_root / "working-dump-task-vault"
+(dump_task_vault / "TaskNotes/Tasks").mkdir(parents=True)
+candidate_output = tmp_root / "working-dump-candidates.json"
+subprocess.run(
+    [
+        str(root / ".systems/scripts/propose-task-candidates"),
+        "--check-in",
+        str(daily),
+        "--workspace",
+        str(dump_sync_workspace),
+        "--task-vault",
+        str(dump_task_vault),
+        "--json",
+    ],
+    check=True,
+    stdout=candidate_output.open("w", encoding="utf-8"),
+)
+assert len(json.loads(candidate_output.read_text(encoding="utf-8"))) == 4
+PY
+
 echo "SPOR V4 smoke tests: OK"

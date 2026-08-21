@@ -25,5 +25,13 @@ for token in ("daily_index_fields", '"metric":true'):
 for token in ("check-ins-v4.csv", "check-ins-v4.metrics.csv", "write_index_set_atomic"):
     if token not in sync:
         raise SystemExit(f"V4 synchronizer contract missing: {token}")
+template = (root / ".systems/ai/templates/workspace/personal-ops/manual-daily-check-in-v4.template.md").read_text(encoding="utf-8")
+for token in ("Working Dump", "ai-system:working-dump:start", "ai-system:working-dump:end"):
+    if token not in template:
+        raise SystemExit(f"Daily V4 Working Dump contract missing: {token}")
+parser = (root / ".systems/scripts/personal_ops_v4.py").read_text(encoding="utf-8")
+for token in ("ensure_working_dump", "preserve_working_dump", "working_dump_text"):
+    if token not in parser:
+        raise SystemExit(f"Working Dump parser contract missing: {token}")
 print("Personal Ops V4 contract artifacts: OK")
 PY

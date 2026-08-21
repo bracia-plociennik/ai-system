@@ -6,13 +6,56 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
-from personal_ops_v4 import json_value, load_weekly
+from personal_ops_v4 import daily_path, json_value, load_daily, load_weekly, working_dump_text
 
 
-def render(properties: dict) -> str:
+SENSITIVE_DUMP_TERMS = (
+    "password", "hasło", "token", "secret", "sekret", "private key", "prywatny klucz",
+    "ssh", "api key", "api_key", "credential", "dane dostępowe", "login",
+)
+
+
+def dump_type(text: str) -> str:
+    lowered = text.lower()
+    if any(term in lowered for term in ("decyzja", "ustalam", "wybieram", "postanawiam")):
+        return "decision"
+    if any(term in lowered for term in ("proces", "workflow", "check-in", "kontrakt", "system")):
+        return "process improvement"
+    if any(term in lowered for term in ("task", "zadanie", "zrobić", "zrobic", "pomysł", "pomysl", "idea")):
+        return "task idea"
+    return "insight"
+
+
+def dump_observation(text: str) -> str:
+    lowered = text.lower()
+    if any(term in lowered for term in SENSITIVE_DUMP_TERMS):
+        return "Treść pominięta: możliwe dane wrażliwe; wymagany prywatny przegląd."
+    excerpt = " ".join(line.strip() for line in text.splitlines() if line.strip())
+    excerpt = excerpt[:220].rstrip()
+    return excerpt + ("…" if len(excerpt) == 220 else "")
+
+
+def working_dump_candidates(workspace: Path, properties: dict) -> list[tuple[str, str, str]]:
+    review_start = date.fromisoformat(str(properties["review_week_start"]))
+    review_end = date.fromisoformat(str(properties["review_week_end"]))
+    candidates: list[tuple[str, str, str]] = []
+    for offset in range(5):
+        current = review_start + timedelta(days=offset)
+        if current > review_end:
+            break
+        if not daily_path(workspace, current).is_file():
+            continue
+        _, _, body = load_daily(workspace, current)
+        dump = working_dump_text(body)
+        if dump.strip():
+            candidates.append((current.isoformat(), dump_type(dump), dump_observation(dump)))
+    return candidates
+
+
+def render(properties: dict, workspace: Path) -> str:
     future_wig = json_value(properties, "future_wig_json", {})
     items = json_value(properties, "future_plan_items_json", [])
     blocks = json_value(properties, "daily_blocks_json", [])
@@ -40,6 +83,17 @@ def render(properties: dict) -> str:
         for slice_item in block.get("work_slices", []) or [{}]:
             item = item_map.get(str(slice_item.get("item_id", "")), {})
             lines.append(f"| {block.get('date', '')} | {block.get('block_id', '')} | {item.get('title', slice_item.get('label', 'bufor'))} | {item.get('definition_of_done', '')} | {item.get('deadline', '—')} |")
+    lines.extend(["", "## Kandydaci z Working Dump"])
+    candidates = working_dump_candidates(workspace, properties)
+    if candidates:
+        lines.extend([
+            "| Źródło | Proponowany typ | Obserwacja | Status |",
+            "| --- | --- | --- | --- |",
+        ])
+        for source_date, candidate_type, observation in candidates:
+            lines.append(f"| {source_date} | {candidate_type} | {observation.replace('|', '\\|')} | owner-approved required |")
+    else:
+        lines.append("- Brak niepustych Working Dump w retrospektywnym zakresie poniedziałek–piątek.")
     lines.extend(["", f"TaskNotes: {properties.get('task_generation_status', 'unknown')}", "Plan jest read-only; nie wykonuje wdrożeń, komunikacji ani innych działań zewnętrznych."])
     return "\n".join(lines) + "\n"
 
@@ -51,8 +105,9 @@ def main() -> int:
     parser.add_argument("--check-file", type=Path)
     args = parser.parse_args()
     try:
-        _, properties, _ = load_weekly(args.workspace.resolve(), args.week)
-        expected = render(properties)
+        workspace = args.workspace.resolve()
+        _, properties, _ = load_weekly(workspace, args.week)
+        expected = render(properties, workspace)
         if args.check_file:
             if args.check_file.read_text(encoding="utf-8").rstrip("\n") != expected.rstrip("\n"):
                 print("weekly V4 summary mismatch", file=sys.stderr)

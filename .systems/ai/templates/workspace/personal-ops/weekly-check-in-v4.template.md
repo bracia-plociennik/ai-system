@@ -38,3 +38,7 @@ Use the four JSON properties as the canonical structured review. Do not duplicat
 ## Raw Weekly Check-In
 
 <paste owner message verbatim>
+
+<!-- ai-system:working-dump:start -->
+## Working Dump
+<!-- ai-system:working-dump:end -->
