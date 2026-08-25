@@ -130,7 +130,11 @@ def normalize_budget_facts(properties: dict[str, Any]) -> dict[str, Any]:
                 normalized["previous_day_finance_approximate"] = str(finance["approximate"]).lower()
 
     if not str(normalized.get("previous_day_actual_calories_representative", "") or "").strip():
+        # V3 uses `if`; V4 readable review data uses `nutrition`. Keep both
+        # routes so the version-aware budget model does not drop actual intake.
         if_data = review_process.get("if")
+        if not isinstance(if_data, dict):
+            if_data = review_process.get("nutrition")
         if isinstance(if_data, dict):
             calories = _numeric_json_value(if_data.get("calories"))
             if calories is not None:

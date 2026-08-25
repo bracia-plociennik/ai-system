@@ -1370,6 +1370,11 @@ v4 = module.normalize_budget_facts({
 })
 assert v4["previous_day_actual_calories_representative"] == "2500", v4
 assert v4["previous_day_finance_amount"] == "420", v4
+v4_nutrition = module.normalize_budget_facts({
+    "review_process_json": json.dumps({"nutrition": {"calories": 2500, "approximate": True}}),
+})
+assert v4_nutrition["previous_day_actual_calories_representative"] == "2500", v4_nutrition
+assert v4_nutrition["previous_day_actual_calories_approximate"] == "true", v4_nutrition
 v3 = module.normalize_budget_facts({
     "previous_day_actual_calories_representative": "2300",
     "previous_day_finance_amount": "70",
