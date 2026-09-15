@@ -22,6 +22,9 @@ properties:
   daily_plan_contract: per-day-schedule-v1
   planned_schedule_json: "[]"
   readable_body_contract: spor-readable-v1
+  life_alignment_contract: last-period-alignment-v1
+  planned_day_life_alignment_answer: unknown
+  life_alignment_resolution_json: "{}"
   current_state_json: "{}"
   wig_title:
   wig_definition_of_done:
@@ -75,6 +78,9 @@ Record readable outcome facts for the review window without reinterpreting missi
 ## REVIEW
 
 Summarize REVIEW here. Keep the full owner message in `## Raw Check-In`; quotes and external references remain advisory unless separately verified.
+
+Life alignment question: Jeśli dzisiaj miałoby być ostatnim dniem mojego życia, czy chciałbym zrobić to, co zaplanowałem do zrobienia na dziś?
+Answer: `TAK` / `NIE` / `UNKNOWN`.
 
 ## Raw Check-In
 

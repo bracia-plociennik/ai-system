@@ -1,0 +1,120 @@
+#!/usr/bin/env python3
+"""Targeted regression tests for Life Alignment Cards."""
+
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+import tempfile
+from datetime import date, timedelta
+from pathlib import Path
+
+from personal_ops_v4 import (
+    DAILY_ALIGNMENT_QUESTION,
+    WEEKLY_ALIGNMENT_QUESTION,
+    alignment_summary,
+    project_index_properties,
+    daily_index_fields,
+    validate_daily,
+)
+
+
+def daily_text(stamp: date, answer: str, resolution: dict | None = None) -> str:
+    props = {
+        "index_contract": 4, "schema_version": 4, "artifact_kind": "daily",
+        "report_id": stamp.isoformat(), "session_date": stamp.isoformat(),
+        "closure_date": (stamp - timedelta(days=1)).isoformat(),
+        "review_window_start": (stamp - timedelta(days=1)).isoformat(),
+        "review_window_end": (stamp - timedelta(days=1)).isoformat(),
+        "review_window_kind": "previous-day", "privacy": "private-sensitive",
+        "private_index_policy": "detailed-private", "work_mode": "normal",
+        "organism_mode": "normal", "planned_schedule_variant": "standard",
+        "wig_title": "test", "wig_definition_of_done": "test", "wig_plan_item_id": "",
+        "planned_items_json": "[]", "review_state_json": "{}", "review_process_json": "{}",
+        "review_outcome_json": "{}", "review_review_json": "{}", "owner_overrides_json": "[]",
+        "osnr_checkpoints_json": "[]", "plan_vs_reality_gap": "", "recovery_cost": "",
+        "task_generation_policy": "commitment-first-6d-v1", "task_generation_status": "proposal-only",
+        "task_generation_references_json": "[]", "life_alignment_contract": "last-period-alignment-v1",
+        "planned_day_life_alignment_answer": answer,
+        "life_alignment_resolution_json": json.dumps(resolution or {}, ensure_ascii=False),
+    }
+    frontmatter = "---\ntype: daily-check-in-v4\nschema_version: 4\nindex_contract: 4\nproperties:\n" + "\n".join(f"  {key}: {json.dumps(str(value), ensure_ascii=False)}" for key, value in props.items()) + "\n---\n"
+    body = "\n".join([
+        "## Plan na dziś\nPlan.", "## STATE\nState.", "## PROCESS\nProcess.",
+        "## OUTCOME\nOutcome.", "## REVIEW\n" + DAILY_ALIGNMENT_QUESTION,
+    ])
+    return frontmatter + body + "\n"
+
+
+def weekly_text(stamp: date, answer: str) -> str:
+    props = {
+        "index_contract": 4, "schema_version": 4, "artifact_kind": "weekly",
+        "report_id": f"{stamp.isocalendar().year}-W{stamp.isocalendar().week:02d}",
+        "review_week_start": (stamp - timedelta(days=7)).isoformat(),
+        "review_week_end": (stamp - timedelta(days=1)).isoformat(),
+        "plan_week_start": stamp.isoformat(), "plan_week_end": (stamp + timedelta(days=4)).isoformat(),
+        "privacy": "private-sensitive", "private_index_policy": "detailed-private",
+        "review_state_json": "{}", "review_process_json": "{}", "review_outcome_json": "{}",
+        "review_review_json": "{}", "future_wig_json": "{}", "future_plan_items_json": "[]",
+        "daily_blocks_json": "[]", "task_generation_policy": "commitment-first-6d-v1",
+        "task_generation_status": "proposal-only", "life_alignment_contract": "last-period-alignment-v1",
+        "planned_week_life_alignment_answer": answer, "life_alignment_resolution_json": "{}",
+    }
+    frontmatter = "---\ntype: weekly-check-in-v4\nschema_version: 4\nindex_contract: 4\nproperties:\n" + "\n".join(f"  {key}: {json.dumps(str(value), ensure_ascii=False)}" for key, value in props.items()) + "\n---\n"
+    return frontmatter + "## Miniony tydzień — STATE / PROCESS / OUTCOME / REVIEW\n" + WEEKLY_ALIGNMENT_QUESTION + "\n"
+
+
+def main() -> int:
+    with tempfile.TemporaryDirectory(prefix="life-alignment-") as raw:
+        workspace = Path(raw)
+        daily_root = workspace / "personal-ops/check-ins-v4/2026"
+        weekly_root = workspace / "personal-ops/weekly-check-ins-v4/2026"
+        daily_root.mkdir(parents=True)
+        weekly_root.mkdir(parents=True)
+
+        current = date(2026, 1, 2)
+        index = 0
+        while index < 30:
+            if current.weekday() in {1, 2, 3, 4}:
+                no_count = 23 if index >= 7 else 0
+                answer = "no" if no_count else "yes"
+                path = daily_root / f"{current.isoformat()}.md"
+                path.write_text(daily_text(current, answer), encoding="utf-8")
+                index += 1
+            current += timedelta(days=1)
+        for idx, answer in enumerate(("yes", "yes", "no", "no")):
+            monday = date(2026, 2, 2) + timedelta(days=7 * idx)
+            (weekly_root / f"{monday.isoformat()}.md").write_text(weekly_text(monday, answer), encoding="utf-8")
+
+        result = alignment_summary(workspace, date(2026, 3, 1))
+        assert result["daily"]["count_30"] == 30 and result["daily"]["no_30"] == 23
+        assert result["daily"]["card_30"] == "red"
+        assert result["weekly"]["answer_count"] == 4 and result["weekly"]["no_count"] == 2
+        assert result["weekly"]["card"] == "yellow"
+        assert result["tasknote_gate"] == "blocked"
+
+        current = date(2026, 3, 3)
+        (daily_root / f"{current.isoformat()}.md").write_text(daily_text(current, "no"), encoding="utf-8")
+        task_vault = workspace / "vault"
+        (task_vault / "TaskNotes/Tasks").mkdir(parents=True)
+        blocked = subprocess.run([
+            sys.executable,
+            str(Path(__file__).with_name("propose-task-candidates")),
+            "--workspace", str(workspace),
+            "--check-in", str(daily_root / f"{current.isoformat()}.md"),
+            "--task-vault", str(task_vault), "--write", "--owner-approved",
+        ], capture_output=True, text=True)
+        assert blocked.returncode != 0 and "unresolved red life-alignment card" in blocked.stderr, blocked.stdout + blocked.stderr
+
+        redacted = project_index_properties(
+            {"private_index_policy": "redacted", "planned_day_life_alignment_answer": "no"},
+            daily_index_fields(),
+        )
+        assert redacted["planned_day_life_alignment_answer"] == ""
+        print("life alignment V4 targeted regressions: PASS")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

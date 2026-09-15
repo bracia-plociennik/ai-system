@@ -18,6 +18,7 @@ from personal_ops_properties_v3 import (
     validate_properties,
 )
 from personal_ops_v4 import (
+    alignment_summary,
     json_value as v4_json_value,
     parse_frontmatter as parse_v4_frontmatter,
     validate_daily as validate_v4_daily,
@@ -1185,7 +1186,16 @@ def main() -> int:
             )
         if is_v3_check_in:
             task_generation_gate = v3_task_generation_gate(args.check_in.resolve())
+        elif is_v4_check_in and args.write:
+            top, properties, body = parse_v4_frontmatter(args.check_in.resolve())
+            validate_v4_daily(top, properties, args.check_in.resolve(), body)
+            report_date = dt.date.fromisoformat(str(properties["session_date"]))
+            alignment = alignment_summary(workspace, report_date)
+            if alignment.get("tasknote_gate") == "blocked":
+                task_generation_gate = "unresolved red life-alignment card blocks professional TaskNote writes"
     if task_generation_gate:
+        if is_v4_check_in and args.write:
+            raise SystemExit(task_generation_gate)
         if args.write:
             update_v3_task_generation_status(args.check_in.resolve(), "skipped", task_generation_gate, [], None)
             print(f"Task generation skipped: {task_generation_gate}")

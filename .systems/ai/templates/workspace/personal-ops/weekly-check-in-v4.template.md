@@ -23,6 +23,9 @@ properties:
   daily_blocks_json: "[]"
   task_generation_policy: commitment-first-6d-v1
   task_generation_status: proposal-only
+  life_alignment_contract: last-period-alignment-v1
+  planned_week_life_alignment_answer: unknown
+  life_alignment_resolution_json: "{}"
 ---
 
 # Weekly Check-In V4 <YYYY-Www>
@@ -30,6 +33,9 @@ properties:
 ## Miniony tydzień — STATE / PROCESS / OUTCOME / REVIEW
 
 Use the four JSON properties as the canonical structured review. Do not duplicate Friday as a separate daily artifact.
+
+Life alignment question: Jeśli przyszły tydzień miałby być ostatnim tygodniem mojego życia, czy chciałbym zrobić to, co zaplanowałem do zrobienia na przyszły tydzień?
+Answer: `TAK` / `NIE` / `UNKNOWN`.
 
 ## Przyszły tydzień
 

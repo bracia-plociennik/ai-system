@@ -11,7 +11,7 @@ from datetime import date
 from decimal import Decimal
 from pathlib import Path
 
-from personal_ops_v4 import json_value, load_daily
+from personal_ops_v4 import DAILY_ALIGNMENT_QUESTION, alignment_summary, json_value, load_daily, normalize_life_alignment_answer
 
 
 CALCULATOR = Path(__file__).with_name("calculate-personal-ops-budgets")
@@ -61,6 +61,25 @@ def display_range(start: object, end: object) -> str:
 
 def markdown_cell(value: object) -> str:
     return str(value or "-").replace("|", "\\|").replace("\n", " ").strip() or "-"
+
+
+def alignment_section(properties: dict, workspace: Path) -> list[str]:
+    report_date = date.fromisoformat(str(properties["session_date"]))
+    summary = alignment_summary(workspace, report_date)
+    daily = summary["daily"]
+    answer = normalize_life_alignment_answer(properties.get("planned_day_life_alignment_answer", "unknown"))
+    card14 = daily["card"] if daily["answer_count"] >= 14 else "nie oceniono"
+    card30 = daily["card_30"] if daily["count_30"] >= 30 else "nie oceniono"
+    resolution = daily.get("resolution")
+    return [
+        "### Kierunek życia",
+        f"- Pytanie: {DAILY_ALIGNMENT_QUESTION}",
+        f"- Odpowiedź: `{answer.upper()}`",
+        f"- Ostatnie 14 odpowiedzi: `{daily['no_count']}/{daily['answer_count']}` NIE; kartka: `{card14}`",
+        f"- Ostatnie 30 odpowiedzi: `{daily['no_30']}/{daily['count_30']}` NIE; kartka: `{card30}`",
+        f"- Stan rozwiązania: `{json.dumps(resolution, ensure_ascii=False) if resolution else 'brak'}`",
+        f"- Gate TaskNotes: `{summary['tasknote_gate']}`",
+    ]
 
 
 def minutes(value: object) -> int:
@@ -290,7 +309,7 @@ def render_food(schedule: dict) -> list[str]:
     return lines
 
 
-def render(properties: dict, rows: list[dict], budget_report: dict) -> str:
+def render(properties: dict, rows: list[dict], budget_report: dict, workspace: Path) -> str:
     items = json_value(properties, "planned_items_json", [])
     by_block: dict[str, list[dict]] = {}
     unallocated: list[dict] = []
@@ -382,6 +401,7 @@ def render(properties: dict, rows: list[dict], budget_report: dict) -> str:
         for item in hidden_allocations:
             lines.append(f"- {prefixed_title(item.get('title', ''), item.get('stream', ''))} | DoD: {item.get('definition_of_done', '')} | DL: {display_deadline(item.get('deadline', ''), 'bez deadlineu')}")
     lines.extend(["", *render_state(properties, [item for item in items if isinstance(item, dict)])])
+    lines.extend(["", *alignment_section(properties, workspace)])
     if properties.get("wig_title"):
         wig_deadline_value = ""
         for item in items:
@@ -464,7 +484,7 @@ def main() -> int:
         target = date.fromisoformat(args.date)
         workspace = args.workspace.resolve()
         _, properties, _ = load_daily(workspace, target)
-        expected = render(properties, schedule_rows(workspace, properties), budget(workspace, target))
+        expected = render(properties, schedule_rows(workspace, properties), budget(workspace, target), workspace)
         if args.check_file:
             actual = args.check_file.read_text(encoding="utf-8")
             if actual.rstrip("\n") != expected.rstrip("\n"):

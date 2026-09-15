@@ -65,6 +65,7 @@ validator="$copy_repo/.systems/scripts/check-prompt-composition"
 run_must_pass "prompt-composition-baseline" "$validator"
 run_must_pass "weekly-planning-baseline" "$copy_repo/.systems/scripts/check-weekly-planning"
 run_must_pass "spor-v4-baseline" "$copy_repo/.systems/scripts/check-spor-v4"
+run_must_pass "life-alignment-v4" "$copy_repo/.systems/scripts/check-life-alignment-v4"
 
 block_checkpoint_validator="$copy_repo/.systems/scripts/check-block-checkpoint"
 block_checkpoint_core="$copy_repo/.systems/ai/core/block-checkpoint.md"

@@ -25,6 +25,9 @@ V4_TRENDS = "personal-ops/indexes/check-ins-v4.trends.md"
 WORKING_DUMP_START = "<!-- ai-system:working-dump:start -->"
 WORKING_DUMP_END = "<!-- ai-system:working-dump:end -->"
 WORKING_DUMP_HEADING = "## Working Dump"
+LIFE_ALIGNMENT_CONTRACT = "last-period-alignment-v1"
+DAILY_ALIGNMENT_QUESTION = "Jeśli dzisiaj miałoby być ostatnim dniem mojego życia, czy chciałbym zrobić to, co zaplanowałem do zrobienia na dziś?"
+WEEKLY_ALIGNMENT_QUESTION = "Jeśli przyszły tydzień miałby być ostatnim tygodniem mojego życia, czy chciałbym zrobić to, co zaplanowałem do zrobienia na przyszły tydzień?"
 
 
 def parse_frontmatter(path: Path) -> tuple[dict[str, Any], dict[str, Any], str]:
@@ -185,6 +188,54 @@ def project_index_properties(properties: dict[str, Any], fields: list[dict[str, 
     return projected
 
 
+def normalize_life_alignment_answer(value: Any) -> str:
+    """Normalize Polish and English input to the private contract values."""
+    raw = str(value or "").strip().lower()
+    if raw in {"yes", "tak"}:
+        return "yes"
+    if raw in {"no", "nie"}:
+        return "no"
+    if raw in {"unknown", "nie wiem", "n/a", "na"} or not raw:
+        return "unknown"
+    raise ValueError(f"invalid life alignment answer: {value}")
+
+
+def _alignment_resolution(properties: dict[str, Any], path: Path) -> dict[str, Any] | None:
+    if "life_alignment_resolution_json" not in properties:
+        return None
+    value = json_value(properties, "life_alignment_resolution_json", None)
+    if value in (None, {}, ""):
+        return None
+    if not isinstance(value, dict):
+        raise ValueError(f"life_alignment_resolution_json must be an object: {path}")
+    required = ("episode_id", "mode", "reason", "approved_at", "approved_by")
+    if any(not str(value.get(key, "")).strip() for key in required):
+        raise ValueError(f"life_alignment_resolution_json is incomplete: {path}")
+    if value.get("mode") not in {"plan-change", "owner-override"}:
+        raise ValueError(f"invalid life alignment resolution mode: {path}")
+    if value.get("approved_by") != "owner":
+        raise ValueError(f"life alignment resolution must be approved_by owner: {path}")
+    if not re.fullmatch(r"(?:daily|weekly):red:[^\s]+", str(value["episode_id"])):
+        raise ValueError(f"invalid life alignment episode_id: {path}")
+    return value
+
+
+def _validate_alignment(properties: dict[str, Any], body: str, path: Path, kind: str) -> None:
+    marker = str(properties.get("life_alignment_contract", "") or "").strip()
+    if not marker:
+        return
+    if marker != LIFE_ALIGNMENT_CONTRACT:
+        raise ValueError(f"unsupported life_alignment_contract: {path}")
+    key = "planned_day_life_alignment_answer" if kind == "daily" else "planned_week_life_alignment_answer"
+    answer = normalize_life_alignment_answer(properties.get(key, "unknown"))
+    if str(properties.get(key, "unknown")).strip().lower() != answer:
+        raise ValueError(f"{key} must be normalized to yes, no, or unknown: {path}")
+    _alignment_resolution(properties, path)
+    question = DAILY_ALIGNMENT_QUESTION if kind == "daily" else WEEKLY_ALIGNMENT_QUESTION
+    if question not in body:
+        raise ValueError(f"life alignment question missing from REVIEW: {path}")
+
+
 def validate_common(top: dict[str, Any], properties: dict[str, Any], path: Path, kind: str) -> None:
     expected_type = "daily-check-in-v4" if kind == "daily" else "weekly-check-in-v4"
     if top.get("type") != expected_type or str(top.get("schema_version")) != "4" or str(top.get("index_contract")) != "4":
@@ -292,6 +343,7 @@ def validate_daily(top: dict[str, Any], properties: dict[str, Any], path: Path, 
         raise ValueError(f"planned_items_json contains missing or duplicate IDs: {path}")
     _validate_planned_schedule(properties, items, path)
     _validate_readable_body(properties, body, path)
+    _validate_alignment(properties, body, path, "daily")
     if properties.get("plan_vs_reality_gap", "") != "":
         gap = int(str(properties["plan_vs_reality_gap"]))
         if gap < 0 or gap > 5:
@@ -302,7 +354,7 @@ def validate_daily(top: dict[str, Any], properties: dict[str, Any], path: Path, 
             raise ValueError(f"recovery_cost must be -2..2: {path}")
 
 
-def validate_weekly(top: dict[str, Any], properties: dict[str, Any], path: Path) -> None:
+def validate_weekly(top: dict[str, Any], properties: dict[str, Any], path: Path, body: str = "") -> None:
     validate_common(top, properties, path, "weekly")
     review_start = date.fromisoformat(str(properties["review_week_start"]))
     review_end = date.fromisoformat(str(properties["review_week_end"]))
@@ -322,6 +374,7 @@ def validate_weekly(top: dict[str, Any], properties: dict[str, Any], path: Path)
     ids = [str(item.get("id", "")) for item in items]
     if len(ids) != len(set(ids)) or any(not item_id for item_id in ids):
         raise ValueError(f"future_plan_items_json contains missing or duplicate IDs: {path}")
+    _validate_alignment(properties, body, path, "weekly")
 
 
 def daily_path(workspace: Path, report_date: date) -> Path:
@@ -354,7 +407,7 @@ def load_weekly(workspace: Path, week_id: str) -> tuple[dict[str, Any], dict[str
     if not path.is_file():
         raise ValueError(f"missing V4 weekly check-in: {path}")
     top, properties, body = parse_frontmatter(path)
-    validate_weekly(top, properties, path)
+    validate_weekly(top, properties, path, body)
     return top, properties, body
 
 
@@ -373,6 +426,104 @@ def load_v4_daily_records(workspace: Path) -> list[dict[str, Any]]:
         seen.add(session)
         records.append(properties)
     return records
+
+
+def load_v4_weekly_records(workspace: Path) -> list[dict[str, Any]]:
+    root = workspace / V4_WEEKLY_ROOT
+    if not root.is_dir():
+        return []
+    records: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for path in sorted(root.glob("*/*.md")):
+        top, properties, body = parse_frontmatter(path)
+        validate_weekly(top, properties, path, body)
+        key = str(properties["plan_week_start"])
+        if key in seen:
+            raise ValueError(f"duplicate V4 weekly plan_week_start: {key}")
+        seen.add(key)
+        records.append(properties)
+    return records
+
+
+def _alignment_records(workspace: Path, kind: str, report_date: date) -> list[tuple[str, str, dict[str, Any]]]:
+    source = load_v4_daily_records(workspace) if kind == "daily" else load_v4_weekly_records(workspace)
+    answer_key = "planned_day_life_alignment_answer" if kind == "daily" else "planned_week_life_alignment_answer"
+    date_key = "session_date" if kind == "daily" else "plan_week_start"
+    records: list[tuple[str, str, dict[str, Any]]] = []
+    for props in sorted(source, key=lambda row: str(row.get(date_key, ""))):
+        stamp = str(props.get(date_key, ""))
+        if not stamp or date.fromisoformat(stamp) > report_date:
+            continue
+        answer = normalize_life_alignment_answer(props.get(answer_key, "unknown"))
+        if str(props.get("life_alignment_contract", "")).strip() != LIFE_ALIGNMENT_CONTRACT:
+            answer = "unknown"
+        records.append((stamp, answer, props))
+    return records
+
+
+def _alignment_card(kind: str, answered_count: int, no_count: int) -> str:
+    if kind == "daily":
+        if answered_count < 30:
+            return "yellow" if answered_count >= 14 and no_count >= 11 else "none"
+        return "red" if no_count >= 23 else ("yellow" if no_count >= 11 else "none")
+    if answered_count < 4:
+        return "none"
+    return "red" if no_count >= 3 else ("yellow" if no_count >= 2 else "none")
+
+
+def _window_summary(kind: str, records: list[tuple[str, str, dict[str, Any]]], size: int) -> dict[str, Any]:
+    answered = [(stamp, answer, props) for stamp, answer, props in records if answer in {"yes", "no"}]
+    window = answered[-size:]
+    no_count = sum(answer == "no" for _, answer, _ in window)
+    card = _alignment_card(kind, len(window), no_count)
+    return {"answer_count": len(window), "no_count": no_count, "card": card, "records": window}
+
+
+def _resolution_for_episode(kind: str, window: dict[str, Any], records: list[tuple[str, str, dict[str, Any]]]) -> dict[str, Any] | None:
+    if window["card"] != "red" or not window["records"]:
+        return None
+    answered = [(stamp, answer, props) for stamp, answer, props in records if answer in {"yes", "no"}]
+    episode_start = window["records"][-1][0]
+    previous_card = "none"
+    for index in range(len(answered)):
+        current_window = answered[max(0, index - (30 if kind == "daily" else 4) + 1) : index + 1]
+        current_card = _alignment_card(kind, len(current_window), sum(answer == "no" for _, answer, _ in current_window))
+        if current_card == "red" and previous_card != "red":
+            episode_start = answered[index][0]
+            break
+        previous_card = current_card
+    episode_id = f"{kind}:red:{episode_start}"
+    for current_stamp, answer, props in reversed(records):
+        if current_stamp < episode_start:
+            continue
+        try:
+            resolution = _alignment_resolution(props, Path("life_alignment"))
+        except ValueError:
+            continue
+        if resolution and resolution.get("episode_id") == episode_id:
+            if resolution.get("mode") == "plan-change" and answer != "yes":
+                continue
+            return resolution
+    return None
+
+
+def alignment_summary(workspace: Path, report_date: date) -> dict[str, Any]:
+    """Return deterministic Daily/Weekly cards and the professional-write gate."""
+    result: dict[str, Any] = {}
+    blocked = False
+    for kind, size in (("daily", 30), ("weekly", 4)):
+        records = _alignment_records(workspace, kind, report_date)
+        window = _window_summary(kind, records, size)
+        resolution = _resolution_for_episode(kind, window, records)
+        if kind == "daily":
+            recent14 = _window_summary(kind, records, 14)
+            result["daily"] = {**recent14, "no_30": window["no_count"], "count_30": window["answer_count"], "card_30": window["card"], "resolution": resolution}
+            blocked = blocked or window["card"] == "red" and resolution is None
+        else:
+            result["weekly"] = {**window, "resolution": resolution}
+            blocked = blocked or window["card"] == "red" and resolution is None
+    result["tasknote_gate"] = "blocked" if blocked else "open"
+    return result
 
 
 def load_official_v4_records(workspace: Path) -> list[dict[str, Any]]:

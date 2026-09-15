@@ -10,7 +10,8 @@
     "task_generation_policy", "task_generation_status", "task_generation_references_json"
   ],
   "daily_optional": [
-    "current_state_json", "daily_plan_contract", "planned_schedule_json", "readable_body_contract"
+    "current_state_json", "daily_plan_contract", "planned_schedule_json", "readable_body_contract",
+    "life_alignment_contract", "planned_day_life_alignment_answer", "life_alignment_resolution_json"
   ],
   "daily_index_fields": [
     {"key":"index_contract","type":"integer","default":4,"metric":true},
@@ -30,6 +31,9 @@
     {"key":"planned_schedule_variant","type":"string","default":"","metric":true},
     {"key":"daily_plan_contract","type":"string","default":""},
     {"key":"readable_body_contract","type":"string","default":""},
+    {"key":"life_alignment_contract","type":"string","default":"","metric":true},
+    {"key":"planned_day_life_alignment_answer","type":"string","default":"","private":true,"metric":true},
+    {"key":"life_alignment_resolution_json","type":"json","default":"{}","private":true},
     {"key":"wig_title","type":"string","default":"","private":true},
     {"key":"wig_definition_of_done","type":"string","default":"","private":true},
     {"key":"wig_plan_item_id","type":"string","default":"","metric":true},
@@ -70,5 +74,6 @@
     "review_process_json", "review_outcome_json", "review_review_json", "future_wig_json",
     "future_plan_items_json", "daily_blocks_json", "task_generation_policy", "task_generation_status"
   ],
+  "weekly_optional": ["life_alignment_contract", "planned_week_life_alignment_answer", "life_alignment_resolution_json"],
   "review_window_kinds": ["previous-day", "weekend"]
 }

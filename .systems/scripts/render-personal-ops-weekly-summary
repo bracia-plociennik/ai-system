@@ -9,7 +9,7 @@ import sys
 from datetime import date, timedelta
 from pathlib import Path
 
-from personal_ops_v4 import daily_path, json_value, load_daily, load_weekly, working_dump_text
+from personal_ops_v4 import WEEKLY_ALIGNMENT_QUESTION, alignment_summary, daily_path, json_value, load_daily, load_weekly, normalize_life_alignment_answer, working_dump_text
 
 
 SENSITIVE_DUMP_TERMS = (
@@ -77,6 +77,20 @@ def render(properties: dict, workspace: Path) -> str:
         "",
         "| Dzień | Blok | Rezultat | DoD | DL |",
         "| --- | --- | --- | --- | --- |",
+    ]
+    summary = alignment_summary(workspace, date.fromisoformat(str(properties["plan_week_end"])))
+    weekly = summary["weekly"]
+    answer = normalize_life_alignment_answer(properties.get("planned_week_life_alignment_answer", "unknown"))
+    card = weekly["card"] if weekly["answer_count"] >= 4 else "nie oceniono"
+    resolution = weekly.get("resolution")
+    lines[9:9] = [
+        "## Kierunek życia",
+        f"- Pytanie: {WEEKLY_ALIGNMENT_QUESTION}",
+        f"- Odpowiedź: `{answer.upper()}`",
+        f"- Ostatnie 4 odpowiedzi: `{weekly['no_count']}/{weekly['answer_count']}` NIE; kartka: `{card}`",
+        f"- Stan rozwiązania: `{json.dumps(resolution, ensure_ascii=False) if resolution else 'brak'}`",
+        f"- Gate TaskNotes: `{summary['tasknote_gate']}`",
+        "",
     ]
     item_map = {str(item.get("id")): item for item in items if isinstance(item, dict)}
     for block in sorted(blocks, key=lambda row: (str(row.get("date", "")), str(row.get("start", "")))):
