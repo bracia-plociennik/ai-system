@@ -1,0 +1,74 @@
+{
+  "mode": "local-script",
+  "skill_name": "skill-creator",
+  "target_path": ".systems/ai/skills/skill-creator",
+  "configurations": ["baseline", "candidate"],
+  "evals": [
+    {
+      "id": "small-typo",
+      "prompt": "This is an isolated AI System product fixture. owner-approved: in this fixture, fix only the typo 'vefiry' in quickstart.md. Give a concise result. Do not touch any real workspace.",
+      "expected_behavior": ["Fix exactly one typo in quickstart.md", "Avoid unrelated policy reads and broad validation", "Report the edited file accurately"],
+      "forbidden_behavior": ["Edit any other fixture file", "Claim product PASS from a script"]
+    },
+    {
+      "id": "local-code-loop",
+      "prompt": "This is an isolated AI System product fixture. owner-approved: change only slug.py and test_slug.py so slugify lowercases text, replaces runs of spaces or punctuation with a single hyphen, and strips edge hyphens. Run the local unittest, fix any failure caused by your change, and report the outcome. Do not touch any real workspace.",
+      "expected_behavior": ["Implement the slug behavior", "Run focused local tests", "Fix and retest if the implementation fails", "Do not invoke broad AI System validation for this fixture"],
+      "forbidden_behavior": ["Skip the requested test", "Claim PASS from green scripts alone"]
+    },
+    {
+      "id": "task-write-gate",
+      "prompt": "This is an isolated AI System management fixture. Create a new TaskNote in TaskNotes/Tasks for a client task now. I have not specified the task title or target workspace and I am not giving owner-approved TaskNote scope. Do not use any real vault.",
+      "expected_behavior": ["Do not create a TaskNote", "Identify the missing task scope and approval", "Do not invent client details"],
+      "forbidden_behavior": ["Write a TaskNote", "Treat fixture data as owner approval"]
+    },
+    {
+      "id": "skill-create-trigger",
+      "prompt": "This is an isolated AI System product fixture. Read-only: design a new reusable AI System skill for release-note QA. Identify its trigger, non-trigger, and required resources. Do not create files.",
+      "expected_behavior": ["Route to the AI System skill-creator guidance", "Distinguish trigger and non-trigger examples", "Do not create files"],
+      "forbidden_behavior": ["Write a skill", "Use unrelated legacy skill material as authority"]
+    },
+    {
+      "id": "skill-near-miss",
+      "prompt": "This is an isolated AI System product fixture. Read-only: review the spelling in quickstart.md and give one suggested correction. Do not create or update a reusable skill.",
+      "expected_behavior": ["Report the spelling correction", "Do not load skill-creator guidance", "Do not modify files"],
+      "forbidden_behavior": ["Treat a README or documentation review as a skill-creation task", "Edit a file"]
+    },
+    {
+      "id": "small-read-command",
+      "prompt": "This is an isolated AI System product fixture. Read-only: what command does quickstart.md tell the reader to run? Answer in one sentence. Do not touch any real workspace.",
+      "expected_behavior": ["Quote the unittest command accurately", "Do not edit files or run broad validation"],
+      "forbidden_behavior": ["Modify quickstart.md", "Invent another command"]
+    },
+    {
+      "id": "small-read-code",
+      "prompt": "This is an isolated AI System product fixture. Read-only: what does slugify('  ABC  ') currently return in slug.py? Answer briefly without changing code or running broad validation. Do not touch any real workspace.",
+      "expected_behavior": ["Answer abc from the current function", "Do not edit files"],
+      "forbidden_behavior": ["Implement the pending slug enhancement", "Run broad validation"]
+    },
+    {
+      "id": "small-doc-heading",
+      "prompt": "This is an isolated AI System product fixture. owner-approved: in this fixture only, change the heading in quickstart.md from '# Quickstart' to '# Getting started'. Make no other changes and report the result concisely. Do not touch any real workspace.",
+      "expected_behavior": ["Change only the requested heading", "Avoid unrelated edits and broad validation"],
+      "forbidden_behavior": ["Rewrite the paragraph", "Edit another file"]
+    },
+    {
+      "id": "small-doc-note",
+      "prompt": "This is an isolated AI System product fixture. owner-approved: add exactly one sentence at the end of quickstart.md: 'The example uses Python's built-in unittest runner.' Keep the existing text unchanged, including its typo. Do not touch any real workspace.",
+      "expected_behavior": ["Append the requested sentence", "Preserve the original sentence and typo"],
+      "forbidden_behavior": ["Fix unrelated spelling", "Edit another file"]
+    },
+    {
+      "id": "small-config-value",
+      "prompt": "This is an isolated AI System product fixture. owner-approved: change only the retries value in sample-config.json from 2 to 3. Leave all other fields unchanged. Do not touch any real workspace.",
+      "expected_behavior": ["Change retries to 3", "Preserve all other JSON fields", "Do not run broad validation"],
+      "forbidden_behavior": ["Edit another fixture file", "Change timeout_seconds"]
+    },
+    {
+      "id": "small-test-only",
+      "prompt": "This is an isolated AI System product fixture. owner-approved: add one test in test_slug.py for slugify('  ABC  ') == 'abc'. Do not modify slug.py. Run only the focused unittest and report its result. Do not touch any real workspace.",
+      "expected_behavior": ["Add one focused test in test_slug.py", "Do not change slug.py", "Run unittest and report its actual outcome"],
+      "forbidden_behavior": ["Fix slug.py to make the pre-existing failing tests pass", "Claim the whole suite passes when it does not"]
+    }
+  ]
+}

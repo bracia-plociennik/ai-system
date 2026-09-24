@@ -169,11 +169,15 @@ Use `.systems/ai/core/validation-routing.md` before `.systems/ai/core/validation
 
 AI System scripts are supporting-only. Green scripts do not equal PASS. Ordinary implementation, client work, PDF, document, and design work do not run broad `validate-ai-system`; targeted or full profiles apply only in the matching artifact QA, checkpoint, CI, upstream-update, or final system-verification route.
 
+Within approved local scope, use a focused test, fix an observed failure, and retest without requesting approval for each safe iteration. Scope expansion and external effects still stop for a new decision. The generated root contract uses selective document routing rather than a universal full-contract read.
+
 `validate-ai-system` always emits a final `AI_SYSTEM_VALIDATION_RESULT` completion marker. For a durable validation record, use `--evidence-file` with a path in an existing runtime directory outside `.systems/**`. The marker and record report script completion and supporting evidence only; semantic QA and final acceptance remain separate decisions.
 
 ## Model Selection Guidance
 
-Use `.systems/ai/core/model-selection-guidance.md` for every new planning, implementation, or QA scope. Recommend `GPT-5.6 Luna High` for bounded reversible work and `GPT-5.6 Sol High` for difficult architecture, ambiguity, security, migrations, production, broad integrations, adversarial review, and high-impact policy changes. The recommendation is always advisory with `Blocking: no`.
+Use `.systems/ai/core/model-selection-guidance.md` for every new planning, implementation, or QA scope. Recommend a currently available fast model for bounded, reversible work and a workhorse or frontier model for high-impact architecture, security, production, or adversarial review. If availability is unknown, name the capability class instead of guessing a version. The recommendation is advisory with `Blocking: no`.
+
+The synthetic before/after protocol and structural audit for prompt/skill efficiency live in `.systems/ai/evals/prompt-and-skill-efficiency-v1/`. Agent-run results are exploratory; approval, privacy, QA, and source-of-truth boundaries remain unchanged.
 
 ## Cross-System Upgrade Handoff
 

@@ -10,7 +10,7 @@ For every new planning, implementation, or QA scope, include:
 
 ```text
 Model recommendation:
-- Recommended: <GPT-5.6 Luna High|GPT-5.6 Sol High>
+- Recommended: <available model and effort, or capability class>
 - Reason:
 - Criticality:
 - Current model known: <yes|no>
@@ -21,14 +21,15 @@ Follow `.systems/ai/core/model-selection-guidance.md`. For unrelated substantive
 
 ## When It Applies
 
-Every substantive response must end with `Co dalej?`.
+Use `Co dalej?` for a response that needs an owner decision or handoff. For a small, complete, low-risk answer or narrow edit, finish with the result and verification instead of a ritual next-step prompt.
 
-Substantive responses include:
+Responses that require the full next-step footer include:
 
-- completed implementation or documentation work;
-- audit, validation, review, and blocker reports;
-- guide, recovery, task-intake, dump triage, memory, distillation, and change-request responses;
-- clarification responses when a command is too short or ambiguous to execute safely.
+- decision-ready plans, audit, validation, review, and blocker reports;
+- guide, recovery, task-intake, dump triage, memory, distillation, and change-request handoffs;
+- substantive implementation closure when a follow-up decision remains.
+
+Do not attach the full footer to every completed typo fix, factual lookup, or self-contained implementation report. This changes presentation only: required post-write operational summaries, approval requests, contract compliance, evidence, and stop conditions still apply when their route requires them.
 
 Do not place the footer inside strict machine-readable output when the owner explicitly requested JSON-only, patch-only, or exact-template output. Put it in the nearest surrounding human-facing response.
 
@@ -39,7 +40,7 @@ After a successful owner-approved create or update of a canonical daily check-in
 1. `Zapisano:` with the exact paths of the artifacts that were actually written.
 2. The route-specific read-only plan summary: `Post-Write Daily Summary` or `Post-Write Weekly Summary`.
 3. The actual targeted validation result.
-4. The applicable Execution Trace, contract-compliance blocks, and `Co dalej?`.
+4. The applicable Execution Trace and contract-compliance blocks, then `Co dalej?` when an owner decision or handoff remains.
 
 Re-read the saved canonical artifact before producing the summary. Do not build it from conversation memory, a proposed plan, or an earlier draft. Omit unknown values instead of guessing.
 
@@ -108,9 +109,9 @@ When Delivery Constraints apply, report the agreed deadline/timebox, delivered a
 
 When a Distillation State record applies, report its state, derived `is_distilled` value, source/quality evidence, owner disposition, and next consumer. These fields are evidence only and do not grant writes, promotion, commit, push, or work closure.
 
-## Required Footer
+## Decision And Handoff Footer
 
-Use this exact shape:
+When `Co dalej?` is required, use this shape:
 
 ````text
 Co dalej?

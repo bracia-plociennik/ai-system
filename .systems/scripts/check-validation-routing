@@ -29,6 +29,9 @@ for ref in \
   "$contract:Architecture, project plan, specification:artifact QA routing" \
   "$contract:Checkpoint:checkpoint routing" \
   "$contract:CI, final system verification:full routing" \
+  "$contract:Safe Local Iteration:local loop" \
+  "$contract:fix an observed failure.*retest:local retest" \
+  "$contract:Stop and seek a new decision:scope escalation boundary" \
   ".systems/ai/core/validation-profiles.md:not a default implementation command:profile separation" \
   ".systems/ai/core/command-routing.md:validation-routing\\.md:routing integration" \
   ".systems/ai/core/response-contract.md:Validation Execution Record:response integration" \

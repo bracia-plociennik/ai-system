@@ -1,0 +1,23 @@
+{
+  "source_revision": "ab6ad83",
+  "measurement": {
+    "files": {
+      "model": {"characters": 1435, "lines": 34},
+      "prompt_module": {"characters": 1590, "lines": 80},
+      "response": {"characters": 12466, "lines": 186},
+      "root_template": {"characters": 19621, "lines": 269},
+      "skill": {"characters": 13695, "lines": 261},
+      "validation": {"characters": 3507, "lines": 64}
+    },
+    "model_names_hardcoded": ["GPT-5.6 Luna High", "GPT-5.6 Sol High"],
+    "prompt_module_forbidden_override_bullets": 6,
+    "response_footer_template_lines": 35,
+    "response_requires_footer_for_all_substantive": true,
+    "root_always_read_items": 8,
+    "root_source_order_items": 26,
+    "skill_description_characters": 342,
+    "skill_requires_full_validator": true,
+    "validation_has_semantic_first_order": true
+  },
+  "agent_run_status": "completed-on-isolated-synthetic-copies"
+}

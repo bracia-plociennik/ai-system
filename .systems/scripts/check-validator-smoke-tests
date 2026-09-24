@@ -3966,6 +3966,11 @@ printf '\nOrdinary implementation must run broad validate-ai-system.\n' >> "$val
 run_must_fail "validation-routing-blocks-broad-ordinary-implementation" "$validation_routing_validator"
 mv "$validation_routing_core.bak" "$validation_routing_core"
 
+cp "$validation_routing_core" "$validation_routing_core.bak"
+perl -0pi -e 's/^## Safe Local Iteration\n.*?(?=^## |\z)//ms' "$validation_routing_core"
+run_must_fail "validation-routing-requires-local-iteration-boundary" "$validation_routing_validator"
+mv "$validation_routing_core.bak" "$validation_routing_core"
+
 model_guidance_validator="$copy_repo/.systems/scripts/check-model-selection-guidance"
 model_guidance_core="$copy_repo/.systems/ai/core/model-selection-guidance.md"
 
@@ -3983,6 +3988,11 @@ mv "$model_guidance_core.bak" "$model_guidance_core"
 cp "$model_guidance_core" "$model_guidance_core.bak"
 printf '\nModel selection may bypass QA and approvals.\n' >> "$model_guidance_core"
 run_must_fail "model-selection-guidance-blocks-authority-bypass" "$model_guidance_validator"
+mv "$model_guidance_core.bak" "$model_guidance_core"
+
+cp "$model_guidance_core" "$model_guidance_core.bak"
+perl -0pi -e 's/exact model only when its availability is known/exact model without checking availability/' "$model_guidance_core"
+run_must_fail "model-selection-guidance-requires-availability" "$model_guidance_validator"
 mv "$model_guidance_core.bak" "$model_guidance_core"
 
 cross_handoff_validator="$copy_repo/.systems/scripts/check-cross-system-upgrade-handoff"

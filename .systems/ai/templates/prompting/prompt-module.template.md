@@ -33,14 +33,7 @@ This module may:
 
 ## Forbidden Overrides
 
-This module must not:
-
-- authorize writes;
-- approve implementation;
-- approve file movement;
-- skip validation or evidence;
-- weaken privacy, risk, permissions, stop conditions, or owner approvals;
-- override `AGENTS.md`, core policy, current files, status, memory, decisions, or owner instructions.
+This advisory module cannot grant writes, approvals, or exceptions to `.systems/ai/core/prompt-composition.md`, `AGENTS.md`, core policy, current evidence, privacy, risk, permissions, validation, or stop conditions.
 
 ## Output Contract
 

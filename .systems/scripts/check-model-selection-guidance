@@ -18,10 +18,11 @@ require_ref() {
 contract=".systems/ai/core/model-selection-guidance.md"
 
 require_ref "$contract" '^# Model Selection Guidance$' "core contract"
-require_ref "$contract" 'GPT-5\.6 Luna High' "Luna option"
-require_ref "$contract" 'GPT-5\.6 Sol High' "Sol option"
-require_ref "$contract" 'bounded, reversible' "Luna classification"
-require_ref "$contract" 'security, billing, migrations, production' "Sol classification"
+require_ref "$contract" 'fast capable model' "bounded-work capability class"
+require_ref "$contract" 'workhorse or frontier model' "high-impact capability class"
+require_ref "$contract" 'security, billing, migrations, production' "critical-work classification"
+require_ref "$contract" 'exact model only when its availability is known' "availability gate"
+require_ref "$contract" 'Do not guess the current model' "current-model boundary"
 require_ref "$contract" 'advisory-only' "authority boundary"
 require_ref "$contract" 'Blocking: no' "non-blocking output"
 require_ref "$contract" 'Deadline pressure.*does not justify' "deadline boundary"
@@ -35,7 +36,7 @@ for file in \
   "README.md" \
   "HUMANS.md"
 do
-  require_ref "$file" 'model-selection-guidance\.md|Model recommendation|Luna / Sol' "model guidance integration"
+  require_ref "$file" 'model-selection-guidance\.md|Model recommendation|Model Selection' "model guidance integration"
 done
 
 for field in 'Recommended:' 'Reason:' 'Criticality:' 'Current model known:' 'Blocking: no'; do
@@ -49,7 +50,7 @@ require_ref ".systems/scripts/check-validator-smoke-tests" 'model-selection-guid
 
 unsafe_patterns=(
   'Model recommendation[^.\n]{0,100}Blocking:[[:space:]]*(yes|conditional)'
-  '(Luna|Sol|model choice|model selection)[^.\n]{0,120}(may|can|allows?|should)[^.\n]{0,100}(bypass|skip|change)[^.\n]{0,80}(risk|permissions|QA|approval|DoD)'
+  '(Luna|Sol|Astra|model choice|model selection)[^.\n]{0,120}(may|can|allows?|should)[^.\n]{0,100}(bypass|skip|change)[^.\n]{0,80}(risk|permissions|QA|approval|DoD)'
   'deadline[^.\n]{0,100}(may|can|should)[^.\n]{0,100}(lower|reduce|weaken)[^.\n]{0,80}(model|quality)'
 )
 

@@ -497,12 +497,14 @@ Zwykła implementacja, client work, PDF, dokument lub design nie wymagają broad
 
 `validate-ai-system` kończy się markerem `AI_SYSTEM_VALIDATION_RESULT`, a opcjonalne `--evidence-file` zapisuje runtime Validation Execution Record. To jest evidence wykonania skryptów `supporting-only`, nie semantic PASS ani final acceptance. Dla workflow evidence ograniczonego do tego projektu uruchom upstreamowy validator z `--project ai-system`; globalny tryb nadal pokazuje drift innych projektów.
 
-## Rekomendacja Luna / Sol
+## Model Selection
 
 Każdy nowy planning, implementation i QA scope powinien zawierać advisory recommendation:
 
-- `GPT-5.6 Luna High` dla pracy bounded, reversible i łatwo testowalnej;
-- `GPT-5.6 Sol High` dla trudnej architektury, niejednoznaczności, security, migration, production, broad integration, recovery i adversarial review.
+- dostępny szybki model dla pracy ograniczonej, odwracalnej i łatwo testowalnej;
+- dostępny workhorse lub frontier dla trudnej architektury, niejednoznaczności, security, migration, production, recovery i adversarial review.
+
+Nie zakładaj dostępności konkretnej wersji modelu. Gdy nie wiadomo, co jest dostępne, rekomenduj klasę możliwości. W zatwierdzonym lokalnym zakresie można wykonać pętlę test, poprawka, retest bez ponownego pytania po każdym kroku; nowe pliki, produkcja i działania zewnętrzne wymagają osobnej decyzji.
 
 Rekomendacja zawsze ma `Blocking: no` i nie zmienia żadnego gate.
 
