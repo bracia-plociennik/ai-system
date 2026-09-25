@@ -533,8 +533,8 @@ def candidates_from_v4_daily(path: Path, workspace: Path, labels: dict[str, list
 
 
 def candidates_from_v4_weekly(path: Path, workspace: Path, labels: dict[str, list[tuple[str, str]]]) -> list[dict[str, object]]:
-    top, properties, _ = parse_v4_frontmatter(path)
-    validate_v4_weekly(top, properties, path)
+    top, properties, body = parse_v4_frontmatter(path)
+    validate_v4_weekly(top, properties, path, body)
     week_id = str(properties["report_id"])
     items = v4_json_value(properties, "future_plan_items_json", [])
     candidates: list[dict[str, object]] = []
@@ -1193,6 +1193,15 @@ def main() -> int:
             alignment = alignment_summary(workspace, report_date)
             if alignment.get("tasknote_gate") == "blocked":
                 task_generation_gate = "unresolved red life-alignment card blocks professional TaskNote writes"
+    elif args.weekly_plan and args.write:
+        weekly_path = args.weekly_plan.resolve()
+        weekly_frontmatter = parse_frontmatter(read_text(weekly_path))
+        if weekly_frontmatter.get("index_contract") == "4":
+            top, properties, body = parse_v4_frontmatter(weekly_path)
+            validate_v4_weekly(top, properties, weekly_path, body)
+            report_date = dt.date.fromisoformat(str(properties["plan_week_start"]))
+            if alignment_summary(workspace, report_date).get("tasknote_gate") == "blocked":
+                raise SystemExit("unresolved red life-alignment card blocks professional TaskNote writes")
     if task_generation_gate:
         if is_v4_check_in and args.write:
             raise SystemExit(task_generation_gate)

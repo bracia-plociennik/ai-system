@@ -47,7 +47,7 @@ def daily_text(stamp: date, answer: str, resolution: dict | None = None) -> str:
     return frontmatter + body + "\n"
 
 
-def weekly_text(stamp: date, answer: str) -> str:
+def weekly_text(stamp: date, answer: str, items: list[dict] | None = None) -> str:
     props = {
         "index_contract": 4, "schema_version": 4, "artifact_kind": "weekly",
         "report_id": f"{stamp.isocalendar().year}-W{stamp.isocalendar().week:02d}",
@@ -56,7 +56,8 @@ def weekly_text(stamp: date, answer: str) -> str:
         "plan_week_start": stamp.isoformat(), "plan_week_end": (stamp + timedelta(days=4)).isoformat(),
         "privacy": "private-sensitive", "private_index_policy": "detailed-private",
         "review_state_json": "{}", "review_process_json": "{}", "review_outcome_json": "{}",
-        "review_review_json": "{}", "future_wig_json": "{}", "future_plan_items_json": "[]",
+        "review_review_json": "{}", "future_wig_json": "{}",
+        "future_plan_items_json": json.dumps(items or [], ensure_ascii=False),
         "daily_blocks_json": "[]", "task_generation_policy": "commitment-first-6d-v1",
         "task_generation_status": "proposal-only", "life_alignment_contract": "last-period-alignment-v1",
         "planned_week_life_alignment_answer": answer, "life_alignment_resolution_json": "{}",
@@ -106,6 +107,52 @@ def main() -> int:
             "--task-vault", str(task_vault), "--write", "--owner-approved",
         ], capture_output=True, text=True)
         assert blocked.returncode != 0 and "unresolved red life-alignment card" in blocked.stderr, blocked.stdout + blocked.stderr
+
+        weekly_workspace = workspace / "weekly-task-workspace"
+        weekly_root = weekly_workspace / "personal-ops/weekly-check-ins-v4/2026"
+        weekly_root.mkdir(parents=True)
+        weekly_vault = weekly_workspace / "vault"
+        weekly_task_dir = weekly_vault / "TaskNotes/Tasks"
+        weekly_task_dir.mkdir(parents=True)
+        monday = date(2026, 2, 2)
+        weekly_file = weekly_root / "2026-W06.md"
+        weekly_item = {
+            "id": "build-01", "stream": "build", "title": "Weekly alignment fixture",
+            "definition_of_done": "Fixture completed", "deadline": "2026-02-02T10:10",
+            "mapping": {"workspace": weekly_workspace.name},
+        }
+        weekly_file.write_text(weekly_text(monday, "yes", [weekly_item]), encoding="utf-8")
+        weekly_command = [
+            sys.executable, str(Path(__file__).with_name("propose-task-candidates")),
+            "--workspace", str(weekly_workspace), "--weekly-plan", str(weekly_file),
+            "--task-vault", str(weekly_vault),
+        ]
+        proposed = subprocess.run([*weekly_command, "--json"], capture_output=True, text=True)
+        assert proposed.returncode == 0, proposed.stdout + proposed.stderr
+        candidates = json.loads(proposed.stdout)
+        assert len(candidates) == 1 and candidates[0]["source_week_item_id"] == "build-01", candidates
+
+        invalid_weekly = weekly_workspace / "invalid-weekly.md"
+        invalid_weekly.write_text(weekly_file.read_text(encoding="utf-8").replace(WEEKLY_ALIGNMENT_QUESTION, "Other question"), encoding="utf-8")
+        rejected = subprocess.run([*weekly_command[:5], str(invalid_weekly), *weekly_command[6:], "--json"], capture_output=True, text=True)
+        assert rejected.returncode != 0 and "life alignment question missing" in rejected.stderr, rejected.stdout + rejected.stderr
+
+        written = subprocess.run([*weekly_command, "--write", "--owner-approved"], capture_output=True, text=True)
+        assert written.returncode == 0 and len(list(weekly_task_dir.glob("*.md"))) == 1, written.stdout + written.stderr
+
+        for index in range(4):
+            stamp = monday + timedelta(days=7 * index)
+            (weekly_root / f"{stamp.isocalendar().year}-W{stamp.isocalendar().week:02d}.md").write_text(
+                weekly_text(stamp, "no", [weekly_item] if index == 3 else []), encoding="utf-8"
+            )
+        red_weekly = weekly_root / "2026-W09.md"
+        blocked_weekly = subprocess.run([
+            sys.executable, str(Path(__file__).with_name("propose-task-candidates")),
+            "--workspace", str(weekly_workspace), "--weekly-plan", str(red_weekly),
+            "--task-vault", str(weekly_vault), "--write", "--owner-approved",
+        ], capture_output=True, text=True)
+        assert blocked_weekly.returncode != 0 and "unresolved red life-alignment card" in blocked_weekly.stderr, blocked_weekly.stdout + blocked_weekly.stderr
+        assert len(list(weekly_task_dir.glob("*.md"))) == 1
 
         redacted = project_index_properties(
             {"private_index_policy": "redacted", "planned_day_life_alignment_answer": "no"},
