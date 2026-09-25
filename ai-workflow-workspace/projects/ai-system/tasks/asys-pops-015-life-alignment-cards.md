@@ -2,10 +2,11 @@
 
 ## Status
 
-- Status: implementation
+- Status: done
 - Change request: `ASYS-CR-006-life-alignment-cards`
 - Owner approval: `owner-approved` in the task request
 - Cross-system impact: no
+- Final owner approval: `final-owner-yes` on `2026-09-25`; see `quality/phase-8-asys-cr-006-final-check.md`.
 
 ## Definition Of Done
 
