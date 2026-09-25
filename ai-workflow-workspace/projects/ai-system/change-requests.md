@@ -11,12 +11,14 @@ This file indexes project-local change requests for the `ai-system` project.
 | `ASYS-CR-001-compact-contracts` | `pre-final-approval` | `acceptance-gap` | `done` | `phase-fix-loop` |
 | `ASYS-CR-002-daily-check-in-v3-integrity` | `post-final-approval` | `defect` | `owner-deferred` | `new-project-iteration` |
 | `ASYS-CR-003-all-planned-work-to-6d-do` | `post-final-approval` | `follow-up-enhancement` | `in-progress` | `new-project-iteration` |
-| `ASYS-CR-005-spor-daily-weekly` | `post-final-approval` | `feature / contract evolution` | `implementation` | `new-project-iteration` |
-| `ASYS-CR-006-life-alignment-cards` | `post-final-approval` | `feature / behavioral contract` | `implementation` | `new-project-iteration` |
+| `ASYS-CR-005-spor-daily-weekly` | `post-final-approval` | `feature / contract evolution` | `in-progress` | `new-project-iteration` |
+| `ASYS-CR-006-life-alignment-cards` | `post-final-approval` | `feature / behavioral contract` | `in-progress` | `new-project-iteration` |
 
 ## Active Change Request
 
 `ASYS-CR-006-life-alignment-cards`
+
+CR-006 remains open: the follow-up product commit `1a10404` needs refreshed quality evidence before Phase 8. The prior owner approval for the original project package does not close this change request.
 
 ## Completed Change Requests
 
