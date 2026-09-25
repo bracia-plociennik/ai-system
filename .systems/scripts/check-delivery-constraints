@@ -34,6 +34,13 @@ for phrase in 'at most `1-3` questions' 'do not invent one' 'deadline pressure n
   require_ref "$contract" "$phrase" "boundary $phrase"
 done
 
+for phrase in 'Mode: micro-exempt' 'at most three files including tests' 'focused verification' 'If the scope grows' 'public API, schema, protocol, policy, routing, approval, privacy, permissions, security, migration'; do
+  require_ref "$contract" "$phrase" "micro-change boundary $phrase"
+done
+require_ref "$template" 'micro-exempt' 'micro-change template mode'
+require_ref '.systems/ai/core/task-intake.md' 'micro-change criteria' 'micro-change task intake'
+require_ref '.systems/ai/templates/root/AGENTS.template.md' 'micro-exempt' 'micro-change root routing'
+
 for integration in \
   '.systems/ai/templates/root/AGENTS.template.md:delivery-constraints.md' \
   '.systems/ai/core/task-intake.md:delivery-constraints.md' \

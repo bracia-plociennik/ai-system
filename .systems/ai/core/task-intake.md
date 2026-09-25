@@ -97,6 +97,8 @@ Resolve an existing deadline, time budget, must-have outcome, quality floor, and
 
 A missing constraint is not permission to invent one. Stop before dependent implementation unless the owner supplies the missing constraint or explicitly opts out for the current work.
 
+For a change meeting the strict micro-change criteria in `delivery-constraints.md`, record the exception instead of asking a separate deadline/timebox question. A small file count alone is insufficient; API, schema, policy, security, external effects, and cross-module changes remain on the normal route. If the scope grows, reclassify before further writes.
+
 ## Undistilled Work Reminder
 
 When a selected workspace and scope are known, inspect applicable Distillation State records from `.systems/ai/core/distillation-state.md` before switching to an unrelated implementation unit. Report unresolved counts and owner actions without blocking the new task automatically or changing any state.

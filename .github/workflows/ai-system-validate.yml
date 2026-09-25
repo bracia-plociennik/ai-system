@@ -4,7 +4,7 @@ on:
   pull_request:
   push:
     branches:
-      - ai-system
+      - main
 
 jobs:
   validate:
@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Ensure scripts are executable
         run: chmod +x .systems/scripts/*
@@ -21,4 +23,9 @@ jobs:
         run: .systems/scripts/validate-ai-system --profile full
 
       - name: Check whitespace
-        run: git diff --check
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            git diff --check "${{ github.event.pull_request.base.sha }}" HEAD
+          else
+            git diff --check HEAD^ HEAD
+          fi

@@ -109,6 +109,8 @@ When Delivery Constraints apply, report the agreed deadline/timebox, delivered a
 
 When a Distillation State record applies, report its state, derived `is_distilled` value, source/quality evidence, owner disposition, and next consumer. These fields are evidence only and do not grant writes, promotion, commit, push, or work closure.
 
+For an eligible micro-change without a state record, report `Distillation State: micro-exempt` and the reason; do not manufacture `is_distilled` or skip focused QA.
+
 ## Decision And Handoff Footer
 
 When `Co dalej?` is required, use this shape:

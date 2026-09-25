@@ -44,7 +44,7 @@ script. The evidence path must remain outside `.systems/**` and is never created
 
 `standard` runs the complete AI System validator chain except embedded `check-validator-smoke-tests`. Use it only when validation routing marks the broad chain applicable.
 
-`full` runs the complete standard chain and `check-validator-smoke-tests`. Use it after semantic current-diff review for checkpoint validation, major distillation, final system verification, CI, release confidence, upstream updates, and high-impact changes to `.systems/ai/core/**`, templates, validators, validation/update scripts, root agent template, `README.md`, or `HUMANS.md`.
+`full` runs the complete standard chain and `check-validator-smoke-tests`. Use it after semantic current-diff review for checkpoint validation, major distillation, final system verification, CI, release confidence, upstream updates, and high-impact system changes. Classify impact by changed behavior, risk, and cross-contract reach, not by a file path alone. A local typo in a core document is not automatically high-impact; a small-looking approval, privacy, schema, security, or routing change can be.
 
 CI and `.systems/scripts/update-from-upstream` must call `.systems/scripts/validate-ai-system --profile full` explicitly.
 
@@ -52,9 +52,9 @@ If `AI_SYSTEM_SKIP_SMOKE_TESTS=1` is used with `--profile full`, the result is n
 
 ## Scoped And Fast
 
-`scoped` runs the fast base checks plus explicitly named validators. Use it after semantic artifact review for targeted validation. It must not be described as a quality verdict or as sufficient before commit or push.
+`scoped` runs shared diff/privacy checks plus explicitly named validators once each. It does not automatically run the entire `fast` bundle. Use it after semantic artifact review for targeted validation. It must not be described as a quality verdict or as sufficient before commit or push.
 
-`fast` runs only cheap contract sanity checks. Do not run it automatically during ordinary implementation. It is not a quality verdict.
+`fast` runs diff, privacy-boundary, and required-artifact sanity checks. Do not run it automatically during ordinary implementation. It is not a quality verdict. The privacy-boundary check is path-oriented; it is not a full content or secret scan.
 
 ## Personal Ops Targeted Default
 

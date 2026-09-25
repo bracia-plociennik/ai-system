@@ -75,6 +75,16 @@ require_ref "$validate" 'if \[\[ "\$profile" == "full" && "\$smoke_skipped" != "
 require_ref "$validate" 'if \[\[ "\$smoke_skipped" == "1" \]\]' "skipped-smoke non-final completion gate"
 require_ref "$validate" '--profile scoped requires --checks' "scoped requires explicit checks"
 require_ref "$validate" '--checks is valid only with --profile scoped' "checks scoped-only"
+require_ref "$validate" 'run_shared_checks' 'shared diff/privacy checks'
+require_ref "$validate" 'unique_checks' 'scoped validator deduplication'
+require_ref "$contract" 'Classify impact by changed behavior, risk, and cross-contract reach' 'risk-based full routing'
+require_ref '.github/workflows/ai-system-validate.yml' '      - main' 'full CI on main'
+require_ref '.systems/scripts/check-validator-smoke-tests' '--suite' 'domain smoke suite selection'
+require_ref '.systems/scripts/check-validator-smoke-tests' 'git ls-files -z -- .systems .github README.md HUMANS.md .gitignore' 'tracked product-only fixture source'
+if rg -q -- 'git ls-files -co --exclude-standard' "$repo_root/.systems/scripts/check-validator-smoke-tests"; then
+  echo "Smoke fixture must not copy arbitrary untracked files"
+  fail=1
+fi
 
 for file in README.md HUMANS.md .systems/ai/core/operating-model.md .systems/ai/core/command-routing.md .systems/ai/core/contract-compliance.md .systems/ai/templates/root/AGENTS.template.md; do
   require_ref "$file" 'validation-profiles\.md|Validation Profiles|validation profile' "$file profile guidance"

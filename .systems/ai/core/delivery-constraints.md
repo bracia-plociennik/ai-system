@@ -12,6 +12,8 @@ Before new implementation work that creates or changes system, project, client, 
 
 Group missing delivery decisions into at most `1-3` questions. Do not ask redundant versions of deadline, duration, and time budget. Read-only analysis, status requests, planning needed to discover constraints, and continuation covered by active constraints do not require a new prompt.
 
+An eligible micro-change may omit a separate deadline/timebox question without treating silence as an owner opt-out. It must be one bounded, reversible local change touching at most three files including tests, with a clear target, approval, and focused verification. It must not change a public API, schema, protocol, policy, routing, approval, privacy, permissions, security, migration, client or production state, external effects, dependencies, or cross-module behavior. Record `Mode: micro-exempt` and the reason in the work response. Honor any deadline or timebox the owner did provide. If the scope grows beyond these limits, stop before further writes, resolve the normal Delivery Constraints, and reclassify the entire work unit.
+
 If the owner gives no deadline or timebox, do not invent one. Record `Mode: not-set` and ask the nearest material question before dependent implementation. An explicit opt-out is scoped to the current work unless the owner says otherwise.
 
 ## Delivery Constraints Block
@@ -20,7 +22,7 @@ Implementation-capable plans and work artifacts use:
 
 ```text
 Delivery Constraints
-- Mode: <deadline-and-timebox|deadline-only|timebox-only|owner-opt-out|not-set>
+- Mode: <deadline-and-timebox|deadline-only|timebox-only|owner-opt-out|micro-exempt|not-set>
 - Deadline: <timestamp|none>
 - Timezone: <IANA timezone|none>
 - Time budget: <duration|none>

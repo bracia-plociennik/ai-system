@@ -50,7 +50,10 @@ contract=".systems/ai/core/distillation-state.md"
 template=".systems/ai/templates/capture/distillation-state.template.md"
 
 require_ref "$contract" '^# Distillation State$' 'core contract'
-require_ref "$contract" 'Every implementation-class write must create or update' 'mandatory producer rule'
+require_ref "$contract" 'Every implementation-class write except an eligible micro-change must create or update' 'non-exempt producer rule'
+require_ref "$contract" 'Distillation State: micro-exempt' 'response-only micro-change disposition'
+require_ref "$contract" 'create a `pending-quality` record for the entire work unit before further writes' 'scope-growth transition'
+require_ref '.systems/ai/templates/root/AGENTS.template.md' 'Distillation State: micro-exempt' 'micro-change root routing'
 require_ref "$contract" '`is_distilled` is compatibility output only' 'derived boolean rule'
 require_ref "$contract" 'Dreaming reports counts by state' 'Dreaming queue counts'
 require_ref "$contract" 'does not change state, create distillation' 'advisory Dreaming boundary'

@@ -8,7 +8,9 @@ Use one state record for a coherent implementation unit. List the resulting arti
 
 ## State Record
 
-Every implementation-class write must create or update a scoped state record before quality closure. The recognized approval for that implementation includes its state metadata record in the canonical nearest-owner namespace; no second approval is required for the metadata record itself.
+Every implementation-class write except an eligible micro-change must create or update a scoped state record before quality closure. The recognized approval for that implementation includes its state metadata record in the canonical nearest-owner namespace; no second approval is required for the metadata record itself.
+
+The micro-change exception uses the exact eligibility limits in `delivery-constraints.md`: one bounded, reversible local change in at most three files including tests, with no API, schema, protocol, policy, routing, approval, privacy, permissions, security, migration, client or production state, external effect, dependency, or cross-module change. It requires focused QA and an explicit `Distillation State: micro-exempt` disposition with reason in the work response, but no per-work state file. Do not emit a synthetic `is_distilled` value for an absent record. If scope expands, create a `pending-quality` record for the entire work unit before further writes. Reusable knowledge discovered during a micro-change still follows the normal Knowledge Capture Gate.
 
 ```text
 Distillation State
@@ -51,7 +53,7 @@ Normal transitions are `pending-quality -> ready`, `pending-quality -> not-appli
 
 ## Producers And Consumers
 
-- The first implementation-class write creates or updates `pending-quality`.
+- The first non-exempt implementation-class write creates or updates `pending-quality`.
 - Quality closure moves the record to `ready` or justified `not-applicable`.
 - An accepted distillation moves it to `completed` and records the artifact path.
 - Task intake reports unresolved records for the selected scope before unrelated new implementation.

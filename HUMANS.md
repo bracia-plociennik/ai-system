@@ -453,7 +453,7 @@ The gate is advisory-only. It requires a decision, not automatic writes. Durable
 
 ## Delivery Constraints
 
-Before implementation or client delivery that creates files, provide a deadline/timebox and protected outcome. AI System should ask only when these are missing:
+Normally, before implementation or client delivery that creates files, provide a deadline/timebox and protected outcome. AI System should ask only when these are missing:
 
 ```text
 Deadline: 2026-07-20 EOD Europe/Warsaw. Time budget: 6 hours. Must-have: <result>. Cut stretch first; keep the agreed QA floor.
@@ -461,7 +461,11 @@ Deadline: 2026-07-20 EOD Europe/Warsaw. Time budget: 6 hours. Must-have: <result
 
 Use `bez deadline'u` or `no timebox` only as a scoped opt-out. Deadline pressure does not weaken QA, privacy, evidence, approvals, or stop conditions.
 
+A single bounded, reversible local micro-change touching at most three files including tests may use `Mode: micro-exempt` without a separate deadline/timebox question. API, schema, policy, routing, approvals, privacy, security, migration, dependencies, cross-module changes, and external effects stay on the normal route. Focused QA and owner approval still apply; scope growth requires reclassification before further writes.
+
 ## Distillation State
+
+Eligible micro-changes report `Distillation State: micro-exempt` with a reason in the response and do not create a per-work state file. All other implementation units retain the nearest-owner state record. Reusable learnings still follow the Knowledge Capture Gate.
 
 Implementation work stores one repo-safe state record under the nearest `capture-state/` namespace. `pending-quality` means QA is incomplete, `ready` means distillation is recommended, and `completed` requires a linked accepted distillation. The derived `is_distilled` value is `true` only for `completed`.
 
@@ -629,3 +633,5 @@ Najpierw wykonaj semantic QA, findings-first review i product checks. Jeśli AI 
 ```
 
 Wszystkie profile dostarczają tylko supporting evidence. PASS wymaga pełnego semantic/product evidence. Skipped checks potrzebują reason, impact i residual risk.
+
+`fast` is limited to diff, path-oriented privacy, and required-artifact checks. `scoped --checks` runs only shared diff/privacy checks plus unique selected validators. Use risk and behavioral scope, not file path alone, to classify a high-impact change. CI runs `full` for PRs and pushes to `main`.

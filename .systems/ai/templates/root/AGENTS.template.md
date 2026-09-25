@@ -53,11 +53,11 @@ The response or artifact must identify:
 
 Task intake does not grant write permission.
 
-Before implementation-class writes, apply `.systems/ai/core/delivery-constraints.md` to resolve constraints from the owner request or accepted plan. Ask only for missing deadline/time budget, must-have, quality floor, cutline, or overrun decisions; never repeat already-resolved questions or invent a deadline.
+Before implementation-class writes, apply `.systems/ai/core/delivery-constraints.md` to resolve constraints from the owner request or accepted plan. Ask only for missing deadline/time budget, must-have, quality floor, cutline, or overrun decisions; never repeat already-resolved questions or invent a deadline. A strictly eligible, reversible micro-change may report `Mode: micro-exempt` instead of asking a separate deadline/timebox question; reclassify if scope expands.
 
 For each new planning, implementation, or QA scope, report the non-blocking Model recommendation from `.systems/ai/core/model-selection-guidance.md`.
 
-Every approved implementation work unit creates or updates one nearest-owner Distillation State record under `.systems/ai/core/distillation-state.md`. Track artifact paths there instead of adding `is_distilled` to source files or managed repositories.
+Every approved non-exempt implementation work unit creates or updates one nearest-owner Distillation State record under `.systems/ai/core/distillation-state.md`. Eligible micro-changes report `Distillation State: micro-exempt` and the reason in the response without a per-work file. Track artifact paths in state records instead of adding `is_distilled` to source files or managed repositories.
 
 ## Write Conditions
 

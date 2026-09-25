@@ -1,14 +1,44 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# weekly-planning smoke coverage is kept alongside the existing task/workspace fixtures.
+# Each suite uses an isolated copy of tracked product files. Run all suites for full validation.
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+suite="all"
+extra_product_files=""
+while [[ "$#" -gt 0 ]]; do
+  case "$1" in
+    --suite)
+      [[ "$#" -ge 2 ]] || { echo "Missing smoke suite" >&2; exit 2; }
+      suite="$2"
+      shift 2
+      ;;
+    --extra-product-file)
+      [[ "$#" -ge 2 ]] || { echo "Missing extra product file" >&2; exit 2; }
+      path="$2"
+      case "$path" in .systems/*|.github/*) ;; *) echo "Extra file must be under .systems/ or .github/: $path" >&2; exit 2 ;; esac
+      [[ "$path" != *[[:space:]]* && "$path" != *".."* && "$path" != *".env"* && "$path" != *"private"* && "$path" != *"secret"* ]] || { echo "Unsafe extra product path: $path" >&2; exit 2; }
+      case "$path" in *.pem|*.key|*.p12|*.pfx) echo "Unsafe extra product extension: $path" >&2; exit 2 ;; esac
+      [[ -f "$repo_root/$path" && ! -L "$repo_root/$path" ]] || { echo "Missing or linked extra product file: $path" >&2; exit 2; }
+      resolved_parent="$(cd -P "$(dirname "$repo_root/$path")" && pwd -P)"
+      [[ "$resolved_parent" == "$repo_root/.systems" || "$resolved_parent" == "$repo_root/.systems/"* || "$resolved_parent" == "$repo_root/.github" || "$resolved_parent" == "$repo_root/.github/"* ]] || { echo "Extra product path escapes repository: $path" >&2; exit 2; }
+      extra_product_files+="$path"$'\n'
+      shift 2
+      ;;
+    *) echo "Usage: check-validator-smoke-tests [--suite core|skills|workspace|personal-ops|tasks|dreaming|quality|all] [--extra-product-file .systems/path]" >&2; exit 2 ;;
+  esac
+done
+case "$suite" in
+  core|skills|workspace|personal-ops|tasks|dreaming|quality|all) ;;
+  *) echo "Unknown smoke suite: $suite" >&2; exit 2 ;;
+esac
 tmp="$(mktemp -d "${TMPDIR:-/tmp}/ai-system-validator-smoke.XXXXXX")"
 copy_repo="$tmp/repo"
 
 cleanup() {
+  local rc=$?
   rm -rf "$tmp"
+  exit "$rc"
 }
 
 trap cleanup EXIT
@@ -18,11 +48,20 @@ mkdir -p "$copy_repo"
 (
   cd "$repo_root"
   while IFS= read -r -d '' path; do
-    [[ -e "$path" ]] || continue
+    [[ -f "$path" && ! -L "$path" ]] || { echo "Unsafe or missing smoke source: $path" >&2; exit 1; }
+    source_parent="$(cd -P "$(dirname "$path")" && pwd -P)"
+    [[ "$source_parent" == "$repo_root/.systems" || "$source_parent" == "$repo_root/.systems/"* || "$source_parent" == "$repo_root/.github" || "$source_parent" == "$repo_root/.github/"* || "$source_parent" == "$repo_root" ]] || { echo "Smoke source escapes product root: $path" >&2; exit 1; }
     mkdir -p "$copy_repo/$(dirname "$path")"
     cp -p "$path" "$copy_repo/$path"
-  done < <(git ls-files -co --exclude-standard -z)
+  done < <(git ls-files -z -- .systems .github README.md HUMANS.md .gitignore)
 )
+while IFS= read -r path; do
+  [[ -n "$path" ]] || continue
+  mkdir -p "$copy_repo/$(dirname "$path")"
+  cp -p "$repo_root/$path" "$copy_repo/$path"
+done <<< "$extra_product_files"
+
+(cd "$copy_repo" && git init -q)
 
 run_must_fail() {
   local name="$1"
@@ -60,6 +99,7 @@ run_must_pass_capture() {
   fi
 }
 
+if [[ "$suite" == "all" || "$suite" == "core" ]]; then
 validator="$copy_repo/.systems/scripts/check-prompt-composition"
 
 run_must_pass "prompt-composition-baseline" "$validator"
@@ -419,7 +459,9 @@ run_must_fail "project-state-detects-runtime-files-in-project-repo" "$project_st
 rm "$project_state_scan_workspace/projects/polluted-repo/status.md" "$project_state_scan_workspace/projects/polluted-repo/memory.md"
 rm -rf "$project_state_scan_workspace/projects/polluted-repo/checkpoints"
 run_must_pass "project-state-clean-project-repos-pass" "$project_state_validator" --workspace "$project_state_scan_workspace"
+fi
 
+if [[ "$suite" == "all" || "$suite" == "skills" ]]; then
 system_skills_validator="$copy_repo/.systems/scripts/check-system-skills"
 naming_validator="$copy_repo/.systems/scripts/check-naming"
 
@@ -848,6 +890,9 @@ JSON
 run_must_fail "system-skills-run-eval-blocks-config-path-traversal" python3 "$copy_repo/.systems/ai/skills/skill-creator/scripts/run_eval.py" "$tmp/skill-run-eval-config-path-traversal.json" --output-dir "$tmp/run-eval-config-path-traversal"
 test ! -e "$tmp/run-eval-config-path-traversal" || { echo "run_eval created output for invalid configuration"; exit 1; }
 
+fi
+
+if [[ "$suite" == "all" || "$suite" == "workspace" ]]; then
 update_workspace_script="$copy_repo/.systems/scripts/update-workspace"
 update_workspace_validator="$copy_repo/.systems/scripts/check-update-workspace"
 
@@ -1208,6 +1253,9 @@ mv "$tmp/external-export-no-checkpoint-decision.md" "$copy_repo/.systems/ai/temp
 run_must_fail "external-export-import-workflow-template-missing-checkpoint-decision" "$external_export_validator"
 cp "$external_export_checklist_template_backup" "$copy_repo/.systems/ai/templates/workspace/dump/external-import-checklist.template.md"
 
+fi
+
+if [[ "$suite" == "all" || "$suite" == "personal-ops" ]]; then
 personal_ops_validator="$copy_repo/.systems/scripts/check-personal-ops"
 notion_mapper="$copy_repo/.systems/scripts/map-notion-check-ins"
 legacy_sync="$copy_repo/.systems/scripts/sync-personal-ops-check-ins"
@@ -2281,6 +2329,9 @@ test ! -f "$legacy_v3_workspace/personal-ops/indexes/check-ins.csv" || { echo "H
 
 fi
 
+fi
+
+if [[ "$suite" == "all" || "$suite" == "tasks" ]]; then
 task_candidate_script="$copy_repo/.systems/scripts/propose-task-candidates"
 
 task_management_validator="$copy_repo/.systems/scripts/check-task-management"
@@ -2848,6 +2899,9 @@ MD
 run_must_fail "task-management-unsafe-auto-write-wording" "$task_management_validator"
 rm "$copy_repo/.systems/ai/core/task-management-unsafe-smoke.md"
 
+fi
+
+if [[ "$suite" == "all" || "$suite" == "dreaming" ]]; then
 dreaming_validator="$copy_repo/.systems/scripts/check-dreaming-mode"
 dreaming_policy="$copy_repo/.systems/ai/core/dreaming-mode.md"
 dreaming_template="$copy_repo/.systems/ai/templates/dreaming/dream-report.template.md"
@@ -3810,6 +3864,13 @@ test -f "$task_update_workspace/tasks/weekly-plans/README.md" || { echo "update-
 test -f "$task_update_workspace/checkpoints/README.md" || { echo "update-workspace did not create checkpoints README"; exit 1; }
 test -f "$task_update_workspace/checkpoints/blocks/README.md" || { echo "update-workspace did not create block checkpoints README"; exit 1; }
 
+fi
+
+if [[ "$suite" == "all" || "$suite" == "quality" ]]; then
+if [[ "$suite" == "quality" ]]; then
+  init_target="$tmp/quality-init-workspace"
+  run_must_pass "quality-init-workspace" "$copy_repo/.systems/scripts/init-workspace" --workspace "$init_target" --workspace-id smoke --workspace-profile primary-entity
+fi
 delivery_validator="$copy_repo/.systems/scripts/check-delivery-constraints"
 distillation_state_validator="$copy_repo/.systems/scripts/check-distillation-state"
 
@@ -3825,6 +3886,11 @@ perl -0pi -e 's/at most `1-3` questions/at most several questions/' "$copy_repo/
 run_must_fail "delivery-constraints-missing-question-limit" "$delivery_validator"
 mv "$copy_repo/.systems/ai/core/delivery-constraints.md.bak" "$copy_repo/.systems/ai/core/delivery-constraints.md"
 
+cp "$copy_repo/.systems/ai/core/delivery-constraints.md" "$copy_repo/.systems/ai/core/delivery-constraints.md.bak"
+perl -0pi -e 's/Mode: micro-exempt/Mode: not-set/' "$copy_repo/.systems/ai/core/delivery-constraints.md"
+run_must_fail "delivery-constraints-requires-bounded-micro-exception" "$delivery_validator"
+mv "$copy_repo/.systems/ai/core/delivery-constraints.md.bak" "$copy_repo/.systems/ai/core/delivery-constraints.md"
+
 cat > "$copy_repo/.systems/ai/core/delivery-constraints-unsafe-smoke.md" <<'MD'
 # Unsafe Deadline
 
@@ -3836,6 +3902,11 @@ rm "$copy_repo/.systems/ai/core/delivery-constraints-unsafe-smoke.md"
 mv "$copy_repo/.systems/ai/templates/capture/distillation-state.template.md" "$copy_repo/.systems/ai/templates/capture/distillation-state.template.md.bak"
 run_must_fail "distillation-state-missing-template" "$distillation_state_validator"
 mv "$copy_repo/.systems/ai/templates/capture/distillation-state.template.md.bak" "$copy_repo/.systems/ai/templates/capture/distillation-state.template.md"
+
+cp "$copy_repo/.systems/ai/core/distillation-state.md" "$copy_repo/.systems/ai/core/distillation-state.md.bak"
+perl -0pi -e 's/Distillation State: micro-exempt/Distillation State: not-applicable/' "$copy_repo/.systems/ai/core/distillation-state.md"
+run_must_fail "distillation-state-requires-response-disposition" "$distillation_state_validator"
+mv "$copy_repo/.systems/ai/core/distillation-state.md.bak" "$copy_repo/.systems/ai/core/distillation-state.md"
 
 distillation_workspace="$tmp/distillation-state-workspace"
 mkdir -p "$distillation_workspace/capture-state" "$distillation_workspace/projects"
@@ -3900,6 +3971,20 @@ run_must_pass "validation-profile-fast-explain" "$validation_profiles_script" --
 run_must_pass "validation-profile-scoped-check" "$validation_profiles_script" --profile scoped --checks check-validation-profiles --explain
 run_must_fail "validation-profile-scoped-requires-checks" "$validation_profiles_script" --profile scoped
 
+run_must_pass_capture "validation-profile-fast-lean" "$tmp/validation-profile-fast-lean.out" "$validation_profiles_script" --profile fast --explain
+test "$(grep -c '^+ .*/check-' "$tmp/validation-profile-fast-lean.out")" = 2 || { echo "Fast profile ran more than two shared validators"; exit 1; }
+run_must_pass_capture "validation-profile-scoped-dedupes" "$tmp/validation-profile-scoped-dedupes.out" "$validation_profiles_script" --profile scoped --checks check-validation-profiles,check-validation-profiles --explain
+test "$(grep -c '^+ .*/check-validation-profiles$' "$tmp/validation-profile-scoped-dedupes.out")" = 1 || { echo "Scoped profile repeated a selected validator"; exit 1; }
+test "$(grep -c '^+ .*/check-' "$tmp/validation-profile-scoped-dedupes.out")" = 2 || { echo "Scoped profile ran unexpected validators"; exit 1; }
+run_must_pass_capture "validation-profile-scoped-shared-only" "$tmp/validation-profile-scoped-shared-only.out" "$validation_profiles_script" --profile scoped --checks check-privacy-boundary --explain
+test "$(grep -c '^+ .*/check-' "$tmp/validation-profile-scoped-shared-only.out")" = 1 || { echo "Scoped profile repeated privacy check"; exit 1; }
+run_must_fail "validation-profile-invalid-scoped-name" "$validation_profiles_script" --profile scoped --checks check-missing
+run_must_fail "validation-profile-trailing-scoped-comma" "$validation_profiles_script" --profile scoped --checks check-validation-profiles,
+run_must_fail "validation-profile-invalid-suite" "$copy_repo/.systems/scripts/check-validator-smoke-tests" --suite missing
+run_must_fail "validation-profile-smoke-rejects-runtime-extra" "$copy_repo/.systems/scripts/check-validator-smoke-tests" --suite core --extra-product-file ../runtime.md
+run_must_fail "validation-profile-smoke-rejects-secret-extra" "$copy_repo/.systems/scripts/check-validator-smoke-tests" --suite core --extra-product-file .systems/.env
+run_must_fail "validation-profile-smoke-rejects-missing-extra" "$copy_repo/.systems/scripts/check-validator-smoke-tests" --suite core --extra-product-file .systems/ai/core/not-present.md
+
 validation_profiles_skip_out="$tmp/validation-profile-full-skip-smoke.out"
 if ! (cd "$copy_repo" && env AI_SYSTEM_SKIP_SMOKE_TESTS=1 "$validation_profiles_script" --profile full) >"$validation_profiles_skip_out" 2>&1; then
   echo "Smoke test failed: validation-profile-full-skip-smoke should have passed"
@@ -3920,6 +4005,11 @@ mv "$copy_repo/.systems/scripts/validate-ai-system.bak" "$copy_repo/.systems/scr
 cp "$copy_repo/.github/workflows/ai-system-validate.yml" "$copy_repo/.github/workflows/ai-system-validate.yml.bak"
 perl -0pi -e 's/validate-ai-system --profile full/validate-ai-system/' "$copy_repo/.github/workflows/ai-system-validate.yml"
 run_must_fail "validation-profiles-require-ci-explicit-full" "$validation_profiles_validator"
+mv "$copy_repo/.github/workflows/ai-system-validate.yml.bak" "$copy_repo/.github/workflows/ai-system-validate.yml"
+
+cp "$copy_repo/.github/workflows/ai-system-validate.yml" "$copy_repo/.github/workflows/ai-system-validate.yml.bak"
+perl -0pi -e 's/      - main/      - ai-system/' "$copy_repo/.github/workflows/ai-system-validate.yml"
+run_must_fail "validation-profiles-require-main-push" "$validation_profiles_validator"
 mv "$copy_repo/.github/workflows/ai-system-validate.yml.bak" "$copy_repo/.github/workflows/ai-system-validate.yml"
 
 cp "$copy_repo/.systems/scripts/validate-ai-system" "$copy_repo/.systems/scripts/validate-ai-system.bak"
@@ -4126,4 +4216,6 @@ MD
 run_must_fail "cross-system-upgrade-handoff-blocks-private-marker" "$cross_handoff_validator" --workspace "$cross_handoff_workspace" --record "$cross_handoff_record"
 mv "$cross_handoff_file.bak" "$cross_handoff_file"
 
-echo "Validator smoke tests passed."
+fi
+
+echo "Validator smoke suite passed: $suite"

@@ -4,7 +4,7 @@
 
 `personal-ops/` stores private owner operational records for planning, review, and self-management. It is not workspace memory by default.
 
-The only active daily check-in contract is Properties + Raw Audit V3. Historical V2 Markdown may be imported once into an immutable local V3 legacy snapshot, but V2 is not an active intake, sync, or importer route.
+Native Properties + Raw Audit V3 and SPOR Daily V4 are active in their separate canonical paths. Historical V2 Markdown may be imported once into an immutable local V3 legacy snapshot, but V2 is not an active intake, sync, or importer route.
 
 ## Boundary And Privacy
 

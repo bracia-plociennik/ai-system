@@ -19,7 +19,7 @@ Usage:
 Profiles:
   standard  Complete AI System validator chain without smoke tests. Default daily validator.
   full      Complete validation, including check-validator-smoke-tests.
-  scoped    Fast base checks plus explicit --checks validators. Iteration only.
+  scoped    Shared diff/privacy checks plus explicit, deduplicated --checks validators. Iteration only.
   fast      Cheap sanity checks. Iteration only.
 
 The final AI_SYSTEM_VALIDATION_RESULT marker is script evidence only; it is not a semantic PASS.
@@ -147,6 +147,11 @@ if [[ "$profile" == "scoped" && -z "$checks" ]]; then
   exit 1
 fi
 
+if [[ "$profile" == "scoped" && ( "$checks" == ,* || "$checks" == *, || "$checks" == *,,* ) ]]; then
+  echo "--checks must be a non-empty comma-separated list of check names"
+  exit 1
+fi
+
 run_cmd() {
   current_check="$*"
   if [[ "$explain" == "1" ]]; then
@@ -187,24 +192,17 @@ explain_profile() {
 }
 
 run_fast_checks() {
+  run_shared_checks
+  run_cmd "$script_dir/check-required-artifacts"
+}
+
+run_shared_checks() {
   if git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     run_cmd git -C "$repo_root" diff --check
   elif [[ "$explain" == "1" ]]; then
     echo "+ git diff --check (skipped: not a git repository)"
   fi
-  run_cmd "$script_dir/check-required-artifacts"
-  run_cmd "$script_dir/check-naming"
   run_cmd "$script_dir/check-privacy-boundary"
-  run_cmd "$script_dir/check-contract-compliance"
-  run_cmd "$script_dir/check-delivery-constraints"
-  run_cmd "$script_dir/check-distillation-state"
-  run_cmd "$script_dir/check-owner-approval"
-  run_cmd "$script_dir/check-validation-routing"
-  run_cmd "$script_dir/check-model-selection-guidance"
-  run_cmd "$script_dir/check-weekly-planning"
-  run_cmd "$script_dir/check-personal-ops-v4"
-  run_cmd "$script_dir/check-weekly-planning-v4"
-  run_cmd "$script_dir/check-block-checkpoint"
 }
 
 run_named_check() {
@@ -264,11 +262,20 @@ if [[ "$profile" == "fast" ]]; then
 fi
 
 if [[ "$profile" == "scoped" ]]; then
-  run_fast_checks
   IFS=',' read -r -a selected_checks <<< "$checks"
+  unique_checks=""
+  seen_checks=","
   for check_name in "${selected_checks[@]}"; do
     check_name="${check_name//[[:space:]]/}"
     [[ -n "$check_name" ]] || { echo "Empty scoped check name in --checks"; exit 1; }
+    [[ "$check_name" =~ ^check-[a-z0-9-]+$ && -x "$script_dir/$check_name" ]] || { echo "Unknown scoped check: $check_name"; exit 1; }
+    [[ "$check_name" == "check-privacy-boundary" ]] && continue
+    [[ "$seen_checks" == *",$check_name,"* ]] && continue
+    seen_checks+="$check_name,"
+    unique_checks+="$check_name "
+  done
+  run_shared_checks
+  for check_name in $unique_checks; do
     run_named_check "$check_name"
   done
   exit 0

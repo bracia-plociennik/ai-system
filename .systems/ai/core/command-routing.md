@@ -16,7 +16,7 @@ Before planning or implementing new work, apply `.systems/ai/core/task-intake.md
 
 For every new planning, implementation, or QA scope, append the advisory Model recommendation from `.systems/ai/core/model-selection-guidance.md`. It is non-blocking and changes no gate.
 
-Before new implementation-class writes, apply `.systems/ai/core/delivery-constraints.md`. Ask only for missing deadline/time budget, must-have, quality-floor, cutline, or overrun decisions; do not repeat constraints already present in the owner request or accepted plan.
+Before new implementation-class writes, apply `.systems/ai/core/delivery-constraints.md`. Ask only for missing deadline/time budget, must-have, quality-floor, cutline, or overrun decisions; do not repeat constraints already present in the owner request or accepted plan. Strictly eligible micro-changes may use `Mode: micro-exempt`; scope expansion returns to the normal gate before further writes.
 
 If the request is only orientation or status, use guide mode.
 
@@ -50,7 +50,7 @@ Task candidates from check-ins or Dream Reports route through `.systems/scripts/
 
 Dreaming Mode requests route through `.systems/ai/core/dreaming-mode.md`. Select exactly one workspace first. The default variant is `workspace-artifacts-only` and writes only an advisory Dream Report under `dreams/runs/**`. Before reading listed sources, validate the draft Source Inventory through `check-dreaming-mode --preflight-report` and the workspace-local narrow-only scope; final validation rechecks it. `full-repo` requires an explicit owner-provided project or source path. Historical reports that predate the current structure may be admitted only through `<workspace>/dreams/legacy-dream-reports-v1.md` with an exact workspace-relative path and SHA-256; this bypasses structure only, never privacy or secret scanning. Dreaming Mode must not automatically promote findings into memory, project-state, System Insights, External Memory, skills, status, personal-ops, source files, commits, GitHub mirrors, or scheduler automation.
 
-Implementation capture state routes through `.systems/ai/core/distillation-state.md`. Create or update one nearest-owner state record for each approved implementation work unit. Dreaming may report an Undistilled Work Queue with counts, states, safe paths, and proposed distillation actions, but must not distill or change state automatically.
+Implementation capture state routes through `.systems/ai/core/distillation-state.md`. Create or update one nearest-owner state record for each approved non-exempt implementation work unit. An eligible micro-change reports `Distillation State: micro-exempt` with a reason and no state file. Dreaming may report an Undistilled Work Queue with counts, states, safe paths, and proposed distillation actions, but must not distill or change state automatically.
 
 Before `AI_SYSTEM_WORK_CLOSURE`, apply `.systems/ai/core/contract-compliance.md`. The gate is advisory-only and requires an explicit `Knowledge capture: required|not-required` decision before final closure, handoff, accepted change, commit-ready or push-ready product-development work, or switching to another work unit.
 

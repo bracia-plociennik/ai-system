@@ -120,7 +120,7 @@ Do not store client names, people names, domains, secrets, contract details, amo
 
 For implementation-class work, closure must compare delivered and deferred scope with the active Delivery Constraints and confirm that deadline pressure did not weaken DoD, QA, privacy, risk, permissions, evidence, or approvals.
 
-Closure must also report the scoped Distillation State record and its derived `is_distilled` value. Quality closure moves `pending-quality` to `ready` or justified `not-applicable`; `completed` requires a linked accepted distillation. An unresolved state is visible evidence, not automatic permission to write capture or a reason to claim closure without required quality evidence.
+For non-exempt implementation, closure must also report the scoped Distillation State record and its derived `is_distilled` value. An eligible micro-change instead reports `Distillation State: micro-exempt` with the reason and no synthetic derived value. Quality closure moves `pending-quality` to `ready` or justified `not-applicable`; `completed` requires a linked accepted distillation. An unresolved state is visible evidence, not automatic permission to write capture or a reason to claim closure without required quality evidence.
 
 ## Mode-Specific Defaults
 

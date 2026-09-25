@@ -151,7 +151,9 @@ Durable capture still needs the correct workspace target, privacy-safe content, 
 
 Before new implementation work creates or changes system, project, client, or owned-asset artifacts, AI System resolves deadline or timebox, must-have outcome, quality floor, cutline, and overrun checkpoint. It reuses constraints already present in the owner request or accepted plan and asks only for material missing decisions. Explicit `bez deadline'u` or `no timebox` opt-out is scoped to the current work.
 
-Every implementation work unit has one nearest-owner `capture-state/<work-id>.md` record. The state moves from `pending-quality` to `ready`, `completed`, or an explicit disposition. `is_distilled` is a derived compatibility value, not a field injected into source artifacts.
+One bounded, reversible local micro-change in at most three files (including tests) may use `Mode: micro-exempt` without a separate deadline/timebox question. The exception excludes API, schema, policy, routing, approval, privacy, security, migration, dependencies, cross-module changes, and external effects; focused QA and existing approvals still apply. If scope expands, resolve normal constraints before further writes.
+
+Every non-exempt implementation work unit has one nearest-owner `capture-state/<work-id>.md` record. An eligible micro-change reports `Distillation State: micro-exempt` with a reason instead of creating a per-work file. The state moves from `pending-quality` to `ready`, `completed`, or an explicit disposition. `is_distilled` is a derived compatibility value, not a field injected into source artifacts.
 
 Dreaming reports unresolved state counts and privacy-safe paths in an Undistilled Work Queue. It proposes distillation but does not execute it.
 
@@ -168,6 +170,8 @@ Capture does not mark PASS, run final check, close a project, update status from
 Use `.systems/ai/core/validation-routing.md` before `.systems/ai/core/validation-profiles.md`. Review owner intent, scope, DoD, the accepted plan/spec, findings, regressions, failure paths, and product evidence before applicable `.systems/scripts/**`.
 
 AI System scripts are supporting-only. Green scripts do not equal PASS. Ordinary implementation, client work, PDF, document, and design work do not run broad `validate-ai-system`; targeted or full profiles apply only in the matching artifact QA, checkpoint, CI, upstream-update, or final system-verification route.
+
+Local `fast` runs diff, path-oriented privacy, and required-artifact sanity checks. `scoped --checks` runs shared diff/privacy checks and only the explicitly selected validators, once each. High-impact changes are classified by behavior and risk, not simply by touched paths. CI runs `full` for pull requests and pushes to `main`.
 
 Within approved local scope, use a focused test, fix an observed failure, and retest without requesting approval for each safe iteration. Scope expansion and external effects still stop for a new decision. The generated root contract uses selective document routing rather than a universal full-contract read.
 
