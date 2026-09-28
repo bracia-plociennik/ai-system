@@ -1,0 +1,162 @@
+#!/usr/bin/env python3
+"""Inspect a selected repository and its local AI Workflow without writing."""
+
+import argparse
+import json
+import re
+import subprocess
+from pathlib import Path
+
+
+def git(path, *args):
+    result = subprocess.run(
+        ["git", "-C", str(path), *args], capture_output=True, text=True, check=False
+    )
+    return result.stdout.strip() if result.returncode == 0 else None
+
+
+def status_fields(path):
+    fields = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        match = re.match(r"^\|\s*`([^`]+)`\s*\|\s*`?([^|`]+?)`?\s*\|$", line)
+        if match:
+            fields[match.group(1)] = match.group(2).strip()
+    return fields
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--workspace", required=True, type=Path)
+    parser.add_argument("--repo", type=Path, help="explicit owner-selected repo path")
+    parser.add_argument("--project-state", help="workspace-relative project-state directory")
+    parser.add_argument("--project-id", help="explicit AI Workflow project ID")
+    args = parser.parse_args()
+
+    blockers = []
+    result = {
+        "result": "blocked",
+        "repository": None,
+        "workflow_version": None,
+        "workflow_project": None,
+        "git_baseline": None,
+        "dirty_entry_count": None,
+        "project_status": None,
+        "blockers": blockers,
+        "evidence_role": "read-only inspection; not approval or QA",
+    }
+
+    try:
+        workspace = args.workspace.resolve(strict=True)
+        if not workspace.is_dir():
+            blockers.append("selected workspace is not a directory")
+    except OSError:
+        blockers.append("selected workspace does not exist")
+        print(json.dumps(result, indent=2))
+        return 1
+
+    linked_repo = None
+    if args.project_state:
+        raw_parts = args.project_state.split("/")
+        parts = Path(args.project_state).parts
+        if Path(args.project_state).is_absolute() or not parts or any(
+            part in ("", ".", "..") for part in raw_parts
+        ) or "project-state" not in parts:
+            blockers.append("project-state must be a normalized workspace-relative path")
+        else:
+            current = workspace
+            for part in parts:
+                current /= part
+                if current.is_symlink():
+                    blockers.append("project-state path contains a symlink alias")
+                    break
+            state = (workspace / args.project_state).resolve()
+            if not state.is_relative_to(workspace) or not state.is_dir():
+                blockers.append("project-state is missing or escapes selected workspace")
+            elif (state / "links.md").is_symlink() or not (state / "links.md").is_file():
+                blockers.append("project-state links.md is missing")
+            else:
+                links = (state / "links.md").read_text(encoding="utf-8")
+                values = re.findall(r"^repo-path:\s*(.+?)\s*$", links, flags=re.MULTILINE)
+                if len(values) != 1 or not values[0] or values[0].startswith("<"):
+                    blockers.append("links.md must have exactly one resolved repo-path")
+                else:
+                    source = Path(values[0])
+                    linked_repo = (source if source.is_absolute() else workspace / source).resolve()
+
+    explicit_repo = args.repo.resolve() if args.repo else None
+    if linked_repo and explicit_repo and linked_repo != explicit_repo:
+        blockers.append("explicit repo and project-state repo-path disagree")
+    repo = explicit_repo or linked_repo
+    if repo is None:
+        blockers.append("an explicit repo or project-state repo-path is required")
+    elif not repo.is_dir():
+        blockers.append("target repository does not exist")
+    else:
+        result["repository"] = str(repo)
+        root = git(repo, "rev-parse", "--show-toplevel")
+        if root is None or Path(root).resolve() != repo:
+            blockers.append("target path is not the root of its Git repository")
+        else:
+            result["git_baseline"] = git(repo, "rev-parse", "HEAD")
+            if result["git_baseline"] is None:
+                blockers.append("target repository has no committed Git baseline")
+            dirty = git(repo, "status", "--porcelain")
+            result["dirty_entry_count"] = len(dirty.splitlines()) if dirty else 0
+
+        if (repo / "AGENTS.md").is_symlink() or not (repo / "AGENTS.md").is_file():
+            blockers.append("target root AGENTS.md is missing")
+        workflow = repo / "ai-workflow"
+        if workflow.is_symlink() or not workflow.is_dir() or (workflow / "AGENTS.md").is_symlink() or not (workflow / "AGENTS.md").is_file():
+            blockers.append("nested AI Workflow AGENTS.md is missing")
+        elif git(workflow, "rev-parse", "--show-toplevel") != str(workflow.resolve()):
+            blockers.append("nested AI Workflow is not an independent Git clone")
+        elif not (workflow / ".systems/ai/core/risk-model.md").is_file():
+            blockers.append("nested AI Workflow contracts are incomplete")
+        else:
+            result["workflow_version"] = git(workflow, "rev-parse", "HEAD")
+
+        runtime = repo / "ai-workflow-workspace"
+        repo_status = runtime / "repo/core/status.md"
+        repo_intake = runtime / "repo/core/repo-intake.md"
+        if runtime.is_symlink() or any(
+            path.is_symlink() or not path.is_file() or not path.resolve().is_relative_to(repo)
+            for path in (repo_status, repo_intake)
+        ):
+            blockers.append("AI Workflow runtime status or repo intake is missing")
+
+        if args.project_id and not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", args.project_id):
+            blockers.append("unsafe AI Workflow project ID")
+        else:
+            projects = runtime / "projects"
+            candidates = sorted(
+                path.name for path in projects.iterdir()
+                if path.is_dir() and not path.is_symlink()
+                and (path / "status.md").is_file() and not (path / "status.md").is_symlink()
+            ) if projects.is_dir() and not projects.is_symlink() else []
+            project_id = args.project_id
+            if not project_id:
+                if len(candidates) == 1:
+                    project_id = candidates[0]
+                else:
+                    blockers.append("AI Workflow project ID is ambiguous or missing")
+            if project_id:
+                project_status = projects / project_id / "status.md"
+                if projects.is_symlink() or (projects / project_id).is_symlink() or project_status.is_symlink() or not project_status.is_file() or not project_status.resolve().is_relative_to(repo):
+                    blockers.append("selected AI Workflow project status is missing")
+                else:
+                    result["workflow_project"] = project_id
+                    result["project_status"] = str(project_status)
+                    fields = status_fields(project_status)
+                    if "blocking-reason" not in fields:
+                        blockers.append("selected AI Workflow project status lacks blocking-reason")
+                    elif fields["blocking-reason"].lower() not in ("none", ""):
+                        blockers.append("selected AI Workflow project reports a blocker")
+
+    if not blockers:
+        result["result"] = "inspect-local-gates"
+    print(json.dumps(result, indent=2))
+    return 1 if blockers else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

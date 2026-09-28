@@ -32,6 +32,8 @@ Green scripts do not equal `PASS`. A semantic mismatch, unresolved blocker, mate
 
 Running an implementation tool or generating an artifact must not automatically trigger broad AI System validation. Broad validation belongs to an applicable quality or checkpoint route after semantic and product review.
 
+When `.systems/ai/core/project-orchestration.md` routes work into another repository, run its applicable product checks and local AI Workflow artifact validation. AI System's broad validators apply to changes in AI System contracts, not merely to an implementation coordinated by AI System. Review the executor's diff and evidence before reporting a verdict; do not treat a worker's `done` message as QA.
+
 ## Safe Local Iteration
 
 Within an already approved, bounded local implementation, run the relevant focused test, fix an observed failure in the approved files, and retest without asking for approval at every iteration. This loop does not expand the file set, change the target, or authorize an external effect. Stop and seek a new decision if a fix requires broader scope, production access, secrets, destructive actions, a new dependency with material risk, or a changed acceptance criterion. A passing local test is product evidence, not the final quality verdict; still perform semantic review and route-specific QA before closure.

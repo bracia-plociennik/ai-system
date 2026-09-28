@@ -240,6 +240,7 @@ run_standard_checks() {
   run_cmd "$script_dir/check-end-of-task-capture"
   run_cmd "$script_dir/check-update-workspace"
   run_cmd "$script_dir/check-project-state"
+  run_cmd "$script_dir/check-project-orchestration"
   run_cmd "$script_dir/check-external-source-registry"
   run_cmd "$script_dir/check-external-export-import-workflow"
   run_cmd "$script_dir/check-personal-ops"

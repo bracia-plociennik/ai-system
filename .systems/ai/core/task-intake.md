@@ -22,6 +22,7 @@ Use task intake before:
 - planning or implementing new work;
 - accepting a change request;
 - creating a side task or micro-project;
+- orchestrating implementation in a selected repository through its local AI Workflow;
 - capturing memory when scope or privacy is unclear;
 - suggesting or creating prompt composition artifacts;
 - proposing `system-insights`;
@@ -66,6 +67,7 @@ Choose one safe route:
 - system-insights anonymization proposal;
 - change request;
 - side task or micro-project;
+- project orchestration using `.systems/ai/core/project-orchestration.md` when the request names work in a managed repository;
 - STOP for missing approval, ambiguous ownership, privacy risk, or unsafe external effects.
 
 ## Stop Conditions

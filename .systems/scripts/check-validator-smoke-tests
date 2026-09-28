@@ -459,6 +459,85 @@ run_must_fail "project-state-detects-runtime-files-in-project-repo" "$project_st
 rm "$project_state_scan_workspace/projects/polluted-repo/status.md" "$project_state_scan_workspace/projects/polluted-repo/memory.md"
 rm -rf "$project_state_scan_workspace/projects/polluted-repo/checkpoints"
 run_must_pass "project-state-clean-project-repos-pass" "$project_state_validator" --workspace "$project_state_scan_workspace"
+
+orchestration_validator="$copy_repo/.systems/scripts/check-project-orchestration"
+orchestration_preflight="$copy_repo/.systems/scripts/project-orchestration-preflight"
+run_must_pass "project-orchestration-contract" "$orchestration_validator"
+
+orchestration_workspace="$tmp/orchestration-workspace"
+orchestration_repo="$orchestration_workspace/projects/sample"
+mkdir -p "$orchestration_repo/ai-workflow/.systems/ai/core" \
+  "$orchestration_repo/ai-workflow-workspace/repo/core" \
+  "$orchestration_repo/ai-workflow-workspace/projects/selected" \
+  "$orchestration_workspace/project-state/sample"
+git -C "$orchestration_repo" init -q
+git -C "$orchestration_repo/ai-workflow" init -q
+printf '# Target instructions\n' > "$orchestration_repo/AGENTS.md"
+printf '# Workflow instructions\n' > "$orchestration_repo/ai-workflow/AGENTS.md"
+printf '# Risk model\n' > "$orchestration_repo/ai-workflow/.systems/ai/core/risk-model.md"
+printf '# Repo intake\n' > "$orchestration_repo/ai-workflow-workspace/repo/core/repo-intake.md"
+printf '| Field | Value |\n| --- | --- |\n| `active-project` | `selected` |\n' > "$orchestration_repo/ai-workflow-workspace/repo/core/status.md"
+printf '| Field | Value |\n| --- | --- |\n| `blocking-reason` | `none` |\n' > "$orchestration_repo/ai-workflow-workspace/projects/selected/status.md"
+printf 'repo-path: %s\n' "$orchestration_repo" > "$orchestration_workspace/project-state/sample/links.md"
+git -C "$orchestration_repo/ai-workflow" add AGENTS.md .systems
+git -C "$orchestration_repo/ai-workflow" -c user.name=Smoke -c user.email=smoke@example.invalid commit -qm fixture
+git -C "$orchestration_repo" add AGENTS.md ai-workflow-workspace
+git -C "$orchestration_repo" -c user.name=Smoke -c user.email=smoke@example.invalid commit -qm fixture
+
+orchestration_args=(--workspace "$orchestration_workspace" --project-state project-state/sample --project-id selected)
+run_must_pass_capture "orchestration-valid" "$tmp/orchestration-valid.json" "$orchestration_preflight" "${orchestration_args[@]}"
+rg -q '"result": "inspect-local-gates"' "$tmp/orchestration-valid.json" || { echo "Preflight did not return inspect-local-gates"; exit 1; }
+rg -q '"workflow_project": "selected"' "$tmp/orchestration-valid.json" || { echo "Preflight selected wrong project"; exit 1; }
+
+run_must_pass "orchestration-single-project" "$orchestration_preflight" --workspace "$orchestration_workspace" --repo "$orchestration_repo"
+mkdir -p "$orchestration_repo/ai-workflow-workspace/projects/other"
+printf '| `blocking-reason` | `none` |\n' > "$orchestration_repo/ai-workflow-workspace/projects/other/status.md"
+run_must_fail "orchestration-requires-explicit-project" "$orchestration_preflight" --workspace "$orchestration_workspace" --repo "$orchestration_repo"
+run_must_pass "orchestration-explicit-project" "$orchestration_preflight" "${orchestration_args[@]}"
+rm -r "$orchestration_repo/ai-workflow-workspace/projects/other"
+
+mkdir -p "$orchestration_workspace/clients/sample/project-state/work"
+printf 'repo-path: %s\n' "$orchestration_repo" > "$orchestration_workspace/clients/sample/project-state/work/links.md"
+run_must_pass "orchestration-nearest-client-owner" "$orchestration_preflight" --workspace "$orchestration_workspace" --project-state clients/sample/project-state/work --project-id selected
+
+run_must_fail "orchestration-path-traversal" "$orchestration_preflight" --workspace "$orchestration_workspace" --repo "$orchestration_repo" --project-state ../outside --project-id selected
+run_must_fail "orchestration-nonnormalized-path" "$orchestration_preflight" --workspace "$orchestration_workspace" --repo "$orchestration_repo" --project-state project-state/./sample --project-id selected
+run_must_fail "orchestration-unsafe-project-id" "$orchestration_preflight" --workspace "$orchestration_workspace" --repo "$orchestration_repo" --project-id ../selected
+printf 'repo-path: %s\n' "$tmp/wrong-repo" > "$orchestration_workspace/project-state/sample/links.md"
+run_must_fail "orchestration-link-conflict" "$orchestration_preflight" --workspace "$orchestration_workspace" --repo "$orchestration_repo" --project-state project-state/sample --project-id selected
+printf 'repo-path: %s\n' "$orchestration_repo" > "$orchestration_workspace/project-state/sample/links.md"
+
+mv "$orchestration_repo/AGENTS.md" "$orchestration_repo/AGENTS.md.bak"
+run_must_fail "orchestration-missing-target-instructions" "$orchestration_preflight" "${orchestration_args[@]}"
+mv "$orchestration_repo/AGENTS.md.bak" "$orchestration_repo/AGENTS.md"
+mv "$orchestration_repo/ai-workflow/AGENTS.md" "$orchestration_repo/ai-workflow/AGENTS.md.bak"
+run_must_fail "orchestration-missing-workflow-instructions" "$orchestration_preflight" "${orchestration_args[@]}"
+mv "$orchestration_repo/ai-workflow/AGENTS.md.bak" "$orchestration_repo/ai-workflow/AGENTS.md"
+mv "$orchestration_repo/ai-workflow-workspace/repo/core/repo-intake.md" "$orchestration_repo/ai-workflow-workspace/repo/core/repo-intake.md.bak"
+run_must_fail "orchestration-missing-repo-intake" "$orchestration_preflight" "${orchestration_args[@]}"
+mv "$orchestration_repo/ai-workflow-workspace/repo/core/repo-intake.md.bak" "$orchestration_repo/ai-workflow-workspace/repo/core/repo-intake.md"
+printf '| `blocking-reason` | `none` |\n' > "$tmp/outside-status.md"
+mv "$orchestration_repo/ai-workflow-workspace/projects/selected/status.md" "$orchestration_repo/ai-workflow-workspace/projects/selected/status.md.bak"
+ln -s "$tmp/outside-status.md" "$orchestration_repo/ai-workflow-workspace/projects/selected/status.md"
+run_must_fail "orchestration-project-status-symlink" "$orchestration_preflight" "${orchestration_args[@]}"
+rm "$orchestration_repo/ai-workflow-workspace/projects/selected/status.md"
+mv "$orchestration_repo/ai-workflow-workspace/projects/selected/status.md.bak" "$orchestration_repo/ai-workflow-workspace/projects/selected/status.md"
+mv "$orchestration_workspace/project-state/sample" "$orchestration_workspace/project-state/sample.bak"
+ln -s "$tmp" "$orchestration_workspace/project-state/sample"
+run_must_fail "orchestration-project-state-symlink-escape" "$orchestration_preflight" --workspace "$orchestration_workspace" --project-state project-state/sample --project-id selected
+rm "$orchestration_workspace/project-state/sample"
+mv "$orchestration_workspace/project-state/sample.bak" "$orchestration_workspace/project-state/sample"
+ln -s "$orchestration_workspace/project-state/sample" "$orchestration_workspace/project-state/sample-alias"
+run_must_fail "orchestration-project-state-symlink-alias" "$orchestration_preflight" --workspace "$orchestration_workspace" --project-state project-state/sample-alias --project-id selected
+rm "$orchestration_workspace/project-state/sample-alias"
+printf '| `blocking-reason` | `missing evidence` |\n' > "$orchestration_repo/ai-workflow-workspace/projects/selected/status.md"
+run_must_fail "orchestration-local-blocker" "$orchestration_preflight" "${orchestration_args[@]}"
+printf '| `blocking-reason` | `none` |\n' > "$orchestration_repo/ai-workflow-workspace/projects/selected/status.md"
+run_must_pass "orchestration-resume-rechecks-source" "$orchestration_preflight" "${orchestration_args[@]}"
+
+mv "$copy_repo/.systems/ai/core/project-orchestration.md" "$copy_repo/.systems/ai/core/project-orchestration.md.bak"
+run_must_fail "orchestration-missing-core" "$orchestration_validator"
+mv "$copy_repo/.systems/ai/core/project-orchestration.md.bak" "$copy_repo/.systems/ai/core/project-orchestration.md"
 fi
 
 if [[ "$suite" == "all" || "$suite" == "skills" ]]; then
@@ -4152,6 +4231,19 @@ cat > "$cross_handoff_record" <<MD
 - Reason: Substantive AI System policy upgrade.
 MD
 run_must_pass "cross-system-upgrade-handoff-yes-with-artifact" "$cross_handoff_validator" --workspace "$cross_handoff_workspace" --record "$cross_handoff_record"
+
+cat > "$cross_handoff_record" <<'MD'
+# Quality Closure
+
+## Cross-system Impact
+
+- Owner decision: yes
+- Counterpart: ai-workflow
+- Handoff artifact: external-memory/memory/2026-07-24-operator-efficiency-ai-workflow-handoff.md
+- Reason: Privacy-safe tracked decision.
+MD
+run_must_pass "cross-system-upgrade-handoff-workspace-relative" "$cross_handoff_validator" --workspace "$cross_handoff_workspace" --record "$cross_handoff_record"
+run_must_fail "cross-system-upgrade-handoff-relative-needs-workspace" "$cross_handoff_validator" --record "$cross_handoff_record"
 
 cat > "$cross_handoff_record" <<'MD'
 # Quality Closure

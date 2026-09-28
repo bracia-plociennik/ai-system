@@ -42,6 +42,8 @@ Before writing, confirm that the plan is complete, current, and not superseded b
 
 Do not infer approval for an action, target, file movement, TaskNote, memory write, commit, push, migration, cleanup, or external effect that the accepted plan does not explicitly include.
 
+For `.systems/ai/core/project-orchestration.md`, pass an exact reference to the owner's current approval into the target work context. An orchestration record, delegated worker instruction, worker summary, or previous approval for a different repository does not grant or extend permission. Local AI Workflow gates and target-specific approvals still apply. A local commit may be included in the approved scope after QA; a push, production effect, or owner-only final check needs its own explicit authority.
+
 ## Rejections
 
 Do not recognize plan acceptance when the reference is ambiguous, stale, superseded, incomplete, or bound to a different target or scope.

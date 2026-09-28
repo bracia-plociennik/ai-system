@@ -56,6 +56,7 @@ Normal transitions are `pending-quality -> ready`, `pending-quality -> not-appli
 - The first non-exempt implementation-class write creates or updates `pending-quality`.
 - Quality closure moves the record to `ready` or justified `not-applicable`.
 - An accepted distillation moves it to `completed` and records the artifact path.
+- For `.systems/ai/core/project-orchestration.md`, an accepted distillation in the target AI Workflow project may be the referenced artifact. Verify its existence, target scope, and acceptance evidence before recording `completed`; do not make a duplicate technical distillation in AI System.
 - Task intake reports unresolved records for the selected scope before unrelated new implementation.
 - End-of-Task Capture, contract compliance, and checkpoints report unresolved state and owner action.
 - Dreaming reads state records and reports an Undistilled Work Queue only.

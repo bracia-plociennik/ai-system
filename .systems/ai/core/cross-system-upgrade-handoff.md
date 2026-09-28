@@ -35,6 +35,7 @@ AI_SYSTEM_WORKSPACE_HOME/external-memory/memory/<date>-<topic>-<counterpart>-han
 Existing files directly under `external-memory/` remain valid historical AI System improvement entries. This contract does not migrate, rename, or rewrite them.
 
 Use `.systems/ai/templates/capture/cross-system-upgrade-handoff.template.md`.
+For a tracked decision record, use `external-memory/memory/<file>.md` relative to the selected workspace. Validate it with `--workspace` so local home paths are not published; absolute paths remain accepted for local-only records.
 
 ## Handoff Requirements
 

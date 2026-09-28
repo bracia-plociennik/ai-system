@@ -21,6 +21,8 @@ System-owned files are upstream-owned in management checkouts. This includes `.s
 
 If the owner asks to change system-owned files in a management checkout, STOP before local implementation. The safe local action is read-only analysis, task intake, and a recommendation. Route the actual product change to the upstream `ai-system-dev` product project, then update this checkout with `.systems/scripts/update-from-upstream`.
 
+For `w projekcie X zrob Y` or equivalent project work, use `.systems/ai/core/project-orchestration.md`. Select the workspace and real repository, then read that repository's local `AGENTS.md` and, when installed, its local `ai-workflow/AGENTS.md` and project state. AI System coordinates the owner request; local AI Workflow governs execution, risk, phases, QA, and technical capture. Do not infer approval from delegation or bypass a local gate.
+
 For `checkpoint bloku`, `koniec bloku`, `checkpoint przed zmianą bloku`, or a listed block-checkpoint write-intent alias such as `przyjmij ten checkpoint blok`, use `.systems/ai/core/block-checkpoint.md`. A listed alias is explicit approval only for the append-only nearest-owner block checkpoint and `latest.md` router; preparation and review wording remains read-only. Re-read both and return the required read-only summary. Do not treat this route as authorization for memory, distillation, TaskNotes, project changes, commits, pushes, or external effects.
 
 ## Source Of Truth

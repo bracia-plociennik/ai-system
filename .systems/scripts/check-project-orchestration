@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+fail=0
+
+require_file() {
+  if [[ ! -f "$repo_root/$1" ]]; then
+    echo "Missing project-orchestration artifact: $1"
+    fail=1
+  fi
+}
+
+require_ref() {
+  local file="$1" pattern="$2" label="$3"
+  require_file "$file"
+  if [[ -f "$repo_root/$file" ]] && ! rg -q -- "$pattern" "$repo_root/$file"; then
+    echo "Missing project-orchestration contract: $file ($label)"
+    fail=1
+  fi
+}
+
+core=".systems/ai/core/project-orchestration.md"
+template=".systems/ai/templates/workspace/project-state/orchestration-record.template.md"
+preflight=".systems/scripts/project-orchestration-preflight"
+require_file "$core"
+require_file "$template"
+require_file "$preflight"
+require_file ".systems/scripts/check-project-orchestration"
+for script in "$preflight" ".systems/scripts/check-project-orchestration"; do
+  if [[ -f "$repo_root/$script" && ! -x "$repo_root/$script" ]]; then
+    echo "Project-orchestration script is not executable: $script"
+    fail=1
+  fi
+done
+
+for pattern in 'selected workspace' 'local AI Workflow' 'change request' 'micro-task' 'planning-range' 'implementation-range' 'owner' 'write set' 'QA' 'distillation' 'Push' 'interruption'; do
+  require_ref "$core" "$pattern" "$pattern"
+done
+for pattern in 'Work ID:' 'Owner namespace:' 'Target repository:' 'AI Workflow project ID:' 'Git baseline:' 'Owner request reference:' 'Definition of Done:' 'Approved write set' 'Result evidence:' 'Next owner decision:'; do
+  require_ref "$template" "$pattern" "$pattern"
+done
+
+for file in \
+  ".systems/ai/templates/root/AGENTS.template.md" \
+  ".systems/ai/core/command-routing.md" \
+  ".systems/ai/core/task-intake.md" \
+  ".systems/ai/core/operating-model.md" \
+  ".systems/ai/core/project-state.md" \
+  ".systems/ai/core/memory.md" \
+  ".systems/ai/core/distillation-state.md" \
+  ".systems/ai/core/owner-approval.md" \
+  ".systems/ai/core/contract-compliance.md" \
+  ".systems/ai/core/validation-routing.md" \
+  "README.md" \
+  "HUMANS.md" \
+  ".systems/scripts/README.md"; do
+  require_ref "$file" 'project-orchestration' "routing integration"
+done
+require_ref ".systems/scripts/check-required-artifacts" 'check-project-orchestration' 'required artifacts wiring'
+require_ref ".systems/scripts/validate-ai-system" 'check-project-orchestration' 'validator chain wiring'
+require_ref ".systems/scripts/check-validator-smoke-tests" 'project-orchestration' 'behavioral fixture coverage'
+
+if [[ -f "$repo_root/$core" ]] && rg -qi 'delegat(e|ion|ed).*(grants|creates|extends) (new )?(approval|permission)|worker.*done.*(is|means) (qa|pass)' "$repo_root/$core"; then
+  echo "Unsafe project-orchestration authority wording"
+  fail=1
+fi
+
+exit "$fail"

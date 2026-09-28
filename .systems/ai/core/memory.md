@@ -55,6 +55,8 @@ Use `not-applicable` when no status, decision, evidence, reusable lesson, or dur
 
 For project memory, status, distillations, decisions, and checkpoints, use `.systems/ai/core/project-state.md`. Do not write AI System runtime files into a project git worktree unless the owner explicitly chooses colocated local-only state.
 
+When `.systems/ai/core/project-orchestration.md` applies, the target AI Workflow project owns detailed technical memory, quality evidence, phase status, and technical distillation. AI System project memory keeps business context, owner decisions, blockers, and links to that local evidence. Do not copy an accepted Workflow distillation into a second AI System technical memory entry.
+
 ## End-of-Task Capture
 
 `.systems/ai/core/end-of-task-capture.md` handles chat-end prompts such as `Koniec pracy`, `Koniec zadania`, `to koniec zadania`, `dziękuję, utrwal wiedzę`, and `end task and capture knowledge`.

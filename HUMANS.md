@@ -165,6 +165,16 @@ for standalone projects, or the nearest owner namespace for nested projects:
 
 Use `links.md` in project-state to point to the real repo or source folder.
 
+For `w projekcie X zrob Y`, AI System first selects the workspace and verifies the real repo, local `AGENTS.md`, nested AI Workflow, and the selected Workflow project. `.systems/ai/core/project-orchestration.md` defines the routing, delegated work scope, evidence review, and resume behavior. The target Workflow owns execution status, quality evidence, and technical distillation; `project-state/<project>/orchestration/<work-id>.md` is a short coordination reference.
+
+Read-only preflight example:
+
+```sh
+.systems/scripts/project-orchestration-preflight --workspace <workspace> --project-state <relative-project-state> --project-id <workflow-id>
+```
+
+A result of `inspect-local-gates` still requires local scope, risk, approval, and write ownership review. A scoped local commit may follow QA; push, production, and owner-only final check remain owner decisions.
+
 Ask:
 
 ```text

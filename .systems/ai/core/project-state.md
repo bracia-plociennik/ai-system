@@ -21,6 +21,7 @@ AI_SYSTEM_WORKSPACE_HOME/project-state/<project-slug>/
   distillations/
   capture-state/
   decisions/
+  orchestration/
   links.md
 ```
 
@@ -42,6 +43,8 @@ AI_SYSTEM_WORKSPACE_HOME/owned-assets/<asset>/project-state/<project-slug>/
 - `source-path` for non-repo material folders;
 - optional source notes and review triggers.
 
+For an approved work unit in a repository with AI Workflow, `orchestration/<work-id>.md` records the owner goal, selected source, local Workflow project, executor, permission scope, and evidence references using `.systems/ai/core/project-orchestration.md`. It is an AI System coordination pointer; Workflow project status and technical memory remain canonical in the target repository.
+
 ## Projects Directory Boundary
 
 `projects/` may contain product repositories, client repositories, cloned repos, source folders, exported materials, or other project-owned files.
@@ -56,7 +59,8 @@ Do not write these AI System runtime artifacts into a project path unless the ow
 - `checkpoints/`;
 - `distillations/`;
 - `capture-state/`;
-- `decisions/`.
+- `decisions/`;
+- `orchestration/`.
 
 ## Git Worktree Guard
 

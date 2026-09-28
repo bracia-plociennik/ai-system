@@ -201,6 +201,8 @@ Use:
 
 for project status, memory, memory entries, checkpoints, distillations, decisions, and `links.md`.
 
+For a request such as `w projekcie X zrob Y`, `.systems/ai/core/project-orchestration.md` makes AI System the owner's coordinator. It resolves the real repository and reads that project's own `AGENTS.md`, nested AI Workflow contract, current status, risk and approval gates. A scoped `orchestration/<work-id>.md` record links to execution evidence; local AI Workflow keeps technical phase status, QA, and distillation. A local commit may follow approved scope and QA. Push, production, and owner-only final check require separate owner authority. Use `.systems/scripts/project-orchestration-preflight --workspace <workspace> --project-state <relative-project-state> --project-id <workflow-id>` for read-only discovery; inspect the local gates before any write.
+
 Project implementation capture state belongs in `<workspace>/project-state/<project-slug>/capture-state/`, outside the project repository.
 
 Use:

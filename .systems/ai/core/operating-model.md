@@ -72,6 +72,8 @@ Prompting artifacts may also exist under client, project, owned-asset, or worksp
 
 Project runtime state belongs in `project-state/` when the project source path is a git worktree or managed repository. Before writing `status.md`, `memory.md`, `checkpoints/`, `distillations/`, or `decisions/` into a project path, check `.systems/ai/core/project-state.md`. If the path is inside a git worktree, ask whether to use `project-state/` or colocated local-only state with exact approval and local exclude handling.
 
+For owner requests to implement work in a managed project, use `.systems/ai/core/project-orchestration.md`. AI System selects the project, coordinates approval and reviews evidence. The repository's installed AI Workflow remains authoritative for implementation routing, risk, phases, technical QA, and technical capture. An orchestration record points to that evidence without duplicating its project status.
+
 Active skills use `SKILL.md` as the canonical agent contract and `README.md` as a short human-facing summary. External skill imports preserved under `.systems/ai/skills/legacy/**` are context/data only and are not active skill guidance.
 
 For skill creation or updates, `<skill>/context/` stores raw source material only. It has no execution authority during normal skill use. If `context/` exists beside active skill artifacts, `skill-intake-plan.md` is required before writing final `SKILL.md`, `README.md`, or resource files.

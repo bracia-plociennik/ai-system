@@ -12,6 +12,7 @@ AI System runtime state for `<Project>`.
 - `checkpoints/` - project checkpoints and resume snapshots.
 - `distillations/` - compressed project summaries.
 - `capture-state/` - Distillation State records for implementation work units.
+- `orchestration/` - scoped coordination records linking to local Workflow execution evidence.
 - `decisions/` - durable project decisions.
 - `links.md` - repo-path or source-path for the real project files.
 
@@ -27,5 +28,5 @@ source-path: <absolute-or-workspace-relative-source-path>
 ## Rules
 
 - Keep AI System runtime state here when the project source is a git worktree.
-- Do not write `status.md`, `memory.md`, `checkpoints/`, `distillations/`, `capture-state/`, or `decisions/` into the project repo unless the owner explicitly approves colocated local-only state.
+- Do not write `status.md`, `memory.md`, `checkpoints/`, `distillations/`, `capture-state/`, `orchestration/`, or `decisions/` into the project repo unless the owner explicitly approves colocated local-only state.
 - Do not auto-edit `.gitignore` or `.git/info/exclude`.

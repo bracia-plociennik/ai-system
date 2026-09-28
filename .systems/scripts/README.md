@@ -34,6 +34,8 @@ Validation scripts for AI System live here.
 
 `check-project-state` validates repo-safe project-state contracts, templates, routing, script wiring, and optional workspace pollution scans.
 
+`project-orchestration-preflight` inspects a selected workspace, repository, nested AI Workflow installation, and project status without writing. `check-project-orchestration` validates the steering contract, template, CLI wiring, and negative path fixtures; neither grants approval or QA.
+
 `check-external-source-registry` validates provider-agnostic external source registry contracts, links templates, routing, docs, and optional workspace source records.
 
 `check-external-export-import-workflow` validates the manual external export import workflow contract, dump templates, routing docs, source-reference requirements, checkpoint decision wording, and v1 external-effect bans.

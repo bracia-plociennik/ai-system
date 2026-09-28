@@ -45,6 +45,8 @@ Before work closure, classify the work mode:
 
 The selected mode must match risk, scope, approvals, write set, workspace selection, and available evidence. If it does not fit, stop or route to the safer workflow before closure.
 
+For `.systems/ai/core/project-orchestration.md`, cite the target Workflow quality and capture artifacts in the closure evidence. A worker's completion message is not evidence. Do not duplicate technical project status or distillation in AI System; its orchestration record and Distillation State may reference verified local Workflow artifacts.
+
 ## Required Decision Block
 
 Before `AI_SYSTEM_WORK_CLOSURE`, the response, handoff, checkpoint, distillation, review note, or status/evidence artifact must be able to state:
