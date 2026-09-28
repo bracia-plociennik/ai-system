@@ -23,7 +23,8 @@
 
 - CR-007 is a new post-final project orchestration iteration. The owner approved a complete implementation plan before product edits; the formal CR and spec were registered during the ongoing implementation. CR-006 final-check evidence remains historical and unchanged.
 - CR-007 Phase 4 implementation and Phase 5 quality are recorded in their scoped artifacts. Product full validation and project-scoped Workflow validation completed as supporting evidence; no Phase 8 final check or new final-owner-yes is claimed.
-- CR-007 Phase 6 distillation, project-memory update, and Phase 7 checkpoint are recorded. `next-phase: phase-8-final-check` names a possible owner-triggered route, not an authorization to run it. Scoped product publication and management rollout remain pending.
+- CR-007 Phase 6 distillation, project-memory update, and Phase 7 checkpoint are recorded. `next-phase: phase-8-final-check` names a possible owner-triggered route, not an authorization to run it. At the checkpoint, publication and rollout were pending; their later completion is recorded below.
+- CR-007 publication completed: `5752ad3` and `2c87b86` are on `origin/main`; the management checkout fast-forwarded to `2c87b86`, refreshed generated `AGENTS.md`, and passed an AI System full updater check. This does not close CR-007 or supply final-owner-yes.
 
 - Phase 5 quality passed for the original implementation package.
 - Owner opened pre-final change request `ASYS-CR-001-compact-contracts` to strengthen `ai-system` contracts before final closure.

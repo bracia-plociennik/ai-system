@@ -40,7 +40,7 @@ The owner accepted the immediately preceding complete `AI System Project Orchest
 - [x] Approved scope implemented with no local Workflow gate bypass.
 - [x] Product QA and project-scoped Workflow QA evidence recorded.
 - [x] Distillation, checkpoint, Distillation State, and privacy-safe handoff recorded.
-- [ ] Product commit/push and safe management rollout verified.
+- [x] Product commit/push and safe management rollout verified.
 
 ## Cross-system Impact
 
@@ -51,5 +51,9 @@ The owner accepted the immediately preceding complete `AI System Project Orchest
 
 ## Result
 
-- Final status: in-progress
-- Completed at: pending
+- Product and rollout status: implemented and verified on `origin/main` at `2c87b86`.
+- Product commit: `5752ad3`; scoped workflow evidence commit: `2c87b86`.
+- Management update: fast-forwarded to `2c87b86`; updater full validation completed with `supporting_only=true`.
+- Local router: generated `AGENTS.md` matches the current template; a read-only preflight selected the `ai-system` Workflow project at Git baseline `2c87b86` with no blocker.
+- Final status: in-progress pending a separate owner-triggered Phase 8 decision; no final-owner-yes is inferred from publication.
+- Completed at: pending formal final check.
