@@ -6,20 +6,24 @@
 | `workflow-scope` | `plan-derived` |
 | `project-workspace` | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system` |
 | `active-plan-status` | `implementation` |
-| `current-task` | `none` |
-| `active-change-request` | `none` |
-| `current-phase` | `phase-8-final-check` |
+| `current-task` | `ASYS-CR-007-project-orchestration` |
+| `active-change-request` | `ASYS-CR-007-project-orchestration` |
+| `current-phase` | `phase-7-checkpoint` |
 | `phase-result` | `PASS` |
-| `final-owner-approval` | `final-owner-yes` |
-| `next-phase` | `owner-final-approval` |
+| `final-owner-approval` | `not-requested` |
+| `next-phase` | `phase-8-final-check` |
 | `next-task` | `none` |
 | `blocking-reason` | `none` |
-| `updated-at` | `2026-09-25` |
+| `updated-at` | `2026-09-28` |
 | `autopilot-mode` | `supervised` |
 | `autopilot-state` | `stopped` |
 | `autopilot-run` | `autopilot-001` |
 
 ## Notes
+
+- CR-007 is a new post-final project orchestration iteration. The owner approved a complete implementation plan before product edits; the formal CR and spec were registered during the ongoing implementation. CR-006 final-check evidence remains historical and unchanged.
+- CR-007 Phase 4 implementation and Phase 5 quality are recorded in their scoped artifacts. Product full validation and project-scoped Workflow validation completed as supporting evidence; no Phase 8 final check or new final-owner-yes is claimed.
+- CR-007 Phase 6 distillation, project-memory update, and Phase 7 checkpoint are recorded. `next-phase: phase-8-final-check` names a possible owner-triggered route, not an authorization to run it. Scoped product publication and management rollout remain pending.
 
 - Phase 5 quality passed for the original implementation package.
 - Owner opened pre-final change request `ASYS-CR-001-compact-contracts` to strengthen `ai-system` contracts before final closure.
