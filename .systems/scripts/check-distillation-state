@@ -108,10 +108,28 @@ if [[ -n "$workspace" ]]; then
   [[ -d "$workspace" ]] || { echo "Workspace does not exist: $workspace"; exit 2; }
   workspace="$(cd "$workspace" && pwd -P)"
 
-  if find "$workspace/projects" -type d -name capture-state -print -quit 2>/dev/null | grep -q .; then
-    echo "Repo pollution: capture-state directory found under workspace projects/"
-    fail=1
-  fi
+  read_record_field() {
+    local value
+    value="$(awk -v label="$2" 'index($0, "- " label ":") == 1 {print substr($0, length(label) + 4); exit}' "$1")"
+    printf '%s\n' "$value" | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//; s/^`(.*)`$/\1/'
+  }
+
+  shopt -s nullglob
+  for pollution in "$workspace"/projects/*/capture-state; do
+    if [[ -d "$pollution" || -L "$pollution" ]]; then
+      echo "Repo pollution: capture-state directory found directly under workspace project: $pollution"
+      fail=1
+    fi
+  done
+
+  records=(
+    "$workspace"/capture-state/*.md
+    "$workspace"/project-state/*/capture-state/*.md
+    "$workspace"/clients/*/capture-state/*.md
+    "$workspace"/clients/*/project-state/*/capture-state/*.md
+    "$workspace"/owned-assets/*/capture-state/*.md
+    "$workspace"/owned-assets/*/project-state/*/capture-state/*.md
+  )
 
   count_pending_quality=0
   count_ready=0
@@ -120,23 +138,34 @@ if [[ -n "$workspace" ]]; then
   count_blocked=0
   count_completed=0
   count_not_applicable=0
+  count_invalid=0
   total=0
-  while IFS= read -r -d '' record; do
+  for record in "${records[@]}"; do
     case "$(basename "$record")" in
       README.md|capture-state.md) continue ;;
     esac
 
     total=$((total + 1))
-    state="$(sed -n 's/^- State:[[:space:]]*//p' "$record" | head -1)"
-    work_id="$(sed -n 's/^- Work ID:[[:space:]]*//p' "$record" | head -1)"
-    privacy="$(sed -n 's|^- Privacy/scope check:[[:space:]]*||p' "$record" | head -1)"
-    derived="$(sed -n 's/^- `is_distilled` derived value:[[:space:]]*//p' "$record" | head -1)"
-    distillation="$(sed -n 's/^- Distillation artifact:[[:space:]]*//p' "$record" | head -1)"
+    record_invalid=0
+    if [[ ! -f "$record" || "$(realpath "$record")" != "$record" ]]; then
+      echo "Capture-state record is missing or uses a symlink: $record"
+      fail=1
+      count_invalid=$((count_invalid + 1))
+      continue
+    fi
 
-    [[ -n "$work_id" ]] || { echo "Capture-state record missing Work ID: $record"; fail=1; }
+    state="$(read_record_field "$record" 'State')"
+    work_id="$(read_record_field "$record" 'Work ID')"
+    privacy="$(read_record_field "$record" 'Privacy/scope check')"
+    privacy="${privacy%%;*}"
+    privacy="${privacy% }"
+    derived="$(read_record_field "$record" '`is_distilled` derived value')"
+    distillation="$(read_record_field "$record" 'Distillation artifact')"
+
+    [[ -n "$work_id" ]] || { echo "Capture-state record missing Work ID: $record"; fail=1; record_invalid=1; }
     case "$state" in
       pending-quality|ready|completed|deferred|owner-skipped|blocked|not-applicable) ;;
-      *) echo "Capture-state record has invalid State: $record ($state)"; fail=1; continue ;;
+      *) echo "Capture-state record has invalid State: $record ($state)"; fail=1; count_invalid=$((count_invalid + 1)); continue ;;
     esac
     case "$state" in
       pending-quality) count_pending_quality=$((count_pending_quality + 1)) ;;
@@ -150,29 +179,46 @@ if [[ -n "$workspace" ]]; then
 
     expected=false
     [[ "$state" == "completed" ]] && expected=true
-    if [[ "$derived" != "$expected" ]]; then
+    if [[ -n "$derived" && "$derived" != "$expected" ]]; then
       echo "Capture-state derived is_distilled mismatch: $record (expected $expected)"
       fail=1
+      record_invalid=1
     fi
     if [[ "$state" == "completed" && ( -z "$distillation" || "$distillation" == "none" ) ]]; then
       echo "Completed capture-state record missing Distillation artifact: $record"
       fail=1
+      record_invalid=1
     fi
     if [[ "$state" == "completed" && -n "$distillation" && "$distillation" != "none" ]]; then
-      case "$distillation" in
-        /*) distillation_path="$distillation" ;;
-        *) distillation_path="$workspace/$distillation" ;;
-      esac
-      if [[ ! -e "$distillation_path" ]]; then
-        echo "Completed capture-state record points to missing Distillation artifact: $record ($distillation)"
+      owner_root="${record%/capture-state/*}"
+      distillation_matches=()
+      if [[ "$distillation" == /* ]]; then
+        distillation_candidates=("$distillation")
+      elif [[ "$distillation" == *'/../'* || "$distillation" == ../* || "$distillation" == *'/./'* || "$distillation" == ./* ]]; then
+        distillation_candidates=()
+      else
+        distillation_candidates=("$workspace/$distillation")
+        [[ "$owner_root" == "$workspace" ]] || distillation_candidates+=("$owner_root/$distillation")
+      fi
+      for distillation_path in "${distillation_candidates[@]}"; do
+        if [[ -f "$distillation_path" ]]; then
+          resolved_path="$(realpath "$distillation_path")"
+          [[ "$resolved_path" == "$workspace/"* ]] && distillation_matches+=("$resolved_path")
+        fi
+      done
+      if [[ "${#distillation_matches[@]}" -ne 1 ]]; then
+        echo "Completed capture-state record has missing, ambiguous, or out-of-scope Distillation artifact: $record ($distillation)"
         fail=1
+        record_invalid=1
       fi
     fi
-    case "$privacy" in pass|fail|unknown) ;; *) echo "Capture-state record has invalid Privacy/scope check: $record"; fail=1 ;; esac
-  done < <(find "$workspace" -type f -path '*/capture-state/*.md' -print0 2>/dev/null)
+    case "$privacy" in pass|fail|unknown) ;; *) echo "Capture-state record has invalid Privacy/scope check: $record"; fail=1; record_invalid=1 ;; esac
+    count_invalid=$((count_invalid + record_invalid))
+  done
 
   unresolved=$((count_pending_quality + count_ready + count_deferred + count_owner_skipped + count_blocked))
   echo "Distillation State records: $total"
+  echo "Invalid records: $count_invalid"
   echo "Unresolved records: $unresolved"
   echo "pending-quality: $count_pending_quality"
   echo "ready: $count_ready"

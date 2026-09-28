@@ -4029,6 +4029,73 @@ perl -0pi -e 's/derived value: false/derived value: true/' "$distillation_worksp
 run_must_fail "distillation-state-derived-value-mismatch" "$distillation_state_validator" --workspace "$distillation_workspace"
 mv "$distillation_workspace/capture-state/work-001.md.bak" "$distillation_workspace/capture-state/work-001.md"
 
+cat > "$distillation_workspace/capture-state/legacy.md" <<'MD'
+# Historical AI System capture state
+
+- Work ID: `legacy`
+- State: `completed`
+- Distillation artifact: `distillations/work-001.md`
+- Privacy/scope check: pass; source stays local
+MD
+run_must_pass "distillation-state-accepts-canonical-history" "$distillation_state_validator" --workspace "$distillation_workspace"
+
+mkdir -p "$distillation_workspace/project-state/demo/capture-state" "$distillation_workspace/project-state/demo/distillations"
+printf '%s\n' '# Owner distillation' > "$distillation_workspace/project-state/demo/distillations/local.md"
+cat > "$distillation_workspace/project-state/demo/capture-state/owner.md" <<'MD'
+# Owner state
+
+- Work ID: owner
+- State: completed
+- Distillation artifact: distillations/local.md
+- Privacy/scope check: pass
+- `is_distilled` derived value: true
+MD
+run_must_pass "distillation-state-resolves-nearest-owner-artifact" "$distillation_state_validator" --workspace "$distillation_workspace"
+printf '%s\n' '# Ambiguous workspace distillation' > "$distillation_workspace/distillations/local.md"
+run_must_fail "distillation-state-rejects-ambiguous-artifact" "$distillation_state_validator" --workspace "$distillation_workspace"
+rm "$distillation_workspace/distillations/local.md"
+
+printf '%s\n' '# Outside distillation' > "$tmp/outside-distillation.md"
+ln -s "$tmp/outside-distillation.md" "$distillation_workspace/project-state/demo/distillations/escape.md"
+perl -0pi -e 's/Distillation artifact: distillations\/local.md/Distillation artifact: distillations\/escape.md/' "$distillation_workspace/project-state/demo/capture-state/owner.md"
+run_must_fail "distillation-state-rejects-artifact-symlink-escape" "$distillation_state_validator" --workspace "$distillation_workspace"
+perl -0pi -e 's/Distillation artifact: distillations\/escape.md/Distillation artifact: distillations\/local.md/' "$distillation_workspace/project-state/demo/capture-state/owner.md"
+rm "$distillation_workspace/project-state/demo/distillations/escape.md"
+
+mkdir -p "$distillation_workspace/clients/demo/capture-state" "$distillation_workspace/owned-assets/demo/capture-state"
+cat > "$distillation_workspace/clients/demo/capture-state/client.md" <<'MD'
+# Client state
+
+- Work ID: client
+- State: not-applicable
+- Distillation artifact: none
+- Privacy/scope check: pass; reviewed locally
+MD
+cat > "$distillation_workspace/owned-assets/demo/capture-state/asset.md" <<'MD'
+# Asset state
+
+- Work ID: asset
+- State: deferred
+- Distillation artifact: none
+- Privacy/scope check: pass
+- `is_distilled` derived value: false
+MD
+run_must_pass "distillation-state-scans-nearest-owner-namespaces" "$distillation_state_validator" --workspace "$distillation_workspace"
+
+mkdir -p "$distillation_workspace/projects/demo/ai-workflow-workspace/projects/foreign/capture-state"
+printf '%s\n' '- State: foreign' > "$distillation_workspace/projects/demo/ai-workflow-workspace/projects/foreign/capture-state/foreign.md"
+run_must_pass "distillation-state-ignores-foreign-runtime" "$distillation_state_validator" --workspace "$distillation_workspace"
+rm -rf "$distillation_workspace/projects/demo/ai-workflow-workspace"
+
+printf '%s\n' '- Work ID: bad' '- State: unknown-state' > "$distillation_workspace/capture-state/invalid.md"
+run_must_fail "distillation-state-counts-invalid-canonical-record" "$distillation_state_validator" --workspace "$distillation_workspace"
+rg -qF 'Invalid records: 1' "$tmp/distillation-state-counts-invalid-canonical-record.out" || { echo "Invalid canonical record was not counted"; exit 1; }
+rm "$distillation_workspace/capture-state/invalid.md"
+
+ln -s "$tmp/outside-capture-state.md" "$distillation_workspace/capture-state/linked.md"
+run_must_fail "distillation-state-rejects-symlinked-record" "$distillation_state_validator" --workspace "$distillation_workspace"
+rm "$distillation_workspace/capture-state/linked.md"
+
 mkdir -p "$distillation_workspace/projects/demo/capture-state"
 run_must_fail "distillation-state-detects-project-repo-pollution" "$distillation_state_validator" --workspace "$distillation_workspace"
 rm -rf "$distillation_workspace/projects/demo"

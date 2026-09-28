@@ -75,6 +75,10 @@ For sensitive scopes, report the safe state-record path and omit or anonymize pr
 
 Do not backfill historical work automatically. Work completed before this contract is invisible to the queue until the owner approves a separate audit or backfill.
 
+`check-distillation-state --workspace` inventories only the canonical AI System namespaces listed above. It does not recursively scan managed project repositories, nested AI Workflow runtimes, or product templates. A `capture-state/` directory directly inside a managed repository remains a placement error. The checker reports invalid records separately from unresolved valid states; an invalid state must not disappear into a zero-unresolved summary.
+
+For existing canonical records, a single pair of Markdown backticks around a field value and a semicolon-delimited note after `Privacy/scope check` are presentation syntax, not a different state. `is_distilled` is derived from `State`; if the compatibility field is present it must agree, but an older record may omit it. A relative distillation artifact path resolves against the AI System workspace root or the record's nearest-owner root; missing, ambiguous, or out-of-workspace targets fail. This compatibility rule does not rewrite historical files, infer a missing `State`, or admit records from foreign runtimes.
+
 ## Privacy And Scope
 
 State records contain paths and workflow metadata only. Do not copy raw client data, secrets, credentials, private keys, production data, check-in content, or project-specific domain content into cross-project reports.
