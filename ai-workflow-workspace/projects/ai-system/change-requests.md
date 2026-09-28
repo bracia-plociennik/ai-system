@@ -13,13 +13,13 @@ This file indexes project-local change requests for the `ai-system` project.
 | `ASYS-CR-003-all-planned-work-to-6d-do` | `post-final-approval` | `follow-up-enhancement` | `in-progress` | `new-project-iteration` |
 | `ASYS-CR-005-spor-daily-weekly` | `post-final-approval` | `feature / contract evolution` | `in-progress` | `new-project-iteration` |
 | `ASYS-CR-006-life-alignment-cards` | `post-final-approval` | `feature / behavioral contract` | `done` | `new-project-iteration` |
-| `ASYS-CR-007-project-orchestration` | `post-final-approval` | `follow-up-enhancement` | `in-progress` | `new-project-iteration` |
+| `ASYS-CR-007-project-orchestration` | `post-final-approval` | `follow-up-enhancement` | `done` | `new-project-iteration` |
 
 ## Active Change Request
 
-`ASYS-CR-007-project-orchestration`
+`none`
 
-CR-006 was closed on 2026-09-25 after current product QA, a refreshed checkpoint, project-scoped full validation, Phase 8 final check, and explicit owner `final-owner-yes`. CR-007 is an independent owner-approved post-final iteration. Other in-progress change requests remain independent.
+CR-006 was closed on 2026-09-25 after current product QA, a refreshed checkpoint, project-scoped full validation, Phase 8 final check, and explicit owner `final-owner-yes`. CR-007 was closed separately after installed-baseline Phase 8 and its own owner `final-owner-yes`. Other in-progress change requests remain independent and are not selected as the active change request.
 
 ## Completed Change Requests
 
@@ -34,3 +34,9 @@ CR-006 was closed on 2026-09-25 after current product QA, a refreshed checkpoint
   - Quality: `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/quality/phase-5-asys-cr-006-follow-up-quality.md`
   - Checkpoint: `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/checkpoints/phase-7-checkpoint-2026-09-25-asys-cr-006-follow-up.md`
   - Final check: `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/quality/phase-8-asys-cr-006-final-check.md`
+- `ASYS-CR-007-project-orchestration`
+  - Entry: `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/change-requests/2026-09-28-ai-system-cr-007-project-orchestration.md`
+  - Quality: `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/quality/phase-5-asys-cr-007-project-orchestration-quality.md`
+  - Checkpoint: `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/checkpoints/phase-7-checkpoint-2026-09-28-asys-cr-007-project-orchestration.md`
+  - Technical final check: `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/quality/phase-8-asys-cr-007-final-check-installed-2026-09-28.md`
+  - Owner approval and closure: `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/quality/phase-8-asys-cr-007-final-owner-approval-2026-09-28.md`

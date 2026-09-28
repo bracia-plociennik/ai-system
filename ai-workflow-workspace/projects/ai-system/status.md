@@ -6,12 +6,12 @@
 | `workflow-scope` | `plan-derived` |
 | `project-workspace` | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system` |
 | `active-plan-status` | `implementation` |
-| `current-task` | `ASYS-CR-007-project-orchestration` |
-| `active-change-request` | `ASYS-CR-007-project-orchestration` |
-| `current-phase` | `phase-7-checkpoint` |
+| `current-task` | `none` |
+| `active-change-request` | `none` |
+| `current-phase` | `phase-8-final-check` |
 | `phase-result` | `PASS` |
-| `final-owner-approval` | `not-requested` |
-| `next-phase` | `phase-8-final-check` |
+| `final-owner-approval` | `received` |
+| `next-phase` | `owner-final-approval` |
 | `next-task` | `none` |
 | `blocking-reason` | `none` |
 | `updated-at` | `2026-09-28` |
@@ -22,9 +22,13 @@
 ## Notes
 
 - CR-007 is a new post-final project orchestration iteration. The owner approved a complete implementation plan before product edits; the formal CR and spec were registered during the ongoing implementation. CR-006 final-check evidence remains historical and unchanged.
-- CR-007 Phase 4 implementation and Phase 5 quality are recorded in their scoped artifacts. Product full validation and project-scoped Workflow validation completed as supporting evidence; no Phase 8 final check or new final-owner-yes is claimed.
-- CR-007 Phase 6 distillation, project-memory update, and Phase 7 checkpoint are recorded. `next-phase: phase-8-final-check` names a possible owner-triggered route, not an authorization to run it. At the checkpoint, publication and rollout were pending; their later completion is recorded below.
+- CR-007 Phase 4 implementation and Phase 5 quality are recorded in their scoped artifacts. Product full validation and project-scoped Workflow validation completed as supporting evidence; at that stage no Phase 8 final check or new final-owner-yes was claimed.
+- CR-007 Phase 6 distillation, project-memory update, and Phase 7 checkpoint are recorded. At the checkpoint, `next-phase: phase-8-final-check` named a possible owner-triggered route, not an authorization to run it; publication and rollout were still pending. Their later completion and the subsequent Phase 8 attempt are recorded below.
 - CR-007 publication completed: `5752ad3` and `2c87b86` are on `origin/main`; the management checkout fast-forwarded to `2c87b86`, refreshed generated `AGENTS.md`, and passed an AI System full updater check. This does not close CR-007 or supply final-owner-yes.
+- CR-007 Phase 8 was run at clean dev and management baseline `e69f7d5`. Product and project-scoped Workflow full checks completed, but the workspace-wide Distillation State checker failed on historical scope/parsing/path-resolution issues. `quality/phase-8-asys-cr-007-final-check.md` records `FAIL`; CR-007 remains open with no owner final approval. Historical records were not modified.
+- A scoped Distillation State fix now validates four canonical AI System records without reading foreign runtimes. An isolated upstream AI Workflow fix corrects QA result parsing; each fix has local regression evidence. The append-only `quality/phase-8-asys-cr-007-final-check-rerun-2026-09-28.md` remains `FAIL` because neither reviewed fix is yet published and installed in management/nested checkouts. No historical record or final owner approval was changed.
+- Both fixes are now published: AI Workflow `1b45483` is installed in the nested clone and AI System `0a0a165` in dev and management. Their official updaters completed full validation. The installed-baseline Phase 8 artifact `quality/phase-8-asys-cr-007-final-check-installed-2026-09-28.md` records `awaiting-owner-final-yes`; CR-007 is still open and no final owner approval is inferred.
+- The owner subsequently gave explicit `final-owner-yes` for CR-007. `quality/phase-8-asys-cr-007-final-owner-approval-2026-09-28.md` records scoped `PASS` and closes only CR-007. `next-phase: owner-final-approval` is the validator-supported Phase 8 routing token; its owner decision has been received, not left pending. Other post-final work is unchanged.
 
 - Phase 5 quality passed for the original implementation package.
 - Owner opened pre-final change request `ASYS-CR-001-compact-contracts` to strengthen `ai-system` contracts before final closure.
