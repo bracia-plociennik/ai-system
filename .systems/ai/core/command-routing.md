@@ -1,5 +1,7 @@
 # Command Routing
 
+Requests for `DAILY CHECK-IN (SPOR) - propozycja read-only`, `WEEKLY CHECK-IN (SPOR) - propozycja read-only`, or an explicitly approved recurring SPOR proposal use `spor-proposals.md`. This separate route prepares stdout-only data and chat drafts; canonical check-in/TaskNote writes are never implied. Its Mon-Sat heartbeat is not the manual V1 weekly-planning scheduler.
+
 ## Purpose
 
 Map owner prompts to safe AI System actions.

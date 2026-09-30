@@ -4,7 +4,7 @@
 
 Weekly Planning records the owner's Saturday plan for the next Monday-Friday work week and routes approved actionable items into TaskForge TaskNotes.
 
-The default route is manual and workspace-local. Saturday is the planning day, Monday-Friday are the planned work days, and Sunday is intentionally outside the plan. There is no scheduler in V1.
+The default route is manual and workspace-local. Saturday is the planning day, Monday-Friday are the planned work days, and Sunday is intentionally outside the plan. There is no scheduler in V1. The separate advisory `spor-proposals.md` route supports an explicitly owner-approved desktop heartbeat; it cannot write this canonical plan or its TaskNotes.
 
 ## Canonical Artifact
 

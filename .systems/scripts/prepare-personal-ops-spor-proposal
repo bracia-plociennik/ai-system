@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+"""Prepare a deterministic advisory SPOR package on stdout, without writes."""
+import argparse
+import json
+import sys
+from datetime import date
+from pathlib import Path
+
+sys.dont_write_bytecode = True
+from personal_ops_spor_proposals import local_today, prepare
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--workspace", required=True)
+parser.add_argument("--date", type=date.fromisoformat)
+parser.add_argument("--json", action="store_true", help="JSON is also the default output")
+parser.add_argument("--scheduled", action="store_true", help="Use the current Warsaw date; never catch up a past date")
+parser.add_argument("--seen-id", action="append", default=[], help="Proposal ID already published in this chat")
+parser.add_argument("--regenerate", action="store_true", help="Explicit owner regeneration bypasses chat ID deduplication")
+args = parser.parse_args()
+try:
+    today = local_today()
+    if args.scheduled and args.date and args.date != today:
+        raise ValueError("Scheduled runs use the current Warsaw date; catch-up is forbidden")
+    result = prepare(Path(args.workspace), today if args.scheduled else args.date or today,
+                     args.scheduled, tuple(args.seen_id), args.regenerate)
+except (ValueError, OSError, TypeError, KeyError) as exc:
+    print(json.dumps({"status": "source-error", "error": str(exc), "writes": False}, ensure_ascii=False), file=sys.stderr)
+    sys.exit(1)
+print(json.dumps(result, ensure_ascii=False, indent=2))

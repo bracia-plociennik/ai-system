@@ -235,6 +235,7 @@ run_standard_checks() {
   run_cmd "$script_dir/check-cross-system-upgrade-handoff"
   run_cmd "$script_dir/check-weekly-planning"
   run_cmd "$script_dir/check-personal-ops-v4"
+  run_cmd "$script_dir/check-spor-proposals"
   run_cmd "$script_dir/check-weekly-planning-v4"
   run_cmd "$script_dir/check-block-checkpoint"
   run_cmd "$script_dir/check-end-of-task-capture"

@@ -33,5 +33,7 @@ Task index state: `phase-2-project-plan-pass`
 
 ## Post-final Release Work
 
+- `ASYS-POPS-016-spor-proposals`: in-progress, high risk; task `tasks/asys-pops-016-spor-proposals.md`, spec `specs/phase-3-asys-cr-008-spor-proposals-specification.md`. Approved read-only proposal product and thread scheduler; no historical approval changes.
+
 - `ASYS-RELEASE-POST-branch-ai-system`: deferred until final check and owner approval.
 - This release item is intentionally outside the current implementation task index.

@@ -1,5 +1,7 @@
 # Personal Ops
 
+Read-only Daily/Weekly proposal requests and the separately owner-approved desktop heartbeat use `spor-proposals.md` and `prepare-personal-ops-spor-proposal`. They never save canonical check-ins or generate TaskNotes; the canonical manual routes below remain unchanged.
+
 ## Purpose
 
 `personal-ops/` stores private owner operational records for planning, review, and self-management. It is not workspace memory by default.

@@ -4,6 +4,8 @@ Templates for private owner operational records under `AI_SYSTEM_WORKSPACE_HOME/
 
 This directory covers daily check-ins and the owner-local budget reporting contract. TODO databases and broader personal operations workflows remain out of scope.
 
+- `daily-spor-proposal.template.md` and `weekly-spor-proposal.template.md` are complete chat-only advisory forms under `spor-proposals.md`, not workspace bootstrap files or canonical TaskNote sources.
+
 - `personal-ops-readme.template.md` -> `AI_SYSTEM_WORKSPACE_HOME/personal-ops/README.md`
 - `check-ins-readme.template.md` -> `AI_SYSTEM_WORKSPACE_HOME/personal-ops/check-ins/README.md`
 - `manual-daily-check-in.template.md` -> `AI_SYSTEM_WORKSPACE_HOME/personal-ops/check-ins/import-profiles/manual-daily-check-in.md`

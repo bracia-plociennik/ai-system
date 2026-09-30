@@ -565,6 +565,15 @@ def calorie_report(records: list[dict], target: date, config: dict[str, str]) ->
 def calculate(workspace: Path, target: date) -> dict:
     config = parse_frontmatter(workspace / CONFIG_RELATIVE)
     records = records_available_as_of(load_official_records(workspace), target)
+    return calculate_from_records(records, target, config)
+
+
+def calculate_from_records(records: list[dict], target: date, config: dict[str, str], planned: dict | None = None) -> dict:
+    """Shared arithmetic for advisory callers; never writes a synthetic check-in."""
+    records = records_available_as_of(records, target)
+    if planned is not None:
+        records = [row for row in records if str(row.get("session_date")) != target.isoformat()]
+        records.append({**planned, "session_date": target.isoformat()})
     return {
         "report_date": target.isoformat(),
         "privacy": "private-sensitive",

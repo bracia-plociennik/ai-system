@@ -2,6 +2,8 @@
 
 Validation scripts for AI System live here.
 
+`prepare-personal-ops-spor-proposal --workspace <path> --date YYYY-MM-DD --json` prepares a source-labeled read-only advisory package on stdout. `--scheduled` selects the current Warsaw date, `--seen-id` deduplicates chat delivery and explicit `--regenerate` permits rerendering. `personal_ops_spor_proposals.py` implements the bounded collector; `check-spor-proposals` runs synthetic safety, period, coverage and capacity regressions.
+
 `init-ai-system` generates the ignored root `AGENTS.md` from `.systems/ai/templates/root/AGENTS.template.md`.
 
 `init-workspace` creates or completes a selected private workspace from workspace templates.

@@ -6,20 +6,24 @@
 | `workflow-scope` | `plan-derived` |
 | `project-workspace` | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system` |
 | `active-plan-status` | `implementation` |
-| `current-task` | `none` |
-| `active-change-request` | `none` |
-| `current-phase` | `phase-8-final-check` |
-| `phase-result` | `PASS` |
-| `final-owner-approval` | `received` |
-| `next-phase` | `owner-final-approval` |
+| `current-task` | `ASYS-POPS-016-spor-proposals` |
+| `active-change-request` | `ASYS-CR-008-spor-proposals` |
+| `current-phase` | `phase-7-checkpoint` |
+| `phase-result` | `in-progress` |
+| `final-owner-approval` | `not-requested` |
+| `next-phase` | `phase-7-checkpoint` |
 | `next-task` | `none` |
 | `blocking-reason` | `none` |
-| `updated-at` | `2026-09-28` |
+| `updated-at` | `2026-09-30` |
 | `autopilot-mode` | `supervised` |
 | `autopilot-state` | `stopped` |
 | `autopilot-run` | `autopilot-001` |
 
 ## Notes
+
+- CR-008 product QA, technical distillation and checkpoint are recorded. Publication, installed verification and scheduler activation are the current delivery route; first actual run remains unobserved. The task stays in-progress and no Phase 8/final-owner-yes is inferred.
+
+- Current pointers select CR-008 only. The owner approved its complete plan without a timebox; previous final approvals remain historical. Implementation entry Spec QA is recorded; no CR-008 final check or scheduler delivery is claimed.
 
 - CR-007 is a new post-final project orchestration iteration. The owner approved a complete implementation plan before product edits; the formal CR and spec were registered during the ongoing implementation. CR-006 final-check evidence remains historical and unchanged.
 - CR-007 Phase 4 implementation and Phase 5 quality are recorded in their scoped artifacts. Product full validation and project-scoped Workflow validation completed as supporting evidence; at that stage no Phase 8 final check or new final-owner-yes was claimed.

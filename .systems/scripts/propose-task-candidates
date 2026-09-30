@@ -1172,6 +1172,22 @@ def main() -> int:
     is_v4_check_in = False
     unsupported_v3_check_in = False
     task_generation_gate = ""
+    for advisory_source in (args.check_in, args.weekly_plan):
+        if advisory_source:
+            advisory_text = read_text(advisory_source.resolve())
+            advisory_frontmatter = parse_frontmatter(advisory_text)
+            advisory_json = {}
+            if advisory_text.lstrip().startswith("{"):
+                try:
+                    advisory_json = json.loads(advisory_text)
+                except json.JSONDecodeError:
+                    pass
+            if (
+                advisory_frontmatter.get("type") == "spor-proposal"
+                or isinstance(advisory_json, dict) and advisory_json.get("contract") == "spor-read-only-proposal-v1"
+                or re.match(r"^# (?:DAILY|WEEKLY) CHECK-IN \(SPOR\).*propozycja read-only", advisory_text)
+            ):
+                raise SystemExit("Read-only SPOR proposals are not canonical TaskNote sources")
     if args.check_in:
         check_in_frontmatter = parse_frontmatter(read_text(args.check_in.resolve()))
         is_v3_check_in = check_in_frontmatter.get("index_contract") == "3"
