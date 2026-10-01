@@ -33,7 +33,7 @@ Task index state: `phase-2-project-plan-pass`
 
 ## Post-final Release Work
 
-- `ASYS-POPS-017-unified-aggregates`: in-progress, high risk; task `tasks/asys-pops-017-unified-aggregates.md`, spec `specs/phase-3-asys-cr-009-unified-aggregates-specification.md`. Owner-approved derived-history migration; historical canonical sources preserved.
+- `ASYS-POPS-017-unified-aggregates`: done for implementation, high risk; task `tasks/asys-pops-017-unified-aggregates.md`, spec `specs/phase-3-asys-cr-009-unified-aggregates-specification.md`. Installed delivery complete; CR-009 final acceptance is a separate gate. Historical canonical sources preserved.
 
 - `ASYS-POPS-016-spor-proposals`: in-progress, high risk; task `tasks/asys-pops-016-spor-proposals.md`, spec `specs/phase-3-asys-cr-008-spor-proposals-specification.md`. Approved read-only proposal product and thread scheduler; no historical approval changes.
 

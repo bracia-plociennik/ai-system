@@ -1,6 +1,6 @@
 # ASYS-POPS-017 Unified Aggregates
 
-- Status: in-progress
+- Status: done
 - Risk: high
 - Change request: ASYS-CR-009-unified-aggregates
 - Source: specs/phase-3-asys-cr-009-unified-aggregates-specification.md
@@ -15,4 +15,4 @@
 
 ## Installed Delivery
 
-Implementation, publication, official update and approved target-only aggregate migration completed on 2026-10-01. Evidence: `quality/asys-cr-009-installed-delivery-evidence.md`. Original sources, TaskNotes and other workspace data remain unchanged. Status stays in-progress for the separately owner-triggered Phase 8/final acceptance; this does not imply remaining implementation work or final-owner-yes.
+Implementation, publication, official update and approved target-only aggregate migration completed on 2026-10-01. Evidence: `quality/asys-cr-009-installed-delivery-evidence.md`. Original sources, TaskNotes and other workspace data were unchanged at delivery. Task status is done for completed implementation. Final acceptance belongs to CR-009 and its separately owner-triggered Phase 8, not this task status. The owner-approved reconciliation is recorded in `decisions/2026-10-01-cr-009-completion-scope.md`; fresh final verification remains required before applying final-owner-yes.

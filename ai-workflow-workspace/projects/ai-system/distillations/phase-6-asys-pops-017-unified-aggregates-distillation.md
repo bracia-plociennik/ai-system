@@ -2,7 +2,7 @@
 
 - Task: ASYS-POPS-017-unified-aggregates
 - Quality: PASS for product scope; `quality/phase-5-asys-cr-009-unified-aggregates-quality.md`.
-- memory-in-repo-memory: false
+- memory-in-repo-memory: true
 
 ## Durable Decisions
 
