@@ -19,6 +19,7 @@ required=(
   ".systems/scripts/validation-dependencies.json"
   ".systems/scripts/smoke_assertion.py"
   ".systems/scripts/smoke_coverage.py"
+  ".systems/scripts/smoke_fixture.py"
   ".systems/scripts/smoke/negative-expectations.json"
   ".systems/scripts/tests/test_validation_integrity.py"
   ".systems/scripts/discover-skills"

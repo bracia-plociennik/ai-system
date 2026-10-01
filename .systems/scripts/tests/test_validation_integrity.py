@@ -25,6 +25,8 @@ import validation_runner as runner
 import smoke_assertion as assertion
 import eval_freshness
 import run_eval
+import smoke_fixture
+import smoke_coverage as population
 
 
 def load(name, path):
@@ -64,6 +66,123 @@ class Fixtures(unittest.TestCase):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text)
         return path
+
+    def test_smoke_copy_equivalence_and_independence(self):
+        source = self.root / "source"
+        init(source)
+        script = source / ".systems/scripts/fixture"
+        script.parent.mkdir(parents=True)
+        script.write_bytes(b"#!/bin/sh\necho fixture\n")
+        script.chmod(0o755)
+        os.utime(script, ns=(1000000000123456789, 1000000000987654321))
+        (source / "README.md").write_text("fixture\n")
+        (source / "private-runtime.md").write_text("excluded\n")
+        git(source, "add", ".systems", "README.md", "private-runtime.md")
+        extra = source / ".systems/extra.md"
+        extra.write_text("explicit product addition\n")
+        copies = [self.root / "one", self.root / "two"]
+        for target in copies:
+            target.mkdir()
+            names = smoke_fixture.copy_fixture(source, target, [".systems/extra.md"])
+            self.assertEqual(names, [".systems/extra.md", ".systems/scripts/fixture", "README.md"])
+            copied = target / ".systems/scripts/fixture"
+            self.assertEqual(copied.read_bytes(), script.read_bytes())
+            self.assertEqual(copied.stat().st_mode, script.stat().st_mode)
+            self.assertEqual(copied.stat().st_mtime_ns, script.stat().st_mtime_ns)
+            self.assertNotEqual(copied.stat().st_ino, script.stat().st_ino)
+            self.assertFalse((target / "private-runtime.md").exists())
+        (copies[0] / ".systems/scripts/fixture").write_text("mutated\n")
+        self.assertEqual((copies[1] / ".systems/scripts/fixture").read_bytes(), script.read_bytes())
+
+    def test_smoke_copy_invalid_sources_before_any_write(self):
+        for mode in ("missing", "linked", "escape", "traversal", "foreign", "secret"):
+            with self.subTest(mode=mode):
+                source = self.root / mode
+                init(source)
+                directory = source / ".systems"
+                directory.mkdir()
+                first = directory / "a.md"
+                first.write_text("valid\n")
+                last = directory / "z.md"
+                last.write_text("last\n")
+                git(source, "add", ".systems")
+                extra = []
+                if mode == "missing":
+                    last.unlink()
+                elif mode == "linked":
+                    last.unlink()
+                    last.symlink_to(first)
+                elif mode == "escape":
+                    outside = self.root / "outside"
+                    outside.mkdir()
+                    (outside / "x.md").write_text("excluded\n")
+                    (directory / "linked").symlink_to(outside, target_is_directory=True)
+                    extra = [".systems/linked/x.md"]
+                elif mode == "traversal":
+                    extra = [".systems/../README.md"]
+                elif mode == "secret":
+                    (directory / ".env").write_text("excluded fixture\n")
+                    extra = [".systems/.env"]
+                else:
+                    extra = ["private-runtime.md"]
+                target = self.root / (mode + "-copy")
+                target.mkdir()
+                with self.assertRaises(ValueError):
+                    smoke_fixture.copy_fixture(source, target, extra)
+                self.assertEqual(list(target.iterdir()), [])
+
+    def test_smoke_copy_unsafe_destinations(self):
+        source = self.root / "source"
+        init(source)
+        (source / "README.md").write_text("fixture\n")
+        git(source, "add", "README.md")
+        filled = self.root / "filled"
+        filled.mkdir()
+        (filled / "keep").write_text("keep\n")
+        linked = self.root / "linked"
+        linked.symlink_to(filled, target_is_directory=True)
+        inside = source / "inside"
+        inside.mkdir()
+        for target in (filled, linked, inside):
+            with self.assertRaises(ValueError):
+                smoke_fixture.copy_fixture(source, target)
+        self.assertEqual((filled / "keep").read_text(), "keep\n")
+
+    def test_smoke_bounded_transactions_and_independent_roots(self):
+        commands = []
+        for index in range(7):
+            target = self.root / str(index)
+            target.mkdir()
+            code = ("import json,os,time; from pathlib import Path; "
+                    "start=time.monotonic_ns(); time.sleep(.05); "
+                    "end=time.monotonic_ns(); Path('owned').write_text(str(os.getpid())); "
+                    "print(json.dumps([start,end,os.getpid()]))")
+            commands.append([sys.executable, "-c", "import os; os.chdir(" + repr(str(target)) + "); " + code])
+        results = smoke_fixture.run_transactions(commands)
+        self.assertEqual(len(results), 7)
+        self.assertTrue(all(result.returncode == 0 for result in results))
+        intervals = [json.loads(result.stdout) for result in results]
+        events = sorted([(start, 1) for start, _, _ in intervals] + [(end, -1) for _, end, _ in intervals])
+        active = peak = 0
+        for _, change in events:
+            active += change
+            peak = max(peak, active)
+        self.assertLessEqual(peak, 2)
+        self.assertEqual(len({pid for _, _, pid in intervals}), 7)
+        for index, (_, _, pid) in enumerate(intervals):
+            self.assertEqual((self.root / str(index) / "owned").read_text(), str(pid))
+        self.assertEqual(smoke_fixture.SUITES, tuple(population.population(ROOT)["suites"]))
+
+    def test_smoke_transactions_drain_failed_batch_without_future_writes(self):
+        marker = self.root / "drained"
+        forbidden = self.root / "forbidden"
+        commands = [[sys.executable, "-c", "import sys; print('expected failure'); sys.exit(7)"],
+                    [sys.executable, "-c", "import time; from pathlib import Path; time.sleep(.05); Path(" + repr(str(marker)) + ").write_text('drained')"],
+                    [sys.executable, "-c", "from pathlib import Path; Path(" + repr(str(forbidden)) + ").write_text('unsafe')"]]
+        results = smoke_fixture.run_transactions(commands)
+        self.assertEqual([result.returncode for result in results], [7, 0])
+        self.assertTrue(marker.exists())
+        self.assertFalse(forbidden.exists())
 
     def test_typed_rejection_and_complete_ownership(self):
         case = {"exit_code": 1, "diagnostic": "scope rejected", "suite": "quality"}

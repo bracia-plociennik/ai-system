@@ -33,14 +33,11 @@ case "$suite" in
   *) echo "Unknown smoke suite: $suite" >&2; exit 2 ;;
 esac
 if [[ "$suite" == all ]]; then
-  for domain in core skills workspace personal-ops tasks dreaming quality; do
-    args=(--suite "$domain")
-    while IFS= read -r path; do
-      [[ -n "$path" ]] && args+=(--extra-product-file "$path")
-    done <<< "$extra_product_files"
-    "$repo_root/.systems/scripts/check-validator-smoke-tests" "${args[@]}"
-  done
-  echo "SMOKE_COMPLETION suites=7 isolation=per-domain supporting_only=true"
+  args=(--repo-root "$repo_root" --run-all)
+  while IFS= read -r path; do
+    [[ -n "$path" ]] && args+=(--extra-product-file "$path")
+  done <<< "$extra_product_files"
+  python3 -B "$repo_root/.systems/scripts/smoke_fixture.py" "${args[@]}"
   exit 0
 fi
 tmp="$(mktemp -d "${TMPDIR:-/tmp}/ai-system-validator-smoke.XXXXXX")"
@@ -56,21 +53,12 @@ trap cleanup EXIT
 
 mkdir -p "$copy_repo"
 
-(
-  cd "$repo_root"
-  while IFS= read -r -d '' path; do
-    [[ -f "$path" && ! -L "$path" ]] || { echo "Unsafe or missing smoke source: $path" >&2; exit 1; }
-    source_parent="$(cd -P "$(dirname "$path")" && pwd -P)"
-    [[ "$source_parent" == "$repo_root/.systems" || "$source_parent" == "$repo_root/.systems/"* || "$source_parent" == "$repo_root/.github" || "$source_parent" == "$repo_root/.github/"* || "$source_parent" == "$repo_root" ]] || { echo "Smoke source escapes product root: $path" >&2; exit 1; }
-    mkdir -p "$copy_repo/$(dirname "$path")"
-    cp -p "$path" "$copy_repo/$path"
-  done < <(git ls-files -z -- .systems .github README.md HUMANS.md .gitignore)
-)
+copy_args=(--repo-root "$repo_root" --destination "$copy_repo")
 while IFS= read -r path; do
   [[ -n "$path" ]] || continue
-  mkdir -p "$copy_repo/$(dirname "$path")"
-  cp -p "$repo_root/$path" "$copy_repo/$path"
+  copy_args+=(--extra-product-file "$path")
 done <<< "$extra_product_files"
+python3 -B "$repo_root/.systems/scripts/smoke_fixture.py" "${copy_args[@]}"
 
 (cd "$copy_repo" && git init -q)
 

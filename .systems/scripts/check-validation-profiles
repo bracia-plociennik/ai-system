@@ -76,7 +76,11 @@ require_ref "$runner" 'selected_checks' 'scoped dependency deduplication'
 require_ref "$contract" 'Classify impact by changed behavior, risk, and cross-contract reach' 'risk-based full routing'
 require_ref '.github/workflows/ai-system-validate.yml' '      - main' 'full CI on main'
 require_ref '.systems/scripts/check-validator-smoke-tests' '--suite' 'domain smoke suite selection'
-require_ref '.systems/scripts/check-validator-smoke-tests' 'git ls-files -z -- .systems .github README.md HUMANS.md .gitignore' 'tracked product-only fixture source'
+if ! rg -qF 'git ls-files -z -- .systems .github README.md HUMANS.md .gitignore' "$repo_root/.systems/scripts/check-validator-smoke-tests"; then
+  require_ref '.systems/scripts/check-validator-smoke-tests' 'python3 -B.*smoke_fixture.py' 'fixture copy producer'
+  require_ref '.systems/scripts/smoke_fixture.py' '"ls-files", "-z", "--"' 'tracked fixture source'
+  require_ref '.systems/scripts/smoke_fixture.py' '".systems", ".github", "README.md", "HUMANS.md", ".gitignore"' 'product-only fixture inventory'
+fi
 if rg -q -- 'git ls-files -co --exclude-standard' "$repo_root/.systems/scripts/check-validator-smoke-tests"; then
   echo "Smoke fixture must not copy arbitrary untracked files"
   fail=1
