@@ -21,3 +21,11 @@ Complete canonical runtime scope, dependency closure and current semantic/privac
 
 ## Review Boundaries
 Independent external model sessions and a private runtime pilot are not authorized or needed for these synthetic product fixtures. Semantic review and observed local behavior are reported separately from script success.
+
+## Final Owner Acceptance
+- Date: 2026-10-01.
+- Authority: direct owner message in the current conversation, received after the completed technical result was presented.
+- Exact statement: "final-owner-yes: akceptuję zamknięcie ai-system-integrity-and-efficiency-v2".
+- Reviewed technical result: Phase 8 at commit 754748b; no unresolved technical blocker, unchanged coverage and complete product/Workflow supporting evidence.
+- Decision: approved; close the eleven-task program and bounded smoke optimization.
+- Boundary: formal closure and scoped local artifact commit only; no push, management update, counterpart source write or private runtime migration.

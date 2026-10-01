@@ -4,15 +4,15 @@
 - Project: ai-system-integrity-and-efficiency-v2
 - Date: 2026-10-01
 - Workflow phase: 8. FINAL CHECK
-- Result: awaiting-owner-final-yes
+- Result: PASS
 - QA verification contract: `full-qa-verification-v2`
 
 ## Current QA Run
-- Run ID: final-check-integrity-efficiency-v2-smoke-optimization-complete
+- Run ID: final-check-integrity-efficiency-v2-owner-approved-closure
 - Artifact kind: final-check
 - Project/task identity: ai-system-integrity-and-efficiency-v2
-- Assessed source HEAD: 628064a0c2dffc0641b63b89f8707c830a254629
-- Assessed worktree digest: 122bddf927874f447287a7da71fca7a54102aceb8fe0fbdd47c0ea1b36ab310b
+- Assessed source HEAD: 754748b135131e7d3a3732a811b52b7c9357f421
+- Assessed worktree digest: a775b458c1efd055c7a117a136f55f6991226183d6a8e0fdfacd22f0b373eafb
 - Input artifacts: see table
 - Verdict: PASS
 - Gate Decision: PASS
@@ -72,7 +72,7 @@
 | owning-project-evidence | checkpoints/phase-7-integrity-efficiency-v2-checkpoint.md | 4f31f5fcb9cf38a9ad2cdf9552b1cd2dbed0dc37f2fffa9053b9e124a8c0307b |
 | owning-project-evidence | checkpoints/phase-7-smoke-setup-optimization-checkpoint.md | e961491c227f86711e5da847dc13e5aa3cdb8e37681344d2881318841e9386c5 |
 | owning-project-evidence | context.md | 78ddaf8e31ae61bf074cbebc3903aa2eeb7b28f67c91fce2bc5839aec17c0222 |
-| owning-project-evidence | decisions/operator-decisions.md | d9e44b847e2dd28120428abe726e30ac9691fdcfa52300e804e7f7fee49161f6 |
+| owning-project-evidence | decisions/operator-decisions.md | 70f6f9c1b913c2fc1247f1837b4d7856b06d53b4f420a8ed6af741d75ea7142c |
 | owning-project-evidence | decisions/smoke-optimization-handoff.md | 256a093b57197ecf7aeec3e8da39252e6f2017153d9d2f2571cdc6cd823b1832 |
 | owning-project-evidence | distillations/phase-6-integrity-efficiency-v2-distillation.md | 90e3933cab139eabe7ec52a3de90cce8cc8816d21df84f292ddf804811846a02 |
 | owning-project-evidence | distillations/phase-6-smoke-setup-optimization-distillation.md | 0fe758148f104ebb5da553300bc2b483739be93da16750ebf1497ce21d4584a7 |
@@ -135,7 +135,7 @@
 | owning-project-evidence | quality/smoke-optimization-timing-review.md | dd4d2cb71c41f06ca7bafb09b09fd69928ad633a1e74c95a7b1aeaad761ac43f |
 | owning-project-evidence | quality/timing-review.md | 2dfeab097d9e758caea8cf987666aca01d0d916587f8517480c09dcab02b94e0 |
 | owning-project-evidence | specs/phase-3-program-specification.md | 824384b8391f7b37b283e4f68c10a7c322d80e0df622aaa89cd8d8cef9c8f399 |
-| owning-project-evidence | status.md | 6d6b716e2c8150c34a562e20b8dca2025da0f7503f587c01ce178e20ccc9980d |
+| owning-project-evidence | status.md | 26a4fa4cf8fc1151b6f674d6e651f7cc52ec523f4829aee7b62cdc90d6b32fd1 |
 | owning-project-evidence | tasks.md | 1db5fc8210df25c9c6ab77a863478c64f714fb17d660a6eb1e892f9c778eb1eb |
 | workflow-source | .systems/ai/workflow/phase-8-final-check.md | 3536e1687e87344e06116589edce3a5f4ee6b789f70ab9f415e2550326d54589 |
 | workflow-source | .systems/scripts/lib/qa-evidence.py | ed083aba1112eb27fd0e4b3c3b97d92d072112da023a9822367513e408f6179a |
@@ -146,13 +146,13 @@ Findings-first semantic review, intent/plan/spec compliance, producer-consumer a
 
 All seven smoke domain bodies and all 220 exact negative contracts are unchanged. Twenty integrity tests include independent-copy equivalence, path preflight, transaction isolation, bounded concurrency and failure/drain behavior. The complete nine-run comparable matrix has means 169.9906 seconds optimized, 225.5908 old sequential isolated and 201.4699 monolithic: 24.65 percent and 15.62 percent improvements respectively. P2-PERF-001 is resolved for this local equivalent population. Coverage digest d0ebb4dd4b8512ed042fb9aca062d039d07e749e99e800a3c953ffa50bc45607 and product source digest dee21660d7935759ac79da9a9577947e8b66c5140e7e5badd9134c560527a3ed match the current reviewed execution. Fixture HEADs and actual-run HEADs remain separately recorded, not falsely equated.
 
-Actual current-worktree product full completed all 33 checks, seven smoke domains and twenty integrity cases with exit 0. Renewed project-scoped Workflow full completed at clean nested HEAD 0c767da0385723560d1b0d4794a9091316c23140 with all smoke groups, exactly one completion marker and exit 0 (648 seconds). These scripts are supporting-only; they do not issue semantic acceptance. Targeted post-write artifact verification is required before recording this assessment as complete.
+Actual current-worktree product full completed all 33 checks, seven smoke domains and twenty integrity cases with exit 0. Renewed project-scoped Workflow full completed at clean nested HEAD 0c767da0385723560d1b0d4794a9091316c23140 with all smoke groups, exactly one completion marker and exit 0 (648 seconds). These scripts are supporting-only; they do not issue semantic acceptance. Targeted post-write QA evidence, status and diff checks completed with exit 0 after applying the owner's final acceptance. Product source is unchanged, so the completed full executions remain applicable.
 
 Earlier Phase 8 FAIL, copy-only insufficient results, failed wrong-directory invocation and formatting recovery snapshots remain retained. No historical QA was silently converted to acceptance. Product/runtime source changes in other checkouts, root AGENTS, nested Workflow source and unrelated CR009 changes remain untouched.
 
 ### Review Completeness Gate
 - Status: complete
-- Reviewed baseline: current exact input table and committed 628064a; original dabbf34 program and bounded IEV2-CR-001
+- Reviewed baseline: current exact input table and committed 754748b; technical result at 628064a, original dabbf34 program and bounded IEV2-CR-001; latest writes only record owner closure
 - Closure freshness: current
 - Post-fix full re-review: completed
 - Policy-boundary adversarial matrix: completed
@@ -180,20 +180,21 @@ Earlier Phase 8 FAIL, copy-only insufficient results, failed wrong-directory inv
 - Prior P2-PERF-001: resolved by current comparable evidence; previous FAIL remains historical
 - Residual risk: timing is a three-sample-per-variant local observation subject to host/cache/load noise, not a universal speed guarantee
 - Excluded scope: private runtime pilot, counterpart implementation, external model sessions, push and management rollout
-- Required owner action: approve or reject the completed technical result
+- Owner action: explicit final-owner-yes received after the completed technical result; acceptance recorded in decisions/operator-decisions.md
 
 ### Owner Approval
 - Technical final check result: PASS
 - Owner approval required: yes
-- Owner decision: awaiting
-- Final-owner-yes: not inferred from the forward implementation request
+- Owner decision: approved
+- Final-owner-yes: explicit current owner message after technical-result presentation, recorded on 2026-10-01
+- Owner statement: "final-owner-yes: akceptuję zamknięcie ai-system-integrity-and-efficiency-v2"
 - Approval scope: final closure of the reviewed integrity-efficiency program and bounded smoke optimization, not publication
 
 ### Final Gate
-- Result: awaiting-owner-final-yes
-- Can close active plan: awaiting-owner
-- Required next phase: owner-final-approval
-- Blocking reason: current owner acceptance remains outstanding; no technical blocker
+- Result: PASS
+- Can close active plan: yes
+- Required next phase: none; owner-final-approval received and applied
+- Blocking reason: none
 - Publication: not authorized
 
 ## Optional Knowledge Capture
@@ -202,8 +203,8 @@ Earlier Phase 8 FAIL, copy-only insufficient results, failed wrong-directory inv
 - Evidence: current capture records and accepted technical distillation; no duplicate source capture
 
 ## Owner Decision Checkpoint
-- State: awaiting-owner
-- Decision needed: final-owner-yes for the current completed technical result
+- State: completed
+- Decision needed: none; current final-owner-yes received and applied
 - Impact: formal plan closure only; does not authorize push or counterpart source changes
 
 ## Contract Compliance
@@ -211,7 +212,7 @@ Earlier Phase 8 FAIL, copy-only insufficient results, failed wrong-directory inv
 - Work mode compliance: pass
 - Knowledge capture: required
 - Capture target: project-memory, distillation, checkpoint and external-memory
-- Reason: technical capture and full evidence chain complete; formal owner acceptance remains separate
+- Reason: technical capture and full evidence chain complete; subsequent explicit final-owner-yes closes only the reviewed scope
 - Delivery constraints: no deadline/timebox, complete quality floor
 - Distillation State: completed
 - Cross-system impact: yes, privacy-safe advisory handoff exists
@@ -222,7 +223,7 @@ Earlier Phase 8 FAIL, copy-only insufficient results, failed wrong-directory inv
 - Evidence reviewed: exact input hashes, semantic/behavior reviews, source/population digests, nine comparable runs, actual product full, complete Workflow full, retained failure history and current capture
 - Procedures used: findings-first re-review, intent/plan/spec compliance, adversarial and producer-consumer checks, Phase 8 technical assessment
 - Skills used: none; no new skill artifacts in this bounded defect fix
-- Instruction adherence refresh: full after context compaction; current root/nested contracts and Phase 8 refreshed, baseline 628064a, no scope drift
+- Instruction adherence refresh: targeted owner-closure refresh after prior full refresh; current status, Phase 8, owner route and evidence grammar reviewed, baseline 754748b, no product or scope drift
 - Commands/checks run: complete product and Workflow full executions; targeted QA/status/capture/handoff and diff checks
 - Skipped scope: private runtime pilot, counterpart source, external model sessions, publication and management rollout
 - Scripts: supporting-only
