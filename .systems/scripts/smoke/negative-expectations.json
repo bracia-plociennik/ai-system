@@ -1,0 +1,1105 @@
+{
+  "contract": 1,
+  "cases": {
+    "block-checkpoint-missing-contract": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing required artifact: .systems/ai/core/block-checkpoint.md"
+    },
+    "block-checkpoint-missing-template": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing required artifact: .systems/ai/templates/checkpoint/block-checkpoint.template.md"
+    },
+    "block-checkpoint-unsafe-fate-contract": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Invalid scope_fate value in block checkpoint contract"
+    },
+    "block-checkpoint-no-automatic-promotion": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Unsafe block checkpoint authority wording detected"
+    },
+    "block-checkpoint-invalid-latest-router": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Invalid block checkpoint latest target"
+    },
+    "block-checkpoint-invalid-workspace-fate": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Invalid block checkpoint scope fate"
+    },
+    "weekly-planning-missing-post-write-summary-contract": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing weekly planning reference 'Post-Write Weekly Summary' in .systems/ai/core/weekly-planning.md"
+    },
+    "weekly-planning-unsafe-post-write-summary-authority": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Unsafe weekly post-write summary authority wording detected"
+    },
+    "tracked-root-agents-forbidden": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Forbidden tracked artifact: AGENTS.md"
+    },
+    "generated-root-agents-missing-prompt-composition": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing prompt composition reference in AGENTS.md: local generated prompt composition contract"
+    },
+    "missing-root-agents-template": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing file for prompt composition reference check: .systems/ai/templates/root/AGENTS.template.md"
+    },
+    "missing-prompt-composition-contract": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing prompt composition artifact: .systems/ai/core/prompt-composition.md"
+    },
+    "missing-client-prompting-template": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing prompt composition artifact: .systems/ai/templates/prompting/client-prompting-readme.template.md"
+    },
+    "prompt-artifacts-authority": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Unsafe prompt composition authority wording found: advisory artifacts are granted policy or gate authority"
+    },
+    "mixed-prompt-artifacts-authority": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Unsafe prompt composition authority wording found: advisory artifacts are granted policy or gate authority"
+    },
+    "prompt-modules-authority": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Unsafe prompt composition authority wording found: advisory artifacts are granted policy or gate authority"
+    },
+    "role-profiles-authority": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Unsafe prompt composition authority wording found: advisory artifacts are granted policy or gate authority"
+    },
+    "variable-packs-authority": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Unsafe prompt composition authority wording found: advisory artifacts are granted policy or gate authority"
+    },
+    "client-role-authority": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Unsafe client role authority wording found"
+    },
+    "project-role-authority": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Unsafe project role authority wording found"
+    },
+    "contract-compliance-missing-client-work": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing contract compliance reference in .systems/ai/core/contract-compliance.md: client-work"
+    },
+    "contract-compliance-missing-required": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing contract compliance reference in .systems/ai/core/contract-compliance.md: Knowledge capture is .*required"
+    },
+    "contract-compliance-missing-not-required": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing contract compliance reference in .systems/ai/core/contract-compliance.md: not-required"
+    },
+    "contract-compliance-missing-checkpoint-target": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing contract compliance reference in .systems/ai/core/contract-compliance.md: checkpoint"
+    },
+    "contract-compliance-missing-advisory-only": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing contract compliance reference in .systems/ai/core/contract-compliance.md: advisory-only"
+    },
+    "missing-owner-approval-contract": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing required artifact: .systems/ai/core/owner-approval.md"
+    },
+    "owner-approval-requires-English-plan-acceptance": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing owner approval reference in .systems/ai/core/owner-approval.md: English acceptance phrase"
+    },
+    "owner-approval-requires-current-plan-binding": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing owner approval reference in .systems/ai/core/owner-approval.md: current plan binding"
+    },
+    "owner-approval-blocks-validation-bypass": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Unsafe owner approval wording found: plan acceptance may bypass validation"
+    },
+    "missing-end-of-task-capture-contract": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing required artifact: .systems/ai/core/end-of-task-capture.md"
+    },
+    "missing-end-of-task-capture-template": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing required artifact: .systems/ai/templates/capture/end-of-task-capture.template.md"
+    },
+    "missing-end-of-task-capture-validator": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing required artifact: .systems/scripts/check-end-of-task-capture"
+    },
+    "end-of-task-capture-requires-trigger-grammar": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing end-of-task capture reference in .systems/ai/core/end-of-task-capture.md: trigger grammar"
+    },
+    "end-of-task-capture-requires-precedence": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing end-of-task capture reference in .systems/ai/core/end-of-task-capture.md: precedence rules"
+    },
+    "end-of-task-capture-requires-privacy-field": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing end-of-task capture reference in .systems/ai/templates/capture/end-of-task-capture.template.md: template field: Privacy/scope check"
+    },
+    "end-of-task-capture-unsafe-wording": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Unsafe end-of-task capture wording found: end task may mark PASS automatically"
+    },
+    "end-of-task-capture-blocks-acknowledge-only": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Unsafe end-of-task capture wording found: (Koniec pracy|Koniec zadania)[^.\\n]{0,120}\\b(may|can|should|will)\\b[^.\\n]{0,100}\\b(acknowledge only|ask what to do next|proposal-only)\\b"
+    },
+    "end-of-task-capture-requires-capture-mode": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing end-of-task capture reference in .systems/ai/templates/capture/end-of-task-capture.template.md: template field: Capture mode"
+    },
+    "project-state-missing-git-worktree-guard": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing project-state reference in .systems/ai/core/project-state.md: git worktree guard"
+    },
+    "project-state-missing-workspaces-reference": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing project-state reference in .systems/ai/core/workspaces.md: project-state guidance"
+    },
+    "project-state-detects-runtime-files-in-project-repo": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Project repo contains AI System runtime artifact: projects/polluted-repo/status.md"
+    },
+    "orchestration-requires-explicit-project": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "AI Workflow project ID is ambiguous or missing"
+    },
+    "orchestration-path-traversal": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "project-state must be a normalized workspace-relative path"
+    },
+    "orchestration-nonnormalized-path": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "project-state must be a normalized workspace-relative path"
+    },
+    "orchestration-unsafe-project-id": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "unsafe AI Workflow project ID"
+    },
+    "orchestration-link-conflict": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "explicit repo and project-state repo-path disagree"
+    },
+    "orchestration-missing-target-instructions": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "target root AGENTS.md is missing"
+    },
+    "orchestration-missing-workflow-instructions": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "nested AI Workflow AGENTS.md is missing"
+    },
+    "orchestration-missing-repo-intake": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "AI Workflow runtime status or repo intake is missing"
+    },
+    "orchestration-project-status-symlink": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "selected AI Workflow project status is missing"
+    },
+    "orchestration-project-state-symlink-escape": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "project-state path contains a symlink alias"
+    },
+    "orchestration-project-state-symlink-alias": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "project-state path contains a symlink alias"
+    },
+    "orchestration-local-blocker": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "selected AI Workflow project reports a blocker"
+    },
+    "orchestration-missing-core": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing project-orchestration artifact: .systems/ai/core/project-orchestration.md"
+    },
+    "missing-skill-intake-plan-template": {
+      "suite": "skills",
+      "exit_code": 1,
+      "diagnostic": "Missing required artifact: .systems/ai/templates/workspace/skills/skill-intake-plan.template.md"
+    },
+    "system-skills-require-intake-plan-for-context": {
+      "suite": "skills",
+      "exit_code": 1,
+      "diagnostic": "System skill with context/ and active artifacts must include skill-intake-plan.md: .systems/ai/skills/context-intake-missing-plan"
+    },
+    "quick-validate-require-intake-plan-for-context": {
+      "suite": "skills",
+      "exit_code": 1,
+      "diagnostic": "Missing skill-intake-plan.md for context-driven skill"
+    },
+    "system-skills-block-context-active-instructions": {
+      "suite": "skills",
+      "exit_code": 1,
+      "diagnostic": "System skill active artifact treats context/** as active guidance or authority: .systems/ai/skills/context-intake-authority/SKILL.md"
+    },
+    "quick-validate-block-context-active-instructions": {
+      "suite": "skills",
+      "exit_code": 1,
+      "diagnostic": "Active skill artifact treats context/** as active guidance or authority"
+    },
+    "system-skills-block-context-guidance": {
+      "suite": "skills",
+      "exit_code": 1,
+      "diagnostic": "System skill active artifact treats context/** as active guidance or authority: .systems/ai/skills/context-intake-guidance/SKILL.md"
+    },
+    "quick-validate-block-context-guidance": {
+      "suite": "skills",
+      "exit_code": 1,
+      "diagnostic": "Active skill artifact treats context/** as active guidance or authority"
+    },
+    "system-skills-block-context-guidance-in-reference": {
+      "suite": "skills",
+      "exit_code": 1,
+      "diagnostic": "System skill active artifact treats context/** as active guidance or authority: .systems/ai/skills/context-reference-guidance/references/source.md"
+    },
+    "quick-validate-block-context-guidance-in-reference": {
+      "suite": "skills",
+      "exit_code": 1,
+      "diagnostic": "Active skill artifact treats context/** as active guidance or authority"
+    },
+    "system-skills-block-long-skill-md": {
+      "suite": "skills",
+      "exit_code": 1,
+      "diagnostic": "System skill SKILL.md is too long; keep active contracts compact (309 lines > 300): .systems/ai/skills/context-intake-long/SKILL.md"
+    },
+    "system-skills-require-skill-md": {
+      "suite": "skills",
+      "exit_code": 1,
+      "diagnostic": "Missing system skill artifact: .systems/ai/skills/skill-creator/SKILL.md"
+    },
+    "system-skills-require-readme": {
+      "suite": "skills",
+      "exit_code": 1,
+      "diagnostic": "Missing system skill artifact: .systems/ai/skills/skill-creator/README.md"
+    },
+    "system-skills-require-frontmatter-name": {
+      "suite": "skills",
+      "exit_code": 1,
+      "diagnostic": "Missing system skill reference in .systems/ai/skills/skill-creator/SKILL.md: evaluation resource routing"
+    },
+    "system-skills-require-authority-boundary": {
+      "suite": "skills",
+      "exit_code": 1,
+      "diagnostic": "Missing system skill reference in .systems/ai/skills/skill-creator/SKILL.md: evaluation resource routing"
+    },
+    "system-skills-block-claude-cli-marker": {
+      "suite": "skills",
+      "exit_code": 1,
+      "diagnostic": "System skill contains external-model/runtime-specific execution markers: .systems/ai/skills/skill-creator"
+    },
+    "system-skills-block-external-cdn": {
+      "suite": "skills",
+      "exit_code": 1,
+      "diagnostic": ".systems/ai/skills/skill-creator/assets-cdn-smoke.html:1:<script src=\"https://cdn.example.invalid/viewer.js\"></script>"
+    },
+    "system-skills-block-undeclared-yaml-import": {
+      "suite": "skills",
+      "exit_code": 1,
+      "diagnostic": "System skill contains undeclared Python dependency import: .systems/ai/skills/skill-creator"
+    },
+    "system-skills-block-python-cache-artifacts": {
+      "suite": "skills",
+      "exit_code": 1,
+      "diagnostic": "System skill contains generated Python runtime artifacts: .systems/ai/skills/skill-creator"
+    },
+    "system-skills-package-blocks-output-inside-skill": {
+      "suite": "skills",
+      "exit_code": 1,
+      "diagnostic": "Output archive must be outside the skill directory"
+    },
+    "system-skills-run-eval-blocks-path-traversal": {
+      "suite": "skills",
+      "exit_code": 1,
+      "diagnostic": "Invalid eval id for filesystem directory: '../escape'. Use letters, digits, dots, underscores, or hyphens only; do not use path separators."
+    },
+    "system-skills-run-eval-blocks-config-path-traversal": {
+      "suite": "skills",
+      "exit_code": 1,
+      "diagnostic": "Invalid configuration for filesystem directory: '../escape'. Use letters, digits, dots, underscores, or hyphens only; do not use path separators."
+    },
+    "update-workspace-missing-root-stops": {
+      "suite": "workspace",
+      "exit_code": 1,
+      "diagnostic": "STOP: selected workspace root does not exist:"
+    },
+    "system-insights-missing-privacy-check": {
+      "suite": "workspace",
+      "exit_code": 1,
+      "diagnostic": "System Insight entry missing required metadata 'Privacy check:'"
+    },
+    "system-insights-missing-operational-validation": {
+      "suite": "workspace",
+      "exit_code": 1,
+      "diagnostic": "System Insight entry missing operational validation subsection '### czego brakuje'"
+    },
+    "system-insights-blocks-raw-client-data": {
+      "suite": "workspace",
+      "exit_code": 1,
+      "diagnostic": "System Insight entry appears to contain raw client data or secret markers"
+    },
+    "system-insights-blocks-product-domain-external-memory": {
+      "suite": "workspace",
+      "exit_code": 1,
+      "diagnostic": "External Memory contains product-domain or System Insight lesson; use AI_SYSTEM_WORKSPACE_HOME/system-insights/"
+    },
+    "external-source-registry-missing-core-contract": {
+      "suite": "workspace",
+      "exit_code": 1,
+      "diagnostic": "Missing external source registry artifact: .systems/ai/core/external-source-registry.md"
+    },
+    "external-source-client-source-record-still-required": {
+      "suite": "workspace",
+      "exit_code": 1,
+      "diagnostic": "External source record missing required field source-slug:: clients/demo/links/notion-source.md"
+    },
+    "external-source-missing-privacy-class": {
+      "suite": "workspace",
+      "exit_code": 1,
+      "diagnostic": "External source record missing required field privacy-class:: links/missing-privacy.md"
+    },
+    "external-source-missing-allowed-operation": {
+      "suite": "workspace",
+      "exit_code": 1,
+      "diagnostic": "External source record missing required field allowed-operation:: links/missing-allowed-operation.md"
+    },
+    "external-source-write-back-forbidden": {
+      "suite": "workspace",
+      "exit_code": 1,
+      "diagnostic": "External source record enables forbidden v1 write-back: links/write-back.md"
+    },
+    "external-source-unsafe-authority": {
+      "suite": "workspace",
+      "exit_code": 1,
+      "diagnostic": "External source record gives external content authority: links/unsafe-authority.md"
+    },
+    "external-export-import-workflow-missing-core-contract": {
+      "suite": "workspace",
+      "exit_code": 1,
+      "diagnostic": "Missing external export import workflow artifact: .systems/ai/core/external-export-import-workflow.md"
+    },
+    "external-export-import-workflow-missing-classification-template": {
+      "suite": "workspace",
+      "exit_code": 1,
+      "diagnostic": "Missing external export import workflow artifact: .systems/ai/templates/workspace/dump/external-export-classification.template.md"
+    },
+    "external-export-import-workflow-missing-checklist-template": {
+      "suite": "workspace",
+      "exit_code": 1,
+      "diagnostic": "Missing external export import workflow artifact: .systems/ai/templates/workspace/dump/external-import-checklist.template.md"
+    },
+    "external-export-import-workflow-missing-checkpoint-template": {
+      "suite": "workspace",
+      "exit_code": 1,
+      "diagnostic": "Missing external export import workflow artifact: .systems/ai/templates/workspace/dump/final-import-checkpoint.template.md"
+    },
+    "external-export-import-workflow-missing-metadata-content-split": {
+      "suite": "workspace",
+      "exit_code": 1,
+      "diagnostic": "Missing external export import workflow reference in .systems/ai/core/external-export-import-workflow.md: Metadata target classes"
+    },
+    "external-export-import-workflow-missing-system-insights-safeguards": {
+      "suite": "workspace",
+      "exit_code": 1,
+      "diagnostic": "Missing external export import workflow reference in .systems/ai/core/external-export-import-workflow.md: System Insights Safeguards"
+    },
+    "external-export-import-workflow-unsafe-write-back": {
+      "suite": "workspace",
+      "exit_code": 1,
+      "diagnostic": "External export import workflow contains unsafe v1 external-effect permission wording."
+    },
+    "external-export-import-workflow-template-missing-source-references": {
+      "suite": "workspace",
+      "exit_code": 1,
+      "diagnostic": "Missing external export import workflow reference in .systems/ai/templates/workspace/dump/metadata-import.template.md: source references"
+    },
+    "external-export-import-workflow-template-missing-checkpoint-decision": {
+      "suite": "workspace",
+      "exit_code": 1,
+      "diagnostic": "Missing external export import workflow reference in .systems/ai/templates/workspace/dump/external-import-checklist.template.md: checkpoint decision"
+    },
+    "personal-ops-daily-summary-check-missing-row": {
+      "suite": "personal-ops",
+      "exit_code": 1,
+      "diagnostic": "daily summary mismatch"
+    },
+    "personal-ops-daily-summary-check-reordered-row": {
+      "suite": "personal-ops",
+      "exit_code": 1,
+      "diagnostic": "daily summary mismatch"
+    },
+    "personal-ops-daily-summary-check-unsafe-claim": {
+      "suite": "personal-ops",
+      "exit_code": 1,
+      "diagnostic": "daily summary mismatch"
+    },
+    "personal-ops-budget-rejects-stale-indexes": {
+      "suite": "personal-ops",
+      "exit_code": 1,
+      "diagnostic": "STOP: official V3 indexes are stale"
+    },
+    "personal-ops-post-write-rejects-status-only": {
+      "suite": "personal-ops",
+      "exit_code": 1,
+      "diagnostic": "STOP: --post-write requires a real index refresh, not --status-only or --dry-run"
+    },
+    "personal-ops-budget-missing-private-config": {
+      "suite": "personal-ops",
+      "exit_code": 1,
+      "diagnostic": "STOP: Missing local Personal Ops budget configuration"
+    },
+    "personal-ops-missing-post-write-summary-contract": {
+      "suite": "personal-ops",
+      "exit_code": 1,
+      "diagnostic": "Missing Personal Ops reference 'Post-Write Daily Summary' in .systems/ai/core/personal-ops.md"
+    },
+    "personal-ops-unsafe-post-write-summary-authority": {
+      "suite": "personal-ops",
+      "exit_code": 1,
+      "diagnostic": "Unsafe Personal Ops post-write summary authority wording detected"
+    },
+    "personal-ops-missing-core-contract": {
+      "suite": "personal-ops",
+      "exit_code": 1,
+      "diagnostic": "Missing Personal Ops artifact: .systems/ai/core/personal-ops.md"
+    },
+    "personal-ops-missing-check-in-template": {
+      "suite": "personal-ops",
+      "exit_code": 1,
+      "diagnostic": "Missing required artifact: .systems/ai/templates/workspace/personal-ops/check-in.template.md"
+    },
+    "personal-ops-retired-v2-notion-mapper": {
+      "suite": "personal-ops",
+      "exit_code": 1,
+      "diagnostic": "STOP: map-notion-check-ins is retired. The V2 Notion importer is no longer supported and cannot write active indexes. Preserve raw exports and use the current owner-approved V3 intake route."
+    },
+    "personal-ops-retired-v2-sync": {
+      "suite": "personal-ops",
+      "exit_code": 1,
+      "diagnostic": "STOP: sync-personal-ops-check-ins is retired. V2 indexes are no longer an active runtime path. Use migrate-personal-ops-legacy-check-ins-v3 once with exact owner approval, then sync-personal-ops-check-ins-v3."
+    },
+    "personal-ops-legacy-migration-requires-owner-approval": {
+      "suite": "personal-ops",
+      "exit_code": 1,
+      "diagnostic": "STOP: one-time legacy migration requires --owner-approved"
+    },
+    "personal-ops-legacy-migration-rejects-precontract-v3": {
+      "suite": "personal-ops",
+      "exit_code": 1,
+      "diagnostic": "STOP: Incomplete pre-contract or invalid V3 report must be recreated as current V3 before legacy migration"
+    },
+    "personal-ops-legacy-snapshot-hash-mismatch": {
+      "suite": "personal-ops",
+      "exit_code": 1,
+      "diagnostic": "STOP: Legacy snapshot source hash mismatch"
+    },
+    "personal-ops-legacy-snapshot-duplicate-session-date": {
+      "suite": "personal-ops",
+      "exit_code": 1,
+      "diagnostic": "STOP: Legacy snapshot properties.file_path must equal origin source_path at line 1"
+    },
+    "personal-ops-legacy-snapshot-missing-property": {
+      "suite": "personal-ops",
+      "exit_code": 1,
+      "diagnostic": "STOP: Missing required properties"
+    },
+    "personal-ops-legacy-snapshot-malformed-jsonl": {
+      "suite": "personal-ops",
+      "exit_code": 1,
+      "diagnostic": "STOP: Malformed legacy snapshot JSONL at line 1"
+    },
+    "task-management-missing-type": {
+      "suite": "tasks",
+      "exit_code": 1,
+      "diagnostic": "AI-created TaskNote missing required field type"
+    },
+    "task-management-invalid-status": {
+      "suite": "tasks",
+      "exit_code": 1,
+      "diagnostic": "TaskNote has invalid status 'someday'"
+    },
+    "task-management-invalid-priority": {
+      "suite": "tasks",
+      "exit_code": 1,
+      "diagnostic": "TaskNote has invalid priority 'urgent'"
+    },
+    "task-management-unsafe-title": {
+      "suite": "tasks",
+      "exit_code": 1,
+      "diagnostic": "TaskNote title contains unsafe secret-like wording"
+    },
+    "task-management-invalid-5d-tag": {
+      "suite": "tasks",
+      "exit_code": 1,
+      "diagnostic": "AI-created TaskNote has invalid classification tag '5d/doing'"
+    },
+    "task-management-invalid-6d-done": {
+      "suite": "tasks",
+      "exit_code": 1,
+      "diagnostic": "AI-created TaskNote has invalid classification tag '6d/done'"
+    },
+    "task-management-invalid-6d-delete-status": {
+      "suite": "tasks",
+      "exit_code": 1,
+      "diagnostic": "AI-created TaskNote uses 6d/delete without status cancelled"
+    },
+    "task-management-mixed-5d-6d": {
+      "suite": "tasks",
+      "exit_code": 1,
+      "diagnostic": "AI-created TaskNote has more than one 5D/6D classification tag"
+    },
+    "task-management-two-6d-tags": {
+      "suite": "tasks",
+      "exit_code": 1,
+      "diagnostic": "AI-created TaskNote has more than one 5D/6D classification tag"
+    },
+    "task-management-5d-in-context": {
+      "suite": "tasks",
+      "exit_code": 1,
+      "diagnostic": "AI-created TaskNote uses classification tag in contexts instead of tags"
+    },
+    "task-management-6d-in-context": {
+      "suite": "tasks",
+      "exit_code": 1,
+      "diagnostic": "AI-created TaskNote uses classification tag in contexts instead of tags"
+    },
+    "task-candidates-write-without-owner-approval": {
+      "suite": "tasks",
+      "exit_code": 1,
+      "diagnostic": "--write requires --owner-approved"
+    },
+    "task-candidates-write-missing-vault": {
+      "suite": "tasks",
+      "exit_code": 1,
+      "diagnostic": "TaskForge vault does not exist or is not a directory"
+    },
+    "task-candidates-write-missing-tasknotes-dir": {
+      "suite": "tasks",
+      "exit_code": 1,
+      "diagnostic": "TaskForge vault must already contain TaskNotes/Tasks/"
+    },
+    "weekly-plan-malformed-mapping-stops-tasks": {
+      "suite": "tasks",
+      "exit_code": 1,
+      "diagnostic": "Weekly plan mapping must be an object for weekly-build-01"
+    },
+    "weekly-plan-workspace-mismatch-stops-tasks": {
+      "suite": "tasks",
+      "exit_code": 1,
+      "diagnostic": "Weekly plan mapping workspace mismatch for weekly-build-01: other-workspace != weekly-plan-workspace"
+    },
+    "weekly-planning-not-ready-blocks-tasks": {
+      "suite": "tasks",
+      "exit_code": 1,
+      "diagnostic": "Weekly plan is not ready for TaskNote generation: needs-review"
+    },
+    "task-candidates-dream-report-write-without-owner-approval": {
+      "suite": "tasks",
+      "exit_code": 1,
+      "diagnostic": "--write requires --owner-approved"
+    },
+    "task-management-missing-app-setup-wording": {
+      "suite": "tasks",
+      "exit_code": 1,
+      "diagnostic": "Missing task-management reference in .systems/ai/core/task-management.md: Task Files / TaskNotes enabled"
+    },
+    "task-management-unsafe-auto-write-wording": {
+      "suite": "tasks",
+      "exit_code": 1,
+      "diagnostic": "Task-management wording allows unsafe automatic task mutation"
+    },
+    "dreaming-mode-missing-policy": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Missing Dreaming Mode artifact: .systems/ai/core/dreaming-mode.md"
+    },
+    "dreaming-mode-missing-workspace-variant": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming Mode policy missing required boundary text: workspace-artifacts-only"
+    },
+    "dreaming-mode-template-missing-variant": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dream report template missing required field or section: Dream variant: `<workspace-artifacts-only\\|full-repo>`"
+    },
+    "dreaming-mode-template-missing-privacy-check": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dream report template missing required field or section: ^## Privacy/Scope Check$"
+    },
+    "dreaming-mode-template-missing-undistilled-queue": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dream report template missing required field or section: ^## Undistilled Work Queue$"
+    },
+    "dreaming-mode-unsafe-auto-write-wording": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming Mode unsafe hard-action wording found: Dreaming Mode writes System Insights automatically"
+    },
+    "dreaming-mode-final-rejects-pending": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dream Report missing required section or field 'Scope preflight:[[:space:]]*`passed`'"
+    },
+    "dreaming-mode-reviewed-no-missing-source": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming scope validation failed: workspace source does not exist: notes/missing-reviewed-no.md"
+    },
+    "dreaming-mode-secret-marker-report": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dream Report appears to contain raw client data or secret markers"
+    },
+    "dreaming-mode-current-report-missing-scope-contract": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dream Report missing required section or field 'Scope contract:[[:space:]]*`1`'"
+    },
+    "dreaming-mode-current-report-missing-local-scope": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming scope validation failed: missing local Dreaming scope"
+    },
+    "dreaming-mode-local-scope-conflicting-widen-clause": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming scope validation failed: Dreaming scope policy mode must be exactly narrow-only"
+    },
+    "dreaming-mode-local-scope-narrows-allowlist": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming scope validation failed: locally excluded workspace source core/status.md: local exact deny rule: core/status.md"
+    },
+    "dreaming-mode-forbidden-source-personal-ops-check-ins-2026-2026-08-10-md": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming scope validation failed: local scope cannot allow personal-ops/check-ins/2026/2026-08-10.md: Personal Ops allows only the sanitized V3/V4 trends projection"
+    },
+    "dreaming-mode-forbidden-source-personal-ops-indexes-check-ins-v3-csv": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming scope validation failed: local scope cannot allow personal-ops/indexes/check-ins-v3.csv: Personal Ops allows only the sanitized V3/V4 trends projection"
+    },
+    "dreaming-mode-forbidden-source-personal-ops-indexes-check-ins-v3-jsonl": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming scope validation failed: local scope cannot allow personal-ops/indexes/check-ins-v3.jsonl: Personal Ops allows only the sanitized V3/V4 trends projection"
+    },
+    "dreaming-mode-forbidden-source-personal-ops-indexes-check-ins-v3-metrics-csv": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming scope validation failed: local scope cannot allow personal-ops/indexes/check-ins-v3.metrics.csv: Personal Ops allows only the sanitized V3/V4 trends projection"
+    },
+    "dreaming-mode-forbidden-source-personal-ops-check-ins-2026-2026-08-10-assets-photo-jpg": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming scope validation failed: local scope cannot allow personal-ops/check-ins/2026/2026-08-10.assets/photo.jpg: Personal Ops allows only the sanitized V3/V4 trends projection"
+    },
+    "dreaming-mode-forbidden-source-notes-private-ocr-md": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming scope validation failed: local scope cannot allow notes/private-ocr.md: OCR sources are forbidden"
+    },
+    "dreaming-mode-forbidden-source-notes-finance-budget-md": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming scope validation failed: local scope cannot allow notes/finance/budget.md: finance, calorie, macro, and health detail sources are forbidden"
+    },
+    "dreaming-mode-forbidden-source-notes-calories-macro-md": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming scope validation failed: local scope cannot allow notes/calories/macro.md: finance, calorie, macro, and health detail sources are forbidden"
+    },
+    "dreaming-mode-forbidden-source-notes-health-record-md": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming scope validation failed: local scope cannot allow notes/health/record.md: finance, calorie, macro, and health detail sources are forbidden"
+    },
+    "dreaming-mode-forbidden-source-tasks-TaskNotes-Tasks-client-task-md": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming scope validation failed: local scope cannot allow tasks/TaskNotes/Tasks/client-task.md: TaskNote bodies are forbidden"
+    },
+    "dreaming-mode-forbidden-source-tasks-weekly-plans-2026-2026-W33-md": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming scope validation failed: local scope cannot allow tasks/weekly-plans/2026/2026-W33.md: weekly-plan Markdown has no sanitized projection"
+    },
+    "dreaming-mode-forbidden-source-dump-incoming-raw-md": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming scope validation failed: local scope cannot allow dump/incoming/raw.md: raw dump intake is forbidden"
+    },
+    "dreaming-mode-missing-inventory-source": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming scope validation failed: workspace source does not exist: notes/missing.md"
+    },
+    "dreaming-mode-invalid-inventory-path--absolute-source-md": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming scope validation failed: Source Inventory path must be workspace/repo-relative: /absolute/source.md"
+    },
+    "dreaming-mode-invalid-inventory-path----outside-md": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming scope validation failed: Source Inventory path contains traversal or an invalid segment: ../outside.md"
+    },
+    "dreaming-mode-duplicate-inventory-source": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming scope validation failed: duplicate Source Inventory path: core/status.md"
+    },
+    "dreaming-mode-symlink-escape": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "Dreaming scope validation failed: workspace source escapes its allowed root through a symlink: notes/README.md"
+    },
+    "personal-ops-properties-v3-rejects-stale-planned-metrics": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "STOP: planned_do_count must equal 3 from planned_items_json"
+    },
+    "personal-ops-properties-v3-rejects-missing-professional-title": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "STOP: Professional planned item requires a non-empty title for build-01"
+    },
+    "personal-ops-deadline-policy-rejects-invalid-deadline": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "ValueError: Invalid isoformat string: 'not-a-deadline'"
+    },
+    "personal-ops-properties-v3-retired-historical-sync": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "STOP: sync-personal-ops-check-ins is retired. V2 indexes are no longer an active runtime path. Use migrate-personal-ops-legacy-check-ins-v3 once with exact owner approval, then sync-personal-ops-check-ins-v3."
+    },
+    "personal-ops-properties-v3-report-id-mismatch": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "STOP: report_id must equal session_date"
+    },
+    "personal-ops-properties-v3-top-session-date-mismatch": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "STOP: session_date must match properties"
+    },
+    "personal-ops-properties-v3-eligible-count-mismatch": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "STOP: task_candidate_eligible_count must equal 3 from eligible planned items"
+    },
+    "personal-ops-properties-v3-missing-property": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "STOP: Missing required properties"
+    },
+    "personal-ops-properties-v3-unknown-property": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "STOP: Unknown properties"
+    },
+    "personal-ops-properties-v3-rejects-retired-task-policy": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "STOP: Property task_generation_policy has unsupported value: legacy-wig-priority"
+    },
+    "personal-ops-properties-v3-rejects-retired-must-do-property": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "STOP: Unknown properties"
+    },
+    "personal-ops-properties-v3-wrong-type": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "STOP: Property routine_total_count must be an integer or empty"
+    },
+    "personal-ops-v3-retired-policy-after-cutover": {
+      "suite": "dreaming",
+      "exit_code": 1,
+      "diagnostic": "STOP: Retired task_generation_policy is not allowed after 2026-07-17"
+    },
+    "delivery-constraints-missing-core": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Missing Delivery Constraints file: .systems/ai/core/delivery-constraints.md"
+    },
+    "delivery-constraints-missing-question-limit": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Missing Delivery Constraints reference in .systems/ai/core/delivery-constraints.md: boundary at most `1-3` questions"
+    },
+    "delivery-constraints-requires-bounded-micro-exception": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Missing Delivery Constraints reference in .systems/ai/core/delivery-constraints.md: micro-change boundary Mode: micro-exempt"
+    },
+    "delivery-constraints-blocks-deadline-bypass": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Unsafe deadline bypass wording found"
+    },
+    "distillation-state-missing-template": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Missing Distillation State file: .systems/ai/templates/capture/distillation-state.template.md"
+    },
+    "distillation-state-requires-response-disposition": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Missing Distillation State reference in .systems/ai/core/distillation-state.md: response-only micro-change disposition"
+    },
+    "distillation-state-completed-requires-artifact": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Completed capture-state record missing Distillation artifact"
+    },
+    "distillation-state-missing-artifact-path": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Completed capture-state record has missing, ambiguous, or out-of-scope Distillation artifact"
+    },
+    "distillation-state-derived-value-mismatch": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Capture-state derived is_distilled mismatch"
+    },
+    "distillation-state-rejects-ambiguous-artifact": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Completed capture-state record has missing, ambiguous, or out-of-scope Distillation artifact"
+    },
+    "distillation-state-rejects-artifact-symlink-escape": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Completed capture-state record has missing, ambiguous, or out-of-scope Distillation artifact"
+    },
+    "distillation-state-counts-invalid-canonical-record": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Capture-state record has invalid State"
+    },
+    "distillation-state-rejects-symlinked-record": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Capture-state record is missing or uses a symlink"
+    },
+    "distillation-state-detects-project-repo-pollution": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Repo pollution: capture-state directory found directly under workspace project:"
+    },
+    "validation-profile-scoped-requires-checks": {
+      "suite": "quality",
+      "exit_code": 2,
+      "diagnostic": "--profile scoped requires --checks"
+    },
+    "validation-profile-invalid-scoped-name": {
+      "suite": "quality",
+      "exit_code": 2,
+      "diagnostic": "Unknown scoped check: check-missing"
+    },
+    "validation-profile-trailing-scoped-comma": {
+      "suite": "quality",
+      "exit_code": 2,
+      "diagnostic": "--checks must be a non-empty comma-separated list"
+    },
+    "validation-profile-invalid-suite": {
+      "suite": "quality",
+      "exit_code": 2,
+      "diagnostic": "Unknown smoke suite: missing"
+    },
+    "validation-profile-smoke-rejects-runtime-extra": {
+      "suite": "quality",
+      "exit_code": 2,
+      "diagnostic": "Extra file must be under .systems/ or .github/: ../runtime.md"
+    },
+    "validation-profile-smoke-rejects-secret-extra": {
+      "suite": "quality",
+      "exit_code": 2,
+      "diagnostic": "Unsafe extra product path: .systems/.env"
+    },
+    "validation-profile-smoke-rejects-missing-extra": {
+      "suite": "quality",
+      "exit_code": 2,
+      "diagnostic": "Missing or linked extra product file: .systems/ai/core/not-present.md"
+    },
+    "validation-profiles-require-standard-default": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Missing validation profile reference: validate-ai-system support: profile=\"standard\" (.systems/scripts/validate-ai-system)"
+    },
+    "validation-profiles-require-ci-explicit-full": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Missing validation profile reference: CI explicit full validation (.github/workflows/ai-system-validate.yml)"
+    },
+    "validation-profiles-require-main-push": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Missing validation profile reference: full CI on main (.github/workflows/ai-system-validate.yml)"
+    },
+    "validation-profiles-require-full-smoke-tests": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Missing validation profile reference: validate-ai-system support: check-validator-smoke-tests (.systems/scripts/validate-ai-system)"
+    },
+    "validation-profiles-block-fast-enough-before-commit": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Unsafe validation profile wording found: fast is enough before commit"
+    },
+    "validation-profiles-block-standard-replaces-full": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Unsafe validation profile wording found: standard may replace full"
+    },
+    "validation-profiles-block-skipped-smoke-pass": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Unsafe validation profile wording found: skip smoke tests and mark PASS"
+    },
+    "validation-routing-contract-required": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Missing required artifact: .systems/ai/core/validation-routing.md"
+    },
+    "validation-routing-template-required": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Missing required artifact: .systems/ai/templates/quality/validation-execution-record.template.md"
+    },
+    "validation-routing-blocks-green-scripts-pass": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Unsafe validation routing wording found: green (AI System )?scripts?[^.\\n]{0,80}(equal|means?|produce|justify|guarantee)[^.\\n]{0,50}PASS"
+    },
+    "validation-routing-blocks-broad-ordinary-implementation": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Unsafe validation routing wording found: (ordinary|routine) implementation[^.\\n]{0,120}(run|requires?|must run)[^.\\n]{0,80}(validate-ai-system|broad AI System validation)"
+    },
+    "validation-routing-requires-local-iteration-boundary": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Missing validation routing requirement in .systems/ai/core/validation-routing.md: local loop"
+    },
+    "model-selection-guidance-contract-required": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Missing required artifact: .systems/ai/core/model-selection-guidance.md"
+    },
+    "model-selection-guidance-requires-nonblocking": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Missing model guidance requirement in .systems/ai/core/model-selection-guidance.md: non-blocking output"
+    },
+    "model-selection-guidance-blocks-authority-bypass": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Unsafe model guidance wording found: (Luna|Sol|Astra|model choice|model selection)[^.\\n]{0,120}(may|can|allows?|should)[^.\\n]{0,100}(bypass|skip|change)[^.\\n]{0,80}(risk|permissions|QA|approval|DoD)"
+    },
+    "model-selection-guidance-requires-availability": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Missing model guidance requirement in .systems/ai/core/model-selection-guidance.md: availability gate"
+    },
+    "cross-system-upgrade-handoff-contract-required": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Missing required artifact: .systems/ai/core/cross-system-upgrade-handoff.md"
+    },
+    "cross-system-upgrade-handoff-template-required": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Missing required artifact: .systems/ai/templates/capture/cross-system-upgrade-handoff.template.md"
+    },
+    "cross-system-upgrade-handoff-relative-needs-workspace": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Workspace-relative handoff requires --workspace"
+    },
+    "cross-system-upgrade-handoff-yes-requires-artifact": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Cross-system yes requires a handoff path"
+    },
+    "cross-system-upgrade-handoff-no-requires-reason": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Cross-system no requires a reason"
+    },
+    "cross-system-upgrade-handoff-pending-blocks": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Cross-system impact pending blocks commit/handoff"
+    },
+    "cross-system-upgrade-handoff-blocks-private-marker": {
+      "suite": "quality",
+      "exit_code": 1,
+      "diagnostic": "Cross-system handoff contains a raw client or credential marker"
+    }
+  }
+}

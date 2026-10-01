@@ -1,5 +1,15 @@
 # HUMANS.md
 
+## Integrity And Efficiency
+
+- Keep failed validation evidence; every retry needs a new hypothesis and a fresh output path.
+- `validate-ai-system --timeout-seconds <n> --evidence-file <new-local-path>` records actual run states.
+- Scoped runtime coverage needs a complete owner inventory; final product integration remains full-required.
+- Compare speed only using three or more complete equivalent runs per variant.
+- Skill discovery reads candidate metadata first; only matching skill contracts are loaded in full.
+- Freshness and topology diagnostics are manual and read-only; they do not repair state.
+- Dream lifecycle entries are advisory evidence, not owner approval or automatic work.
+
 ## Purpose
 
 This is the human runbook for the `ai-system` branch.

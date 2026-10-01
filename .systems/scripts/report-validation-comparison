@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+"""Compare at least three frozen, complete validation runs per variant."""
+import argparse
+import json
+import statistics
+import sys
+from pathlib import Path
+
+sys.dont_write_bytecode = True
+
+
+def read_record(path):
+    text = Path(path).read_text()
+    if "```json\n" in text:
+        text = text.split("```json\n", 1)[1].split("```", 1)[0]
+    return json.loads(text)
+
+
+def validate_group(paths):
+    if len(paths) < 3:
+        raise ValueError("At least three complete runs are required per variant")
+    records = [read_record(path) for path in paths]
+    if len({r["run_id"] for r in records}) != len(records):
+        raise ValueError("Duplicate run identity")
+    source = {r["source"]["source_digest"] for r in records}
+    coverage = {r["coverage_digest"] for r in records}
+    environment = {r["environment_digest"] for r in records}
+    if len(source) != 1 or len(coverage) != 1 or len(environment) != 1:
+        raise ValueError("Source, environment or coverage drift within variant")
+    for record in records:
+        if record["status"] != "completed" or record["exit_code"] != 0 or not record["checks"]:
+            raise ValueError("Failed, partial or timeout run cannot establish timing")
+        if any(c["state"] != "completed" or c["exit_code"] != 0 for c in record["checks"]):
+            raise ValueError("Incomplete child check coverage")
+        if record.get("smoke_status") == "skipped":
+            raise ValueError("Skipped smoke is not equivalent full coverage")
+        if record["duration_ns"] <= 0:
+            raise ValueError("Invalid monotonic wall duration")
+        if any(c["duration_ns"] < 0 or c["duration_ns"] > record["duration_ns"] for c in record["checks"]):
+            raise ValueError("Invalid child attribution duration")
+    return records
+
+
+def compare(left, right):
+    if left[0]["coverage_digest"] != right[0]["coverage_digest"]:
+        raise ValueError("Different test populations are not comparable")
+    if left[0]["environment_digest"] != right[0]["environment_digest"]:
+        raise ValueError("Different environments are not comparable")
+    if set(r["run_id"] for r in left) & set(r["run_id"] for r in right):
+        raise ValueError("A run cannot belong to both variants")
+    def summary(group):
+        wall = [r["duration_ns"] / 1e9 for r in group]
+        return {"runs": len(group), "wall_mean_seconds": statistics.mean(wall),
+                "wall_stdev_seconds": statistics.stdev(wall),
+                "source_digest": group[0]["source"]["source_digest"],
+                "child_mean_seconds": statistics.mean(sum(c["duration_ns"] for c in r["checks"]) / 1e9 for r in group)}
+    return {"baseline": summary(left), "candidate": summary(right), "supporting_only": True,
+            "coverage_digest": left[0]["coverage_digest"],
+            "limitations": "Wall and child attribution are distinct; do not add them. Noise and approved source differences require review; no semantic PASS or automatic performance acceptance."}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--baseline", nargs="+", required=True)
+    parser.add_argument("--candidate", nargs="+", required=True)
+    args = parser.parse_args()
+    try:
+        print(json.dumps(compare(validate_group(args.baseline), validate_group(args.candidate)), indent=2))
+    except (ValueError, KeyError, OSError) as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -9,6 +9,8 @@ import sys
 from pathlib import Path
 from statistics import mean, stdev
 from typing import Any
+sys.dont_write_bytecode = True
+from eval_freshness import validate_run
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -28,7 +30,7 @@ def maybe_load_json(path: Path) -> dict[str, Any]:
 
 
 def collect_gradings(root: Path) -> list[tuple[Path, dict[str, Any]]]:
-    return [(path, load_json(path)) for path in sorted(root.rglob("grading.json"))]
+    return validate_run(root)[1]
 
 
 def number(value: Any, default: float = 0.0) -> float:
@@ -245,7 +247,7 @@ def main() -> int:
 
     try:
         benchmark = build_benchmark(root)
-    except ValueError as exc:
+    except (ValueError, OSError, KeyError) as exc:
         print(str(exc), file=sys.stderr)
         return 1
 

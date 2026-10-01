@@ -32,6 +32,17 @@ case "$suite" in
   core|skills|workspace|personal-ops|tasks|dreaming|quality|all) ;;
   *) echo "Unknown smoke suite: $suite" >&2; exit 2 ;;
 esac
+if [[ "$suite" == all ]]; then
+  for domain in core skills workspace personal-ops tasks dreaming quality; do
+    args=(--suite "$domain")
+    while IFS= read -r path; do
+      [[ -n "$path" ]] && args+=(--extra-product-file "$path")
+    done <<< "$extra_product_files"
+    "$repo_root/.systems/scripts/check-validator-smoke-tests" "${args[@]}"
+  done
+  echo "SMOKE_COMPLETION suites=7 isolation=per-domain supporting_only=true"
+  exit 0
+fi
 tmp="$(mktemp -d "${TMPDIR:-/tmp}/ai-system-validator-smoke.XXXXXX")"
 copy_repo="$tmp/repo"
 
@@ -68,8 +79,12 @@ run_must_fail() {
   shift
   local out="$tmp/$name.out"
 
-  if (cd "$copy_repo" && "$@") >"$out" 2>&1; then
-    echo "Smoke test failed: $name should have failed"
+  local code=0
+  (cd "$copy_repo" && "$@") >"$out" 2>&1 || code=$?
+  if ! python3 -B "$repo_root/.systems/scripts/smoke_assertion.py" \
+    --expectations "$repo_root/.systems/scripts/smoke/negative-expectations.json" \
+    --executed "$tmp/negative-executed.txt" --suite "$suite" --case "$name" --code "$code" --output "$out"; then
+    echo "Smoke test failed: $name returned the wrong rejection"
     cat "$out"
     exit 1
   fi
@@ -4377,4 +4392,7 @@ mv "$cross_handoff_file.bak" "$cross_handoff_file"
 
 fi
 
-echo "Validator smoke suite passed: $suite"
+python3 -B "$repo_root/.systems/scripts/smoke_assertion.py" \
+  --expectations "$repo_root/.systems/scripts/smoke/negative-expectations.json" \
+  --executed "$tmp/negative-executed.txt" --suite "$suite"
+echo "Validator smoke suite passed: $suite (supporting-only; not semantic PASS)"

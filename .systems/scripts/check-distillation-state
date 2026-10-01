@@ -3,6 +3,7 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 workspace=""
+owned_root=""
 fail=0
 
 usage() {
@@ -16,6 +17,11 @@ EOF
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --owned-root)
+      owned_root="${2:-}"
+      [[ -n "$owned_root" ]] || { echo "Missing value for --owned-root"; exit 2; }
+      shift 2
+      ;;
     --workspace)
       workspace="${2:-}"
       [[ -n "$workspace" ]] || { echo "Missing value for --workspace"; exit 2; }
@@ -32,6 +38,8 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+[[ -z "$owned_root" || -n "$workspace" ]] || { echo "--owned-root requires --workspace"; exit 2; }
 
 require_ref() {
   local file="$1" pattern="$2" label="$3"
@@ -116,6 +124,7 @@ if [[ -n "$workspace" ]]; then
 
   shopt -s nullglob
   for pollution in "$workspace"/projects/*/capture-state; do
+    [[ -z "$owned_root" ]] || continue
     if [[ -d "$pollution" || -L "$pollution" ]]; then
       echo "Repo pollution: capture-state directory found directly under workspace project: $pollution"
       fail=1
@@ -130,6 +139,17 @@ if [[ -n "$workspace" ]]; then
     "$workspace"/owned-assets/*/capture-state/*.md
     "$workspace"/owned-assets/*/project-state/*/capture-state/*.md
   )
+  if [[ -n "$owned_root" ]]; then
+    if [[ "$owned_root" != capture-state && ! "$owned_root" =~ ^project-state/[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+      echo "Invalid canonical --owned-root"; exit 2
+    fi
+    [[ -d "$workspace/$owned_root" && "$(realpath "$workspace/$owned_root")" == "$workspace/$owned_root" ]] || { echo "Missing or linked owned root"; exit 2; }
+    if [[ "$owned_root" == capture-state ]]; then
+      records=("$workspace/$owned_root"/*.md)
+    else
+      records=("$workspace/$owned_root"/capture-state/*.md)
+    fi
+  fi
 
   count_pending_quality=0
   count_ready=0

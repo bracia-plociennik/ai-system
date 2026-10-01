@@ -13,6 +13,20 @@ if git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 fi
 
 required=(
+  ".systems/scripts/check-validation-integrity"
+  ".systems/scripts/validation_runner.py"
+  ".systems/scripts/validation_support.py"
+  ".systems/scripts/validation-dependencies.json"
+  ".systems/scripts/smoke_assertion.py"
+  ".systems/scripts/smoke_coverage.py"
+  ".systems/scripts/smoke/negative-expectations.json"
+  ".systems/scripts/tests/test_validation_integrity.py"
+  ".systems/scripts/discover-skills"
+  ".systems/scripts/report-validation-comparison"
+  ".systems/scripts/report-workspace-freshness"
+  ".systems/scripts/report-contract-topology"
+  ".systems/scripts/dream_recommendations.py"
+  ".systems/ai/skills/skill-creator/scripts/eval_freshness.py"
   "HUMANS.md"
   "README.md"
   ".systems/ai/core/operating-model.md"

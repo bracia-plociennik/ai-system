@@ -38,7 +38,7 @@ for ref in \
   ".systems/ai/templates/root/AGENTS.template.md:validation-routing\\.md:root template integration" \
   "README.md:validation-routing\\.md:README integration" \
   "HUMANS.md:Semantic QA Przed Skryptami:HUMANS integration" \
-  ".systems/scripts/validate-ai-system:script evidence is supporting-only:neutral CLI result" \
+  ".systems/scripts/validation_runner.py:supporting_only=true:neutral CLI result" \
   ".systems/scripts/check-required-artifacts:check-validation-routing:required artifacts" \
   ".systems/scripts/check-validator-smoke-tests:validation-routing:smoke integration"
 do

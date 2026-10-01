@@ -378,6 +378,10 @@ check_current_dream_scope() {
   local file="$1"
   if ! "$scope_validator" --workspace "$workspace_arg" --report "$file" --require-preflight-passed; then
     fail=1
+    return
+  fi
+  if ! python3 -B "$repo_root/.systems/scripts/dream_recommendations.py" --workspace "$workspace_arg" --report "$file"; then
+    fail=1
   fi
 }
 

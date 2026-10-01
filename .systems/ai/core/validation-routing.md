@@ -40,6 +40,24 @@ Within an already approved, bounded local implementation, run the relevant focus
 
 ## Validation Execution Record
 
+### Bounded Recovery Evidence
+
+Preserve every failed run and its source identity. Each retry records the observed failure,
+one new falsifiable hypothesis, the approved files changed, the focused retest and its result.
+Do not repeat an unchanged failed command without new evidence, weaken an assertion, suppress
+an unexpected exit or expand permissions to get a green result. Infrastructure failures are
+not expected negative-test success. A source change invalidates prior current-diff closure;
+perform a fresh semantic review and applicable product checks after the fix before final evidence.
+
+### Runtime-Only Checkpoint Coverage
+
+A scoped runtime checkpoint can be considered only with a complete owned-namespace inventory,
+current fingerprints, declared dependency closure and separate semantic/privacy evidence.
+Execution coverage, scope coverage and final-evidence eligibility are different fields.
+The candidate flag is supporting evidence, not automatic acceptance. Unmapped inputs, stale
+evidence or incomplete dependencies stop eligibility. Shared product integration, CI, updater
+and final system verification remain full-required. See `validation-profiles.md`.
+
 Use `.systems/ai/templates/quality/validation-execution-record.template.md`.
 
 QA artifacts and substantive quality closures record:

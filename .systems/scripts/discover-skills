@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+"""Inspect active skill frontmatter only; full selected contracts remain an agent read gate."""
+import argparse
+import json
+import sys
+from pathlib import Path
+sys.dont_write_bytecode = True
+
+
+def metadata(path):
+    values = {}
+    with path.open() as stream:
+        if stream.readline().strip() != "---":
+            raise ValueError(f"Skill has no frontmatter: {path}")
+        active = None
+        for line in stream:
+            if line.strip() == "---":
+                if not values.get("name") or not values.get("description"):
+                    raise ValueError("Missing skill name/description")
+                return values
+            key, separator, value = line.partition(":")
+            if separator and key in {"name", "description"}:
+                if key in values:
+                    raise ValueError("Duplicate skill metadata field")
+                values[key] = value.strip().strip("\"'")
+                active = key if values[key] in {">", "|", ">-", "|-"} else None
+                if active:
+                    values[key] = ""
+            elif active and line.startswith((" ", "\t")):
+                values[active] = (values[active] + " " + line.strip()).strip()
+            elif line.strip():
+                active = None
+    raise ValueError("Unclosed skill frontmatter")
+
+
+def discover(workspace=None):
+    root = Path(__file__).resolve().parents[2]
+    roots = [("workspace", Path(workspace) / "skills")] if workspace else []
+    roots += [("system", root / ".systems/ai/skills")]
+    result, seen = [], set()
+    for layer, directory in roots:
+        if not directory.is_dir():
+            continue
+        for path in sorted(directory.glob("*/SKILL.md")):
+            if path.parent.name == "legacy" or path.is_symlink() or path.parent.is_symlink():
+                continue
+            item = metadata(path)
+            if item["name"] in seen:
+                continue
+            seen.add(item["name"])
+            result.append({**item, "path": str(path), "layer": layer, "read": "frontmatter-only"})
+    return result
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--workspace")
+    args = parser.parse_args()
+    try:
+        print(json.dumps(discover(args.workspace), indent=2))
+    except (OSError, ValueError) as exc:
+        print(str(exc), file=sys.stderr)
+        raise SystemExit(1)

@@ -30,6 +30,13 @@ Passing requires evidence. If the output looks plausible but the transcript or f
 
 Write `grading.json`:
 
+Copy `run_fingerprint` from `run.json` and `metadata_fingerprint` from the matching
+`eval_metadata.json`; include exact `eval_id` and `configuration`. Never adopt stale grades
+after a changed plan, target source or input file. Use a fresh run directory instead.
+Also bind every actual output/transcript under the configuration directory using
+`result_fingerprints: {relative-path: SHA-256}`. Exclude scaffolding README/todo and grading
+files. At least one actual result is required; changed or unlisted output invalidates the grade.
+
 ```json
 {
   "eval_id": "eval-001",

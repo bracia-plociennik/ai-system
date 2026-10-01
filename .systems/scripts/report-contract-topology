@@ -1,0 +1,34 @@
+#!/usr/bin/env python3
+"""Report product contract references without crawling private runtime."""
+import argparse
+import hashlib
+import json
+import re
+import sys
+from pathlib import Path
+sys.dont_write_bytecode = True
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--contract", action="append", required=True, help="Core contract basename")
+args = parser.parse_args()
+root = Path(__file__).resolve().parents[2]
+sources = [p for base in (root / ".systems/ai/core", root / ".systems/ai/templates", root / ".systems/scripts") for p in base.rglob("*") if p.is_file() and p.suffix in {".md", ".py", ".json", ""} and not p.is_symlink() and "__pycache__" not in p.parts]
+rows = []
+for contract in args.contract:
+    if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", contract):
+        parser.error("Unsafe contract selector")
+    source = root / ".systems/ai/core" / (contract + ".md")
+    if not source.is_file():
+        parser.error("Missing selected core contract")
+    links = [str(p.relative_to(root)) for p in sources if p != source and contract + ".md" in p.read_text(errors="replace")]
+    categories = {"router": any("command-routing" in p or "AGENTS.template" in p for p in links),
+                  "template": any("/templates/" in p for p in links),
+                  "validator": any("/scripts/check-" in p for p in links),
+                  "smoke": any("smoke" in p for p in links)}
+    rows.append({"contract": str(source.relative_to(root)), "references": links, "categories": categories,
+                 "producer_paths": [p for p in links if "/templates/" in p or "init-workspace" in p or "update-workspace" in p],
+                 "consumer_paths": [p for p in links if "/scripts/check-" in p or "/core/" in p],
+                 "reference_fingerprints": {p: hashlib.sha256((root / p).read_bytes()).hexdigest() for p in links},
+                 "state": "linked" if all(categories.values()) else "partial" if links else "orphaned",
+                 "limitations": "References are not proof of semantic producer-consumer compatibility"})
+print(json.dumps({"supporting_only": True, "contracts": rows}, indent=2))

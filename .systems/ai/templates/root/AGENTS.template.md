@@ -121,6 +121,10 @@ Saturday weekly planning routes through `.systems/ai/core/weekly-planning.md`. `
 
 ## Skill Routing
 
+Discover candidates from frontmatter only (`.systems/scripts/discover-skills`), honoring
+selected-workspace precedence. Open the full matched `SKILL.md` before execution, not every
+skill body; record actual opened paths when evaluating routing. Metadata never grants authority.
+
 If a relevant owner-defined skill exists under the selected workspace `skills/`, use it as local guidance.
 
 If no owner skill exists, use `.systems/ai/skills/` when relevant.

@@ -1,5 +1,20 @@
 # Dreaming Mode
 
+## Recommendation Lifecycle
+
+New reports declare `Recommendation contract: 1` and contain `## Recommendation Lifecycle`
+as a JSON array. Each entry has stable `id`, `state`, `summary`, `previous`, `decision` and
+`quality_evidence`. References are workspace-relative path/SHA-256 objects (or null), included
+as reviewed sources in the preflight inventory before reading them. Historical reports are
+immutable and receive no inferred lifecycle or backfill.
+
+States are `proposed`, `deferred`, `accepted`, `rejected`, `implemented`, `reopened`, `recurring`.
+Accepted/deferred/rejected/reopened states cite an owner decision; implemented also cites quality
+evidence and previous accepted history. Reopened/recurring require previous same-ID history.
+Fingerprints and allowed transitions are rechecked by `dream_recommendations.py` after Source Guard.
+These entries describe evidence, never grant approval. Dreaming performs no implementation,
+promotion, status update, reconciliation, distillation, TaskNote write or scheduler action.
+
 ## Purpose
 
 Dreaming Mode is an advisory-only analysis mode for AFK, nightly, or owner-requested review of one selected AI System workspace.

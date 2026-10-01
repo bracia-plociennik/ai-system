@@ -1,0 +1,28 @@
+#!/usr/bin/env python3
+"""Read-only Git metadata for explicitly selected repository roots."""
+import argparse
+import json
+import sys
+from pathlib import Path
+sys.dont_write_bytecode = True
+from validation_support import git_output
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--repo", action="append", required=True)
+args = parser.parse_args()
+rows = []
+for name in args.repo:
+    try:
+        root = Path(name).resolve(strict=True)
+    except OSError as exc:
+        parser.error(f"Selected repository is unavailable: {exc}")
+    top = git_output(root, "rev-parse", "--show-toplevel")
+    if not top or Path(top).resolve() != root:
+        parser.error("Selected path must be a repository root; recursive discovery is forbidden")
+    upstream = git_output(root, "rev-parse", "--abbrev-ref", "@{upstream}")
+    rows.append({"path": str(root), "branch": git_output(root, "branch", "--show-current"),
+                 "head": git_output(root, "rev-parse", "HEAD"), "upstream": upstream or "unknown",
+                 "dirty": bool(git_output(root, "status", "--porcelain")),
+                 "drift": git_output(root, "rev-list", "--left-right", "--count", "HEAD...@{upstream}") if upstream else "unknown",
+                 "owner_action": "review metadata; no automatic reconciliation"})
+print(json.dumps({"supporting_only": True, "remote_freshness": "not-fetched; local refs only", "repositories": rows}, indent=2))

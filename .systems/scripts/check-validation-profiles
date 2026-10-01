@@ -34,6 +34,7 @@ done
 
 contract=".systems/ai/core/validation-profiles.md"
 validate=".systems/scripts/validate-ai-system"
+runner=".systems/scripts/validation_runner.py"
 
 for term in \
   'Validation Profiles' \
@@ -57,26 +58,21 @@ done
 
 for term in \
   'profile="standard"' \
-  '--profile' \
-  '--checks' \
-  '--explain' \
-  'run_fast_checks' \
-  'run_standard_checks' \
-  'run_named_check' \
   'check-validator-smoke-tests' \
-  'Script evidence: supporting-only; semantic and product QA still required' \
-  'AI_SYSTEM_SKIP_SMOKE_TESTS' \
-  'AI System validation completed with smoke tests skipped; not final validation evidence without explicit owner acceptance of residual risk.'
+  'validation_runner.py'
 do
   require_ref "$validate" "$term" "validate-ai-system support: $term"
 done
 
-require_ref "$validate" 'if \[\[ "\$profile" == "full" && "\$smoke_skipped" != "1" \]\]' "full profile smoke gate"
-require_ref "$validate" 'if \[\[ "\$smoke_skipped" == "1" \]\]' "skipped-smoke non-final completion gate"
-require_ref "$validate" '--profile scoped requires --checks' "scoped requires explicit checks"
-require_ref "$validate" '--checks is valid only with --profile scoped' "checks scoped-only"
-require_ref "$validate" 'run_shared_checks' 'shared diff/privacy checks'
-require_ref "$validate" 'unique_checks' 'scoped validator deduplication'
+for term in '--profile' '--checks' '--explain' 'AI_SYSTEM_SKIP_SMOKE_TESTS' 'supporting_only=true' 'AI System validation completed with smoke tests skipped; not final validation evidence without explicit owner acceptance of residual risk.'; do
+  require_ref "$runner" "$term" "runner support: $term"
+done
+require_ref "$runner" 'if profile == "full" and not skip_smoke' "full profile smoke gate"
+require_ref "$runner" 'if skip_smoke:' "skipped-smoke non-final completion gate"
+require_ref "$runner" '--profile scoped requires --checks' "scoped requires explicit checks"
+require_ref "$runner" '--checks is valid only with --profile scoped' "checks scoped-only"
+require_ref "$runner" 'check-privacy-boundary' 'shared privacy check'
+require_ref "$runner" 'selected_checks' 'scoped dependency deduplication'
 require_ref "$contract" 'Classify impact by changed behavior, risk, and cross-contract reach' 'risk-based full routing'
 require_ref '.github/workflows/ai-system-validate.yml' '      - main' 'full CI on main'
 require_ref '.systems/scripts/check-validator-smoke-tests' '--suite' 'domain smoke suite selection'

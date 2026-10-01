@@ -40,6 +40,36 @@ The evidence record includes the profile, scope, baseline, checks run or skipped
 risk; it explicitly records that script evidence is `supporting-only` and that the final verdict is not issued by the
 script. The evidence path must remain outside `.systems/**` and is never created by a routine implementation write.
 
+## Source-Bound Integrity And Observability
+
+The runner emits one start, per-check progress and exactly one completion marker with a unique
+run ID. Evidence records actual `not-started`, `started`, `completed`, `failed`, `timeout` or
+`interrupted` states, source fingerprints, coverage, parent/child monotonic timing and an
+environment fingerprint. `--timeout-seconds <n>` bounds only this run; cleanup targets its
+own child process groups. A pending or interrupted run never inherits completed smoke status.
+
+`--evidence-file` requires an existing local runtime or non-repository output directory.
+Foreign repositories, product paths, tracked/deleted-tracked files, symlink parents and
+existing destinations are rejected. Publication is atomic and no-clobber, with parent identity
+rechecked. Use a new evidence filename for every retry; do not replace prior failure evidence.
+
+`--profile scoped --checks ... --scope-manifest <json>` uses `validation-dependencies.json`.
+The manifest contains `scope_contract: 1`, `workspace`, `owned_root`, all `inputs` with hashes,
+`required_checks`, `semantic_evidence` and `privacy_evidence` path/hash objects, and
+`product_source_digest`. Canonical capture-state or block-checkpoint namespaces are supported;
+unmapped consumers require full validation. Inputs and evidence are rechecked after execution.
+No manifest means iteration-only, not a checkpoint coverage claim. Checkers receive explicit
+`--owned-root` and never infer the owner from a directory name or crawl nested repositories.
+
+Smoke suites are isolated transactions with owned setup, mutation, assertions and cleanup.
+Negative tests require declared exit codes and cause-specific diagnostics; 126/127, signals,
+missing modules and permissions failures do not count. Each suite checks complete negative
+coverage before its completion marker. Test bodies retain their direct positive assertions.
+
+`report-validation-comparison` requires at least three complete frozen runs per variant, equal
+test coverage and environment, and no within-variant source drift. Wall duration and child
+attribution are reported separately, never added. Population changes invalidate speedup claims.
+
 ## Standard And Full
 
 `standard` runs the complete AI System validator chain except embedded `check-validator-smoke-tests`. Use it only when validation routing marks the broad chain applicable.

@@ -1,5 +1,12 @@
 # AI System
 
+Validation integrity tools provide typed rejection tests, source-bound run evidence,
+scoped runtime coverage and comparable timing. Green checks remain supporting-only.
+Use `discover-skills` for metadata-first candidates, `report-workspace-freshness` for
+explicit repository metadata and `report-contract-topology` for product reference gaps.
+Dream recommendations have stable advisory identities and fingerprinted decision history;
+they never authorize execution. See Validation Profiles and Dreaming Mode core contracts.
+
 ## Purpose
 
 AI System is a local Mac workspace system for managing clients, projects, tasks, materials, memory, and personal work-quality insights.

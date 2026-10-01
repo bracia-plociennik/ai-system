@@ -1,5 +1,11 @@
 # Skills
 
+Discover candidate skills through `.systems/scripts/discover-skills --workspace <selected-root>`.
+Discovery reads only opening YAML frontmatter through its closing delimiter. Workspace skill
+names take precedence over system names. Match the concrete trigger and should-not-trigger
+boundaries before opening the full selected `SKILL.md`; references load only as needed.
+Record actual opened paths in evaluation traces. Metadata discovery is not execution authority.
+
 This directory stores system-defined AI System skills.
 
 Skills are reusable task-specific guidance for local operations, product maintenance, quality review, skill creation, and other repeatable work.

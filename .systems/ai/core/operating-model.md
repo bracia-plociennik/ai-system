@@ -1,5 +1,16 @@
 # Operating Model
 
+## On-Demand Diagnostics
+
+`report-workspace-freshness --repo <explicit-root>` inspects only selected Git metadata:
+branch, HEAD, locally known upstream, dirty state and ahead/behind counts. It does not fetch,
+discover repositories recursively or reconcile status. Remote freshness remains unverified.
+
+`report-contract-topology --contract <core-basename>` reports product-local router, template,
+validator and smoke references, marking missing links as partial/orphaned. This is a
+producer-consumer inspection aid, not proof of semantic compatibility. Both commands are
+read-only, on-demand and supporting-only; no scheduler or private runtime content crawl.
+
 ## Purpose
 
 AI System manages one or more local Mac workspaces for clients, projects, tasks, files, memory, and work-quality insights.

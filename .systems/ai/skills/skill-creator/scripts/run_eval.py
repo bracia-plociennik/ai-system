@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.dont_write_bytecode = True
+from eval_freshness import digest, identity, validate_run, no_links
 
 try:
     from utils import dump_json, load_json, write_text
@@ -57,6 +58,8 @@ def validate_plan(plan: dict, source: Path) -> list[dict]:
         assertions = item.get("assertions", [])
         if assertions and not isinstance(assertions, list):
             raise ValueError(f"Eval assertions must be a list: {item.get('id')}")
+    if len({str(item["id"]) for item in evals}) != len(evals):
+        raise ValueError("Duplicate eval IDs")
     return evals
 
 
@@ -67,7 +70,10 @@ def plan_configurations(plan: dict, override: str | None) -> list[str]:
         configs = plan.get("configurations", list(DEFAULT_CONFIGURATIONS))
     if not isinstance(configs, list) or not configs:
         raise ValueError("Configurations must be a non-empty list")
-    return [safe_dir_name(config, "configuration") for config in configs]
+    result = [safe_dir_name(config, "configuration") for config in configs]
+    if len(set(result)) != len(result):
+        raise ValueError("Duplicate configurations")
+    return result
 
 
 def eval_assertions(item: dict) -> list[dict]:
@@ -85,13 +91,39 @@ def eval_assertions(item: dict) -> list[dict]:
 
 
 def create_run(plan_path: Path, output_dir: Path, overwrite: bool, config_override: str | None) -> Path:
+    no_links(plan_path)
     plan = load_json(plan_path)
     evals = validate_plan(plan, plan_path)
     configurations = plan_configurations(plan, config_override)
-    run_dir = output_dir
+    plan_path = plan_path.resolve(strict=True)
+    expected = identity(plan_path, plan, configurations)
+    run_dir = no_links(output_dir)
+    if run_dir.exists():
+        for existing in run_dir.rglob("*"):
+            no_links(existing)
+    target = plan.get("target_path")
+    if target:
+        target = Path(target)
+        target = target if target.is_absolute() else plan_path.parent / target
+        if run_dir.resolve().is_relative_to(target.resolve()):
+            raise ValueError("Eval run must be outside target skill source")
+    if run_dir.is_symlink():
+        raise ValueError("Linked eval run directory is forbidden")
+    if (run_dir / "run.json").exists() and list(run_dir.rglob("grading.json")):
+        manifest, _ = validate_run(run_dir)
+        if manifest["run_fingerprint"] != digest(expected):
+            raise ValueError("Cannot overwrite a graded run with changed input")
+        if not overwrite:
+            raise FileExistsError("Eval run already exists")
+        return run_dir
+    if run_dir.exists() and list(run_dir.rglob("grading.json")):
+        raise ValueError("Orphan grades cannot be adopted by a new run")
     run_dir.mkdir(parents=True, exist_ok=True)
 
     run_manifest = {
+        "freshness_contract": 1,
+        **expected,
+        "run_fingerprint": digest(expected),
         "source_plan": str(plan_path),
         "skill_name": plan.get("skill_name", "unknown"),
         "target_path": plan.get("target_path", ""),
@@ -107,6 +139,7 @@ def create_run(plan_path: Path, output_dir: Path, overwrite: bool, config_overri
         eval_dir = run_dir / eval_id
         eval_dir.mkdir(parents=True, exist_ok=True)
         metadata = {
+            "run_fingerprint": run_manifest["run_fingerprint"],
             "eval_id": eval_id,
             "eval_name": item.get("name", eval_id),
             "prompt": item["prompt"],
@@ -116,6 +149,7 @@ def create_run(plan_path: Path, output_dir: Path, overwrite: bool, config_overri
             "forbidden_behavior": item.get("forbidden_behavior", []),
             "configurations": configurations,
         }
+        metadata["metadata_fingerprint"] = digest(metadata)
         dump_json(eval_dir / "eval_metadata.json", metadata, overwrite=overwrite)
 
         for config in configurations:
@@ -141,7 +175,7 @@ def main() -> int:
 
     try:
         run_dir = create_run(args.evals_json, args.output_dir, args.overwrite, args.configs)
-    except (ValueError, FileExistsError) as exc:
+    except (ValueError, OSError, KeyError) as exc:
         print(str(exc), file=sys.stderr)
         return 1
 

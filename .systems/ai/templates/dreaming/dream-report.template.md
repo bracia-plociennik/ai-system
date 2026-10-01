@@ -1,5 +1,15 @@
 # Dream Report
 
+- Recommendation contract: `1`
+
+## Recommendation Lifecycle
+```json
+[]
+```
+
+Use stable recommendation IDs and source-bound previous/decision/quality references.
+This is advisory history, never approval or execution authority.
+
 ## Metadata
 
 - Date: `<YYYY-MM-DD>`

@@ -1,0 +1,133 @@
+{
+  "contract": 1,
+  "checks": {
+    "check-required-artifacts": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-readmes": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-naming": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-privacy-boundary": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-system-skills": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-contract-compliance": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-delivery-constraints": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-distillation-state": {
+      "dependencies": ["check-owner-approval", "check-delivery-constraints"],
+      "runtime_capable": true
+    },
+    "check-owner-approval": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-validation-routing": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-model-selection-guidance": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-cross-system-upgrade-handoff": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-weekly-planning": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-personal-ops-v4": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-personal-ops-aggregates-v4": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-spor-proposals": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-weekly-planning-v4": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-block-checkpoint": {
+      "dependencies": ["check-owner-approval"],
+      "runtime_capable": true
+    },
+    "check-end-of-task-capture": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-update-workspace": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-project-state": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-project-orchestration": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-external-source-registry": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-external-export-import-workflow": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-personal-ops": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-task-management": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-dreaming-mode": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-system-insights": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-prompt-composition": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-validation-profiles": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-validation-integrity": {
+      "dependencies": [],
+      "runtime_capable": false
+    },
+    "check-validator-smoke-tests": {
+      "dependencies": [],
+      "runtime_capable": false
+    }
+  }
+}

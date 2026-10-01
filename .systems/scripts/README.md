@@ -1,5 +1,19 @@
 # Scripts
 
+## Integrity Tools
+
+- `check-validation-integrity`: offline adversarial regression tests for run/eval/output boundaries.
+- `validation_runner.py` / `validation_support.py`: source identity, actual lifecycle, monotonic timing and atomic no-clobber evidence.
+- `validation-dependencies.json`: explicit scoped dependencies and runtime-capable consumers.
+- `smoke_assertion.py` and `smoke/negative-expectations.json`: typed failure causes and complete suite accounting.
+- `discover-skills`: workspace-first candidate frontmatter, without loading full bodies.
+- `report-validation-comparison`: three-run minimum, equivalent coverage/environment and separate wall/child attribution.
+- `report-workspace-freshness`: explicitly selected Git roots, metadata only, no fetch or reconciliation.
+- `report-contract-topology`: product reference gaps, not semantic compatibility proof.
+- `dream_recommendations.py`: advisory IDs, transitions and fingerprinted inventory-bound history.
+
+All reports are supporting-only. Preserve failure records and avoid broad validators during ordinary implementation.
+
 Validation scripts for AI System live here.
 
 `prepare-personal-ops-spor-proposal --workspace <path> --date YYYY-MM-DD --json` prepares a source-labeled read-only advisory package on stdout. `--scheduled` selects the current Warsaw date, `--seen-id` deduplicates chat delivery and explicit `--regenerate` permits rerendering. `personal_ops_spor_proposals.py` implements the bounded collector; `check-spor-proposals` runs synthetic safety, period, coverage and capacity regressions.

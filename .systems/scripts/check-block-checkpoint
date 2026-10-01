@@ -3,6 +3,7 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 workspace=""
+owned_root=""
 fail=0
 
 usage() {
@@ -11,6 +12,11 @@ usage() {
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --owned-root)
+      owned_root="${2:-}"
+      [[ -n "$owned_root" ]] || { echo "Missing value for --owned-root"; exit 2; }
+      shift 2
+      ;;
     --workspace)
       workspace="${2:-}"
       [[ -n "$workspace" ]] || { echo "Missing value for --workspace"; exit 2; }
@@ -34,6 +40,8 @@ require_file() {
     fail=1
   fi
 }
+
+[[ -z "$owned_root" || -n "$workspace" ]] || { echo "--owned-root requires --workspace"; exit 2; }
 
 require_ref() {
   local path="$1"
@@ -133,6 +141,15 @@ if [[ -n "$workspace" ]]; then
     exit 1
   fi
   blocks_dir="$workspace/checkpoints/blocks"
+  if [[ -n "$owned_root" ]]; then
+    if [[ "$owned_root" != checkpoints/blocks && ! "$owned_root" =~ ^project-state/[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+      echo "Invalid canonical --owned-root"; exit 2
+    fi
+    [[ -d "$workspace/$owned_root" && "$(realpath "$workspace/$owned_root")" == "$workspace/$owned_root" ]] || { echo "Missing or linked owned root"; exit 2; }
+    if [[ "$owned_root" != checkpoints/blocks ]]; then
+      blocks_dir="$workspace/$owned_root/checkpoints/blocks"
+    fi
+  fi
   if [[ -d "$blocks_dir" ]]; then
     while IFS= read -r checkpoint; do
       [[ -n "$checkpoint" ]] || continue

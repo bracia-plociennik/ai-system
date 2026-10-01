@@ -1,293 +1,43 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-repo_root="$(cd "$script_dir/../.." && pwd -P)"
 profile="standard"
-checks=""
-explain=0
-evidence_file=""
-current_check="argument parsing"
-evidence_path_valid=0
-smoke_skipped=0
 
-usage() {
-  cat <<'EOF'
-Usage:
-  .systems/scripts/validate-ai-system [--profile full|standard|scoped|fast] [--checks check-a,check-b] [--evidence-file <runtime-path>] [--explain]
-
-Profiles:
-  standard  Complete AI System validator chain without smoke tests. Default daily validator.
-  full      Complete validation, including check-validator-smoke-tests.
-  scoped    Shared diff/privacy checks plus explicit, deduplicated --checks validators. Iteration only.
-  fast      Cheap sanity checks. Iteration only.
-
-The final AI_SYSTEM_VALIDATION_RESULT marker is script evidence only; it is not a semantic PASS.
-The neutral CLI result is supporting evidence only; script evidence is supporting-only, and semantic QA and final acceptance remain separate.
-AI System validation completed with smoke tests skipped; not final validation evidence without explicit owner acceptance of residual risk.
-EOF
-}
-
-write_evidence() {
-  [[ "$evidence_path_valid" == "1" ]] || return 0
-
-  local rc="$1"
-  local status="failed"
-  local smoke_status="not-applicable"
-  local temp_file
-  [[ "$rc" == "0" ]] && status="completed"
-  if [[ "$profile" == "full" ]]; then
-    smoke_status="run"
-    [[ "$smoke_skipped" == "1" ]] && smoke_status="skipped"
-  fi
-
-  temp_file="$(mktemp "${evidence_file}.tmp.XXXXXX")" || return 0
-  if ! {
-    printf '%s\n' '# Validation Execution Record'
-    printf '%s\n' "- Profile: \`$profile\`"
-    printf '%s\n' "- Scope: AI System product validator chain"
-    printf '%s\n' "- Status: \`$status\`"
-    printf '%s\n' "- Exit code: \`$rc\`"
-    printf '%s\n' "- Last check: \`$current_check\`"
-    printf '%s\n' "- Smoke status: \`$smoke_status\`"
-    printf '%s\n' '- Semantic QA result: not-provided-by-script'
-    printf '%s\n' '- Findings/blockers: script result only; semantic review required'
-    printf '%s\n' '- Product checks: not-provided-by-script'
-    printf '%s\n' '- AI System script applicability: applicable for this validator route'
-    printf '%s\n' '- Script evidence role: `supporting-only`'
-    printf '%s\n' '- Final verdict: not-issued-by-script'
-    printf '%s\n' '- Skipped checks: see smoke status and command output'
-    printf '%s\n' '- Residual risk: green scripts do not establish semantic PASS or final acceptance'
-  } > "$temp_file"; then
-    rm -f "$temp_file"
-    return 0
-  fi
-  mv "$temp_file" "$evidence_file"
-}
-
-emit_result() {
-  local rc="$1"
-  local status="failed"
-  local smoke_status="not-applicable"
-  [[ "$rc" == "0" ]] && status="completed"
-  if [[ "$profile" == "full" ]]; then
-    smoke_status="run"
-    [[ "$smoke_skipped" == "1" ]] && smoke_status="skipped"
-  fi
-  printf 'AI_SYSTEM_VALIDATION_RESULT profile=%s status=%s exit_code=%s supporting_only=true smoke=%s\n' "$profile" "$status" "$rc" "$smoke_status"
-}
-
-on_exit() {
-  local rc=$?
-  write_evidence "$rc"
-  emit_result "$rc"
-}
-trap on_exit EXIT
-
-while [[ "$#" -gt 0 ]]; do
-  case "$1" in
-    --profile)
-      [[ "$#" -ge 2 ]] || { echo "Missing value for --profile"; exit 1; }
-      profile="$2"
-      shift 2
-      ;;
-    --checks)
-      [[ "$#" -ge 2 ]] || { echo "Missing value for --checks"; exit 1; }
-      checks="$2"
-      shift 2
-      ;;
-    --evidence-file)
-      [[ "$#" -ge 2 ]] || { echo "Missing value for --evidence-file"; exit 1; }
-      evidence_file="$2"
-      shift 2
-      ;;
-    --explain)
-      explain=1
-      shift
-      ;;
-    -h|--help)
-      usage
-      exit 0
-      ;;
-    *)
-      echo "Unknown validate-ai-system argument: $1"
-      usage
-      exit 1
-      ;;
-  esac
-done
-
-case "$profile" in
-  full|standard|scoped|fast) ;;
-  *) echo "Unknown validation profile: $profile"; exit 1 ;;
-esac
-
-smoke_skipped=0
-if [[ "$profile" == "full" && "${AI_SYSTEM_SKIP_SMOKE_TESTS:-0}" == "1" ]]; then
-  smoke_skipped=1
-fi
-
-if [[ -n "$evidence_file" ]]; then
-  if [[ "$evidence_file" == *".."* || "$evidence_file" == .systems/* || "$evidence_file" == "$repo_root/.systems/"* ]]; then
-    echo "Evidence file must be a runtime path outside .systems/**"
-    exit 2
-  fi
-  evidence_parent="$(dirname "$evidence_file")"
-  [[ -d "$evidence_parent" ]] || { echo "Evidence file parent does not exist: $evidence_parent"; exit 2; }
-  evidence_path_valid=1
-fi
-
-if [[ -n "$checks" && "$profile" != "scoped" ]]; then
-  echo "--checks is valid only with --profile scoped"
-  exit 1
-fi
-
-if [[ "$profile" == "scoped" && -z "$checks" ]]; then
-  echo "--profile scoped requires --checks <check-a,check-b>"
-  exit 1
-fi
-
-if [[ "$profile" == "scoped" && ( "$checks" == ,* || "$checks" == *, || "$checks" == *,,* ) ]]; then
-  echo "--checks must be a non-empty comma-separated list of check names"
-  exit 1
-fi
-
-run_cmd() {
-  current_check="$*"
-  if [[ "$explain" == "1" ]]; then
-    printf '+ %s\n' "$*"
-  fi
-  "$@"
-}
-
-explain_profile() {
-  [[ "$explain" == "1" ]] || return 0
-  case "$profile" in
-    full)
-      echo "Validation profile: full"
-      if [[ "$smoke_skipped" == "1" ]]; then
-        echo "Smoke tests: skipped by AI_SYSTEM_SKIP_SMOKE_TESTS=1"
-      else
-        echo "Smoke tests: run"
-      fi
-      echo "Script evidence: supporting-only"
-      ;;
-    standard)
-      echo "Validation profile: standard"
-      echo "Smoke tests: skipped"
-      echo "Script evidence: supporting-only; semantic and product QA still required"
-      ;;
-    scoped)
-      echo "Validation profile: scoped"
-      echo "Scoped checks: $checks"
-      echo "Smoke tests: skipped"
-      echo "Script evidence: targeted supporting-only"
-      ;;
-    fast)
-      echo "Validation profile: fast"
-      echo "Smoke tests: skipped"
-      echo "Script evidence: supporting-only sanity check"
-      ;;
-  esac
-}
-
-run_fast_checks() {
-  run_shared_checks
-  run_cmd "$script_dir/check-required-artifacts"
-}
-
-run_shared_checks() {
-  if git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    run_cmd git -C "$repo_root" diff --check
-  elif [[ "$explain" == "1" ]]; then
-    echo "+ git diff --check (skipped: not a git repository)"
-  fi
-  run_cmd "$script_dir/check-privacy-boundary"
-}
-
-run_named_check() {
-  local check_name="$1"
-  local check_path
-  if [[ ! "$check_name" =~ ^check-[a-z0-9-]+$ ]]; then
-    echo "Invalid scoped check name: $check_name"
-    exit 1
-  fi
-  check_path="$script_dir/$check_name"
-  if [[ ! -f "$check_path" || ! -x "$check_path" ]]; then
-    echo "Unknown scoped check: $check_name"
-    exit 1
-  fi
-  run_cmd "$check_path"
-}
-
-run_standard_checks() {
-  run_cmd "$script_dir/check-required-artifacts"
-  run_cmd "$script_dir/check-readmes"
-  run_cmd "$script_dir/check-naming"
-  run_cmd "$script_dir/check-privacy-boundary"
-  run_cmd "$script_dir/check-system-skills"
-  run_cmd "$script_dir/check-contract-compliance"
-  run_cmd "$script_dir/check-delivery-constraints"
-  run_cmd "$script_dir/check-distillation-state"
-  run_cmd "$script_dir/check-owner-approval"
-  run_cmd "$script_dir/check-validation-routing"
-  run_cmd "$script_dir/check-model-selection-guidance"
-  run_cmd "$script_dir/check-cross-system-upgrade-handoff"
-  run_cmd "$script_dir/check-weekly-planning"
-  run_cmd "$script_dir/check-personal-ops-v4"
-  run_cmd "$script_dir/check-personal-ops-aggregates-v4"
-  run_cmd "$script_dir/check-spor-proposals"
-  run_cmd "$script_dir/check-weekly-planning-v4"
-  run_cmd "$script_dir/check-block-checkpoint"
-  run_cmd "$script_dir/check-end-of-task-capture"
-  run_cmd "$script_dir/check-update-workspace"
-  run_cmd "$script_dir/check-project-state"
-  run_cmd "$script_dir/check-project-orchestration"
-  run_cmd "$script_dir/check-external-source-registry"
-  run_cmd "$script_dir/check-external-export-import-workflow"
-  run_cmd "$script_dir/check-personal-ops"
-  run_cmd "$script_dir/check-task-management"
-  run_cmd "$script_dir/check-dreaming-mode"
-  run_cmd "$script_dir/check-system-insights"
-  run_cmd "$script_dir/check-prompt-composition"
-  run_cmd "$script_dir/check-validation-profiles"
-}
-
-explain_profile
-
-if [[ "$profile" == "full" && "$smoke_skipped" == "1" ]]; then
-  echo "AI System validation completed with smoke tests skipped; not final validation evidence without explicit owner acceptance of residual risk."
-fi
-
-if [[ "$profile" == "fast" ]]; then
-  run_fast_checks
-  exit 0
-fi
-
-if [[ "$profile" == "scoped" ]]; then
-  IFS=',' read -r -a selected_checks <<< "$checks"
-  unique_checks=""
-  seen_checks=","
-  for check_name in "${selected_checks[@]}"; do
-    check_name="${check_name//[[:space:]]/}"
-    [[ -n "$check_name" ]] || { echo "Empty scoped check name in --checks"; exit 1; }
-    [[ "$check_name" =~ ^check-[a-z0-9-]+$ && -x "$script_dir/$check_name" ]] || { echo "Unknown scoped check: $check_name"; exit 1; }
-    [[ "$check_name" == "check-privacy-boundary" ]] && continue
-    [[ "$seen_checks" == *",$check_name,"* ]] && continue
-    seen_checks+="$check_name,"
-    unique_checks+="$check_name "
-  done
-  run_shared_checks
-  for check_name in $unique_checks; do
-    run_named_check "$check_name"
-  done
-  exit 0
-fi
-
-run_standard_checks
-
-if [[ "$profile" == "full" && "$smoke_skipped" != "1" ]]; then
-  run_cmd "$script_dir/check-validator-smoke-tests"
-fi
-
-exit 0
+# The declared standard chain is the producer of the execution plan.
+# Scoped checks use explicit registry dependencies; fast uses shared sanity checks.
+# AI_SYSTEM_SKIP_SMOKE_TESTS always produces supporting-only non-final evidence.
+standard_checks=(
+  check-required-artifacts
+  check-readmes
+  check-naming
+  check-privacy-boundary
+  check-system-skills
+  check-contract-compliance
+  check-delivery-constraints
+  check-distillation-state
+  check-owner-approval
+  check-validation-routing
+  check-model-selection-guidance
+  check-cross-system-upgrade-handoff
+  check-weekly-planning
+  check-personal-ops-v4
+  check-personal-ops-aggregates-v4
+  check-spor-proposals
+  check-weekly-planning-v4
+  check-block-checkpoint
+  check-end-of-task-capture
+  check-update-workspace
+  check-project-state
+  check-project-orchestration
+  check-external-source-registry
+  check-external-export-import-workflow
+  check-personal-ops
+  check-task-management
+  check-dreaming-mode
+  check-system-insights
+  check-prompt-composition
+  check-validation-profiles
+  check-validation-integrity
+)
+checks="$(IFS=,; echo "${standard_checks[*]}")"
+exec python3 -B "$script_dir/validation_runner.py" "$@" --default-profile "$profile" --standard-checks "$checks" --full-smoke-check check-validator-smoke-tests

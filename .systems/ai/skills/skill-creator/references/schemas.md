@@ -48,6 +48,8 @@ Located at `<run-dir>/<eval-id>/eval_metadata.json`.
 {
   "eval_id": "eval-001",
   "eval_name": "validation-evidence",
+  "run_fingerprint": "<copy exact run.json fingerprint>",
+  "metadata_fingerprint": "<copy exact matching metadata fingerprint>",
   "prompt": "Create a skill and show validation evidence.",
   "assertions": [
     {
@@ -111,6 +113,16 @@ Located at `<run-dir>/<eval-id>/<configuration>/timing.json` when available.
 ```
 
 ## `grading.json`
+
+Freshness contract 1 requires `eval_id`, `configuration`, `run_fingerprint` and
+`metadata_fingerprint` in every grade. `run.json` binds the complete source plan,
+configurations, membership, target skill files and explicit input fingerprints.
+The producer checks existing grades before any overwrite; standalone aggregation repeats
+the same checks. Historical unbound runs require a new run, not retroactive fingerprinting.
+
+`result_fingerprints` binds the exact nonempty set of actual output/transcript files relative
+to the configuration directory, excluding grading files and scaffold README/todo files.
+Changing or adding an evaluated output invalidates the existing grade.
 
 Located at `<run-dir>/<eval-id>/<configuration>/grading.json`.
 
