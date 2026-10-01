@@ -21,4 +21,3 @@ On-demand scoped metadata and producer-consumer reports without private-content 
 - No private runtime migration or Workflow product modification.
 - Product scripts are supporting evidence, not semantic acceptance.
 - Quality closure is recorded separately in quality/phase-5-iev2-ops-011-freshness-topology-quality.md.
-

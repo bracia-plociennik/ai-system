@@ -19,4 +19,3 @@ Canonical ownership, symlink containment, immutable outputs and atomic no-clobbe
 - No private runtime migration or Workflow product modification.
 - Product scripts are supporting evidence, not semantic acceptance.
 - Quality closure is recorded separately in quality/phase-5-iev2-val-003-evidence-destinations-quality.md.
-

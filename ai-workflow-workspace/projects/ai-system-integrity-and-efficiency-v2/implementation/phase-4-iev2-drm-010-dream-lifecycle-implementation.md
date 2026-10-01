@@ -21,4 +21,3 @@ Versioned recommendation identity and decision evidence; immutable history and a
 - No private runtime migration or Workflow product modification.
 - Product scripts are supporting evidence, not semantic acceptance.
 - Quality closure is recorded separately in quality/phase-5-iev2-drm-010-dream-lifecycle-quality.md.
-

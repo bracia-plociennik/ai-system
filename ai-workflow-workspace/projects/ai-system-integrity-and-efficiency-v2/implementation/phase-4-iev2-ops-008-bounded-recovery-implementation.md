@@ -20,4 +20,3 @@ Retain failed evidence, hypothesis per retry, no guard weakening, changed source
 - No private runtime migration or Workflow product modification.
 - Product scripts are supporting evidence, not semantic acceptance.
 - Quality closure is recorded separately in quality/phase-5-iev2-ops-008-bounded-recovery-quality.md.
-

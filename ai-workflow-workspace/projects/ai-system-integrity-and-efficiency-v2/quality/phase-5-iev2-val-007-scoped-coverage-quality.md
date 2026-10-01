@@ -8,11 +8,11 @@
 - QA verification contract: `full-qa-verification-v2`
 
 ## Current QA Run
-- Run ID: qa-iev2-val-007-scoped-coverage-2026-10-01
+- Run ID: qa-iev2-val-007-scoped-coverage-2026-10-01-format-recovery
 - Artifact kind: implementation-quality
 - Project/task identity: ai-system-integrity-and-efficiency-v2:IEV2-VAL-007-scoped-coverage
-- Assessed source HEAD: dabbf3457b98cd28f44b7785f14ece51b5932017
-- Assessed worktree digest: 03427319b6d22099ff12cccb972b828c66dba3fba5d27182a8789603b19512dc
+- Assessed source HEAD: 3f65e146f19b98b575c7e61baa7f2e0bff337349
+- Assessed worktree digest: e195487206eac15fa3fc3a65ff700aec7842102bb8ce6bf4b0cd449d54d40bcc
 - Input artifacts: see table
 - Verdict: PASS
 - Gate Decision: PASS
@@ -26,14 +26,14 @@
 | approved-target-source | .systems/scripts/tests/test_validation_integrity.py | 1cf04a884e6fe3b9d6d69aceb9c43107b37aa19eb6e512915a90d5135d2ca8af |
 | approved-target-source | .systems/scripts/validation_runner.py | a41469e162c89ede55ab3c4b7f5161971854771d8fffedee4bee71aa73c8d1a8 |
 | approved-target-source | .systems/scripts/validation-dependencies.json | 915273e4a758f4e983535bb9a75a5504c2ef9f2aa29c04c0256358ffe7aae0dc |
-| owning-project-evidence | implementation/phase-4-iev2-val-007-scoped-coverage-implementation.md | 1786f741ed4daf43e0aff1ed1f7786cbc6fda2ce598c734a2de42366efdaa912 |
+| owning-project-evidence | implementation/phase-4-iev2-val-007-scoped-coverage-implementation.md | fcdf0dd679e3c73f192eea466dc2e5952fde776b2be732d8ba34150b84d761cb |
 | owning-project-evidence | quality/evidence/integrity-full-03.md | 75cbc61a6603b082c0ea192e145349f9a24fd3cec779db7affb103959d170dbb |
 | owning-project-evidence | quality/evidence/integrity-tests-07.log | 4f76f32d07378234bac3dfffcdc90a3da9c5138e9e9e6e4c66438cdd5258662e |
 | owning-project-evidence | quality/evidence/smoke-equivalence.json | b22a91df5797405f6b12008fc9c7bdcb83d96597a6242301db35910f22b04371 |
-| owning-project-evidence | quality/recovery-ledger.md | d8a1d43d459d999a18974b670218427350b387b858b86008c6d793a733356fe4 |
+| owning-project-evidence | quality/recovery-ledger.md | 853ac42e104acffd3ed80c19379c14ccc7a8298d2ea6f2cd4ef5520def997aac |
 | owning-project-evidence | quality/semantic-review.md | b17cdcaad2863f369ab8507527afea1cf221083e7d7002df3b6565a596ce0165 |
 | owning-project-evidence | quality/skill-routing-trace.md | c1a9444a3e06cddd25457801fc9b57db3114c2a11fc6dc37cb77b0fe17ad76c7 |
-| owning-project-evidence | specs/phase-3-program-specification.md | fb8be11df7df88cb9b7f9603f26379b945a8409932f59e1b4a80d061a16d4f2a |
+| owning-project-evidence | specs/phase-3-program-specification.md | 824384b8391f7b37b283e4f68c10a7c322d80e0df622aaa89cd8d8cef9c8f399 |
 
 ### Evidence
 Current diff and producer-consumer review for IEV2-VAL-007-scoped-coverage, documented in semantic-review.md. Representative behavior: Complete canonical runtime manifest and dependency closure. Failure paths: missing consumer, partial inventory, stale hashes and changed shared source. Executable/manual evidence: test_scoped_complete_owned_inventory; smoke-equivalence.json; all 15 integrity tests and current full-03 validation completed. Formal verdict combines the reviewed DoD, boundaries, current hashes and behavior; scripts are supporting-only. Old failed runs remain excluded from current acceptance.
@@ -138,3 +138,6 @@ Current diff and producer-consumer review for IEV2-VAL-007-scoped-coverage, docu
 - Criticality: high
 - Current model known: no
 - Blocking: no
+
+## Runtime Formatting Recovery
+Only current runtime EOF formatting and declared input fingerprints were refreshed. Pre-recovery report bytes are retained in quality/evidence/pre-format-recovery-qa.json. Product source and product behavior evidence are unchanged. Required nonzero gates stop subsequent commit execution.

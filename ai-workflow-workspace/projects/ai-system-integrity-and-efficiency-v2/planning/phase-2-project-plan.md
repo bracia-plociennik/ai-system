@@ -22,4 +22,3 @@ Mode: owner-opt-out; no deadline/timebox. Must-have all eleven tasks. Cutline: e
 
 ## Publication
 Local reviewable commits; no push or management update. Explicit owner-triggered Phase 8, without final-owner-yes. Cross-system impact yes: one privacy-safe handoff after QA.
-

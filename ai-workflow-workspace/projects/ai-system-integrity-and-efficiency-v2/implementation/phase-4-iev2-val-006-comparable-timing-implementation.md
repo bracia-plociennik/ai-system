@@ -20,4 +20,3 @@ At least three complete equivalent runs; parent wall time distinct from child at
 - No private runtime migration or Workflow product modification.
 - Product scripts are supporting evidence, not semantic acceptance.
 - Quality closure is recorded separately in quality/phase-5-iev2-val-006-comparable-timing-quality.md.
-

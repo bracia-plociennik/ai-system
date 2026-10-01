@@ -21,4 +21,3 @@ Frontmatter-only candidate discovery, workspace precedence, full matched contrac
 - No private runtime migration or Workflow product modification.
 - Product scripts are supporting evidence, not semantic acceptance.
 - Quality closure is recorded separately in quality/phase-5-iev2-skl-009-metadata-discovery-quality.md.
-

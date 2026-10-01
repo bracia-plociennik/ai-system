@@ -8,11 +8,11 @@
 - QA verification contract: `full-qa-verification-v2`
 
 ## Current QA Run
-- Run ID: qa-iev2-ops-011-freshness-topology-2026-10-01
+- Run ID: qa-iev2-ops-011-freshness-topology-2026-10-01-format-recovery
 - Artifact kind: implementation-quality
 - Project/task identity: ai-system-integrity-and-efficiency-v2:IEV2-OPS-011-freshness-topology
-- Assessed source HEAD: dabbf3457b98cd28f44b7785f14ece51b5932017
-- Assessed worktree digest: c57958372d3757806f3178f1ab0cdad710e9a54d4968b30b33b1023eecaf01b9
+- Assessed source HEAD: 3f65e146f19b98b575c7e61baa7f2e0bff337349
+- Assessed worktree digest: 8e80176fb3ecbdcfafaa1b85fa36595e1b6d3fc8b346e3f62047f359a1c3e8ce
 - Input artifacts: see table
 - Verdict: PASS
 - Gate Decision: PASS
@@ -24,14 +24,14 @@
 | approved-target-source | .systems/scripts/report-contract-topology | 7d296d1cee64b85284231ac5d5f32335ed97435a6688f55d73f860003cb087e4 |
 | approved-target-source | .systems/scripts/report-workspace-freshness | 12ca8314f7246e80fdc87651bbfb94149d505b097ff0f740641e924449e724f5 |
 | approved-target-source | .systems/scripts/tests/test_validation_integrity.py | 1cf04a884e6fe3b9d6d69aceb9c43107b37aa19eb6e512915a90d5135d2ca8af |
-| owning-project-evidence | implementation/phase-4-iev2-ops-011-freshness-topology-implementation.md | 2467761a2eb3bdf303896c100bd2f2f62d8c474a581a94e9910613e9f8cfc8d4 |
+| owning-project-evidence | implementation/phase-4-iev2-ops-011-freshness-topology-implementation.md | 245662b838fcc573443b23dfba48de4bbe4a1f63829a94e2e7818e474fcccc4a |
 | owning-project-evidence | quality/evidence/integrity-full-03.md | 75cbc61a6603b082c0ea192e145349f9a24fd3cec779db7affb103959d170dbb |
 | owning-project-evidence | quality/evidence/integrity-tests-07.log | 4f76f32d07378234bac3dfffcdc90a3da9c5138e9e9e6e4c66438cdd5258662e |
 | owning-project-evidence | quality/evidence/smoke-equivalence.json | b22a91df5797405f6b12008fc9c7bdcb83d96597a6242301db35910f22b04371 |
-| owning-project-evidence | quality/recovery-ledger.md | d8a1d43d459d999a18974b670218427350b387b858b86008c6d793a733356fe4 |
+| owning-project-evidence | quality/recovery-ledger.md | 853ac42e104acffd3ed80c19379c14ccc7a8298d2ea6f2cd4ef5520def997aac |
 | owning-project-evidence | quality/semantic-review.md | b17cdcaad2863f369ab8507527afea1cf221083e7d7002df3b6565a596ce0165 |
 | owning-project-evidence | quality/skill-routing-trace.md | c1a9444a3e06cddd25457801fc9b57db3114c2a11fc6dc37cb77b0fe17ad76c7 |
-| owning-project-evidence | specs/phase-3-program-specification.md | fb8be11df7df88cb9b7f9603f26379b945a8409932f59e1b4a80d061a16d4f2a |
+| owning-project-evidence | specs/phase-3-program-specification.md | 824384b8391f7b37b283e4f68c10a7c322d80e0df622aaa89cd8d8cef9c8f399 |
 
 ### Evidence
 Current diff and producer-consumer review for IEV2-OPS-011-freshness-topology, documented in semantic-review.md. Representative behavior: Explicit repository or product-contract selectors -> stdout metadata. Failure paths: unsafe selectors rejected; remote not fetched and links not treated as semantic proof. Executable/manual evidence: Explicit report-workspace-freshness/report-contract-topology invocations and source review; all 15 integrity tests and current full-03 validation completed. Formal verdict combines the reviewed DoD, boundaries, current hashes and behavior; scripts are supporting-only. Old failed runs remain excluded from current acceptance.
@@ -136,3 +136,6 @@ Current diff and producer-consumer review for IEV2-OPS-011-freshness-topology, d
 - Criticality: high
 - Current model known: no
 - Blocking: no
+
+## Runtime Formatting Recovery
+Only current runtime EOF formatting and declared input fingerprints were refreshed. Pre-recovery report bytes are retained in quality/evidence/pre-format-recovery-qa.json. Product source and product behavior evidence are unchanged. Required nonzero gates stop subsequent commit execution.

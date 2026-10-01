@@ -17,6 +17,7 @@ In target repositories, this is the place to record proposed AI Workflow improve
 | Date | Topic | Type | Status | Route |
 | --- | --- | --- | --- | --- |
 | 2026-09-28 | Canonical capture state and QA evidence | cross-system handoff | advisory | `memory/2026-09-28-canonical-capture-state-and-qa-evidence-handoff.md` |
+| 2026-10-01 | Source-bound validation and evaluation integrity | cross-system handoff | advisory | `memory/2026-10-01-integrity-efficiency-v2-ai-workflow-handoff.md` |
 
 ## Rules
 

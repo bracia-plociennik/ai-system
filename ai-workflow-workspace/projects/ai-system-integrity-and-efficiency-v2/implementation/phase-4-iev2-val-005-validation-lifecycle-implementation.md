@@ -20,4 +20,3 @@ Actual execution states, source digest, run ID, monotonic durations, timeout/int
 - No private runtime migration or Workflow product modification.
 - Product scripts are supporting evidence, not semantic acceptance.
 - Quality closure is recorded separately in quality/phase-5-iev2-val-005-validation-lifecycle-quality.md.
-

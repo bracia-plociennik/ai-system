@@ -7,11 +7,11 @@
 - QA verification contract: `full-qa-verification-v2`
 
 ## Current QA Run
-- Run ID: phase-3-iev2-val-001-typed-negative-assertions-spec-qa-2026-10-01
+- Run ID: phase-3-iev2-val-001-typed-negative-assertions-spec-qa-2026-10-01-format-recovery
 - Artifact kind: spec-qa
 - Project/task identity: ai-system-integrity-and-efficiency-v2:IEV2-VAL-001-typed-negative-assertions
-- Assessed source HEAD: dabbf3457b98cd28f44b7785f14ece51b5932017
-- Assessed worktree digest: 8077f8872623e7122b6e9daaa07205d803fee5f21195f68a136745f2b93d9845
+- Assessed source HEAD: 3f65e146f19b98b575c7e61baa7f2e0bff337349
+- Assessed worktree digest: 0b48d1a5444069f48d0acbb35d4fec27d710cae54114e35636b19d6f293b3ddb
 - Input artifacts: see table
 - Verdict: PASS
 - Gate Decision: PASS
@@ -19,10 +19,10 @@
 ### Input Artifacts
 | Root kind | Relative path | SHA-256 |
 | --- | --- | --- |
-| owning-project-evidence | planning/phase-1-architecture.md | dfc6ffe3fceda38bcefc891e6cb46115710088e391e2293166cd308c100789e2 |
-| owning-project-evidence | planning/phase-2-project-plan.md | eef20e77f18e0f23341664fa0b9ac8a8f8b45a4839ca814f7f7829e70cdd17f3 |
-| owning-project-evidence | specs/phase-3-program-specification.md | fb8be11df7df88cb9b7f9603f26379b945a8409932f59e1b4a80d061a16d4f2a |
-| owning-project-evidence | context.md | 40b86784238ba3b66bd3403f755468734e54a57a3d2774add18511908e8daa63 |
+| owning-project-evidence | planning/phase-1-architecture.md | 37ca45f582433378cae1f671874cd175ef83820aea8314cc59796cdd3ccd55ec |
+| owning-project-evidence | planning/phase-2-project-plan.md | 7cc6b1266eb46b49f74e92df84285158a672010e2fafa27563d7fa38d98f151c |
+| owning-project-evidence | specs/phase-3-program-specification.md | 824384b8391f7b37b283e4f68c10a7c322d80e0df622aaa89cd8d8cef9c8f399 |
+| owning-project-evidence | context.md | 78ddaf8e31ae61bf074cbebc3903aa2eeb7b28f67c91fce2bc5839aec17c0222 |
 
 ### Evidence
 Reviewed accepted owner scope, eleven testable outcomes, shared-module boundaries, dependency and source identity contracts, staged prototype against architecture and explicit no-push/no-Workflow-change boundaries. This is current artifact QA, not backdated evidence or implementation acceptance. Plan permits isolated local fixtures; no unresolved owner choices remain except deliberate final-owner-yes.
@@ -88,3 +88,6 @@ Owner opt-out: no deadline or timebox. Quality floor preserved; no independent i
 - Criticality: high
 - Current model known: no
 - Blocking: no
+
+## Runtime Formatting Recovery
+Only current runtime EOF formatting and declared input fingerprints were refreshed. Pre-recovery report bytes are retained in quality/evidence/pre-format-recovery-qa.json. Product source and product behavior evidence are unchanged. Required nonzero gates stop subsequent commit execution.

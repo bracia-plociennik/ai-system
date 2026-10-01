@@ -38,4 +38,3 @@ Stop on scope expansion, private data requirement, unavailable permission or mat
 
 ## Instruction Refresh
 Full refresh: root shim, nested AGENTS, implementation slicing, risk/permissions, delivery constraints, plan quality, full QA and Phase 8; baseline dabbf3457b98cd28f44b7785f14ece51b5932017; CR-009 dirty runtime excluded by isolated worktree.
-

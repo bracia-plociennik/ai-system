@@ -19,4 +19,3 @@ Equal/behind only; ahead/diverged stop with local state preserved.
 - No private runtime migration or Workflow product modification.
 - Product scripts are supporting evidence, not semantic acceptance.
 - Quality closure is recorded separately in quality/phase-5-iev2-upd-004-canonical-updater-quality.md.
-

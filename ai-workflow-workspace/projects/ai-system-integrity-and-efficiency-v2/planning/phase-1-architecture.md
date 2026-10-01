@@ -14,4 +14,3 @@ Validate all destinations before execution. Fail closed on stale identity, incom
 
 ## Residual Risk
 Static contracts cannot prove an agent's complete read-set. Timing is noisy and source changes require honest non-comparability reporting.
-

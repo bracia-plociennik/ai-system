@@ -14,6 +14,7 @@ Retain failed evidence. Each retry below has a new bounded hypothesis and does n
 | full-02 | Product changed while the run was active | Freshness must reject rather than accept that run | Preserve actual result; start a new frozen full run for closure |
 | workflow-01 | Nested validator invoked from the target root could not locate its timeout helper | Run the existing tool from its own clone directory | workflow-02 reached runtime checks; no Workflow source change |
 | workflow-02 | New task IDs lacked required descriptive suffixes and task links used unsupported relative bases | Normalize only this new project's IDs/links and refresh current input hashes; retain earlier artifact QA snapshots | workflow-03 completed the project-scoped standard chain |
+| runtime commit whitespace gate | Staged diff check returned exit 2 for blank lines at EOF, but the orchestration call continued to a local commit | Correct only the new current runtime formatting; retain prior QA bytes in a fingerprinted JSON snapshot and refresh all affected input hashes. A nonzero required gate must stop commit execution | Follow-up artifact QA, project-scoped Workflow validation and cumulative diff check required before Phase 8; no reset, history rewrite, push or product change |
 
 ## Current Frozen Product Verification
 integrity-full-03 completed with exit 0 and smoke completed after the source fixes. integrity-full-02 correctly failed with exit 2 when the source changed; completed child checks did not turn that stale run into eligible evidence.

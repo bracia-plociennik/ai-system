@@ -8,11 +8,11 @@
 - QA verification contract: `full-qa-verification-v2`
 
 ## Current QA Run
-- Run ID: qa-iev2-val-006-comparable-timing-2026-10-01
+- Run ID: qa-iev2-val-006-comparable-timing-2026-10-01-format-recovery
 - Artifact kind: implementation-quality
 - Project/task identity: ai-system-integrity-and-efficiency-v2:IEV2-VAL-006-comparable-timing
-- Assessed source HEAD: dabbf3457b98cd28f44b7785f14ece51b5932017
-- Assessed worktree digest: 9b1a67f9653d87efe5488ba1f11a75be7a7afa638d651d6d3359cab5aeb2bc2d
+- Assessed source HEAD: 3f65e146f19b98b575c7e61baa7f2e0bff337349
+- Assessed worktree digest: afd94eba00f9c43ebc196377afd7d305f30928a904b3bfb42b8141ac94b61d40
 - Input artifacts: see table
 - Verdict: PASS
 - Gate Decision: PASS
@@ -23,14 +23,14 @@
 | approved-target-source | .systems/scripts/report-validation-comparison | da46d0196fda417a14b8b8143789564052e889936a583131823bcb115e2d4f50 |
 | approved-target-source | .systems/scripts/smoke_coverage.py | 0c552c7920a5dfb91b5028996bb540a655dfa4fa6afdb5dffdd8b3864fbe22ae |
 | approved-target-source | .systems/scripts/tests/test_validation_integrity.py | 1cf04a884e6fe3b9d6d69aceb9c43107b37aa19eb6e512915a90d5135d2ca8af |
-| owning-project-evidence | implementation/phase-4-iev2-val-006-comparable-timing-implementation.md | 6d85eb6082325698f29193c798314dd9051c30840bfca99e3edfaedd221502b0 |
+| owning-project-evidence | implementation/phase-4-iev2-val-006-comparable-timing-implementation.md | 09aed9b37d05d0514d5904bf4724e17a00f69a2341a4a058de5ccc095fb5d420 |
 | owning-project-evidence | quality/evidence/integrity-full-03.md | 75cbc61a6603b082c0ea192e145349f9a24fd3cec779db7affb103959d170dbb |
 | owning-project-evidence | quality/evidence/integrity-tests-07.log | 4f76f32d07378234bac3dfffcdc90a3da9c5138e9e9e6e4c66438cdd5258662e |
 | owning-project-evidence | quality/evidence/smoke-equivalence.json | b22a91df5797405f6b12008fc9c7bdcb83d96597a6242301db35910f22b04371 |
-| owning-project-evidence | quality/recovery-ledger.md | d8a1d43d459d999a18974b670218427350b387b858b86008c6d793a733356fe4 |
+| owning-project-evidence | quality/recovery-ledger.md | 853ac42e104acffd3ed80c19379c14ccc7a8298d2ea6f2cd4ef5520def997aac |
 | owning-project-evidence | quality/semantic-review.md | b17cdcaad2863f369ab8507527afea1cf221083e7d7002df3b6565a596ce0165 |
 | owning-project-evidence | quality/skill-routing-trace.md | c1a9444a3e06cddd25457801fc9b57db3114c2a11fc6dc37cb77b0fe17ad76c7 |
-| owning-project-evidence | specs/phase-3-program-specification.md | fb8be11df7df88cb9b7f9603f26379b945a8409932f59e1b4a80d061a16d4f2a |
+| owning-project-evidence | specs/phase-3-program-specification.md | 824384b8391f7b37b283e4f68c10a7c322d80e0df622aaa89cd8d8cef9c8f399 |
 | owning-project-evidence | quality/evidence/timing-comparison.json | 6c84f9eb051677cc0e4bdcd08a05c54070a313fe67235de30a9987d483d6d66f |
 | owning-project-evidence | quality/timing-review.md | 2dfeab097d9e758caea8cf987666aca01d0d916587f8517480c09dcab02b94e0 |
 | owning-project-evidence | quality/evidence/monolithic-1.md | 43d1c532210580e06b5d9870bf320f34767b303ab3795b6ba867a50701d48f02 |
@@ -145,3 +145,5 @@ Current diff and producer-consumer review for IEV2-VAL-006-comparable-timing, do
 - Current model known: no
 - Blocking: no
 
+## Runtime Formatting Recovery
+Only current runtime EOF formatting and declared input fingerprints were refreshed. Pre-recovery report bytes are retained in quality/evidence/pre-format-recovery-qa.json. Product source and product behavior evidence are unchanged. Required nonzero gates stop subsequent commit execution.
