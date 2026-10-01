@@ -8,13 +8,13 @@
 | `active-plan-status` | `active` |
 | `current-task` | `none` |
 | `active-change-request` | `none` |
-| `current-phase` | `phase-8-final-check` |
-| `phase-result` | `FAIL` |
+| `current-phase` | `phase-7-checkpoint` |
+| `phase-result` | `completed` |
 | `final-owner-approval` | `not-requested` |
-| `next-phase` | `phase-5-fix-loop` |
+| `next-phase` | `phase-8-final-check` |
 | `next-task` | `none` |
-| `blocking-reason` | `unresolved full-profile isolation performance warning; Phase 8 prohibits PASS with a system warning` |
+| `blocking-reason` | `none` |
 | `updated-at` | `2026-10-01` |
 | `autopilot-mode` | `supervised` |
-| `autopilot-state` | `blocked` |
+| `autopilot-state` | `running` |
 | `autopilot-run` | `integrity-efficiency-v2` |

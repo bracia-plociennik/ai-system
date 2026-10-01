@@ -8,11 +8,11 @@
 - QA verification contract: `full-qa-verification-v2`
 
 ## Current QA Run
-- Run ID: qa-iev2-ops-011-freshness-topology-2026-10-01-format-recovery
+- Run ID: qa-iev2-ops-011-freshness-topology-2026-10-01-format-recovery-smoke-optimization
 - Artifact kind: implementation-quality
 - Project/task identity: ai-system-integrity-and-efficiency-v2:IEV2-OPS-011-freshness-topology
-- Assessed source HEAD: 3f65e146f19b98b575c7e61baa7f2e0bff337349
-- Assessed worktree digest: 8e80176fb3ecbdcfafaa1b85fa36595e1b6d3fc8b346e3f62047f359a1c3e8ce
+- Assessed source HEAD: 3e8b795821bc46d7d91f6a620d6a3272e8a5cafb
+- Assessed worktree digest: 2abeff7522f4440d94a86f53d090eab27c4c306446bff1111291108816ae1afd
 - Input artifacts: see table
 - Verdict: PASS
 - Gate Decision: PASS
@@ -21,20 +21,36 @@
 | Root kind | Relative path | SHA-256 |
 | --- | --- | --- |
 | approved-target-source | .systems/ai/core/operating-model.md | b8e3866b5d8174a1c1562c954f37859a128a1f91fceee789f0684a80b70bdb29 |
+| approved-target-source | .systems/scripts/check-required-artifacts | 5c5fad09b9cbc82e77f4b35acc6c825b18ad9e98f6cca49d9df0f85f5e8d0fd2 |
+| approved-target-source | .systems/scripts/check-validation-profiles | 3deea2250e20a1bb03aeddceb428e5c91077f09f9f6124c6d074e6b3b016d2e7 |
+| approved-target-source | .systems/scripts/check-validator-smoke-tests | 9398d7250d0153e5e3c4644351ab109ae857ce48e4bfb6bbb2b64c3fc9a9c28a |
 | approved-target-source | .systems/scripts/report-contract-topology | 7d296d1cee64b85284231ac5d5f32335ed97435a6688f55d73f860003cb087e4 |
 | approved-target-source | .systems/scripts/report-workspace-freshness | 12ca8314f7246e80fdc87651bbfb94149d505b097ff0f740641e924449e724f5 |
-| approved-target-source | .systems/scripts/tests/test_validation_integrity.py | 1cf04a884e6fe3b9d6d69aceb9c43107b37aa19eb6e512915a90d5135d2ca8af |
+| approved-target-source | .systems/scripts/smoke/README.md | 20030f16a63a04e99b75e51e8313db5785ddeb881fb5f07d7b5118a2a7e2f98c |
+| approved-target-source | .systems/scripts/smoke_fixture.py | e50e628ec964d279cdff9af73a73cdd651236c1e8a5b911b81a97eb51f87fea3 |
+| approved-target-source | .systems/scripts/tests/README.md | aeaa0708dc3c3bf832947d24c820fc98905f02c16ba687b0beffb6b014077668 |
+| approved-target-source | .systems/scripts/tests/test_validation_integrity.py | 8870f4c72c9335d30a5b583c0a97cda8a292c2665e611c5083176c44afb0a2d7 |
+| owning-project-evidence | change-requests/2026-10-01-iev2-cr-001-smoke-setup-optimization.md | c7db66f359a3de10ba32cbacafd7afb5690171048df6484781c2e33a383f6a02 |
+| owning-project-evidence | implementation/phase-4-iev2-cr-001-smoke-setup-optimization-implementation.md | 6479c9e81cd3bb625764d1badd0ee2eedcd19774e5ed3ce9bf7e39595798102c |
 | owning-project-evidence | implementation/phase-4-iev2-ops-011-freshness-topology-implementation.md | 245662b838fcc573443b23dfba48de4bbe4a1f63829a94e2e7818e474fcccc4a |
 | owning-project-evidence | quality/evidence/integrity-full-03.md | 75cbc61a6603b082c0ea192e145349f9a24fd3cec779db7affb103959d170dbb |
 | owning-project-evidence | quality/evidence/integrity-tests-07.log | 4f76f32d07378234bac3dfffcdc90a3da9c5138e9e9e6e4c66438cdd5258662e |
 | owning-project-evidence | quality/evidence/smoke-equivalence.json | b22a91df5797405f6b12008fc9c7bdcb83d96597a6242301db35910f22b04371 |
+| owning-project-evidence | quality/evidence/smoke-optimization-current-source.json | 439a1f3e1b18dd77f4c1553f5a06473dff0ed196df1b19782e5ef799cfc1aa76 |
+| owning-project-evidence | quality/evidence/smoke-optimization-full.md | 08b53c384b0cc353b5fea15e4273c65a34096ea9704b70f2ff4908f920bb8324 |
+| owning-project-evidence | quality/evidence/smoke-optimization-tests.log | fd995145caeb65ee3765fb89c518805d7e04c3be3eb0ee9f6e29131de1f61b55 |
+| owning-project-evidence | quality/evidence/smoke-optimized/monolithic-to-optimized.json | 8e35b0ec1eca815bb27ae57902defaf614d610ba3d6b78fa175ef8458ed57af1 |
+| owning-project-evidence | quality/evidence/smoke-optimized/old-to-optimized.json | 6f0ac9de27fe9d2b5af4cfcaeb09b6e6c6535697e32773ae02fa6bbf562974a1 |
+| owning-project-evidence | quality/evidence/smoke-optimized/population.json | fd9b142cfe9a3c7a89e550c49f8ffa642dc8a3573341d0356671ade5b984f32d |
 | owning-project-evidence | quality/recovery-ledger.md | 853ac42e104acffd3ed80c19379c14ccc7a8298d2ea6f2cd4ef5520def997aac |
 | owning-project-evidence | quality/semantic-review.md | b17cdcaad2863f369ab8507527afea1cf221083e7d7002df3b6565a596ce0165 |
 | owning-project-evidence | quality/skill-routing-trace.md | c1a9444a3e06cddd25457801fc9b57db3114c2a11fc6dc37cb77b0fe17ad76c7 |
+| owning-project-evidence | quality/smoke-optimization-review.md | 2003ab568174aaffc28383665494bf9403ede9d9a390cf01fcc8a6f60302206b |
+| owning-project-evidence | quality/smoke-optimization-timing-review.md | dd4d2cb71c41f06ca7bafb09b09fd69928ad633a1e74c95a7b1aeaad761ac43f |
 | owning-project-evidence | specs/phase-3-program-specification.md | 824384b8391f7b37b283e4f68c10a7c322d80e0df622aaa89cd8d8cef9c8f399 |
 
 ### Evidence
-Current diff and producer-consumer review for IEV2-OPS-011-freshness-topology, documented in semantic-review.md. Representative behavior: Explicit repository or product-contract selectors -> stdout metadata. Failure paths: unsafe selectors rejected; remote not fetched and links not treated as semantic proof. Executable/manual evidence: Explicit report-workspace-freshness/report-contract-topology invocations and source review; all 15 integrity tests and current full-03 validation completed. Formal verdict combines the reviewed DoD, boundaries, current hashes and behavior; scripts are supporting-only. Old failed runs remain excluded from current acceptance.
+Current diff and producer-consumer review for IEV2-OPS-011-freshness-topology, documented in semantic-review.md. Representative behavior: Explicit repository or product-contract selectors -> stdout metadata. Failure paths: unsafe selectors rejected; remote not fetched and links not treated as semantic proof. Executable/manual evidence: Explicit report-workspace-freshness/report-contract-topology invocations and source review; all 20 current integrity tests and historical full-03 (superseded by current smoke-optimization-full) validation completed. Formal verdict combines the reviewed DoD, boundaries, current hashes and behavior; scripts are supporting-only. Old failed runs remain excluded from current acceptance.
 
 ### Definition Of Done Validation
 | DoD Item | Result | Evidence |
@@ -67,7 +83,7 @@ Current diff and producer-consumer review for IEV2-OPS-011-freshness-topology, d
 - Negative-space / adversarial review: completed
 - Automated evidence role: supporting-only
 - Post-fix full re-review: completed
-- Reviewed baseline: dabbf34 and current input table/digest; full-03 after product fixes
+- Reviewed baseline: original dabbf34 and current input table/digest; current actual smoke-optimization-full source matches optimized frozen records
 - Instruction refresh: performed-targeted
 - Instruction baseline: current
 - Closure freshness: current
@@ -86,13 +102,13 @@ Current diff and producer-consumer review for IEV2-OPS-011-freshness-topology, d
 ### Commands
 | Command | Result | Notes |
 | --- | --- | --- |
-| check-validation-integrity | PASS | 15 offline synthetic behavior tests; no external model session |
-| validate-ai-system --profile full | PASS | full-03, all seven smoke domains; supporting-only |
+| check-validation-integrity | PASS | 20 offline synthetic behavior tests; no external model session |
+| validate-ai-system --profile full | PASS | smoke-optimization-full, all seven domains; supporting-only |
 
 ### Findings
 - Blockers: none
 - Unresolved findings: none
-- Warnings: no independent model session or real private runtime pilot; counterpart source and management rollout excluded
+- Warnings: none in the approved scope; independent model sessions, private runtime pilot, counterpart source and management rollout are explicitly excluded residual limits
 - Residual risk: fingerprints do not prove truthful source claims; future agents must still follow semantic review and owner gates
 
 ### Quality Gate
@@ -137,5 +153,8 @@ Current diff and producer-consumer review for IEV2-OPS-011-freshness-topology, d
 - Current model known: no
 - Blocking: no
 
-## Runtime Formatting Recovery
+## Previous Runtime Formatting Recovery (Historical)
 Only current runtime EOF formatting and declared input fingerprints were refreshed. Pre-recovery report bytes are retained in quality/evidence/pre-format-recovery-qa.json. Product source and product behavior evidence are unchanged. Required nonzero gates stop subsequent commit execution.
+
+## Smoke Optimization Recovery
+Current semantic/failure-path re-review is recorded in smoke-optimization-review.md. All prior 15 integrity cases are retained and all 20 current cases passed. Current actual full execution and nine equivalent frozen runs establish current supporting evidence; the initial copy-only performance hypothesis remains retained and excluded from acceptance. No privacy/approval gate, domain body, assertion or restore was removed. Previous report bytes are retained in evidence/pre-smoke-optimization-qa.json.
