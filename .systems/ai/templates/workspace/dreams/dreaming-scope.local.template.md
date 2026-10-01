@@ -24,6 +24,7 @@ Only exact workspace-relative paths are allowed. Remove rows to narrow the local
 | `projects/README.md` |
 | `capture-state/capture-state.md` |
 | `personal-ops/indexes/check-ins-v3.trends.md` |
+| `personal-ops/indexes/check-ins-v4.trends.md` |
 
 ## Excluded Workspace Paths
 
@@ -41,6 +42,6 @@ These rows add local exclusions. Supported match types are `exact`, `prefix`, `s
 
 - The system hard denylist always wins.
 - The local file may narrow the scope only; it cannot authorize a forbidden source.
-- Personal Ops exposes only `personal-ops/indexes/check-ins-v3.trends.md`.
+- Personal Ops exposes only sanitized `personal-ops/indexes/check-ins-v4.trends.md` after unified activation; `personal-ops/indexes/check-ins-v3.trends.md` is the unmigrated compatibility source. Missing sources are not fabricated.
 - Run Dreaming scope preflight before reading any listed source.
 - Dream Reports remain advisory-only and perform no durable promotion.

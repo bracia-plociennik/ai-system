@@ -6,20 +6,22 @@
 | `workflow-scope` | `plan-derived` |
 | `project-workspace` | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system` |
 | `active-plan-status` | `implementation` |
-| `current-task` | `ASYS-POPS-016-spor-proposals` |
-| `active-change-request` | `ASYS-CR-008-spor-proposals` |
+| `current-task` | `ASYS-POPS-017-unified-aggregates` |
+| `active-change-request` | `ASYS-CR-009-unified-aggregates` |
 | `current-phase` | `phase-7-checkpoint` |
-| `phase-result` | `in-progress` |
+| `phase-result` | `PASS` |
 | `final-owner-approval` | `not-requested` |
-| `next-phase` | `phase-7-checkpoint` |
+| `next-phase` | `phase-8-final-check` |
 | `next-task` | `none` |
 | `blocking-reason` | `none` |
-| `updated-at` | `2026-09-30` |
+| `updated-at` | `2026-10-01` |
 | `autopilot-mode` | `supervised` |
 | `autopilot-state` | `stopped` |
 | `autopilot-run` | `autopilot-001` |
 
 ## Notes
+
+- CR-009 product Phase 5 QA, Phase 6 technical capture and Phase 7 checkpoint are recorded. Publication, installed checks and target-only aggregate migration remain delivery gates. The next-phase token is a possible owner-triggered route, not approval to run Phase 8. CR-008 and prior evidence remain independent historical scopes.
 
 - CR-008 product QA, technical distillation and checkpoint are recorded. Publication, installed verification and scheduler activation are the current delivery route; first actual run remains unobserved. The task stays in-progress and no Phase 8/final-owner-yes is inferred.
 

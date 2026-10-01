@@ -527,6 +527,9 @@ def alignment_summary(workspace: Path, report_date: date) -> dict[str, Any]:
 
 
 def load_official_v4_records(workspace: Path) -> list[dict[str, Any]]:
+    from personal_ops_aggregates_v4 import is_unified, read_properties
+    if is_unified(workspace):
+        return read_properties(workspace)
     required_paths = [
         workspace / V4_ROUTER,
         workspace / V4_INDEX,
@@ -576,6 +579,9 @@ def load_v3_index_records(workspace: Path) -> list[dict[str, Any]]:
 
 
 def load_current_records(workspace: Path) -> list[dict[str, Any]]:
+    from personal_ops_aggregates_v4 import is_unified, read_properties
+    if is_unified(workspace):
+        return read_properties(workspace)
     records = load_v3_index_records(workspace) + load_official_v4_records(workspace)
     seen: dict[str, str] = {}
     for properties in records:

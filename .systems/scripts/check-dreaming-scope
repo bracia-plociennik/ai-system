@@ -20,6 +20,7 @@ WORKSPACE_SOURCE_TYPES = {
     "other",
 }
 PERSONAL_OPS_TRENDS = "personal-ops/indexes/check-ins-v3.trends.md"
+PERSONAL_OPS_V4_TRENDS = "personal-ops/indexes/check-ins-v4.trends.md"
 ALLOWED_REVIEW_VALUES = {"yes", "no"}
 SUPPORTED_DENY_TYPES = {"exact", "prefix", "segment", "basename"}
 NOISY_REPO_SEGMENTS = {
@@ -109,10 +110,10 @@ def hard_forbidden_workspace_path(path: str) -> str | None:
     lower_parts = tuple(part.lower() for part in pure.parts)
     lower_path = path.lower()
 
-    if path == PERSONAL_OPS_TRENDS:
+    if path in {PERSONAL_OPS_TRENDS, PERSONAL_OPS_V4_TRENDS}:
         return None
     if lower_path.startswith("personal-ops/"):
-        return "Personal Ops allows only the sanitized V3 trends projection"
+        return "Personal Ops allows only the sanitized V3/V4 trends projection"
     if lower_path.startswith("dump/incoming/"):
         return "raw dump intake is forbidden"
     if lower_path.startswith("tasks/tasknotes/"):
@@ -301,6 +302,8 @@ def validate_report(workspace: Path, report: Path, require_passed: bool) -> None
 
         if source_type not in WORKSPACE_SOURCE_TYPES:
             raise ScopeError(f"unsupported workspace Source type: {source_type}")
+        if path == PERSONAL_OPS_TRENDS and (workspace / "personal-ops/indexes/check-ins-v4-active").is_symlink():
+            raise ScopeError("unified workspace Dreaming must use sanitized V4 trends")
         reason = hard_forbidden_workspace_path(path)
         if reason:
             raise ScopeError(f"forbidden workspace source {path}: {reason}")

@@ -1,0 +1,321 @@
+#!/usr/bin/env python3
+"""Synthetic regression suite for loss-accounted V4 aggregate cutover."""
+
+import csv
+import io
+import json
+import os
+import subprocess
+import sys
+import tempfile
+import unittest
+from datetime import date, timedelta
+from pathlib import Path
+from unittest.mock import patch
+
+import personal_ops_aggregates_v4 as a
+from personal_ops_v4 import load_current_records, required_schema, daily_index_fields
+
+
+class AggregateTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.w = Path(self.temp.name)
+        self.history_path = self.w / "personal-ops/check-ins/2026/2026-08-11.md"
+        self.history_path.parent.mkdir(parents=True)
+        self.history_path.write_text("historic source with PRIVATE_RAW_SENTINEL\n")
+        self.history_props = {"session_date": "2026-08-11", "closure_date": "2026-08-10", "file_path": self.history_path.relative_to(self.w).as_posix(),
+                              "schema_version": "3", "index_contract": "3", "private_index_policy": "detailed-private",
+                              "previous_day_finance_amount": "0", "previous_day_actual_calories_representative": "2300", "previous_day_sleep_quality_score": "5"}
+        self.history = [a.make_row(self.w, self.history_props, self.history_props["file_path"], "3")]
+        self.daily("2026-08-12")
+        index = self.w / "personal-ops/indexes"
+        index.mkdir()
+        (index / "check-ins-v3.jsonl").write_text(json.dumps({"properties": self.history_props}) + "\n")
+        (index / "check-ins-v3.md").write_text("unsynced-native-check-in-count: 0\n")
+        self.old_hashes = {p.name: a.digest(p) for p in index.iterdir() if p.is_file()}
+
+    def tearDown(self):
+        self.temp.cleanup()
+
+    def daily(self, session):
+        closure = (date.fromisoformat(session) - timedelta(days=1)).isoformat()
+        props = {key: "" for key in required_schema("daily")}
+        props.update({"session_date": session, "closure_date": closure, "index_contract": "4", "schema_version": "4", "artifact_kind": "daily",
+                      "private_index_policy": "detailed-private", "privacy": "private-sensitive", "report_id": session,
+                      "review_window_start": closure, "review_window_end": closure, "review_window_kind": "previous-day",
+                      "planned_items_json": "[]", "review_state_json": '{"sleep":{"quality":4,"minutes":480}}',
+                      "review_process_json": '{"nutrition":{"calories":2500},"finance":{"amount":0}}',
+                      "review_outcome_json": "{}", "review_review_json": "{}", "owner_overrides_json": "[]",
+                      "osnr_checkpoints_json": "[]", "task_generation_references_json": "[]"})
+        path = self.w / f"personal-ops/check-ins-v4/2026/{session}.md"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("---\ntype: daily-check-in-v4\nschema_version: 4\nindex_contract: 4\nproperties:\n" +
+                        "".join(f"  {k}: {json.dumps(v)}\n" for k, v in props.items()) +
+                        "---\n## Raw Check-In\nPRIVATE_RAW_SENTINEL\n<!-- ai-system:working-dump:start -->\n## Working Dump\nPRIVATE_DUMP_SENTINEL\n<!-- ai-system:working-dump:end -->\n")
+        return path
+
+    def initial(self, workspace):
+        native = a.native_rows(workspace)
+        rows = self.history + native
+        return rows, {r["source"]["path"]: r["source"]["sha256"] for r in rows}, self.history
+
+    def activate(self):
+        with patch.object(a, "build_initial", self.initial):
+            return a.migration(self.w, True)
+
+    def test_dry_run_does_not_write(self):
+        before = {p.relative_to(self.w): a.digest(p) for p in self.w.rglob("*") if p.is_file()}
+        with patch.object(a, "build_initial", self.initial):
+            self.assertEqual(a.migration(self.w)["record_count"], 2)
+        self.assertEqual(before, {p.relative_to(self.w): a.digest(p) for p in self.w.rglob("*") if p.is_file()})
+
+    def test_mapping_loss_unknown_and_private_exclusions(self):
+        props = {**self.history_props, "previous_day_actual_build_count": "0", "attachments_json": '["private.png"]', "ocr_entries_json": '["PRIVATE_OCR"]'}
+        row = a.make_row(self.w, props, props["file_path"], "2", {"field_confidence": {"previous_day_actual_build_count": "unknown"}})
+        self.assertEqual(row["provenance"]["previous_day_actual_build_count"]["confidence"], "unknown")
+        self.assertNotIn("PRIVATE_OCR", json.dumps(row))
+        with self.assertRaisesRegex(ValueError, "unmapped"):
+            a.make_row(self.w, {**props, "new_unknown_metric": "1"}, props["file_path"], "2")
+        with self.assertRaisesRegex(ValueError, "credential"):
+            a.make_row(self.w, {**props, "gratitude": "password=not-a-real-secret"}, props["file_path"], "3")
+
+    def test_redacted_projection(self):
+        props = {**self.history_props, "private_index_policy": "redacted", "review_process_json": '{"nutrition":{"calories":2500}}', "life_alignment_resolution_json": '{"reason":"private override"}'}
+        row = a.make_row(self.w, props, props["file_path"], "3", extensions={"note": "private extension"})
+        encoded = json.dumps(row)
+        self.assertNotIn("private override", encoded)
+        self.assertNotIn("private extension", encoded)
+        self.assertEqual(row["observations"], [])
+
+    def test_metrics_unknown_defaults_and_source_range(self):
+        props = {**self.history_props, "previous_day_finance_amount": "0"}
+        row = a.make_row(self.w, props, props["file_path"], "2", {
+            "field_confidence": {"previous_day_finance_amount": "unknown"},
+            "origin": {"source_contract": "legacy-v2", "source_range": "structured source sections"},
+        })
+        output = a.build_outputs([row], "test")
+        metrics = next(csv.DictReader(io.StringIO(output["check-ins-v4.metrics.csv"])))
+        full = next(csv.DictReader(io.StringIO(output["check-ins-v4.csv"])))
+        self.assertEqual(metrics["previous_day_finance_amount"], "")
+        self.assertEqual(full["previous_day_finance_amount"], "0")
+        self.assertEqual(row["source"]["source_range"], "structured source sections")
+        self.assertFalse(any(f["metric"] == "spending" for f in row["observations"]))
+
+    def test_by_date_ranges_and_conflicts(self):
+        props = {**self.history_props, "previous_day_finance_amount": "", "previous_day_actual_calories_representative": "", "review_window_start": "2026-08-07", "review_window_end": "2026-08-09",
+                 "review_process_json": '{"nutrition":{"calories":{"2026-08-07":{"value":2500,"approx":true},"2026-08-08":3000,"2026-08-09":2300}},"finance":{"amount":490}}'}
+        facts = a.observations(props, {})
+        self.assertEqual(len([f for f in facts if f["metric"] == "calories"]), 3)
+        spend = next(f for f in facts if f["metric"] == "spending")
+        self.assertEqual((spend["period_start"], spend["period_end"]), ("2026-08-07", "2026-08-09"))
+        with self.assertRaisesRegex(ValueError, "conflicting"):
+            a.observations({**self.history_props, "review_process_json": '{"nutrition":{"calories":999}}'}, {})
+
+    def test_activate_idempotence_and_readers(self):
+        result = self.activate()
+        self.assertEqual(len(load_current_records(self.w)), 2)
+        self.assertFalse((self.w / "personal-ops/indexes/check-ins-v3.jsonl").exists())
+        self.assertEqual(a.migration(self.w, True)["generation"], result["generation"])
+        archive = self.w / result["archive"]
+        for name, value in self.old_hashes.items():
+            self.assertEqual(a.digest(archive / name), value)
+        for name in a.FILES:
+            self.assertTrue((self.w / "personal-ops/indexes" / name).is_symlink())
+        output = (a.active_root(self.w) / a.FILES[0]).read_text()
+        self.assertNotIn("PRIVATE_RAW_SENTINEL", output)
+        self.assertNotIn("PRIVATE_DUMP_SENTINEL", output)
+
+    def test_sync_keeps_history_and_detects_same_count_edits(self):
+        self.activate()
+        path = self.w / "personal-ops/check-ins-v4/2026/2026-08-12.md"
+        path.write_text(path.read_text().replace('"calories":2500', '"calories":2600'))
+        # Changing only body bytes also invalidates the source hash.
+        path.write_text(path.read_text() + "body edit\n")
+        with self.assertRaisesRegex(ValueError, "source changed"):
+            a.read_generation(self.w)
+        a.refresh(self.w)
+        self.daily("2026-08-13")
+        with self.assertRaisesRegex(ValueError, "inventory changed"):
+            a.read_generation(self.w)
+        a.refresh(self.w)
+        self.assertEqual(len(load_current_records(self.w)), 3)
+
+    def test_corruption_and_writer_lock(self):
+        self.activate()
+        with a.writer_lock(self.w):
+            with self.assertRaisesRegex(ValueError, "writer"):
+                a.refresh(self.w)
+        (a.active_root(self.w) / "check-ins-v4.metrics.csv").write_text("corrupt")
+        with self.assertRaisesRegex(ValueError, "hash mismatch"):
+            load_current_records(self.w)
+
+    def test_pointer_failure_retains_previous_generation(self):
+        self.activate()
+        old = os.readlink(self.w / a.ACTIVE)
+        self.daily("2026-08-13")
+        replace = os.replace
+        def fail(source, destination):
+            if str(destination).endswith("check-ins-v4-active"):
+                raise OSError("synthetic pointer failure")
+            return replace(source, destination)
+        with patch.object(os, "replace", fail):
+            with self.assertRaises(OSError):
+                a.refresh(self.w)
+        self.assertEqual(os.readlink(self.w / a.ACTIVE), old)
+        a.refresh(self.w)
+        self.assertEqual(len(load_current_records(self.w)), 3)
+
+    def test_interrupted_archival_resumes(self):
+        original = a.finish_archive
+        with patch.object(a, "finish_archive", side_effect=OSError("synthetic archive interruption")):
+            with self.assertRaises(OSError):
+                self.activate()
+        self.assertTrue(a.is_unified(self.w))
+        self.assertEqual(len(load_current_records(self.w)), 2)
+        original(self.w)
+        self.assertEqual(a.migration(self.w, True)["status"], "already-active")
+
+    def test_budget_dedup_coverage_and_unknown_not_zero(self):
+        row = {"session_date": "2026-08-12", "aggregate_observations": [{"metric": "calories", "value": 2500, "period_start": "2026-08-11", "period_end": "2026-08-11", "approximate": False}]}
+        facts, cov = a.budget_facts([row, row], date(2026, 8, 10), date(2026, 8, 11), "calories")
+        self.assertEqual(len(facts), 1)
+        self.assertEqual(cov["missing_dates"], ["2026-08-10"])
+        row2 = {"session_date": "2026-08-13", "aggregate_observations": [{**row["aggregate_observations"][0], "value": 2600}]}
+        with self.assertRaisesRegex(ValueError, "conflicting"):
+            a.budget_facts([row, row2], date(2026, 8, 10), date(2026, 8, 11), "calories")
+
+    def test_unmigrated_reader_unchanged(self):
+        rows = load_current_records(self.w)
+        self.assertEqual(len(rows), 2)
+        self.assertFalse(a.is_unified(self.w))
+
+    def test_proposal_sleep_and_freshness(self):
+        self.activate()
+        import personal_ops_spor_proposals as p
+        daily, _, budget = p.canonical_records(self.w, date(2026, 8, 12), [])
+        self.assertEqual(len(daily), 2)
+        self.assertEqual(p.index_freshness(self.w), {"v4": "reported-current"})
+        stats = p.series_statistics(daily, date(2026, 8, 10), date(2026, 8, 11))
+        self.assertEqual(stats["metrics"]["sleep_quality"]["n"], 2)
+        self.assertEqual(stats["metrics"]["sleep_quality"]["mean"], 4.5)
+
+    def test_cli_approval_gate(self):
+        result = subprocess.run([sys.executable, str(a.ROOT / ".systems/scripts/migrate-personal-ops-aggregates-v4"), "--workspace", str(self.w), "--apply"], capture_output=True, text=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("owner-approved", result.stderr)
+        self.assertFalse(a.is_unified(self.w))
+
+    def test_write_symlinks_block_before_external_mutation(self):
+        outside = self.w / "protected-original.md"
+        outside.write_text("unchanged")
+        store = self.w / a.STORE
+        store.mkdir()
+        (store / "history.json.pending").symlink_to(outside)
+        with self.assertRaisesRegex(ValueError, "symlink"):
+            self.activate()
+        self.assertEqual(outside.read_text(), "unchanged")
+        self.assertFalse(a.is_unified(self.w))
+        lock = self.w / "personal-ops/indexes/.personal-ops-v4.lock"
+        lock.unlink()
+        lock.symlink_to(outside)
+        with self.assertRaisesRegex(ValueError, "symlink"):
+            self.activate()
+        self.assertEqual(outside.read_text(), "unchanged")
+        lock.unlink()
+        (store / "history.json.pending").unlink()
+        store.rmdir()
+        store.symlink_to(self.history_path.parent, target_is_directory=True)
+        with self.assertRaisesRegex(ValueError, "symlink"):
+            self.activate()
+        self.assertEqual(outside.read_text(), "unchanged")
+
+    def test_v3_sync_retired_without_writes(self):
+        self.activate()
+        before = {p.relative_to(self.w): a.digest(p) for p in self.w.rglob("*") if p.is_file()}
+        result = subprocess.run([sys.executable, str(a.ROOT / ".systems/scripts/sync-personal-ops-check-ins-v3"), "--workspace", str(self.w), "--post-write"], capture_output=True, text=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("V3 sync retired", result.stderr)
+        self.assertEqual(before, {p.relative_to(self.w): a.digest(p) for p in self.w.rglob("*") if p.is_file()})
+
+    def test_initial_inventory_race_blocks_activation(self):
+        stage = a.stage_generation
+        def changed(*args, **kwargs):
+            directory = stage(*args, **kwargs)
+            self.daily("2026-08-13")
+            return directory
+        with patch.object(a, "stage_generation", changed):
+            with self.assertRaisesRegex(ValueError, "native source inventory"):
+                self.activate()
+        self.assertFalse(a.is_unified(self.w))
+        for name, value in self.old_hashes.items():
+            self.assertEqual(a.digest(self.w / "personal-ops/indexes" / name), value)
+
+    def test_sleep_duration_semantics(self):
+        facts = a.observations({**self.history_props, "review_state_json": '{"sleep":{"minutes_in_bed":480,"actual_sleep_minutes":420}}'}, {})
+        values = {f["metric"]: f["value"] for f in facts}
+        self.assertEqual(values["time_in_bed_minutes"], 480)
+        self.assertEqual(values["actual_sleep_minutes"], 420)
+
+    def test_generation_pointer_and_manifest_tampering(self):
+        self.activate()
+        path = a.active_root(self.w) / "manifest.json"
+        manifest = json.loads(path.read_text())
+        manifest["sources"][self.history_props["file_path"]] = "0" * 64
+        path.write_text(json.dumps(manifest))
+        with self.assertRaises(ValueError):
+            a.read_generation(self.w, fresh=False)
+
+    def test_generation_file_symlink_rejected(self):
+        self.activate()
+        path = a.active_root(self.w) / "check-ins-v4.metrics.csv"
+        path.unlink()
+        path.symlink_to(self.history_path)
+        with self.assertRaisesRegex(ValueError, "symlink"):
+            a.read_generation(self.w)
+
+    def test_historical_addition_blocks_sync(self):
+        self.activate()
+        (self.history_path.parent / "2026-08-09.md").write_text("new old source")
+        with self.assertRaisesRegex(ValueError, "historical source inventory"):
+            a.refresh(self.w)
+
+    def test_calculator_coverage_no_fictional_balance(self):
+        self.activate()
+        calc = a.script_module("calculate-personal-ops-budgets")
+        config = {"monthly_base_budget": "1000", "monthly_buffer": "100", "daily_spending_pace": "30", "monthly_budget_currency": "PLN",
+                  "weekly_calorie_budget": "16100", "training_day_standard": "2300", "rest_day_standard": "2300", "minimum_daily_calories": "1800"}
+        report = calc.calculate_from_records(load_current_records(self.w), date(2026, 8, 12), config)
+        self.assertEqual(report["weekly_calories"]["actual_consumed"], 4800)
+        self.assertEqual(report["weekly_calories"]["coverage"]["status"], "complete")
+        self.assertEqual(report["monthly_spending"]["coverage"]["status"], "partial-known-subtotal")
+        self.assertIsNone(report["monthly_spending"]["remaining_base_budget"])
+
+    def test_dreaming_denies_detailed_aggregate(self):
+        scope = a.script_module("check-dreaming-scope")
+        self.assertIsNone(scope.hard_forbidden_workspace_path("personal-ops/indexes/check-ins-v4.trends.md"))
+        self.assertIsNotNone(scope.hard_forbidden_workspace_path("personal-ops/indexes/check-ins-v4.jsonl"))
+
+    def test_rollback_keeps_new_native_checkins(self):
+        self.activate()
+        path = self.daily("2026-08-13")
+        original_hash = a.digest(path)
+        a.refresh(self.w)
+        old = a.script_module("sync-personal-ops-check-ins-v3")
+        fields = a.v3_fields()
+        props = {f["key"]: f.get("default", "") for f in fields}
+        props.update(self.history_props)
+        record = {"properties": props, "full_properties": props, "record_kind": "native", "path": self.history_path}
+        original_loader = a.script_module
+        def loader(name):
+            return old if name == "sync-personal-ops-check-ins-v3" else original_loader(name)
+        with patch.object(a, "script_module", loader), patch.object(old, "load_records", return_value=([record], fields)):
+            result = a.rollback(self.w)
+        self.assertEqual(result["native_count"], 2)
+        self.assertEqual(a.digest(path), original_hash)
+        self.assertFalse(a.is_unified(self.w))
+        self.assertEqual(len(load_current_records(self.w)), 3)
+
+
+if __name__ == "__main__":
+    unittest.main()

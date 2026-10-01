@@ -32,7 +32,7 @@ Derived official indexes remain at:
 
 Markdown and the immutable legacy snapshot are sources of truth for their own source class. Derived indexes never override them. A normal manual check-in write creates the canonical Markdown and optional sibling assets, then must run the real V3 index refresh before the post-write summary. The durable-first rule keeps the Markdown if refresh fails and reports the partial result explicitly.
 
-Dreaming Mode may read only `personal-ops/indexes/check-ins-v3.trends.md`. It must not read raw daily Markdown, detailed CSV/JSONL/metrics indexes, legacy snapshot details, attachments, OCR, financial values, calorie data, health detail, reflections, lessons, or quotations.
+Dreaming Mode may read only sanitized trends: `personal-ops/indexes/check-ins-v4.trends.md` after unified activation, or `personal-ops/indexes/check-ins-v3.trends.md` in unmigrated workspaces. It must not read raw daily Markdown, detailed CSV/JSONL/metrics indexes, legacy snapshot details, attachments, OCR, financial values, calorie data, health detail, reflections, lessons, or quotations.
 
 ## Properties + Raw Audit V3
 
@@ -189,7 +189,7 @@ This summary does not execute tasks, authorize deploys, or send external communi
 
 New SPOR Daily artifacts use `index_contract: 4` under `personal-ops/check-ins-v4/YYYY/`. Tuesday-Friday review one previous day; Monday reviews Friday-Sunday. Saturday and Sunday do not create Daily V4 artifacts. V3 remains immutable and is read through the compatibility model without migration.
 
-The required post-write V4 refresh atomically replaces one official private index set: `check-ins-v4.jsonl`, `check-ins-v4.csv`, `check-ins-v4.metrics.csv`, `check-ins-v4.md`, and `check-ins-v4.trends.md`. The full CSV uses the ordered `daily_index_fields` contract; the metrics CSV contains only fields marked `metric`. Neither CSV contains body Markdown, Raw Check-In, OCR, or attachments. `detailed-private` preserves contracted private values locally, while `redacted` blanks private and unknown values before any detailed V4 index is written. Readers must stop on a partial official set rather than mix generations.
+The required post-write V4 refresh replaces one official private index set: `check-ins-v4.jsonl`, `check-ins-v4.csv`, `check-ins-v4.metrics.csv`, `check-ins-v4.md`, and `check-ins-v4.trends.md`. Unmigrated workspaces retain the ordered `daily_index_fields` exports. Unified workspaces use the separate aggregate contract, a complete source-field dictionary and immutable generations selected by one atomic pointer; see `personal-ops-aggregates-v4.md`. Neither export contains body Markdown, Raw Check-In, OCR, or attachments. `detailed-private` preserves contracted private values locally, while `redacted` removes private values and provenance payloads. Readers stop on a partial or stale official generation.
 
 Daily V4 TaskNote generation must validate the parsed canonical body together with frontmatter and properties. A `spor-readable-v1` report with all required readable sections can generate candidates; an empty required section remains a controlled validation error.
 

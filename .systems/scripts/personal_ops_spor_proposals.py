@@ -35,6 +35,7 @@ SCALAR_KEYS = {
     "plan_vs_reality_gap", "recovery_cost", "privacy", "private_index_policy",
     "previous_day_sleep_start", "previous_day_sleep_end", "previous_day_sleep_duration_minutes",
     "previous_day_sleep_quality", "previous_day_sleep_awakenings",
+    "previous_day_sleep_quality_score", "previous_day_sleep_minutes", "aggregate_observations",
     "previous_day_finance_amount", "previous_day_finance_currency", "previous_day_finance_approximate",
     "previous_day_actual_calories_representative", "previous_day_actual_calories_approximate",
     "planned_training_type", "planned_training_start", "planned_training_end", "planned_calories_representative",
@@ -115,7 +116,20 @@ def periods(target: date) -> dict:
 
 def canonical_records(workspace: Path, target: date, warnings: list[str]) -> tuple[list[dict], list[dict], list[dict]]:
     daily, weekly, budget = [], [], []
+    from personal_ops_aggregates_v4 import is_unified, read_properties
+    unified = is_unified(workspace)
+    if unified:
+        for props in read_properties(workspace):
+            if str(props["session_date"]) > target.isoformat():
+                continue
+            # Aggregate provenance retains the original canonical file, never a draft source.
+            source = props["aggregate_source_path"]
+            daily.append(source_record(workspace, workspace / source, "daily-aggregate-v4", props))
+            if props.get("private_index_policy") != "redacted":
+                budget.append(normalize_budget_facts(props))
     for directory, kind in (("check-ins", "daily-v3"), ("check-ins-v3", "daily-v3"), ("check-ins-v4", "daily-v4"), ("weekly-check-ins-v4", "weekly-v4")):
+        if unified and kind != "weekly-v4":
+            continue
         for path in sorted((workspace / "personal-ops" / directory).glob("*/*.md")):
             if not re.fullmatch(r"\d{4}", path.parent.name) or not re.fullmatch(r"\d{4}-(?:\d{2}-\d{2}|W\d{2})\.md", path.name):
                 continue
@@ -174,6 +188,10 @@ def select_weekly_plan(workspace: Path, weekly: list[dict], target: date, plan_s
 
 
 def index_freshness(workspace: Path) -> dict:
+    from personal_ops_aggregates_v4 import is_unified, read_generation
+    if is_unified(workspace):
+        read_generation(workspace)
+        return {"v4": "reported-current"}
     result = {}
     for version, key in (("v3", "unsynced-native-check-in-count"), ("v4", "unsynced-v4-check-in-count")):
         path = workspace / f"personal-ops/indexes/check-ins-{version}.md"
@@ -231,7 +249,11 @@ def series_statistics(records: list[dict], start: date, end: date) -> dict:
         if start.isoformat() <= closure <= end.isoformat() and p.get("review_window_start", closure) == p.get("review_window_end", closure):
             state = p.get("review_state", {})
             sleep = state.get("sleep", {}) if isinstance(state, dict) else {}
-            add("sleep_quality", closure, sleep.get("quality", p.get("previous_day_sleep_quality")))
+            add("sleep_quality", closure, sleep.get("quality", p.get("previous_day_sleep_quality_score", p.get("previous_day_sleep_quality"))))
+        for observation in p.get("aggregate_observations", []):
+            day = observation["period_start"]
+            if observation["metric"] == "sleep_quality" and observation["period_end"] == day and start.isoformat() <= day <= end.isoformat():
+                add("sleep_quality", day, observation["value"])
     return {"metrics": {key: {"mean": round(sum(v for v in values.values() if v is not None) / len([v for v in values.values() if v is not None]), 2) if any(v is not None for v in values.values()) else None,
                              "n": len([v for v in values.values() if v is not None]), "dates": [d for d, v in values.items() if v is not None]} for key, values in samples.items()},
             "conflicts": conflicts, "owner_subjective_weekly_assessment": "unknown - ask owner"}
@@ -263,6 +285,12 @@ def budget_projection(records: list[dict], target: date, config: dict, planned: 
     for metric, field, since in (("spending", "previous_day_finance_amount", first), ("calories", "previous_day_actual_calories_representative", monday)):
         by_date = {}
         uncertain = []
+        if any("aggregate_observations" in row for row in records):
+            from personal_ops_aggregates_v4 import budget_facts
+            facts, cov = budget_facts(records, since, target - timedelta(days=1), metric)
+            coverage[metric] = {**cov, "aggregates_not_distributed": cov["unallocated_aggregates"]}
+            metric_rows[metric] = [{"closure_date": f["period_end"], "session_date": f["session_date"], field: f["value"]} for f in facts]
+            continue
         for record in records:
             closure = record.get("closure_date", "")
             if not since.isoformat() <= closure < target.isoformat():

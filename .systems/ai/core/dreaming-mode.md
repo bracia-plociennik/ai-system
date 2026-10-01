@@ -50,7 +50,7 @@ Every Source Inventory row must pass path, scope, hard-deny, existence, and syml
 
 The local exact allowlist is authoritative within that broad category description. Paths absent from the local allowlist are not reviewable. Weekly-plan Markdown is excluded until AI System provides a separate sanitized projection.
 
-Personal Ops V2 indexes are retired. Dreaming Mode may read only `personal-ops/indexes/check-ins-v3.trends.md`, whose aggregate is native-V3-only even when the official V3 indexes also contain a legacy snapshot. It must not read daily check-in Markdown, detailed CSV/JSONL/metrics indexes or redacted projections, legacy snapshot files, attachments, OCR, finances, calories, health details, owner reflections, lessons, or unverified quotations/sources.
+Personal Ops V2 indexes are retired. Dreaming Mode may read only sanitized trends: `personal-ops/indexes/check-ins-v4.trends.md` for unified workspaces, or `personal-ops/indexes/check-ins-v3.trends.md` (native-V3-only) in unmigrated workspaces. Unified V4 trends expose only counts on explicit work/organism-mode allowlists. It must not read daily check-in Markdown, detailed CSV/JSONL/metrics indexes or redacted projections, legacy snapshot files, attachments, OCR, finances, calories, health details, owner reflections, lessons, or unverified quotations/sources.
 
 `full-repo` is explicit owner-requested only. It may inspect selected workspace artifacts plus one owner-specified project or source path for review candidates, repeated patterns, useful practices, missing capabilities, weak areas, and removal candidates.
 

@@ -367,7 +367,14 @@ def write_indexes(records: list[dict], fields: list[dict], workspace: Path, dry_
         for path in outputs:
             print(f"would write: {path}")
         return
-    write_index_set_atomic(outputs)
+    from personal_ops_aggregates_v4 import is_unified, writer_lock
+    if source == "owner-approved-rollback":
+        write_index_set_atomic(outputs)
+        return
+    with writer_lock(workspace):
+        if is_unified(workspace):
+            raise ValueError("V3 sync retired in unified workspace")
+        write_index_set_atomic(outputs)
 
 
 def print_status(records: list[dict], workspace: Path) -> None:
@@ -397,6 +404,13 @@ def main() -> int:
     parser.add_argument("--post-write", action="store_true", help="Mark this real refresh as required after a canonical check-in write")
     args = parser.parse_args()
     try:
+        from personal_ops_aggregates_v4 import is_unified, read_generation
+        if is_unified(args.workspace.resolve()):
+            if args.status_only or args.dry_run:
+                rows, _ = read_generation(args.workspace.resolve())
+                print(f"unified-v4-record-count: {len(rows)}; V3 sync retired for this workspace")
+                return 0
+            raise ValueError("V3 sync retired in unified workspace; use sync-personal-ops-check-ins-v4")
         records, fields = load_records(args.workspace.resolve())
         if args.post_write and (args.status_only or args.dry_run):
             raise ValueError("--post-write requires a real index refresh, not --status-only or --dry-run")

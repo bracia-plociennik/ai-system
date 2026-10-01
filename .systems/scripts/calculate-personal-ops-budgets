@@ -474,7 +474,13 @@ def monthly_report(records: list[dict], target: date, config: dict[str, str]) ->
     month_key = target.strftime("%Y-%m")
     spending = Decimal("0")
     approximate = False
-    for properties in records:
+    coverage = None
+    actual_records = records
+    if any("aggregate_observations" in row for row in records):
+        from personal_ops_aggregates_v4 import budget_facts
+        facts, coverage = budget_facts(records, target.replace(day=1), target - timedelta(days=1), "spending")
+        actual_records = [{"closure_date": f["period_end"], "previous_day_finance_amount": f["value"], "previous_day_finance_approximate": str(f["approximate"]).lower()} for f in facts]
+    for properties in actual_records:
         closure = str(properties.get("closure_date", ""))
         if closure.startswith(month_key) and closure <= target.isoformat():
             amount = numeric_property(properties, "previous_day_finance_amount")
@@ -490,7 +496,7 @@ def monthly_report(records: list[dict], target: date, config: dict[str, str]) ->
     after_today = int((overrun / pace).to_integral_value(rounding=ROUND_CEILING)) if overrun > 0 else 0
     from_today = after_today + 1 if overrun > 0 else 0
     resume = target + timedelta(days=from_today) if from_today else target
-    return {
+    result = {
         "base_budget": json_number(base),
         "buffer": json_number(buffer),
         "currency": currency,
@@ -506,6 +512,14 @@ def monthly_report(records: list[dict], target: date, config: dict[str, str]) ->
         "standard_spend_resume_date": resume.isoformat(),
         "approximate": approximate,
     }
+    if coverage is not None:
+        result["coverage"] = coverage
+        result["known_spending_subtotal"] = json_number(spending) if actual_records or not coverage["missing_dates"] else None
+        if coverage["status"] != "complete":
+            for key in ("remaining_base_budget", "average_available_per_remaining_day", "pace_overrun", "no_spend_days_after_today", "no_spend_days_from_today", "standard_spend_resume_date"):
+                result[key] = None
+            result["current_spending"] = result["known_spending_subtotal"]
+    return result
 
 
 def calorie_report(records: list[dict], target: date, config: dict[str, str]) -> dict:
@@ -517,7 +531,13 @@ def calorie_report(records: list[dict], target: date, config: dict[str, str]) ->
     week_end = week_start + timedelta(days=6)
     actual = Decimal("0")
     approximate = False
-    for properties in records:
+    coverage = None
+    actual_records = records
+    if any("aggregate_observations" in row for row in records):
+        from personal_ops_aggregates_v4 import budget_facts
+        facts, coverage = budget_facts(records, week_start, target - timedelta(days=1), "calories")
+        actual_records = [{"closure_date": f["period_end"], "previous_day_actual_calories_representative": f["value"], "previous_day_actual_calories_approximate": str(f["approximate"]).lower()} for f in facts]
+    for properties in actual_records:
         closure = str(properties.get("closure_date", ""))
         if not closure:
             continue
@@ -539,7 +559,7 @@ def calorie_report(records: list[dict], target: date, config: dict[str, str]) ->
     unbalanced = None
     if common_sense is not None and remaining_after_today is not None:
         unbalanced = max(Decimal("0"), common_sense * Decimal(after_days) - remaining_after_today)
-    return {
+    result = {
         "weekly_budget": json_number(weekly),
         "week_start": week_start.isoformat(),
         "week_end": week_end.isoformat(),
@@ -560,6 +580,14 @@ def calorie_report(records: list[dict], target: date, config: dict[str, str]) ->
         "approximate": approximate,
         "food_schedule": food_schedule_report(records, target, config),
     }
+    if coverage is not None:
+        result["coverage"] = coverage
+        result["known_calorie_subtotal"] = json_number(actual) if actual_records or not coverage["missing_dates"] else None
+        if coverage["status"] != "complete":
+            for key in ("remaining_before_today", "mechanical_limit_inclusive", "projected_after_today", "remaining_after_today", "mechanical_limit_after_today", "common_sense_limit_after_today", "unbalanced_balance"):
+                result[key] = None
+            result["actual_consumed"] = result["known_calorie_subtotal"]
+    return result
 
 
 def calculate(workspace: Path, target: date) -> dict:

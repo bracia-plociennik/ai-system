@@ -133,6 +133,21 @@ def main() -> int:
     args = parser.parse_args()
     try:
         workspace = args.workspace.resolve()
+        from personal_ops_aggregates_v4 import is_unified, read_generation, refresh
+        if args.post_write and args.status_only:
+            raise ValueError("--post-write requires a real index refresh, not --status-only")
+        if is_unified(workspace):
+            if args.status_only:
+                try:
+                    rows, manifest = read_generation(workspace)
+                    print(f"aggregate-v4-check-in-count: {len(rows)}")
+                    print("unsynced-v4-check-in-count: 0")
+                except ValueError:
+                    print("unsynced-v4-check-in-count: unknown; source refresh required")
+                    raise
+            else:
+                print(json.dumps(refresh(workspace, "post-write-check-in" if args.post_write else "owner-approved-sync")))
+            return 0
         raw_records = load_v4_daily_records(workspace)
         fields = daily_index_fields()
         records = [project_index_properties(record, fields) for record in raw_records]
@@ -153,7 +168,11 @@ def main() -> int:
         }
         if tuple(path.name for path in outputs) != INDEX_FILENAMES:
             raise ValueError("V4 index output set drifted from its contract")
-        write_index_set_atomic(outputs)
+        from personal_ops_aggregates_v4 import writer_lock
+        with writer_lock(workspace):
+            if is_unified(workspace):
+                raise ValueError("workspace activated during legacy refresh; rerun unified sync")
+            write_index_set_atomic(outputs)
         print(f"synced-v4-native-check-ins: {len(records)}")
         return 0
     except Exception as exc:  # noqa: BLE001

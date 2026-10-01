@@ -458,6 +458,10 @@ def render(properties: dict, rows: list[dict], budget_report: dict, workspace: P
     if properties.get("task_generation_status"):
         lines.extend(["", "### TaskNotes", f"- Status: {properties.get('task_generation_status')}"])
     warnings = []
+    for label, report in (("wydatków", monthly), ("kalorii", weekly)):
+        coverage = report.get("coverage")
+        if coverage and coverage["status"] != "complete":
+            warnings.append(f"budżet {label}: znana suma częściowa; brak danych dla {len(coverage['missing_dates'])} dni; pełne saldo nieznane")
     for label, key in (("mental", "mental_clarity_score"), ("ciało", "body_readiness_score")):
         try:
             if str(properties.get(key, "")) and Decimal(str(properties[key])) <= 3:

@@ -16,6 +16,7 @@ Detailed entries live in `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/`
 | 2026-07-14 | Daily Check-In V3 integrity rules | project-decision | active | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/2026-07-14-daily-check-in-v3-integrity.md` |
 | 2026-09-28 | Project Orchestration V1 rules | project-decision | active | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/2026-09-28-project-orchestration-v1.md` |
 | 2026-09-30 | SPOR proposal product boundary | project-decision | active | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/2026-09-30-spor-proposals.md` |
+| 2026-10-01 | Unified aggregate product boundary | project-decision | active | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/2026-10-01-unified-aggregates.md` |
 
 ## Rules
 
