@@ -70,6 +70,15 @@ class AggregateTests(unittest.TestCase):
             self.assertEqual(a.migration(self.w)["record_count"], 2)
         self.assertEqual(before, {p.relative_to(self.w): a.digest(p) for p in self.w.rglob("*") if p.is_file()})
 
+    def test_active_consumer_contracts_use_version_aware_refresh(self):
+        core = Path(__file__).resolve().parents[1] / "ai/core"
+        for filename in ("personal-ops-budgets.md", "response-contract.md"):
+            text = (core / filename).read_text()
+            self.assertIn("sync-personal-ops-check-ins-v4 --post-write", text)
+            self.assertIn("unmigrated V3", text)
+        self.assertIn("Unified Aggregate Coverage", (core / "personal-ops-budgets.md").read_text())
+        self.assertIn("verified active V4 generation", (core / "personal-ops.md").read_text())
+
     def test_mapping_loss_unknown_and_private_exclusions(self):
         props = {**self.history_props, "previous_day_actual_build_count": "0", "attachments_json": '["private.png"]', "ocr_entries_json": '["PRIVATE_OCR"]'}
         row = a.make_row(self.w, props, props["file_path"], "2", {"field_confidence": {"previous_day_actual_build_count": "unknown"}})

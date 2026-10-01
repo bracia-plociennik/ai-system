@@ -2,15 +2,19 @@
 
 ## Purpose
 
-This contract defines owner-local reporting for spending and calorie budgets. It is an advisory calculation layer over official `check-ins-v3.*` indexes; it does not change the V3 properties schema and does not provide medical, dietary, tax, or financial advice.
+This contract defines owner-local reporting for spending and calorie budgets. It is an advisory calculation layer over official indexes; it does not change canonical source schemas and does not provide medical, dietary, tax, or financial advice.
 
-The calculator reads only:
+The calculator reads the local configuration and the official version-aware read model:
 
 - `<workspace>/personal-ops/check-ins/check-in-settings.local.md`;
-- `<workspace>/personal-ops/indexes/check-ins-v3.jsonl`;
-- `<workspace>/personal-ops/indexes/check-ins-v3.md` for freshness.
+- unified workspace: the complete hashed generation selected by `<workspace>/personal-ops/indexes/check-ins-v4-active`, with its V4 JSONL, manifest and source inventory;
+- unmigrated workspace: compatible V3/V4 canonical properties and `<workspace>/personal-ops/indexes/check-ins-v3.jsonl` / `check-ins-v3.md` freshness metadata, preserving existing behavior.
 
 It must stop when the local configuration is missing, malformed, or when official indexes are missing or stale. It must never fall back to hard-coded owner values.
+
+## Unified Aggregate Coverage
+
+After aggregate activation, `.systems/ai/core/personal-ops-aggregates-v4.md` governs dated observations and coverage instead of the legacy scalar-only arithmetic below. Records remain as-of the report date; facts before that date are selected by explicit closure/review periods. Equal repeated facts deduplicate; conflicting values or partial overlaps stop arithmetic. Multi-day amounts remain undivided. Unknown legacy defaults are not observed zero; incomplete periods show known subtotals and missing dates, with full balances and derived limits unknown. Weekly canonical facts are not added again. An empty elapsed period at a month/week boundary can be complete with zero; that does not assert today's consumption or spending is zero.
 
 ## Local Configuration
 
@@ -95,7 +99,7 @@ When the configured minimum prevents closing the weekly budget, report the remai
 After a successful daily check-in write or update, the route must:
 
 1. save the canonical Markdown and optional assets;
-2. run the real `.systems/scripts/sync-personal-ops-check-ins-v3 --post-write` refresh;
+2. run the real `.systems/scripts/sync-personal-ops-check-ins-v4 --post-write` refresh in unified workspaces or for native V4; only unmigrated V3 uses `.systems/scripts/sync-personal-ops-check-ins-v3 --post-write`;
 3. read the refreshed official indexes;
 4. calculate the owner-only budget projection for the response summary.
 
