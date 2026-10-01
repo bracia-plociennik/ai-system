@@ -11,4 +11,4 @@
 - Last reminder: 2026-10-01, implementation entry
 - Owner disposition: capture-now
 - Privacy/scope check: technical evidence only, private facts excluded
-- Residual risk: technical capture complete; migration and installed verification pending
+- Residual risk: technical capture and installed delivery complete; historical semantic ambiguity and source reconciliation remain. Evidence: projects/ai-system/quality/asys-cr-009-installed-delivery-evidence.md. Formal final acceptance separate.

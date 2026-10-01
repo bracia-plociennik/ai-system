@@ -17,7 +17,7 @@ Budget observations distinguish dated values, intervals and multi-day aggregates
 | S1 | loss-accounted adapter and source inventory | aggregate module/mapping manifest | all known fields disposed, private exclusions, source hashes | synthetic tests and private dry-run | product QA complete |
 | S2 | generation writer, activation/archive/rollback | migration CLI, V4/V3 sync | pointer atomicity, rerun, crash recovery, current-history preservation | failure-path tests | product QA complete |
 | S3 | coherent consumers and trends boundary | parser, calculator, proposals, core/docs | unified-only reads with legacy workspace compatibility | renderer/proposal/budget regressions | product QA complete |
-| S4 | product QA and delivery | runners, workflow evidence, updater, private migration | no material findings, full checks, installed comparison, archive | validation records and private manifest | product QA complete; local delivery pending |
+| S4 | product QA and delivery | runners, workflow evidence, updater, private migration | no material findings, full checks, installed comparison, archive | validation records and private manifest | delivered; installed evidence recorded, formal final acceptance separate |
 
 Stop rule: material unmapped value, ambiguous fact, source drift, privacy breach, dependency conflict or new scope blocks dependent activation; routine fixes inside this approved scope continue.
 

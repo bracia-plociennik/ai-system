@@ -47,3 +47,7 @@ Technical capture completed. Private delivery evidence stays in the selected agg
 ## Owner Decision Checkpoint
 
 Decision state clear for approved delivery. No historical approval or final-owner-yes inferred.
+
+## Subsequent Installed Delivery
+
+Publication, official management full update, installed regressions and target-only aggregate migration completed on 2026-10-01. See `quality/asys-cr-009-installed-delivery-evidence.md` for archive hashes, unchanged protected inputs, consumer probes and the disclosed pre-existing private naming failure. This append-only observation does not rewrite the earlier checkpoint gate or invoke Phase 8.

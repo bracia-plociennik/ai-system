@@ -21,6 +21,8 @@
 
 ## Notes
 
+- CR-009 implementation delivery completed on 2026-10-01: product published and installed, full official updater validation with smoke, target-only cutover and archive/hash checks completed. `quality/asys-cr-009-installed-delivery-evidence.md` supplements earlier frozen gates. No canonical sources, TaskNotes or foreign workspace data changed; Phase 8/final-owner-yes remains unrequested.
+
 - CR-009 product Phase 5 QA, Phase 6 technical capture and Phase 7 checkpoint are recorded. Publication, installed checks and target-only aggregate migration remain delivery gates. The next-phase token is a possible owner-triggered route, not approval to run Phase 8. CR-008 and prior evidence remain independent historical scopes.
 
 - CR-008 product QA, technical distillation and checkpoint are recorded. Publication, installed verification and scheduler activation are the current delivery route; first actual run remains unobserved. The task stays in-progress and no Phase 8/final-owner-yes is inferred.

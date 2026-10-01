@@ -12,3 +12,7 @@
 - Required verification: specification verification set; synthetic fixtures and private read-only differential audit.
 - Residual risk: historical semantic comparability.
 - Owner Decision Checkpoint: accepted plan and explicit scoped implementation/delivery approval.
+
+## Installed Delivery
+
+Implementation, publication, official update and approved target-only aggregate migration completed on 2026-10-01. Evidence: `quality/asys-cr-009-installed-delivery-evidence.md`. Original sources, TaskNotes and other workspace data remain unchanged. Status stays in-progress for the separately owner-triggered Phase 8/final acceptance; this does not imply remaining implementation work or final-owner-yes.
