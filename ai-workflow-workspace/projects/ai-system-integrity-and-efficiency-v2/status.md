@@ -8,13 +8,13 @@
 | `active-plan-status` | `active` |
 | `current-task` | `none` |
 | `active-change-request` | `none` |
-| `current-phase` | `phase-7-checkpoint` |
-| `phase-result` | `completed` |
-| `final-owner-approval` | `not-requested` |
-| `next-phase` | `phase-8-final-check` |
+| `current-phase` | `phase-8-final-check` |
+| `phase-result` | `awaiting-owner-final-yes` |
+| `final-owner-approval` | `awaiting` |
+| `next-phase` | `owner-final-approval` |
 | `next-task` | `none` |
-| `blocking-reason` | `none` |
+| `blocking-reason` | `awaiting current final owner approval; no technical blocker` |
 | `updated-at` | `2026-10-01` |
 | `autopilot-mode` | `supervised` |
-| `autopilot-state` | `running` |
+| `autopilot-state` | `awaiting-owner` |
 | `autopilot-run` | `integrity-efficiency-v2` |
