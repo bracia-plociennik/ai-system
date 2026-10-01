@@ -1,0 +1,17 @@
+AI_SYSTEM_VALIDATE_START run_id=e6a4112047ca467381db8fc27d057101 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=e6a4112047ca467381db8fc27d057101 check=diff index=1/5 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=e6a4112047ca467381db8fc27d057101 check=check-privacy-boundary index=2/5 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=e6a4112047ca467381db8fc27d057101 check=check-owner-approval index=3/5 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=e6a4112047ca467381db8fc27d057101 check=check-delivery-constraints index=4/5 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=e6a4112047ca467381db8fc27d057101 check=check-distillation-state index=5/5 supporting_only=true
+Distillation State records: 1
+Invalid records: 0
+Unresolved records: 0
+pending-quality: 0
+ready: 0
+deferred: 0
+owner-skipped: 0
+blocked: 0
+completed: 1
+not-applicable: 0
+AI_SYSTEM_VALIDATION_RESULT run_id=e6a4112047ca467381db8fc27d057101 profile=scoped status=completed exit_code=0 supporting_only=true smoke=not-applicable

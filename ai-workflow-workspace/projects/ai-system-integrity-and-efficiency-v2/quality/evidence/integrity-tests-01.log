@@ -1,0 +1,42 @@
+test_all_declared_negative_causes_are_specific (__main__.Fixtures.test_all_declared_negative_causes_are_specific) ... ok
+test_dream_identity_and_historical_boundary (__main__.Fixtures.test_dream_identity_and_historical_boundary) ... ok
+test_eval_plan_membership_metadata_and_orphans (__main__.Fixtures.test_eval_plan_membership_metadata_and_orphans) ... ok
+test_eval_stale_source_producer_and_consumer (__main__.Fixtures.test_eval_stale_source_producer_and_consumer) ... ok
+test_evidence_directory_identity_change (__main__.Fixtures.test_evidence_directory_identity_change) ... ok
+test_evidence_no_clobber_link_and_foreign_owner (__main__.Fixtures.test_evidence_no_clobber_link_and_foreign_owner) ... ok
+test_lifecycle_success_failure_and_exact_marker (__main__.Fixtures.test_lifecycle_success_failure_and_exact_marker) ... ok
+test_metadata_discovery_stops_before_body (__main__.Fixtures.test_metadata_discovery_stops_before_body) ... ok
+test_scoped_complete_owned_inventory (__main__.Fixtures.test_scoped_complete_owned_inventory) ... ok
+test_timeout_and_interruption_cleanup (__main__.Fixtures.test_timeout_and_interruption_cleanup) ... ERROR
+test_timing_rejects_population_drift_and_partial (__main__.Fixtures.test_timing_rejects_population_drift_and_partial) ... ok
+test_typed_rejection_and_complete_ownership (__main__.Fixtures.test_typed_rejection_and_complete_ownership) ... ok
+test_updater_equal_behind_ahead_diverged (__main__.Fixtures.test_updater_equal_behind_ahead_diverged) ... FAIL
+
+======================================================================
+ERROR: test_timeout_and_interruption_cleanup (__main__.Fixtures.test_timeout_and_interruption_cleanup)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/ai-system-integrity-efficiency-v2/.systems/scripts/tests/test_validation_integrity.py", line 221, in test_timeout_and_interruption_cleanup
+    pid = int((product / "child.pid").read_text())
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py", line 787, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/private/var/folders/z8/75mknv4133d06g5vwmqfl__m0000gn/T/integrity-fixture-octaktdy/runner/child.pid'
+
+======================================================================
+FAIL: test_updater_equal_behind_ahead_diverged (__main__.Fixtures.test_updater_equal_behind_ahead_diverged)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/ai-system-integrity-efficiency-v2/.systems/scripts/tests/test_validation_integrity.py", line 320, in test_updater_equal_behind_ahead_diverged
+    self.assertIn("ahead", result.stdout)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'ahead' not found in 'AI_SYSTEM_WORKSPACE_HOME: /private/var/folders/z8/75mknv4133d06g5vwmqfl__m0000gn/T/integrity-fixture-_tgpvq4n/target/ai-system-workspace (not found)\nContinuing because update-from-upstream only updates system-owned repository files.\nAI_SYSTEM_HOME: /private/var/folders/z8/75mknv4133d06g5vwmqfl__m0000gn/T/integrity-fixture-_tgpvq4n/target\nCurrent branch: main\nUpdate target: origin/main\nProtected runtime workspace: /private/var/folders/z8/75mknv4133d06g5vwmqfl__m0000gn/T/integrity-fixture-_tgpvq4n/target/ai-system-workspace\nProtected local roots:\n - ai-system-workspace\n - onlinen-workspace\n - kuba-plociennik-workspace\n - workspace\n - ai-workflow\n - ai-workflow-workspace\n'
+
+----------------------------------------------------------------------
+Ran 13 tests in 6.689s
+
+FAILED (failures=1, errors=1)

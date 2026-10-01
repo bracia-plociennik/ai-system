@@ -1,0 +1,46 @@
+AI_WORKFLOW_VALIDATE_START profile=standard progress=summary
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-required-artifacts status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-required-artifacts status=pass duration_seconds=1
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-prompt-composition status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-prompt-composition status=pass duration_seconds=1
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-branch-policy status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-branch-policy status=pass duration_seconds=0
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-naming --project ai-system-integrity-and-efficiency-v2 status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-naming --project ai-system-integrity-and-efficiency-v2 status=pass duration_seconds=4
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-status-consistency --project ai-system-integrity-and-efficiency-v2 status=started
+/private/tmp/ai-system-integrity-efficiency-v2/ai-workflow-workspace/projects/ai-system-integrity-and-efficiency-v2/status.md has invalid phase transition: phase-3-specification + in-progress -> phase-3-spec-qa
+/private/tmp/ai-system-integrity-efficiency-v2/ai-workflow-workspace/projects/ai-system-integrity-and-efficiency-v2/tasks.md has invalid task ID: IEV2-VAL-001
+AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system-integrity-and-efficiency-v2/tasks.md references missing task artifact for IEV2-VAL-001: tasks/iev2-val-001.md
+AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system-integrity-and-efficiency-v2/tasks.md references missing task artifact for IEV2-VAL-001: specs/phase-3-program-specification.md
+/private/tmp/ai-system-integrity-efficiency-v2/ai-workflow-workspace/projects/ai-system-integrity-and-efficiency-v2/tasks.md has invalid task ID: IEV2-SKL-002
+AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system-integrity-and-efficiency-v2/tasks.md references missing task artifact for IEV2-SKL-002: tasks/iev2-skl-002.md
+AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system-integrity-and-efficiency-v2/tasks.md references missing task artifact for IEV2-SKL-002: specs/phase-3-program-specification.md
+/private/tmp/ai-system-integrity-efficiency-v2/ai-workflow-workspace/projects/ai-system-integrity-and-efficiency-v2/tasks.md has invalid task ID: IEV2-VAL-003
+AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system-integrity-and-efficiency-v2/tasks.md references missing task artifact for IEV2-VAL-003: tasks/iev2-val-003.md
+AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system-integrity-and-efficiency-v2/tasks.md references missing task artifact for IEV2-VAL-003: specs/phase-3-program-specification.md
+/private/tmp/ai-system-integrity-efficiency-v2/ai-workflow-workspace/projects/ai-system-integrity-and-efficiency-v2/tasks.md has invalid task ID: IEV2-UPD-004
+AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system-integrity-and-efficiency-v2/tasks.md references missing task artifact for IEV2-UPD-004: tasks/iev2-upd-004.md
+AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system-integrity-and-efficiency-v2/tasks.md references missing task artifact for IEV2-UPD-004: specs/phase-3-program-specification.md
+/private/tmp/ai-system-integrity-efficiency-v2/ai-workflow-workspace/projects/ai-system-integrity-and-efficiency-v2/tasks.md has invalid task ID: IEV2-VAL-005
+AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system-integrity-and-efficiency-v2/tasks.md references missing task artifact for IEV2-VAL-005: tasks/iev2-val-005.md
+AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system-integrity-and-efficiency-v2/tasks.md references missing task artifact for IEV2-VAL-005: specs/phase-3-program-specification.md
+/private/tmp/ai-system-integrity-efficiency-v2/ai-workflow-workspace/projects/ai-system-integrity-and-efficiency-v2/tasks.md has invalid task ID: IEV2-VAL-006
+AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system-integrity-and-efficiency-v2/tasks.md references missing task artifact for IEV2-VAL-006: tasks/iev2-val-006.md
+AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system-integrity-and-efficiency-v2/tasks.md references missing task artifact for IEV2-VAL-006: specs/phase-3-program-specification.md
+/private/tmp/ai-system-integrity-efficiency-v2/ai-workflow-workspace/projects/ai-system-integrity-and-efficiency-v2/tasks.md has invalid task ID: IEV2-VAL-007
+AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system-integrity-and-efficiency-v2/tasks.md references missing task artifact for IEV2-VAL-007: tasks/iev2-val-007.md
+AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system-integrity-and-efficiency-v2/tasks.md references missing task artifact for IEV2-VAL-007: specs/phase-3-program-specification.md
+/private/tmp/ai-system-integrity-efficiency-v2/ai-workflow-workspace/projects/ai-system-integrity-and-efficiency-v2/tasks.md has invalid task ID: IEV2-OPS-008
+AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system-integrity-and-efficiency-v2/tasks.md references missing task artifact for IEV2-OPS-008: tasks/iev2-ops-008.md
+AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system-integrity-and-efficiency-v2/tasks.md references missing task artifact for IEV2-OPS-008: specs/phase-3-program-specification.md
+/private/tmp/ai-system-integrity-efficiency-v2/ai-workflow-workspace/projects/ai-system-integrity-and-efficiency-v2/tasks.md has invalid task ID: IEV2-SKL-009
+AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system-integrity-and-efficiency-v2/tasks.md references missing task artifact for IEV2-SKL-009: tasks/iev2-skl-009.md
+AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system-integrity-and-efficiency-v2/tasks.md references missing task artifact for IEV2-SKL-009: specs/phase-3-program-specification.md
+/private/tmp/ai-system-integrity-efficiency-v2/ai-workflow-workspace/projects/ai-system-integrity-and-efficiency-v2/tasks.md has invalid task ID: IEV2-DRM-010
+AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system-integrity-and-efficiency-v2/tasks.md references missing task artifact for IEV2-DRM-010: tasks/iev2-drm-010.md
+AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system-integrity-and-efficiency-v2/tasks.md references missing task artifact for IEV2-DRM-010: specs/phase-3-program-specification.md
+/private/tmp/ai-system-integrity-efficiency-v2/ai-workflow-workspace/projects/ai-system-integrity-and-efficiency-v2/tasks.md has invalid task ID: IEV2-OPS-011
+AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system-integrity-and-efficiency-v2/tasks.md references missing task artifact for IEV2-OPS-011: tasks/iev2-ops-011.md
+AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system-integrity-and-efficiency-v2/tasks.md references missing task artifact for IEV2-OPS-011: specs/phase-3-program-specification.md
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-status-consistency --project ai-system-integrity-and-efficiency-v2 status=fail duration_seconds=1
+AI_WORKFLOW_VALIDATE_COMPLETE profile=standard result=fail exit_code=1 duration_seconds=7 stage=validator check=.systems/scripts/check-status-consistency --project ai-system-integrity-and-efficiency-v2

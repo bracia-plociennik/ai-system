@@ -1,0 +1,15 @@
+AI_SYSTEM_VALIDATE_START run_id=5a55d0a8929b4007acfff5cefa26fa5f supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=5a55d0a8929b4007acfff5cefa26fa5f check=diff index=1/32 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=5a55d0a8929b4007acfff5cefa26fa5f check=check-required-artifacts index=2/32 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=5a55d0a8929b4007acfff5cefa26fa5f check=check-readmes index=3/32 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=5a55d0a8929b4007acfff5cefa26fa5f check=check-naming index=4/32 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=5a55d0a8929b4007acfff5cefa26fa5f check=check-privacy-boundary index=5/32 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=5a55d0a8929b4007acfff5cefa26fa5f check=check-system-skills index=6/32 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=5a55d0a8929b4007acfff5cefa26fa5f check=check-contract-compliance index=7/32 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=5a55d0a8929b4007acfff5cefa26fa5f check=check-delivery-constraints index=8/32 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=5a55d0a8929b4007acfff5cefa26fa5f check=check-owner-approval index=9/32 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=5a55d0a8929b4007acfff5cefa26fa5f check=check-distillation-state index=10/32 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=5a55d0a8929b4007acfff5cefa26fa5f check=check-validation-routing index=11/32 supporting_only=true
+Missing validation routing requirement in .systems/scripts/validate-ai-system: neutral CLI result
+Validator failed: check-validation-routing (exit 1)
+AI_SYSTEM_VALIDATION_RESULT run_id=5a55d0a8929b4007acfff5cefa26fa5f profile=standard status=failed exit_code=1 supporting_only=true smoke=not-applicable

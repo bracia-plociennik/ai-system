@@ -1,0 +1,102 @@
+{
+  "supporting_only": true,
+  "contracts": [
+    {
+      "contract": ".systems/ai/core/validation-profiles.md",
+      "references": [
+        ".systems/ai/core/operating-model.md",
+        ".systems/ai/core/contract-compliance.md",
+        ".systems/ai/core/command-routing.md",
+        ".systems/ai/core/update-from-upstream.md",
+        ".systems/ai/core/validation-routing.md",
+        ".systems/ai/templates/root/AGENTS.template.md",
+        ".systems/scripts/check-validation-profiles",
+        ".systems/scripts/check-required-artifacts",
+        ".systems/scripts/check-validator-smoke-tests",
+        ".systems/scripts/check-validation-routing"
+      ],
+      "categories": {
+        "router": true,
+        "template": true,
+        "validator": true,
+        "smoke": true
+      },
+      "producer_paths": [
+        ".systems/ai/templates/root/AGENTS.template.md"
+      ],
+      "consumer_paths": [
+        ".systems/ai/core/operating-model.md",
+        ".systems/ai/core/contract-compliance.md",
+        ".systems/ai/core/command-routing.md",
+        ".systems/ai/core/update-from-upstream.md",
+        ".systems/ai/core/validation-routing.md",
+        ".systems/scripts/check-validation-profiles",
+        ".systems/scripts/check-required-artifacts",
+        ".systems/scripts/check-validator-smoke-tests",
+        ".systems/scripts/check-validation-routing"
+      ],
+      "reference_fingerprints": {
+        ".systems/ai/core/operating-model.md": "b8e3866b5d8174a1c1562c954f37859a128a1f91fceee789f0684a80b70bdb29",
+        ".systems/ai/core/contract-compliance.md": "93960158568d611d140bdb49e21d51b5a33471ce54df350b417d9a35cbe9cb1f",
+        ".systems/ai/core/command-routing.md": "0ed2b29d3e31c0838e02782837eb30ea7d72acad7bc027455696567ff3541a6f",
+        ".systems/ai/core/update-from-upstream.md": "cdb4352dd450080e19acb75d7dc9b87b45495dd4250677a4b41f3d404bbd5f30",
+        ".systems/ai/core/validation-routing.md": "6a9147cf9430496402903b85c7a66828b9c48bc8b99d3c9d4839ce39b2e8a1f6",
+        ".systems/ai/templates/root/AGENTS.template.md": "1e9fe90a98e5bee325332919057cc1106af8b48abe5bdf3c9c9da8bd4eb6ee34",
+        ".systems/scripts/check-validation-profiles": "ca3f2fc51f8f8abedefc15b4cc52e626ed16b1af32f92381f416a5aaf8684365",
+        ".systems/scripts/check-required-artifacts": "2fd0f08d35e0b6eb582b2f8b726c15f989990085010928138f98a9c44be2f5c3",
+        ".systems/scripts/check-validator-smoke-tests": "9d885e72ae4ab516792936c233b5ab62962cb84f074993f7ad25e0ad5ceb71e5",
+        ".systems/scripts/check-validation-routing": "7cfa61f20648857f2488c8f46982587020567a5d034aa98fb0ac053f862df146"
+      },
+      "state": "linked",
+      "limitations": "References are not proof of semantic producer-consumer compatibility"
+    },
+    {
+      "contract": ".systems/ai/core/dreaming-mode.md",
+      "references": [
+        ".systems/ai/core/operating-model.md",
+        ".systems/ai/core/command-routing.md",
+        ".systems/ai/core/memory.md",
+        ".systems/ai/templates/root/AGENTS.template.md",
+        ".systems/scripts/check-personal-ops",
+        ".systems/scripts/check-distillation-state",
+        ".systems/scripts/check-required-artifacts",
+        ".systems/scripts/check-validator-smoke-tests",
+        ".systems/scripts/check-dreaming-mode",
+        ".systems/scripts/smoke/negative-expectations.json"
+      ],
+      "categories": {
+        "router": true,
+        "template": true,
+        "validator": true,
+        "smoke": true
+      },
+      "producer_paths": [
+        ".systems/ai/templates/root/AGENTS.template.md"
+      ],
+      "consumer_paths": [
+        ".systems/ai/core/operating-model.md",
+        ".systems/ai/core/command-routing.md",
+        ".systems/ai/core/memory.md",
+        ".systems/scripts/check-personal-ops",
+        ".systems/scripts/check-distillation-state",
+        ".systems/scripts/check-required-artifacts",
+        ".systems/scripts/check-validator-smoke-tests",
+        ".systems/scripts/check-dreaming-mode"
+      ],
+      "reference_fingerprints": {
+        ".systems/ai/core/operating-model.md": "b8e3866b5d8174a1c1562c954f37859a128a1f91fceee789f0684a80b70bdb29",
+        ".systems/ai/core/command-routing.md": "0ed2b29d3e31c0838e02782837eb30ea7d72acad7bc027455696567ff3541a6f",
+        ".systems/ai/core/memory.md": "cf933be4e13517e1813ddaaf3fe73e2e185d643e156f9aad2a6271403d064d07",
+        ".systems/ai/templates/root/AGENTS.template.md": "1e9fe90a98e5bee325332919057cc1106af8b48abe5bdf3c9c9da8bd4eb6ee34",
+        ".systems/scripts/check-personal-ops": "db257d6c3c695be883be7714fa0de1f2781397ebeb89f28763d7d3bd71e1c8e2",
+        ".systems/scripts/check-distillation-state": "a65af266b591cda891b763047e21bed9c0244fcc08637c9390f386731ae814b6",
+        ".systems/scripts/check-required-artifacts": "2fd0f08d35e0b6eb582b2f8b726c15f989990085010928138f98a9c44be2f5c3",
+        ".systems/scripts/check-validator-smoke-tests": "9d885e72ae4ab516792936c233b5ab62962cb84f074993f7ad25e0ad5ceb71e5",
+        ".systems/scripts/check-dreaming-mode": "e40dc802a6b6d03b6a4ca242af1ebb32e6d83fa8b997021724572dcca84ce3f0",
+        ".systems/scripts/smoke/negative-expectations.json": "be2f9f720068fa7a1b5518901a3d145593c336c40240b8d0ab77ee2aa79455f9"
+      },
+      "state": "linked",
+      "limitations": "References are not proof of semantic producer-consumer compatibility"
+    }
+  ]
+}
