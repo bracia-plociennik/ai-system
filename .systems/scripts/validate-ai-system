@@ -23,6 +23,7 @@ standard_checks=(
   check-personal-ops-v4
   check-personal-ops-aggregates-v4
   check-spor-proposals
+  check-work-evidence
   check-weekly-planning-v4
   check-block-checkpoint
   check-end-of-task-capture

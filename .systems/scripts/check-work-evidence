@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+python="${WORK_EVIDENCE_PYTHON:-python3}"
+"$python" -B -c 'import sys; sys.path.insert(0, sys.argv[1]); from work_evidence_xlsx import dependencies; dependencies()' "$script_dir"
+exec "$python" -B -m unittest discover -s "$script_dir/tests" -p 'test_work_evidence*.py' -q

@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+"""Local documentation preview and explicitly approved immutable writes."""
+import argparse
+import json
+import sys
+
+from work_evidence import EvidenceError, require, read_json, safe_path
+from work_evidence_ledger import Ledger
+from work_evidence_docs import assemble, persist, record_replay
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("action", choices=("preview", "write", "record-replay"))
+    parser.add_argument("--workspace", required=True)
+    parser.add_argument("--procedure", required=True, help="Workspace-relative approved JSON")
+    parser.add_argument("--expected-hash")
+    parser.add_argument("--replay")
+    parser.add_argument("--approval")
+    parser.add_argument("--owner-approved", action="store_true")
+    args = parser.parse_args()
+    try:
+        if args.action != "preview":
+            require(args.owner_approved, "owner-approval-required", "action")
+        ledger = Ledger(args.workspace)
+        procedure = read_json(safe_path(ledger.workspace, args.procedure))
+        if args.action == "preview":
+            result = assemble(ledger, procedure)
+            result.pop("procedure")
+        elif args.action == "write":
+            result = persist(ledger, procedure, args.expected_hash, owner_approved=True)
+        else:
+            replay = read_json(safe_path(ledger.workspace, args.replay))
+            approval = read_json(safe_path(ledger.workspace, args.approval))
+            result = record_replay(ledger, procedure, args.expected_hash, replay, approval, owner_approved=True)
+        print(json.dumps(result, ensure_ascii=False, allow_nan=False))
+        return 0
+    except (EvidenceError, OSError, ValueError, TypeError, KeyError):
+        error = sys.exc_info()[1]
+        category = error.category if isinstance(error, EvidenceError) else "invalid-or-unavailable-input"
+        print(json.dumps({"status": "blocked", "category": category}), file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())

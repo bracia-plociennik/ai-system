@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "workspace_id": "sample-workspace",
+  "source_roots": {},
+  "ledger_roots": [],
+  "timezone": "Europe/Warsaw"
+}

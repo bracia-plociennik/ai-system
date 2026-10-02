@@ -24,6 +24,12 @@ jobs:
       - name: Ensure scripts are executable
         run: chmod +x .systems/scripts/*
 
+      - name: Prepare isolated work evidence validation environment
+        run: |
+          python3 -m venv "$RUNNER_TEMP/work-evidence-venv"
+          "$RUNNER_TEMP/work-evidence-venv/bin/python" -m pip install --require-hashes --only-binary=:all: -r .systems/ai/templates/work-evidence/requirements-xlsx.txt
+          echo "WORK_EVIDENCE_PYTHON=$RUNNER_TEMP/work-evidence-venv/bin/python" >> "$GITHUB_ENV"
+
       - name: Validate AI System
         run: .systems/scripts/validate-ai-system --profile full
 
