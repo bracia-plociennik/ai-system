@@ -316,7 +316,7 @@ class Fixtures(unittest.TestCase):
         init(product)
         scripts = product / ".systems/scripts"
         scripts.mkdir(parents=True)
-        for name in ("validation_runner.py", "validation_support.py", "smoke_coverage.py"):
+        for name in ("validation_runner.py", "validation_support.py", "smoke_coverage.py", "execution_efficiency.py"):
             shutil.copy2(SCRIPTS / name, scripts / name)
         registry = {name: {"dependencies": [], "runtime_capable": False} for name in ("check-privacy-boundary", "check-required-artifacts", "check-smoke")}
         (scripts / "validation-dependencies.json").write_text(json.dumps({"checks": registry}))

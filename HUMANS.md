@@ -1,5 +1,12 @@
 # HUMANS.md
 
+## Validation And Closure Efficiency
+
+Use explicit targeted checks after semantic QA. An authenticated unchanged check may be reused
+for iteration, but full validation, CI and updater execution remain fresh. `prepare-quality-record`
+validates reviewer-supplied DoD, findings and evidence before publication; it never creates owner
+approval or formal PASS. Historical evidence stays immutable. See `execution-efficiency.md`.
+
 ## Integrity And Efficiency
 
 - Keep failed validation evidence; every retry needs a new hypothesis and a fresh output path.

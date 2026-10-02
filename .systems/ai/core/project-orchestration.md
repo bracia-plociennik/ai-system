@@ -1,5 +1,13 @@
 # Project Orchestration
 
+## Efficiency Capability Boundary
+
+Preflight reads optional installed Workflow `execution-efficiency-v1` capabilities through
+`execution-efficiency.md`. Missing support falls back to installed-local-gates; invalid or linked
+metadata blocks preflight. Capabilities do not authorize writes or bypass risk/phase rules.
+Project-artifact validation and bounded-defect execution may be selected only when both the
+capability and the local contract allow them. Historical QA is not automatically a current PASS.
+
 ## Purpose
 
 AI System is the owner's entry point for work in a selected workspace's project. When the project uses AI Workflow, AI System coordinates the request and reviews the result; the target repository's local AI Workflow owns execution rules, project phase, technical evidence, and technical memory. This contract does not grant permission or replace the target's instructions.

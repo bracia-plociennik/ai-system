@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+"""Validate a reviewer-authored record and publish it without inventing acceptance."""
+import argparse
+import json
+import sys
+from pathlib import Path
+
+sys.dont_write_bytecode = True
+from execution_efficiency import assessment_state, build_quality, read_record, render_quality, validate_quality, timing_summary
+from validation_support import InvalidEvidence, atomic_create, product_identity, safe_destination
+
+ROOT = Path(__file__).resolve().parents[2]
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--input", help="complete canonical record")
+    source.add_argument("--review", help="reviewer fields and path lists; baseline/hashes are computed")
+    parser.add_argument("--output", help="new no-clobber local execution artifact")
+    args = parser.parse_args()
+    try:
+        record = build_quality(read_record(args.review), ROOT) if args.review else validate_quality(read_record(args.input), ROOT)
+        lifecycle = assessment_state(record, product_identity(ROOT))
+        if record["assessment"] == "current" and lifecycle != "current":
+            raise InvalidEvidence("Current assessment baseline is stale; preserve it as history")
+        if args.output:
+            destination = safe_destination(args.output, ROOT)
+            stat = destination.parent.stat()
+            atomic_create(destination, render_quality(record, ROOT), (stat.st_dev, stat.st_ino))
+        print(json.dumps({"assessment": lifecycle, "supporting_only": True,
+                          "timing": timing_summary(record["timings"]), "owner_acceptance": "not-issued"}, indent=2))
+        return 0
+    except (InvalidEvidence, OSError, ValueError, KeyError, TypeError) as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

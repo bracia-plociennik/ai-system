@@ -1,5 +1,12 @@
 # Command Routing
 
+## Efficiency Routing
+
+Validation reuse, bounded-defect eligibility, historical assessment lifecycle, schema-driven
+quality records, selective resume and process timing use `execution-efficiency.md`.
+Reuse is explicit supporting evidence only. Approval remains bound to the current accepted scope;
+do not re-ask resolved decisions, invent authority or skip an installed local quality gate.
+
 Requests for `DAILY CHECK-IN (SPOR) - propozycja read-only`, `WEEKLY CHECK-IN (SPOR) - propozycja read-only`, or an explicitly approved recurring SPOR proposal use `spor-proposals.md`. This separate route prepares stdout-only data and chat drafts; canonical check-in/TaskNote writes are never implied. Its Mon-Sat heartbeat is not the manual V1 weekly-planning scheduler.
 
 ## Purpose

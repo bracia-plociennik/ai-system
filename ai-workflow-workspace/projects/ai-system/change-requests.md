@@ -16,11 +16,11 @@ This file indexes project-local change requests for the `ai-system` project.
 | `ASYS-CR-007-project-orchestration` | `post-final-approval` | `follow-up-enhancement` | `done` | `new-project-iteration` |
 | `ASYS-CR-008-spor-proposals` | `post-final-approval` | `follow-up-enhancement` | `in-progress` | `new-project-iteration` |
 | `ASYS-CR-009-unified-aggregates` | `post-final-approval` | `follow-up-enhancement` | `done` | `new-project-iteration` |
-| `ASYS-CR-010-overnight-schedules` | `post-final-approval` | `defect` | `in-progress` | `new-project-iteration` |
+| `ASYS-CR-010-overnight-schedules` | `post-final-approval` | `defect` | `done` | `new-project-iteration` |
 
 ## Active Change Request
 
-`ASYS-CR-010-overnight-schedules`
+No change request is selected as the current active request. CR-010 closed on 2026-10-02; independent in-progress requests remain unchanged.
 
 CR-009 closed on 2026-10-01 after status/scope reconciliation, fresh full Quality with smoke, technical capture/checkpoint and scoped Phase 8. Explicit owner final-owner-yes is applied in `quality/asys-cr-009/history/25ee186/recovery-phase-8-final-check.md`. No independent open CR is auto-selected or closed.
 
@@ -28,6 +28,11 @@ CR-006 was closed on 2026-09-25 after current product QA, a refreshed checkpoint
 
 ## Completed Change Requests
 
+- `ASYS-CR-010-overnight-schedules`
+  - Entry: `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/change-requests/2026-10-02-ai-system-cr-010-overnight-schedules.md`
+  - Quality: `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/quality/phase-5-asys-pops-018-overnight-schedules-quality.md`
+  - Checkpoint: `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/checkpoints/phase-7-checkpoint-2026-10-02-overnight-schedules.md`
+  - Final check and owner approval: `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/quality/recovery-phase-8-final-check.md` and `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/quality/phase-8-asys-cr-010-final-owner-approval-2026-10-02.md`
 - `ASYS-CR-009-unified-aggregates`
   - Entry: `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/change-requests/2026-10-01-ai-system-cr-009-unified-aggregates.md`
   - Quality: `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/quality/asys-cr-009/history/25ee186/recovery-phase-5-asys-pops-017-unified-aggregates-quality.md`

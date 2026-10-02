@@ -1,5 +1,21 @@
 # Scripts
 
+## Execution Efficiency
+
+- `check-execution-efficiency`: offline behavioral tests for check identities, authenticated reuse,
+  bounded eligibility, historical assessment, quality schema, selective refresh and timing.
+- `prepare-quality-record --input <json-or-record> [--output <new-local-record>]`: validate the shared
+  typed quality schema; atomic no-clobber output; no generated semantic PASS or owner approval.
+  `--review <json>` computes baseline and hashes from declared path lists and supplied semantic fields.
+- `validate-ai-system --profile scoped --checks <names> --reuse-evidence <successful-run>
+  --reuse-key-file <owner-only-local-key>`: explicit iteration-only reuse. Include the same key and
+  `--evidence-file` on the fresh source run. Keep the key private; never put it in Git or handoffs.
+- Fresh full runs may use repeated `--extra-product-file <approved-new-product-path>` arguments
+  for independent smoke fixture setup before new files are tracked.
+
+Unknown dependencies execute. CI/full/updater gates remain fresh. See the core execution-efficiency
+contract; script success is supporting-only, not semantic acceptance.
+
 ## Integrity Tools
 
 - `check-validation-integrity`: offline adversarial regression tests for run/eval/output boundaries.

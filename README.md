@@ -1,5 +1,10 @@
 # AI System
 
+Validation and closure efficiency is governed by `.systems/ai/core/execution-efficiency.md`:
+explicit authenticated per-check reuse for iteration, compact typed quality records and
+immutable historical assessments. Full CI/update gates remain freshly executed and scripts
+remain supporting-only. Installed project Workflow capabilities are discovered, never assumed.
+
 Validation integrity tools provide typed rejection tests, source-bound run evidence,
 scoped runtime coverage and comparable timing. Green checks remain supporting-only.
 Use `discover-skills` for metadata-first candidates, `report-workspace-freshness` for

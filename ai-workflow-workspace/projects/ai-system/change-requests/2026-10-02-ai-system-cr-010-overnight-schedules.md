@@ -33,3 +33,11 @@
 ## Optional Knowledge Capture
 
 Technical distillation/checkpoint only, no private sources or global memory changes.
+
+## Closure
+
+- Status: `done` on `2026-10-02`.
+- Phase 8 technical final check: `PASS`; `quality/recovery-phase-8-final-check.md`.
+- Owner final approval: received and applied; `quality/phase-8-asys-cr-010-final-owner-approval-2026-10-02.md`.
+- Published and installed at AI System commit `1295fb7`; official update and installed SPOR regressions completed.
+- Scope closed: CR-010/POPS-018 only. No canonical history migration or backfill; independent CRs remain unchanged.

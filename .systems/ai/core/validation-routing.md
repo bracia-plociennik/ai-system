@@ -77,6 +77,12 @@ Validation Execution Record
 
 ## Relationship To Validation Profiles
 
+Use `execution-efficiency.md` to plan product/runtime-artifact/integration/environment checks,
+reuse explicitly selected authenticated evidence, and retain immutable historical assessments.
+The runner records applicability and invalidation reasons; unknown impact executes. Reuse never
+replaces fresh semantic review or an installed full-required gate. Whole-process intervals in
+the compact quality record explain refresh, tests, artifact rework and owner waiting separately.
+
 `.systems/ai/core/validation-profiles.md` defines what each profile runs and what evidence it supplies.
 
 This contract decides whether scripts are applicable and when they run. Profile selection never moves scripts before semantic QA.

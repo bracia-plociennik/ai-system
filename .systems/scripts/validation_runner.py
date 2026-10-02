@@ -18,11 +18,16 @@ from pathlib import Path
 sys.dont_write_bytecode = True
 from validation_support import InvalidEvidence, atomic_create, contained_file, fingerprint, git_output, product_identity, safe_destination
 from smoke_coverage import population
+from execution_efficiency import check_identity, environment_identity, read_record, reuse_key, reusable_checks, reuse_decision, seal_record
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPTS = ROOT / ".systems/scripts"
 REGISTRY = SCRIPTS / "validation-dependencies.json"
 REQUIRED_TOOLS = ("bash", "git", "python3", "rg")
+
+
+class PlanningComplete(Exception):
+    """Leave execution through the shared evidence-publication and exit path."""
 
 
 def require_tools():
@@ -141,8 +146,13 @@ def main():
     parser.add_argument("--checks", default="")
     parser.add_argument("--evidence-file")
     parser.add_argument("--scope-manifest")
+    parser.add_argument("--reuse-evidence", help="explicit authenticated successful local source run")
+    parser.add_argument("--reuse-key-file", help="owner-only local key; never serialized")
+    parser.add_argument("--extra-product-file", action="append", default=[], help="approved new product files for smoke fixtures")
     parser.add_argument("--timeout-seconds", type=float, default=0)
     parser.add_argument("--explain", action="store_true")
+    parser.add_argument("--plan-only", action="store_true", help="preflight and print applicability without executing checks")
+    parser.add_argument("--require-process-inspection", action="store_true", help="preflight a locally required ps capability")
     parser.add_argument("--default-profile", default="standard")
     parser.add_argument("--standard-checks", required=True)
     parser.add_argument("--full-smoke-check", required=True)
@@ -154,6 +164,9 @@ def main():
     destination = None
     destination_parent = None
     process = None
+    key = None
+    reuse_source = None
+    previous_checks = {}
     rc = 2
     print(f"AI_SYSTEM_VALIDATE_START run_id={run_id} supporting_only=true", flush=True)
     def interrupt(signum, frame):
@@ -191,10 +204,22 @@ def main():
         if "check-privacy-boundary" not in names:
             names.insert(0, "check-privacy-boundary")
         require_tools()
+        if args.require_process_inspection:
+            probe = subprocess.run(["ps", "-p", str(os.getpid()), "-o", "pid="], capture_output=True, text=True)
+            if probe.returncode:
+                raise InvalidEvidence("Required process inspection unavailable; resolve environment before validation")
+        if args.reuse_evidence and (profile == "full" or os.environ.get("CI", "").lower() in {"1", "true"}):
+            raise InvalidEvidence("Full/CI validation requires fresh execution; reuse is iteration-only")
+        if args.reuse_evidence and not args.reuse_key_file:
+            raise InvalidEvidence("Reuse requires an explicit private authentication key")
+        if args.reuse_key_file:
+            key = reuse_key(args.reuse_key_file)
+        if args.reuse_evidence:
+            reuse_source = read_record(args.reuse_evidence)
+            previous_checks = reusable_checks(reuse_source, key)
         record["source"] = product_identity(ROOT)
-        record["environment_digest"] = fingerprint({"platform": platform.platform(), "python": sys.version,
-            "skip_smoke": os.environ.get("AI_SYSTEM_SKIP_SMOKE_TESTS", "0"),
-            "ci": os.environ.get("CI", "false")})
+        environment = environment_identity()
+        record["environment_digest"] = fingerprint(environment)
         record["coverage"] = scope_coverage(args.scope_manifest, registry, names) if profile == "scoped" else {"eligibility": "full-required" if profile == "full" else "iteration-only"}
         skip_smoke = profile == "full" and os.environ.get("AI_SYSTEM_SKIP_SMOKE_TESTS") == "1"
         if profile == "full" and not skip_smoke:
@@ -205,12 +230,25 @@ def main():
         commands = [("diff", ["git", "-C", str(ROOT), "diff", "--check"])]
         for name in names:
             command = [str(SCRIPTS / name)]
+            if name == args.full_smoke_check:
+                for extra in args.extra_product_file:
+                    command += ["--extra-product-file", extra]
             if args.scope_manifest and registry.get(name, {}).get("runtime_capable"):
                 command += ["--workspace", record["coverage"]["workspace"], "--owned-root", record["coverage"]["owned_root"]]
             commands.append((name, command))
         record["checks"] = [{"id": name, "state": "not-started", "command": command} for name, command in commands]
         record["coverage_digest"] = fingerprint({"checks": [name for name, _ in commands],
             "smoke_population": population(ROOT) if profile == "full" and not skip_smoke else None})
+        coverage = {"digest": record["coverage_digest"], "scope": record["coverage"]}
+        for check in record["checks"]:
+            check["binding"] = check_identity(ROOT, check, registry, record["source"], environment, coverage)
+            check["execution"] = "planned"
+        record["execution_plan"] = [{"id": c["id"], "category": c["binding"]["category"],
+                                     "reason": c["binding"]["reason"]} for c in record["checks"]]
+        if args.explain or args.plan_only:
+            print(json.dumps({"supporting_only": True, "execution_plan": record["execution_plan"]}), flush=True)
+        if args.plan_only:
+            raise PlanningComplete()
         for index, check in enumerate(record["checks"]):
             if args.timeout_seconds and (time.monotonic_ns() - start) / 1e9 >= args.timeout_seconds:
                 raise subprocess.TimeoutExpired(check["command"], args.timeout_seconds)
@@ -219,6 +257,14 @@ def main():
             print(f"AI_SYSTEM_VALIDATE_PROGRESS run_id={run_id} check={check['id']} index={index + 1}/{len(commands)} supporting_only=true", flush=True)
             check_start = time.monotonic_ns()
             check.update(state="started", parent_id=run_id, start_offset_ns=check_start - start)
+            reusable, reason = reuse_decision(check["binding"], previous_checks.get(check["id"]))
+            check["rerun_reason"] = reason if reuse_source else "Fresh execution requested"
+            if reuse_source and reusable:
+                check.update(state="reused", execution="reused", exit_code=0, duration_ns=0,
+                             source_run_id=reuse_source["run_id"])
+                print(f"AI_SYSTEM_VALIDATE_REUSED run_id={run_id} check={check['id']} source_run_id={reuse_source['run_id']} supporting_only=true", flush=True)
+                continue
+            check["execution"] = "invalidated" if reuse_source else "executed"
             if check["id"] == args.full_smoke_check:
                 record["smoke_status"] = "started"
             process = subprocess.Popen(check["command"], cwd=ROOT, start_new_session=True)
@@ -236,7 +282,15 @@ def main():
             raise InvalidEvidence("Source changed during validation")
         if args.scope_manifest and scope_coverage(args.scope_manifest, registry, names) != record["coverage"]:
             raise InvalidEvidence("Runtime scope changed during validation")
+        for check in record["checks"]:
+            if check_identity(ROOT, check, registry, record["source"], environment, coverage) != check["binding"]:
+                raise InvalidEvidence("Declared check inputs changed during validation")
+        if fingerprint(environment_identity()) != record["environment_digest"]:
+            raise InvalidEvidence("Environment changed during validation")
         record["status"] = "completed"
+        rc = 0
+    except PlanningComplete:
+        record["status"] = "planned"
         rc = 0
     except SystemExit as exc:
         rc = int(exc.code)
@@ -261,6 +315,7 @@ def main():
         if record["smoke_status"] == "started":
             record["smoke_status"] = record["status"]
         record.update(exit_code=rc, duration_ns=time.monotonic_ns() - start)
+        seal_record(record, key)
         if destination:
             try:
                 safe_destination(destination, ROOT)

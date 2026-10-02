@@ -1,5 +1,11 @@
 # Operating Model
 
+Use `execution-efficiency.md` for the seven-priority validation/closure efficiency contract.
+Plan applicable checks before execution, retain source-bound evidence and record whole-process
+timing. Consolidate bounded work evidence instead of duplicating status, specifications or memory.
+Selective refresh checks actual opened contract fingerprints and the unchanged approval scope;
+unknown impact and unsupported local Workflow capabilities retain the existing broader route.
+
 ## On-Demand Diagnostics
 
 `report-workspace-freshness --repo <explicit-root>` inspects only selected Git metadata:

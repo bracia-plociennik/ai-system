@@ -72,6 +72,17 @@ attribution are reported separately, never added. Population changes invalidate 
 
 ## Standard And Full
 
+### Explicit Iteration Reuse
+
+`execution-efficiency.md` defines `--reuse-evidence <run> --reuse-key-file <owner-only-key>`.
+Only authenticated successful completed records with revalidated complete inputs may reuse.
+Unknown dependencies and runtime reference closures execute fresh. Per-check execution is
+`executed`, `reused` or `invalidated`, with reason and source run. A reused duration is zero
+new child execution, not the original test cost. Historical evidence is not current acceptance.
+Full/CI/updater runs remain fresh; the runner rejects reuse with the full profile or in CI.
+`--extra-product-file <path>` explicitly includes newly approved untracked product files in
+isolated full-smoke fixtures; it does not admit private runtime or change test membership.
+
 `standard` runs the complete AI System validator chain except embedded `check-validator-smoke-tests`. Use it only when validation routing marks the broad chain applicable.
 
 `full` runs the complete standard chain and `check-validator-smoke-tests`. Use it after semantic current-diff review for checkpoint validation, major distillation, final system verification, CI, release confidence, upstream updates, and high-impact system changes. Classify impact by changed behavior, risk, and cross-contract reach, not by a file path alone. A local typo in a core document is not automatically high-impact; a small-looking approval, privacy, schema, security, or routing change can be.

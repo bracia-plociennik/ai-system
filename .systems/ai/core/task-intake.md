@@ -1,5 +1,13 @@
 # Task Intake
 
+## Bounded Defect Eligibility
+
+Use `execution-efficiency.md` for an approved reversible defect with known consumers, observable
+DoD and focused regression evidence. Its single work record may consolidate scope, plan, tests,
+review and capture disposition. Eligibility is not approval. A medium-risk defect is not a
+micro-task; installed AI Workflow risk and phase rules still decide its execution route.
+Missing capability, unknown consumers, architecture or sensitive effects require the normal route.
+
 ## Purpose
 
 Task intake is the mandatory pre-routing lens for new work in AI System.

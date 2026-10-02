@@ -5,7 +5,11 @@ import argparse
 import json
 import re
 import subprocess
+import sys
 from pathlib import Path
+sys.dont_write_bytecode = True
+from execution_efficiency import capability_record
+from validation_support import InvalidEvidence
 
 
 def git(path, *args):
@@ -41,6 +45,7 @@ def main():
         "git_baseline": None,
         "dirty_entry_count": None,
         "project_status": None,
+        "workflow_efficiency": {"capabilities": {}, "fallback": "installed-local-gates"},
         "blockers": blockers,
         "evidence_role": "read-only inspection; not approval or QA",
     }
@@ -114,6 +119,10 @@ def main():
             blockers.append("nested AI Workflow contracts are incomplete")
         else:
             result["workflow_version"] = git(workflow, "rev-parse", "HEAD")
+            try:
+                result["workflow_efficiency"] = capability_record(workflow)
+            except (InvalidEvidence, OSError, ValueError) as exc:
+                blockers.append(str(exc))
 
         runtime = repo / "ai-workflow-workspace"
         repo_status = runtime / "repo/core/status.md"

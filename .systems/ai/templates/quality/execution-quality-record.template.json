@@ -1,0 +1,19 @@
+{
+  "contract": 1,
+  "kind": "quality-assessment",
+  "work_id": "replace-work-id",
+  "stage": "quality",
+  "assessment": "current",
+  "baseline": {"head": "", "source_digest": ""},
+  "approval_reference": "",
+  "approved_scope": "",
+  "dod": "",
+  "findings": [],
+  "semantic_result": "blocked",
+  "inputs": {},
+  "evidence": {},
+  "capture_disposition": "",
+  "residual_risk": "",
+  "opened_contracts": {},
+  "timings": []
+}

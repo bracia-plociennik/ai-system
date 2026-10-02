@@ -188,6 +188,11 @@ Exact `Koniec pracy` and `Koniec zadania` mean `capture-now` and must not end as
 
 ## Naming And Validation
 
+Use `.systems/ai/core/execution-efficiency.md` for explicit source-bound validation reuse,
+bounded defects, immutable historical QA, compact quality records and whole-process timing.
+Unknown dependencies execute fresh; semantic review and installed local gates remain mandatory.
+CI and updater runs never reuse validation in V1. Capability discovery does not grant approval.
+
 Use lowercase kebab-case for new non-root Markdown files unless an existing template requires a different name. `AGENTS.md`, `HUMANS.md`, and `README.md` are exempt.
 
 Use `.systems/ai/core/validation-routing.md` before `.systems/ai/core/validation-profiles.md`. Semantic QA, findings-first review, failure-path analysis, and product checks precede applicable AI System scripts. Scripts are supporting-only; green scripts do not equal PASS. Ordinary implementation does not run broad AI System validation.

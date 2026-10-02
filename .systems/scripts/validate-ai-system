@@ -38,6 +38,7 @@ standard_checks=(
   check-prompt-composition
   check-validation-profiles
   check-validation-integrity
+  check-execution-efficiency
 )
 checks="$(IFS=,; echo "${standard_checks[*]}")"
 exec python3 -B "$script_dir/validation_runner.py" "$@" --default-profile "$profile" --standard-checks "$checks" --full-smoke-check check-validator-smoke-tests

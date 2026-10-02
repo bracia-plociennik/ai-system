@@ -1,12 +1,20 @@
 {
   "contract": 1,
   "checks": {
+    "check-execution-efficiency": {
+      "dependencies": [],
+      "runtime_capable": false,
+      "category": "integration",
+      "inputs": {"complete": true, "mode": "product-tree"}
+    },
     "check-required-artifacts": {
       "dependencies": [],
       "runtime_capable": false
     },
     "check-readmes": {
       "dependencies": [],
+      "category": "product",
+      "inputs": {"complete": true, "mode": "files", "paths": [".systems/scripts/check-readmes"]},
       "runtime_capable": false
     },
     "check-naming": {
@@ -15,6 +23,8 @@
     },
     "check-privacy-boundary": {
       "dependencies": [],
+      "category": "product",
+      "inputs": {"complete": true, "mode": "product-tree"},
       "runtime_capable": false
     },
     "check-system-skills": {
@@ -27,18 +37,26 @@
     },
     "check-delivery-constraints": {
       "dependencies": [],
+      "category": "product",
+      "inputs": {"complete": true, "mode": "product-tree"},
       "runtime_capable": false
     },
     "check-distillation-state": {
       "dependencies": ["check-owner-approval", "check-delivery-constraints"],
+      "category": "runtime-artifact",
+      "inputs": {"complete": true, "mode": "product-tree"},
       "runtime_capable": true
     },
     "check-owner-approval": {
       "dependencies": [],
+      "category": "product",
+      "inputs": {"complete": true, "mode": "product-tree"},
       "runtime_capable": false
     },
     "check-validation-routing": {
       "dependencies": [],
+      "category": "product",
+      "inputs": {"complete": true, "mode": "product-tree"},
       "runtime_capable": false
     },
     "check-model-selection-guidance": {

@@ -6,12 +6,12 @@
 | `workflow-scope` | `plan-derived` |
 | `project-workspace` | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system` |
 | `active-plan-status` | `implementation` |
-| `current-task` | `ASYS-POPS-018-overnight-schedules` |
-| `active-change-request` | `ASYS-CR-010-overnight-schedules` |
-| `current-phase` | `phase-7-checkpoint` |
+| `current-task` | `none` |
+| `active-change-request` | `none` |
+| `current-phase` | `phase-8-final-check` |
 | `phase-result` | `PASS` |
-| `final-owner-approval` | `not-requested` |
-| `next-phase` | `phase-8-final-check` |
+| `final-owner-approval` | `approved` |
+| `next-phase` | `owner-final-approval` |
 | `next-task` | `none` |
 | `blocking-reason` | `none` |
 | `updated-at` | `2026-10-02` |
@@ -21,9 +21,13 @@
 
 ## Notes
 
-- CR-010 implementation Quality and technical Phase 6/7 are complete. Current Quality: `quality/phase-5-asys-pops-018-overnight-schedules-quality.md`; checkpoint: `checkpoints/phase-7-checkpoint-2026-10-02-overnight-schedules.md`. Approved commit/push/update and installed checks are subsequent delivery actions, not claimed by this checkpoint. Next-phase names an owner-triggered route only; no Phase 8/final-owner-yes supplied. The two CR-009 assessments were archived byte-for-byte with owner approval; historical acceptance remains unchanged.
+- CR-010/POPS-018 closed on 2026-10-02 after the installed-baseline Phase 8 technical pass and explicit owner `final-owner-yes`. Evidence: `quality/recovery-phase-8-final-check.md` and `quality/phase-8-asys-cr-010-final-owner-approval-2026-10-02.md`. `active-plan-status: implementation` reflects other independent in-progress change requests; none is selected as the current task here.
 
-- CR-010 is the current owner-approved medium-risk overnight schedule defect iteration. AI System only, no deadline/timebox, no history/settings backfill. CR-009 approval and earlier notes remain historical. Scoped spec and artifact QA precede implementation; publication and official updater are explicitly authorized, Phase 8 is not.
+- The AI System fix is published at `1295fb7` and installed in this management checkout. The official updater completed full validation; current installed SPOR regressions, QA evidence, status consistency, and Distillation State checks passed. No personal-ops migration or backfill was performed.
+
+- Historical Phase 7 snapshot: CR-010 implementation Quality and technical Phase 6/7 were complete; commit/push/update and installed checks were still subsequent actions, and Phase 8/final-owner-yes had not yet been supplied. The two CR-009 assessments were archived byte-for-byte with owner approval; historical acceptance remains unchanged.
+
+- Historical CR-010 intake snapshot: owner-approved medium-risk overnight schedule defect iteration, AI System only, no deadline/timebox, no history/settings backfill. Publication and official updater were authorized; Phase 8 was not yet requested. The current closure is recorded above.
 
 - Current 7c624ef publication-baseline Quality and Phase 8 verification are PASS in the two renewed recovery reports, binding 43 and 53 current inputs respectively. Publication distillation/checkpoint and project memory are synchronized. Historical CR-009 final-owner-yes remains received and scoped; the owner-final-approval token is satisfied, not a new request. No in-scope warning remains. Four unchanged historical EOF findings are explicitly approved and disclosed, not hidden. Scoped commit/push and official management update are authorized delivery actions still awaiting execution at this status snapshot; no migration/backfill or private write. Earlier status notes below remain chronological history.
 
