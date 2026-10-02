@@ -8,3 +8,10 @@ mutation independence and rejection before copy for unsafe sources/destinations.
 Bounded transaction tests verify seven separate roots/processes, concurrency no
 greater than two, failure propagation, draining of the started peer, and absence
 of writes from later transactions after a failed pair.
+Dependency regressions exercise a restricted `PATH`, an exact failure completion
+marker, no validators started when tools are missing, direct skill-check preflight,
+and preservation of genuine missing-reference findings when `rg` is available.
+SPOR fixture dates use Python calendar arithmetic, verified with an unavailable
+platform `date` tool, so the same cases run on macOS and Linux.
+Legacy source hash fixtures restore their temporary source with a portable stream
+rewrite instead of platform-dependent in-place `sed` flags.

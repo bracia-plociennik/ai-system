@@ -7,6 +7,7 @@ import os
 import hashlib
 import platform
 import re
+import shutil
 import signal
 import subprocess
 import sys
@@ -21,6 +22,14 @@ from smoke_coverage import population
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPTS = ROOT / ".systems/scripts"
 REGISTRY = SCRIPTS / "validation-dependencies.json"
+REQUIRED_TOOLS = ("bash", "git", "python3", "rg")
+
+
+def require_tools():
+    missing = [name for name in REQUIRED_TOOLS if shutil.which(name) is None]
+    if missing:
+        raise InvalidEvidence("Missing validation dependencies: " + ", ".join(missing) +
+                              ". Install required tools before validation (rg is provided by ripgrep).")
 
 
 def selected_checks(names, registry):
@@ -157,6 +166,9 @@ def main():
         if args.timeout_seconds < 0:
             raise InvalidEvidence("Timeout must be nonnegative")
         if args.evidence_file:
+            # Evidence ownership checks themselves need Git; never bypass them.
+            if shutil.which("git") is None:
+                require_tools()
             destination = safe_destination(args.evidence_file, ROOT)
             stat = destination.parent.stat()
             destination_parent = (stat.st_dev, stat.st_ino)
@@ -178,6 +190,7 @@ def main():
         names = selected_checks(names, registry)
         if "check-privacy-boundary" not in names:
             names.insert(0, "check-privacy-boundary")
+        require_tools()
         record["source"] = product_identity(ROOT)
         record["environment_digest"] = fingerprint({"platform": platform.platform(), "python": sys.version,
             "skip_smoke": os.environ.get("AI_SYSTEM_SKIP_SMOKE_TESTS", "0"),

@@ -67,22 +67,24 @@ EOF
 write_daily() {
   local day="$1" kind="$2" variant="$3" review_process="$4"
   local review_process_escaped="${review_process//\"/\\\"}"
+  local previous_day
+  previous_day="$(python3 -c 'from datetime import date, timedelta; import sys; print((date.fromisoformat(sys.argv[1]) - timedelta(days=1)).isoformat())' "$day")"
   cat > "$workspace/personal-ops/check-ins-v4/2026/${day}.md" <<EOF
 ---
 type: daily-check-in-v4
 schema_version: 4
 index_contract: 4
 session_date: ${day}
-closure_date: $(date -j -v-1d -f %Y-%m-%d "${day}" +%Y-%m-%d)
+closure_date: ${previous_day}
 properties:
   index_contract: 4
   schema_version: 4
   artifact_kind: daily
   report_id: ${day}
   session_date: ${day}
-  closure_date: $(date -j -v-1d -f %Y-%m-%d "${day}" +%Y-%m-%d)
-  review_window_start: $(date -j -v-1d -f %Y-%m-%d "${day}" +%Y-%m-%d)
-  review_window_end: $(date -j -v-1d -f %Y-%m-%d "${day}" +%Y-%m-%d)
+  closure_date: ${previous_day}
+  review_window_start: ${previous_day}
+  review_window_end: ${previous_day}
   review_window_kind: ${kind}
   privacy: private-sensitive
   private_index_policy: detailed-private

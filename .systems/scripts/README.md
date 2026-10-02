@@ -16,6 +16,21 @@ All reports are supporting-only. Preserve failure records and avoid broad valida
 
 Validation scripts for AI System live here.
 
+## Runtime Requirements
+
+The validation chain requires Bash, Git, Python 3 and ripgrep (`rg`) on `PATH`.
+GitHub Actions installs ripgrep explicitly before running the unchanged full profile.
+For local validation, install these tools before invoking scripts; on Ubuntu,
+`sudo apt-get install ripgrep` supplies `rg`.
+The runner checks required tools before executing validators. A missing tool ends
+the run with a dependency diagnostic and a supporting-only failure marker, not
+findings about missing product contracts. Direct `check-system-skills` invocation
+also checks for `rg` and exits with code 2 when it is unavailable.
+If Git is missing, evidence ownership cannot be verified, so no evidence file is
+written; the console still reports the dependency failure and completion marker.
+
+## Script Reference
+
 `prepare-personal-ops-spor-proposal --workspace <path> --date YYYY-MM-DD --json` prepares a source-labeled read-only advisory package on stdout. `--scheduled` selects the current Warsaw date, `--seen-id` deduplicates chat delivery and explicit `--regenerate` permits rerendering. `personal_ops_spor_proposals.py` implements the bounded collector; `check-spor-proposals` runs synthetic safety, period, coverage and capacity regressions.
 
 `init-ai-system` generates the ignored root `AGENTS.md` from `.systems/ai/templates/root/AGENTS.template.md`.

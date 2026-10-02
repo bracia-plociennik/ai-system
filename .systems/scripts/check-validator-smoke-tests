@@ -2001,7 +2001,8 @@ cp "$legacy_migration_workspace/personal-ops/indexes/check-ins-v3.csv" "$legacy_
 printf '\nchanged' >> "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-05-12.md"
 run_must_fail "personal-ops-legacy-snapshot-hash-mismatch" "$properties_v3_sync" --workspace "$legacy_migration_workspace"
 cmp "$legacy_migration_workspace/personal-ops/indexes/check-ins-v3.csv.before-hash-failure" "$legacy_migration_workspace/personal-ops/indexes/check-ins-v3.csv" || { echo "hash mismatch replaced official index"; exit 1; }
-sed -i '' '$d' "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-05-12.md"
+sed '$d' "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-05-12.md" > "$tmp/legacy-source-restored.md"
+mv "$tmp/legacy-source-restored.md" "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-05-12.md"
 mkdir -p "$legacy_migration_workspace/personal-ops/archive/legacy-source"
 mv "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-05-12.md" "$legacy_migration_workspace/personal-ops/archive/legacy-source/2026-05-12.md"
 cp "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-07-14.md" "$legacy_migration_workspace/personal-ops/check-ins/2026/2026-05-12.md"

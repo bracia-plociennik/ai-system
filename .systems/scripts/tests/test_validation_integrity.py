@@ -340,6 +340,97 @@ class Fixtures(unittest.TestCase):
     def runner_environment(self):
         return {k: v for k, v in os.environ.items() if k != "AI_SYSTEM_SKIP_SMOKE_TESTS"}
 
+    def tool_path(self, missing):
+        directory = self.root / "tools"
+        directory.mkdir()
+        for name in runner.REQUIRED_TOOLS:
+            if name not in missing:
+                executable = shutil.which(name)
+                self.assertIsNotNone(executable, name)
+                (directory / name).symlink_to(executable)
+        return str(directory)
+
+    def test_dependency_preflight_stops_before_checks_with_exact_marker(self):
+        product, command = self.runner_fixture()
+        evidence = self.root / "missing-tools.md"
+        env = self.runner_environment()
+        env["PATH"] = self.tool_path({"rg"})
+        result = subprocess.run(command + ["--profile", "full", "--evidence-file", str(evidence)],
+                                capture_output=True, text=True, env=env)
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("Missing validation dependencies: rg", result.stderr)
+        self.assertNotIn("Missing system skill reference", result.stdout + result.stderr)
+        self.assertNotIn("command not found", result.stdout + result.stderr)
+        self.assertNotIn("AI_SYSTEM_VALIDATE_PROGRESS", result.stdout)
+        self.assertEqual(result.stdout.count("AI_SYSTEM_VALIDATION_RESULT"), 1)
+        record = comparison.read_record(evidence)
+        self.assertEqual(record["status"], "failed")
+        self.assertEqual(record["exit_code"], 2)
+        self.assertEqual(record["smoke_status"], "not-started")
+        self.assertEqual(record["checks"], [])
+        self.assertTrue(record["supporting_only"])
+
+    def test_missing_git_reports_dependencies_without_unsafe_evidence_write(self):
+        product, command = self.runner_fixture()
+        evidence = self.root / "unverified-owner.md"
+        env = self.runner_environment()
+        env["PATH"] = self.tool_path({"git", "rg"})
+        result = subprocess.run(command + ["--profile", "full", "--evidence-file", str(evidence)],
+                                capture_output=True, text=True, env=env)
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("Missing validation dependencies: git, rg", result.stderr)
+        self.assertNotIn("No such file or directory", result.stderr)
+        self.assertNotIn("AI_SYSTEM_VALIDATE_PROGRESS", result.stdout)
+        self.assertEqual(result.stdout.count("AI_SYSTEM_VALIDATION_RESULT"), 1)
+        self.assertIn("status=failed exit_code=2 supporting_only=true smoke=not-started", result.stdout)
+        self.assertFalse(evidence.exists())
+
+    def test_dependency_preflight_accepts_available_tools(self):
+        env = self.runner_environment()
+        env["PATH"] = self.tool_path(set())
+        with mock.patch.dict(os.environ, env, clear=True):
+            runner.require_tools()
+
+    def test_spor_fixtures_do_not_require_platform_date(self):
+        tool = self.put("portable-tools/date", "#!/bin/sh\necho platform-date-must-not-be-used >&2\nexit 99\n")
+        tool.chmod(0o755)
+        env = self.runner_environment()
+        env["PATH"] = str(tool.parent) + os.pathsep + env["PATH"]
+        result = subprocess.run([shutil.which("bash"), str(SCRIPTS / "check-spor-v4")],
+                                capture_output=True, text=True, env=env)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("platform-date-must-not-be-used", result.stdout + result.stderr)
+
+    def test_skill_check_missing_rg_is_not_a_contract_finding(self):
+        env = self.runner_environment()
+        env["PATH"] = self.tool_path({"rg"})
+        result = subprocess.run([shutil.which("bash"), str(SCRIPTS / "check-system-skills")],
+                                capture_output=True, text=True, env=env)
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("Missing validation dependency: rg (ripgrep)", result.stderr)
+        self.assertNotIn("Missing system skill reference", result.stdout + result.stderr)
+        self.assertNotIn("command not found", result.stdout + result.stderr)
+
+    def test_skill_check_available_rg_retains_missing_reference_findings(self):
+        product = self.root / "skill-product"
+        product.mkdir()
+        # This test also runs inside smoke roots with no tracked Git inventory.
+        shutil.copytree(ROOT / ".systems", product / ".systems")
+        for name in ("README.md", "HUMANS.md"):
+            shutil.copy2(ROOT / name, product / name)
+        command = [shutil.which("bash"), str(product / ".systems/scripts/check-system-skills")]
+        result = subprocess.run(command, capture_output=True, text=True, env=self.runner_environment())
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        contract = product / ".systems/ai/core/operating-model.md"
+        original = contract.read_text()
+        self.assertIn("SKILL.md", original)
+        contract.write_text(original.replace("SKILL.md", "removed-skill-reference"))
+        result = subprocess.run(command, capture_output=True, text=True, env=self.runner_environment())
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("Missing system skill reference in .systems/ai/core/operating-model.md: canonical skill contract",
+                      result.stdout)
+        self.assertNotIn("Missing validation dependenc", result.stdout + result.stderr)
+
     def test_lifecycle_success_failure_and_exact_marker(self):
         for failure in (False, True):
             with self.subTest(failure=failure):
