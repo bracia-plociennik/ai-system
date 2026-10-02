@@ -261,6 +261,22 @@ def _clock_minutes(value: Any, label: str, path: Path) -> int:
     return hour * 60 + minute
 
 
+def schedule_interval_minutes(row: dict, path: Path | None = None) -> tuple[int, int]:
+    """Return a wall-clock interval relative to the schedule's session day."""
+    source = path or Path("planned_schedule_json")
+    block_id = str(row.get("block_id", "schedule"))
+    offset = row.get("end_day_offset", 0)
+    if type(offset) is not int or offset not in (0, 1):
+        raise ValueError(f"{block_id}.end_day_offset must be integer 0 or 1: {source}")
+    start = _clock_minutes(row.get("start"), f"{block_id}.start", source)
+    end = _clock_minutes(row.get("end"), f"{block_id}.end", source) + offset * 1440
+    if end <= start:
+        raise ValueError(f"planned_schedule_json row must end after it starts: {block_id}: {source}")
+    if end - start > 1440:
+        raise ValueError(f"planned_schedule_json row cannot exceed 24 hours: {block_id}: {source}")
+    return start, end
+
+
 def _validate_planned_schedule(properties: dict[str, Any], items: list[dict], path: Path) -> None:
     contract = str(properties.get("daily_plan_contract", "") or "").strip()
     if not contract:
@@ -280,10 +296,7 @@ def _validate_planned_schedule(properties: dict[str, Any], items: list[dict], pa
             raise ValueError(f"planned_schedule_json contains missing or duplicate block_id: {path}")
         if not kind or not label:
             raise ValueError(f"planned_schedule_json rows require kind and label: {path}")
-        start = _clock_minutes(row.get("start"), f"{block_id}.start", path)
-        end = _clock_minutes(row.get("end"), f"{block_id}.end", path)
-        if end <= start:
-            raise ValueError(f"planned_schedule_json row must end after it starts: {block_id}: {path}")
+        schedule_interval_minutes(row, path)
         block_ids.add(block_id)
         if kind == "meal":
             slot = row.get("meal_slot")

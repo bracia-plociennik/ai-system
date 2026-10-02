@@ -10,7 +10,7 @@
 
 ## Inputs
 
-- Current Quality: quality/recovery-phase-5-asys-pops-017-unified-aggregates-quality.md, 31 current hashed inputs
+- Current Quality: quality/asys-cr-009/history/25ee186/recovery-phase-5-asys-pops-017-unified-aggregates-quality.md, 31 current hashed inputs
 - Accepted scope: specs/phase-3-asys-cr-009-unified-aggregates-specification.md
 - Decision: decisions/2026-10-01-cr-009-completion-scope.md
 - Architecture: architecture/phase-1-architecture.md plus the accepted additive aggregate specification

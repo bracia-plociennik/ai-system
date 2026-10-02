@@ -19,6 +19,7 @@ Detailed entries live in `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/`
 | 2026-10-01 | Unified aggregate product boundary | project-decision | active | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/2026-10-01-unified-aggregates.md` |
 | 2026-10-01 | CR-009 completion boundaries | project-constraint | active | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/2026-10-01-cr-009-completion.md` |
 | 2026-10-01 | CR-009 publication evidence boundaries | project-constraint | active | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/2026-10-01-cr-009-publication.md` |
+| 2026-10-02 | Explicit overnight SPOR schedule boundaries | project-decision | active | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/2026-10-02-overnight-schedules.md` |
 
 ## Rules
 

@@ -15,7 +15,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from personal_ops_properties_v3 import parse_frontmatter_and_properties
-from personal_ops_v4 import normalize_budget_facts
+from personal_ops_v4 import normalize_budget_facts, schedule_interval_minutes
 
 CONTRACT = "spor-read-only-proposal-v1"
 ROOT = Path(__file__).resolve().parents[2]
@@ -341,12 +341,16 @@ def schedule_plan(config: dict, plan: dict | None, target: date, mode: str) -> d
         # Local weekly training/rest cadence is a proposal, never actual execution.
         profile = "training" if day.weekday() in {0, 2, 4} else "rest"
         rows = json.loads(config.get("schedule_standard_json" if profile == "training" else "schedule_rest_json", "[]"))
+        for row in rows:
+            schedule_interval_minutes(row)
         blocks = [row for row in allocations if row.get("date") == day.isoformat()]
         capacity_label = LABELS[1]
         if not blocks:
             capacity_label = LABELS[2]
             aliases = {"adapt-1": "adapt-build-deliver", "adapt-2": "adapt-promote-deliver-2", "adapt-3": "adapt-promote-deliver-3"}
-            blocks = [{"date": day.isoformat(), "block_id": aliases.get(row["block_id"], row["block_id"]), "start": row["start"], "end": row["end"], "planned_minutes": 60, "work_slices": [], "buffer": True}
+            blocks = [{"date": day.isoformat(), "block_id": aliases.get(row["block_id"], row["block_id"]), "start": row["start"], "end": row["end"],
+                       "end_day_offset": row.get("end_day_offset", 0),
+                       "planned_minutes": schedule_interval_minutes(row)[1] - schedule_interval_minutes(row)[0], "work_slices": [], "buffer": True}
                       for row in rows if row.get("kind") == "work"]
         capacity = []
         for block in blocks:
@@ -355,9 +359,13 @@ def schedule_plan(config: dict, plan: dict | None, target: date, mode: str) -> d
             start = block.get("start", block.get("start_time"))
             end = block.get("end", block.get("end_time"))
             checkpoint = None
-            if minutes > 0 and end:
-                end_minutes = int(end[:2])*60 + int(end[3:5])
-                checkpoint = {"start": f"{(end_minutes-5)//60:02}:{(end_minutes-5)%60:02}", "end": end}
+            if minutes > 0 and start and end:
+                start_minutes, end_minutes = schedule_interval_minutes({**block, "start": start, "end": end})
+                checkpoint_minutes = min(5, minutes, end_minutes - start_minutes)
+                checkpoint_start = end_minutes - checkpoint_minutes
+                checkpoint = {"start": f"{checkpoint_start % 1440 // 60:02}:{checkpoint_start % 60:02}", "end": end}
+                if end_minutes >= 1440:
+                    checkpoint.update({"start_day_offset": checkpoint_start // 1440, "end_day_offset": end_minutes // 1440})
             capacity.append({**block, "label": capacity_label, "focus_capacity_minutes": max(0, minutes-5), "osnr_minutes": min(5, minutes), "checkpoint": checkpoint,
                              "conflict": used > max(0, minutes-5)})
             if capacity[-1]["conflict"]:

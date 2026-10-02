@@ -127,12 +127,14 @@ write_daily 2026-08-18 previous-day merged-adapt-shifted '{"if":{"calories":2500
 write_daily 2026-08-19 previous-day standard '{"if":{"calories":2600,"approximate":true},"finance":{"amount":70,"currency":"PLN"}}'
 
 python3 - "$workspace/personal-ops/check-ins-v4/2026/2026-08-19.md" <<'PY'
+import json
 import sys
 from pathlib import Path
 
 path = Path(sys.argv[1])
 text = path.read_text(encoding="utf-8")
 schedule = '[{"block_id":"build-01","start":"09:10","end":"10:40","kind":"work","stream":"build","label":"Build"},{"block_id":"adapt-01","start":"11:40","end":"12:40","kind":"work","stream":"deliver","label":"Adaptacja"},{"block_id":"meal-01","start":"14:00","end":"15:00","kind":"meal","stream":"self","label":"Pierwszy posiłek","meal_slot":1},{"block_id":"meal-02","start":"17:00","end":"17:50","kind":"meal","stream":"self","label":"Drugi posiłek","meal_slot":2},{"block_id":"promote-01","start":"17:50","end":"18:50","kind":"work","stream":"promote","label":"Promocja"},{"block_id":"meal-03","start":"19:00","end":"21:00","kind":"meal","stream":"self","label":"Obiado-kolacja","meal_slot":3},{"block_id":"close-01","start":"21:00","end":"21:30","kind":"close","stream":"close","label":"Czas z bliskimi"}]'
+schedule = json.dumps(json.loads(schedule) + [{"block_id": "sleep", "kind": "sleep", "stream": "self", "label": "Sen", "start": "23:10", "end": "07:30", "end_day_offset": 1}], ensure_ascii=False)
 text = text.replace(
     "  planned_schedule_variant: standard\n",
     "  planned_schedule_variant: standard\n  daily_plan_contract: per-day-schedule-v1\n  planned_schedule_json: \"" + schedule.replace('"', '\\\"') + "\"\n  readable_body_contract: spor-readable-v1\n",
@@ -155,11 +157,14 @@ if "$repo_root/.systems/scripts/check-weekly-planning-v4" >/dev/null; then :; el
 fi
 
 python3 - "$repo_root" "$workspace" <<'PY'
+import json
+from importlib.machinery import SourceFileLoader
+from importlib.util import module_from_spec, spec_from_loader
 import sys
 from datetime import date
 from pathlib import Path
 sys.path.insert(0, str(Path(sys.argv[1]) / ".systems/scripts"))
-from personal_ops_v4 import load_current_records, load_daily, validate_daily
+from personal_ops_v4 import load_current_records, load_daily, validate_daily, schedule_interval_minutes
 
 workspace = Path(sys.argv[2])
 load_daily(workspace, date(2026, 8, 17))
@@ -179,6 +184,57 @@ else:
 
 per_day_path = workspace / "personal-ops/check-ins-v4/2026/2026-08-19.md"
 per_day_top, per_day_properties, per_day_body = load_daily(workspace, date(2026, 8, 19))
+rows = json.loads(per_day_properties["planned_schedule_json"])
+sleep = next(row for row in rows if row["block_id"] == "sleep")
+assert schedule_interval_minutes(sleep) == (1390, 1890)
+assert schedule_interval_minutes(sleep)[1] - schedule_interval_minutes(sleep)[0] == 500
+assert schedule_interval_minutes({"start": "00:00", "end": "00:00", "end_day_offset": 1}) == (0, 1440)
+assert schedule_interval_minutes({"start": "23:59", "end": "00:00", "end_day_offset": 1}) == (1439, 1440)
+assert schedule_interval_minutes({"start": "09:10", "end": "10:10"}) == (550, 610)
+assert schedule_interval_minutes({"start": "09:10", "end": "10:10", "end_day_offset": 0}) == (550, 610)
+bad_rows = [
+    {"start": "23:10", "end": "07:30"},
+    {"start": "10:00", "end": "10:00"},
+    {"start": "09:00", "end": "10:00", "end_day_offset": 1},
+    {"start": "24:00", "end": "07:30", "end_day_offset": 1},
+    {"start": "23:10", "end": "07:60", "end_day_offset": 1},
+    {"start": "9:10", "end": "10:10"},
+] + [{**sleep, "end_day_offset": offset} for offset in (-1, 2, True, False, 1.0, "1", None)]
+for bad_row in bad_rows:
+    invalid_sleep = {key: value for key, value in sleep.items() if key != "end_day_offset"}
+    invalid = {**per_day_properties, "planned_schedule_json": json.dumps(rows[:-1] + [{**invalid_sleep, **bad_row}])}
+    try:
+        validate_daily(per_day_top, invalid, per_day_path, per_day_body)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(f"invalid schedule accepted: {bad_row}")
+
+loader = SourceFileLoader("overnight_renderer", str(Path(sys.argv[1]) / ".systems/scripts/render-personal-ops-daily-summary-v4"))
+renderer = module_from_spec(spec_from_loader(loader.name, loader))
+loader.exec_module(renderer)
+report = renderer.budget(workspace, date(2026, 8, 19))
+output = renderer.render(per_day_properties, rows, report, workspace)
+assert "23:10–07:30 (koniec następnego dnia)" in output
+assert "konflikt posiłku" not in output
+assert output.index("21:00–21:30") < output.index("23:10–07:30")
+# A next-day endpoint must not overlap the *previous* morning's food slot.
+assert "konflikt posiłku 11:00–13:00" not in output
+
+loader = SourceFileLoader("overnight_budget", str(Path(sys.argv[1]) / ".systems/scripts/calculate-personal-ops-budgets"))
+calculator = module_from_spec(spec_from_loader(loader.name, loader))
+loader.exec_module(calculator)
+meal_rows = [{**row, "end_day_offset": 1, "end": row["start"]} if row.get("meal_slot") == 1 else row for row in rows]
+food = calculator.relocate_food_schedule(
+    {**per_day_properties, "planned_schedule_json": json.dumps(meal_rows)}, report["weekly_calories"]["food_schedule"])
+assert food["status"] == "unavailable", food
+assert "unique macro block" in food["reason"], food
+
+conflict_rows = [{"block_id": "overnight", "start": "18:00", "end": "07:30", "end_day_offset": 1, "label": "Overnight"}]
+conflict_output = renderer.render(per_day_properties, conflict_rows, report, workspace)
+assert "konflikt posiłku 19:00–21:00" in conflict_output
+assert "18:00–07:30 (koniec następnego dnia)" in conflict_output
+
 invalid_schedule = dict(per_day_properties)
 invalid_schedule["planned_schedule_json"] = "[]"
 try:
@@ -327,6 +383,7 @@ fi
 grep -Fq '| 14:00–15:00 | `Self` Pierwszy posiłek |' "$per_day_output"
 grep -Fq '| 17:00–17:50 | `Self` Drugi posiłek |' "$per_day_output"
 grep -Fq '| 19:00–21:00 | `Self` Obiado-kolacja |' "$per_day_output"
+grep -Fq '| 23:10–07:30 (koniec następnego dnia) | `Self` Sen |' "$per_day_output"
 grep -Fq -- '- `11:00–13:00`: empty' "$per_day_output"
 grep -Fq -- '- `13:00–15:00`: `~' "$per_day_output"
 grep -Fq -- '- `15:00–17:00`: empty' "$per_day_output"

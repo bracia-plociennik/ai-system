@@ -6,20 +6,24 @@
 | `workflow-scope` | `plan-derived` |
 | `project-workspace` | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system` |
 | `active-plan-status` | `implementation` |
-| `current-task` | `ASYS-POPS-017-unified-aggregates` |
-| `active-change-request` | `none` |
-| `current-phase` | `phase-8-final-check` |
+| `current-task` | `ASYS-POPS-018-overnight-schedules` |
+| `active-change-request` | `ASYS-CR-010-overnight-schedules` |
+| `current-phase` | `phase-7-checkpoint` |
 | `phase-result` | `PASS` |
-| `final-owner-approval` | `approved` |
-| `next-phase` | `owner-final-approval` |
+| `final-owner-approval` | `not-requested` |
+| `next-phase` | `phase-8-final-check` |
 | `next-task` | `none` |
 | `blocking-reason` | `none` |
-| `updated-at` | `2026-10-01` |
+| `updated-at` | `2026-10-02` |
 | `autopilot-mode` | `supervised` |
 | `autopilot-state` | `stopped` |
 | `autopilot-run` | `autopilot-001` |
 
 ## Notes
+
+- CR-010 implementation Quality and technical Phase 6/7 are complete. Current Quality: `quality/phase-5-asys-pops-018-overnight-schedules-quality.md`; checkpoint: `checkpoints/phase-7-checkpoint-2026-10-02-overnight-schedules.md`. Approved commit/push/update and installed checks are subsequent delivery actions, not claimed by this checkpoint. Next-phase names an owner-triggered route only; no Phase 8/final-owner-yes supplied. The two CR-009 assessments were archived byte-for-byte with owner approval; historical acceptance remains unchanged.
+
+- CR-010 is the current owner-approved medium-risk overnight schedule defect iteration. AI System only, no deadline/timebox, no history/settings backfill. CR-009 approval and earlier notes remain historical. Scoped spec and artifact QA precede implementation; publication and official updater are explicitly authorized, Phase 8 is not.
 
 - Current 7c624ef publication-baseline Quality and Phase 8 verification are PASS in the two renewed recovery reports, binding 43 and 53 current inputs respectively. Publication distillation/checkpoint and project memory are synchronized. Historical CR-009 final-owner-yes remains received and scoped; the owner-final-approval token is satisfied, not a new request. No in-scope warning remains. Four unchanged historical EOF findings are explicitly approved and disclosed, not hidden. Scoped commit/push and official management update are authorized delivery actions still awaiting execution at this status snapshot; no migration/backfill or private write. Earlier status notes below remain chronological history.
 
@@ -29,11 +33,11 @@
 
 - Current publication verification is in progress on product 7c624ef. Owner approved preserving and fast-forwarding the checkout, fresh QA, scoped commit/push and official update without migration/backfill. The two earlier dabbf34 V2 reports were archived byte-for-byte under `quality/asys-cr-009/history/dabbf34/` with explicit owner approval. Historical CR-009 acceptance remains recorded; current technical verification is not claimed complete until fresh evidence exists. Independent iterations remain untouched. See `quality/asys-cr-009-publication-plan.md`.
 
-- Current scoped CR-009 Phase 8 is PASS in `quality/recovery-phase-8-final-check.md` after current full Quality and refreshed capture/checkpoint. The owner's explicit 2026-10-01 final-owner-yes is received and applied only to CR-009/POPS-017. No blocker or in-scope warning remains. Independent open CRs retain their status; active-plan-status implementation refers to them, not an open CR-009 gate. The next-phase owner-final-approval token is satisfied, not pending. Earlier notes and failed reports below are historical, not current pointers. This completion evidence is local and not yet committed/published.
+- Current scoped CR-009 Phase 8 is PASS in `quality/asys-cr-009/history/25ee186/recovery-phase-8-final-check.md` after current full Quality and refreshed capture/checkpoint. The owner's explicit 2026-10-01 final-owner-yes is received and applied only to CR-009/POPS-017. No blocker or in-scope warning remains. Independent open CRs retain their status; active-plan-status implementation refers to them, not an open CR-009 gate. The next-phase owner-final-approval token is satisfied, not pending. Earlier notes and failed reports below are historical, not current pointers. This completion evidence is local and not yet committed/published.
 
 - Current completion distillation and checkpoint are synchronized in `distillations/phase-6-asys-cr-009-completion-distillation.md` and `checkpoints/phase-7-checkpoint-2026-10-01-cr-009-completion.md`. Both scoped distillation checkboxes are true. Independent CRs are unchanged; the owner has explicitly requested the subsequent Phase 8 and final-owner-yes, but technical acceptance remains separate.
 
-- Current CR-009 Quality PASS is recorded in `quality/recovery-phase-5-asys-pops-017-unified-aggregates-quality.md` at product dabbf34 / Workflow 0c767da. Both full product checks and the full project Workflow check include all smoke tests. Technical capture/checkpoint and the separately requested final check are next; owner approval is not yet applied.
+- Current CR-009 Quality PASS is recorded in `quality/asys-cr-009/history/25ee186/recovery-phase-5-asys-pops-017-unified-aggregates-quality.md` at product dabbf34 / Workflow 0c767da. Both full product checks and the full project Workflow check include all smoke tests. Technical capture/checkpoint and the separately requested final check are next; owner approval is not yet applied.
 
 - Owner-approved CR-009 completion reconciliation separates done implementation from final acceptance. Scope of the prior failed broad private naming audit is documented in `decisions/2026-10-01-cr-009-completion-scope.md`; original FAIL evidence stays immutable. Fresh full Quality is in progress; explicit final-owner-yes has been received conditionally but not applied before technical PASS. No product, historical source, TaskNote or aggregate write is authorized by this reconciliation.
 

@@ -11,7 +11,7 @@ from datetime import date
 from decimal import Decimal
 from pathlib import Path
 
-from personal_ops_v4 import DAILY_ALIGNMENT_QUESTION, alignment_summary, json_value, load_daily, normalize_life_alignment_answer
+from personal_ops_v4 import DAILY_ALIGNMENT_QUESTION, alignment_summary, json_value, load_daily, normalize_life_alignment_answer, schedule_interval_minutes
 
 
 CALCULATOR = Path(__file__).with_name("calculate-personal-ops-budgets")
@@ -330,6 +330,8 @@ def render(properties: dict, rows: list[dict], budget_report: dict, workspace: P
     wig_item_id = str(properties.get("wig_plan_item_id", "")).strip()
     for order, row in enumerate(rows):
         start, end = str(row.get("start", "")), str(row.get("end", ""))
+        schedule_interval_minutes(row)
+        end_day_offset = row.get("end_day_offset", 0)
         block_id = str(row.get("block_id", ""))
         matched = by_block.get(block_id, [])
         food_match = matching_food_block(row, food_blocks)
@@ -342,6 +344,7 @@ def render(properties: dict, rows: list[dict], budget_report: dict, workspace: P
                 table_records.append({
                     "start": start,
                     "end": end,
+                    "end_day_offset": end_day_offset,
                     "order": order,
                     "title": prefixed_title(item.get("title", row.get("label", "")), stream, str(item.get("id", "")).strip() == wig_item_id),
                     "dod": item.get("definition_of_done", "") or row.get("dod", ""),
@@ -352,6 +355,7 @@ def render(properties: dict, rows: list[dict], budget_report: dict, workspace: P
             table_records.append({
                 "start": start,
                 "end": end,
+                "end_day_offset": end_day_offset,
                 "order": order,
                 "title": prefixed_title(row.get("label", ""), stream),
                 "dod": food_detail(food_match[1]) if food_match else row.get("dod", ""),
@@ -366,7 +370,7 @@ def render(properties: dict, rows: list[dict], budget_report: dict, workspace: P
                 continue
             start, configured_end = time.split("-", 1)
             start_minute, end_minute = minutes(start), minutes(configured_end)
-            overlapping = [record for record in table_records if minutes(record["start"]) <= start_minute < minutes(record["end"])]
+            overlapping = [record for record in table_records if schedule_interval_minutes(record)[0] <= start_minute < schedule_interval_minutes(record)[1]]
             later_starts = [minutes(record["start"]) for record in table_records if start_minute < minutes(record["start"]) < end_minute]
             rendered_end = configured_end
             if not overlapping and later_starts:
@@ -385,8 +389,11 @@ def render(properties: dict, rows: list[dict], budget_report: dict, workspace: P
 
     table = ["| Czas | Element | DoD | DL |", "|---|---|---|---|"]
     for record in sorted(table_records, key=lambda value: (minutes(value["start"]), value["order"])):
+        time_range = display_range(record['start'], record['end'])
+        if record.get("end_day_offset", 0):
+            time_range += " (koniec następnego dnia)"
         table.append(
-            f"| {display_range(record['start'], record['end'])} | {markdown_cell(record['title'])} | {markdown_cell(record['dod'])} | {markdown_cell(display_deadline(record['deadline']))} |"
+            f"| {time_range} | {markdown_cell(record['title'])} | {markdown_cell(record['dod'])} | {markdown_cell(display_deadline(record['deadline']))} |"
         )
 
     lines = [f"## Plan na dziś - {display_date(properties.get('session_date'))}", "", *table]

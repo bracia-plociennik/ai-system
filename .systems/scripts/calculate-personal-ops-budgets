@@ -13,7 +13,7 @@ from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation, ROUND_CEILING, ROUND_HALF_UP
 from pathlib import Path
 
-from personal_ops_v4 import load_current_records, normalize_budget_facts
+from personal_ops_v4 import load_current_records, normalize_budget_facts, schedule_interval_minutes
 
 
 CONFIG_RELATIVE = "personal-ops/check-ins/check-in-settings.local.md"
@@ -372,7 +372,15 @@ def relocate_food_schedule(properties: dict, schedule: dict) -> dict:
     relocated = [{"id": block_id, "time": time_range, "status": "empty"} for block_id, time_range in FOOD_BLOCKS]
     used_targets: set[int] = set()
     for meal, package in zip(meals, configured):
-        start, end = clock_minutes(str(meal.get("start", ""))), clock_minutes(str(meal.get("end", "")))
+        try:
+            start, end = schedule_interval_minutes(meal)
+        except ValueError:
+            return unavailable_food_schedule(
+                Decimal(str(schedule.get("planned_calorie_target"))),
+                str(schedule.get("day_type", "")),
+                "per-day meal interval is invalid",
+                [f"meal_slot_{meal.get('meal_slot')}_time"],
+            )
         target_index = next((
             index for index, (_block_id, time_range) in enumerate(FOOD_BLOCKS)
             if start is not None and end is not None and block_time(time_range)[0] <= start < end <= block_time(time_range)[1]

@@ -195,6 +195,18 @@ Daily V4 TaskNote generation must validate the parsed canonical body together wi
 
 V4 preserves STATE, PROCESS, OUTCOME, and REVIEW, plus `owner_overrides_json`, `osnr_checkpoints_json`, `plan_vs_reality_gap`, `recovery_cost`, and explicit `planned_schedule_variant`. New artifacts set `daily_plan_contract: per-day-schedule-v1`: `planned_schedule_json` is the canonical schedule for that date and every professional item references one of its `block_id` values. Rendering falls back first to an explicit date-keyed historical override and then to a generic local variant for legacy artifacts only. A fallback must not contain client-specific or dated work.
 
+Schedule rows use strict `HH:MM` clocks. Start is on `session_date`; optional
+`end_day_offset` is exactly integer `0` (default, same day) or `1` (next day).
+An overnight row must set `end_day_offset: 1` explicitly, for example
+`{"block_id":"sleep","kind":"sleep","label":"Sen","start":"23:10","end":"07:30","end_day_offset":1}`.
+This is 500 planned wall-clock minutes (8 h 20 min), not a claim about actual
+sleep or DST-adjusted elapsed time. Intervals must be positive and at most
+1440 minutes; `24:00`, invalid offset types, implicit rollover and multi-day
+spans are rejected. Rendering labels next-day ends; OSNR remains inside the
+work block, with relative endpoint offsets when a checkpoint crosses midnight.
+Next-day meals cannot be squeezed into same-day macro slots: their macro
+projection remains unavailable. Historical artifacts/settings are not backfilled.
+
 Per-day meal rows use `kind: meal` and unique `meal_slot` values `1`, `2`, and `3`. The budget projection moves the three configured macro packages to the fixed macro blocks containing the actual meal windows. IF conflicts use those actual windows, while calorie and macro totals remain unchanged. New artifacts also set `readable_body_contract: spor-readable-v1`, which requires non-empty `Plan na dziś`, `STATE`, `PROCESS`, `OUTCOME`, and `REVIEW` sections. Unmarked historical V4 remains valid.
 
 The structured V4 properties include `review_window_start`, `review_window_end`, and `review_window_kind`. The compatibility adapter rejects any duplicate effective session_date across V3 and V4 instead of silently double-counting it.

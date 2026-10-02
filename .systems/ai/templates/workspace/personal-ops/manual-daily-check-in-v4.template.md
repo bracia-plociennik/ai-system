@@ -49,6 +49,12 @@ properties:
 
 Use `planned_items_json` as the machine-readable source. Each professional item must reference a `block_id` from `planned_schedule_json` and may include `definition_of_done`, `deadline`, and `mapping`. The per-day schedule is canonical for this date; local variants are legacy fallback only. Meal rows use `kind: meal` and unique `meal_slot` values `1`, `2`, and `3`.
 
+For overnight rows set integer `end_day_offset: 1` explicitly; start belongs to
+`session_date`, end to the next day. Example sleep row:
+`{"block_id":"sleep","kind":"sleep","label":"Sen","start":"23:10","end":"07:30","end_day_offset":1}`.
+Omitted offset means same day. Keep positive intervals of at most 24 hours;
+never use `24:00` or infer rollover from an earlier end clock.
+
 After a successful post-write refresh, render the chat-only plan with:
 
 ```text

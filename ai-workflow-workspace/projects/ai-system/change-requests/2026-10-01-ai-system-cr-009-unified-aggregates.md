@@ -22,7 +22,7 @@ Technical distillation and checkpoint required; private historical values stay i
 
 ## Final Acceptance
 
-On 2026-10-01 the owner explicitly approved completion reconciliation, required QA, renewed Phase 8 and final-owner-yes. Current Quality and technical capture/checkpoint passed before the final assessment. `quality/recovery-phase-8-final-check.md` records technical PASS and applies that exact owner approval to CR-009 only. Original failed assessment remains immutable; independent CRs and historical source data are not rewritten. New closure evidence remains local, without a new commit/push.
+On 2026-10-01 the owner explicitly approved completion reconciliation, required QA, renewed Phase 8 and final-owner-yes. Current Quality and technical capture/checkpoint passed before the final assessment. `quality/asys-cr-009/history/25ee186/recovery-phase-8-final-check.md` records technical PASS and applies that exact owner approval to CR-009 only. Original failed assessment remains immutable; independent CRs and historical source data are not rewritten. New closure evidence remains local, without a new commit/push.
 
 ## Owner Decision Checkpoint
 

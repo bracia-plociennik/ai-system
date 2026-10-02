@@ -1,7 +1,7 @@
 # CR-009 Completion Distillation
 
 - Task: ASYS-POPS-017-unified-aggregates
-- Quality: quality/recovery-phase-5-asys-pops-017-unified-aggregates-quality.md
+- Quality: quality/asys-cr-009/history/25ee186/recovery-phase-5-asys-pops-017-unified-aggregates-quality.md
 - memory-in-repo-memory: true
 
 ## What Was Done

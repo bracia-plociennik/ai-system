@@ -127,6 +127,29 @@ class ProposalTests(unittest.TestCase):
         self.assertEqual(day["wig"]["candidate_item_id"], "one")
         self.assertEqual(day["approved_work_blocks"][4]["osnr_minutes"], 0)
 
+    def test_overnight_capacity_and_checkpoint_offsets(self):
+        config = {**self.config, "schedule_rest_json": json.dumps([
+            {"block_id": "sleep", "kind": "sleep", "start": "23:10", "end": "07:30", "end_day_offset": 1},
+            {"block_id": "build-future", "kind": "work", "start": "23:10", "end": "00:10", "end_day_offset": 1},
+        ])}
+        day = schedule_plan(config, None, date(2026, 9, 29), "daily")["days"][0]
+        self.assertEqual(day["work_minutes"], 60)  # Sleep is not work capacity.
+        self.assertEqual(day["local_schedule"][0]["end_day_offset"], 1)
+        block = day["approved_work_blocks"][0]
+        self.assertEqual(block["focus_capacity_minutes"], 55)
+        self.assertEqual(block["checkpoint"], {"start": "00:05", "end": "00:10", "start_day_offset": 1, "end_day_offset": 1})
+        for end, expected_start, offset in (("00:02", "23:57", 0), ("00:00", "23:55", 0)):
+            approved = {"properties": {"daily_blocks": [{"date": "2026-09-29", "block_id": "build-future", "start": "23:10", "end": end, "end_day_offset": 1, "planned_minutes": 60}]}}
+            checkpoint = schedule_plan(self.config, approved, date(2026, 9, 29), "daily")["days"][0]["approved_work_blocks"][0]["checkpoint"]
+            self.assertEqual(checkpoint, {"start": expected_start, "end": end, "start_day_offset": offset, "end_day_offset": 1})
+        short = {"properties": {"daily_blocks": [{"date": "2026-09-29", "block_id": "build-future", "start": "23:59", "end": "00:02", "end_day_offset": 1, "planned_minutes": 3}]}}
+        short_block = schedule_plan(self.config, short, date(2026, 9, 29), "daily")["days"][0]["approved_work_blocks"][0]
+        self.assertEqual(short_block["checkpoint"]["start"], "23:59")
+        self.assertEqual((short_block["osnr_minutes"], short_block["focus_capacity_minutes"]), (3, 0))
+        config["schedule_rest_json"] = json.dumps([{"block_id": "build-future", "kind": "work", "start": "23:10", "end": "00:10"}])
+        with self.assertRaises(ValueError):
+            schedule_plan(config, None, date(2026, 9, 29), "daily")
+
     def test_safety_redacted_symlink_and_no_instruction_authority(self):
         self.assertNotIn("planned_day_life_alignment_answer", properties_projection({"private_index_policy": "redacted", "planned_day_life_alignment_answer": "no"}))
         outside = Path(self.temp.name) / "outside.md"
