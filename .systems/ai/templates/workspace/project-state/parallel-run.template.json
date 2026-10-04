@@ -1,0 +1,19 @@
+{
+  "contract": 1,
+  "run_id": "example-run",
+  "coordinator_id": "owner-facing-coordinator",
+  "approval_ref": "replace-with-current-approved-scope",
+  "baseline": {"commit": "0000000000000000000000000000000000000000", "source_digest": "0000000000000000000000000000000000000000000000000000000000000000"},
+  "source_manifest": [],
+  "retired_attempt_ids": [],
+  "retired_agent_ids": [],
+  "runtime_capacity": 1,
+  "dispatch_count": 1,
+  "checkpoint_open": true,
+  "workflow_parallel_supported": false,
+  "units": [
+    {"id": "example-review", "goal": "Replace with approved outcome", "dod": "Replace with observable acceptance", "dependencies": [],
+     "mode": "read-only", "system": "ai-system", "write_paths": [], "resources": [], "worktree": null,
+     "status": "pending", "attempt_id": null, "agent_id": null, "termination_confirmed": false, "result": null}
+  ]
+}

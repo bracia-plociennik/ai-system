@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+"""Inspect a run or validate a proposed event without changing the run."""
+
+import argparse
+import hashlib
+import json
+import subprocess
+import sys
+from pathlib import Path
+sys.dont_write_bytecode = True
+
+from parallel_orchestration import InvalidPlan, dispatchable_units, ready_units, transition, validate_plan
+
+
+def verify_files(plan, repo):
+    head = subprocess.check_output(["git", "-C", str(repo), "rev-parse", "HEAD"], text=True).strip()
+    if head != plan["baseline"]["commit"]:
+        raise InvalidPlan("repository HEAD differs from run baseline")
+    manifest = plan.get("source_manifest")
+    if not isinstance(manifest, list) or not manifest:
+        raise InvalidPlan("repository inspection requires a nonempty source_manifest")
+    from parallel_orchestration import safe_path
+    entries = []
+    seen = set()
+    for item in manifest:
+        if not isinstance(item, dict):
+            raise InvalidPlan("source manifest entry must be an object")
+        path = safe_path(item.get("path"), repo)
+        if path in seen:
+            raise InvalidPlan("duplicate source manifest path")
+        seen.add(path)
+        source = repo / path
+        if not source.is_file() or hashlib.sha256(source.read_bytes()).hexdigest() != item.get("sha256"):
+            raise InvalidPlan("source manifest is missing or stale")
+        entries.append(path + "=" + item["sha256"] + "\n")
+    digest = hashlib.sha256("".join(sorted(entries)).encode()).hexdigest()
+    if digest != plan["baseline"]["source_digest"]:
+        raise InvalidPlan("source manifest differs from run baseline")
+    for unit in plan["units"]:
+        if unit["status"] in {"submitted", "accepted"}:
+            for item in unit["result"]["evidence"]:
+                source = repo / item["path"]
+                if not source.is_file() or hashlib.sha256(source.read_bytes()).hexdigest() != item["sha256"]:
+                    raise InvalidPlan("worker evidence is missing or stale")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--plan", type=Path)
+    parser.add_argument("--repo", type=Path)
+    parser.add_argument("--event", type=Path)
+    args = parser.parse_args()
+    root = Path(__file__).resolve().parents[2]
+    try:
+        if args.plan is None:
+            if args.event or args.repo:
+                parser.error("--event and --repo require --plan")
+            for name in (".systems/ai/core/project-orchestration.md", ".systems/ai/templates/workspace/project-state/parallel-run.template.json"):
+                if not (root / name).is_file():
+                    raise InvalidPlan("missing parallel orchestration artifact: " + name)
+            if not (root / ".systems/scripts/tests/test_parallel_orchestration.py").is_file():
+                raise InvalidPlan("missing behavioral regression suite")
+            return subprocess.call([sys.executable, "-m", "unittest", "discover", "-s", str(root / ".systems/scripts/tests"), "-p", "test_parallel_orchestration.py"])
+        if args.plan.is_symlink() or args.event is not None and args.event.is_symlink():
+            raise InvalidPlan("run/event cannot be a symlink")
+        plan = validate_plan(json.loads(args.plan.read_text()), args.repo)
+        event = json.loads(args.event.read_text()) if args.event else None
+        if args.event and not isinstance(event, dict):
+            raise InvalidPlan("event must be an object")
+        recovery = isinstance(event, dict) and event.get("action") == "rebase"
+        if args.repo and not recovery:
+            verify_files(plan, args.repo)
+        if event is not None:
+            if args.repo and recovery and not event.get("new_source_manifest"):
+                raise InvalidPlan("repository rebase requires a new source manifest")
+            plan = validate_plan(transition(plan, event), args.repo)
+            if args.repo:
+                verify_files(plan, args.repo)
+        print(json.dumps({"result": "inspection-only", "supporting_only": True, "ready": ready_units(plan),
+                          "dispatchable": dispatchable_units(plan), "run": plan}, indent=2))
+        return 0
+    except (InvalidPlan, OSError, ValueError, subprocess.SubprocessError) as error:
+        print("Parallel orchestration blocked: " + str(error), file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

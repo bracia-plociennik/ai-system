@@ -1,0 +1,10 @@
+{
+  "contract": 2,
+  "execution_mode": "proposal-only",
+  "capacity": 1,
+  "checkpoint": {"known": false, "parent_task_slots": 3, "active_tasks": []},
+  "dependency_ready": [],
+  "units": [{"contract": 2, "id": "unit-a", "task_id": "TASK-001", "package_id": null, "slice_id": "slice-a",
+    "goal": "Replace with approved bounded outcome", "dod": ["Replace with observable acceptance"],
+    "dependencies": [], "read_set": [], "write_set": ["src/a.py"], "resources": []}]
+}

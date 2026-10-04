@@ -199,7 +199,9 @@ class Fixtures(unittest.TestCase):
 
     def test_all_declared_negative_causes_are_specific(self):
         cases = json.loads((SCRIPTS / "smoke/negative-expectations.json").read_text())["cases"]
-        self.assertEqual(len(cases), 220)
+        self.assertEqual(len(cases), 222)
+        self.assertEqual(cases["orchestration-parallel-unnegotiated-workflow"]["suite"], "core")
+        self.assertEqual(cases["orchestration-parallel-stale-source"]["suite"], "core")
         for name, case in cases.items():
             self.assertIn(case["exit_code"], (1, 2), name)
             self.assertGreater(len(case["diagnostic"]), 12, name)
@@ -451,18 +453,21 @@ class Fixtures(unittest.TestCase):
         product, command = self.runner_fixture(slow=True)
         for interrupt in (False, True):
             evidence = self.root / f"stop-{interrupt}.md"
-            proc = subprocess.Popen(command + ["--profile", "full", "--timeout-seconds", "3", "--evidence-file", str(evidence)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=self.runner_environment())
+            # Leave room for dependency/environment preflight under concurrent load.
+            # The fixture's 30-second child still must be terminated by the runner.
+            proc = subprocess.Popen(command + ["--profile", "full", "--timeout-seconds", "10", "--evidence-file", str(evidence)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=self.runner_environment())
             if interrupt:
-                deadline = time.monotonic() + 5
+                deadline = time.monotonic() + 8
                 while not (product / "child.pid").exists() and time.monotonic() < deadline:
                     time.sleep(.01)
                 proc.send_signal(signal.SIGTERM)
-            stdout, stderr = proc.communicate(timeout=8)
+            stdout, stderr = proc.communicate(timeout=18)
             record = comparison.read_record(evidence)
             self.assertEqual(proc.returncode, 143 if interrupt else 124, stderr)
             self.assertEqual(record["status"], "interrupted" if interrupt else "timeout")
             self.assertEqual(record["smoke_status"], "not-started")
             self.assertEqual(stdout.count("AI_SYSTEM_VALIDATION_RESULT"), 1)
+            self.assertTrue((product / "child.pid").is_file(), "Fixture must reach child startup to prove descendant cleanup")
             pid = int((product / "child.pid").read_text())
             with self.assertRaises(ProcessLookupError):
                 os.kill(pid, 0)

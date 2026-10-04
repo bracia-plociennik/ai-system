@@ -1,5 +1,11 @@
 # Distillation State
 
+## Canonical Capture Parity
+
+`capture_parity.py` is the shared formal record/collection consumer used by `check-distillation-state` and compatibility inventory. Existing schema-1 records remain immutable historical/advisory data and do not provide current QA PASS. New formal records use `Capture schema: 2` and a `Capture Verification` JSON block with work/project/task identities, exact evidence root, source root/HEAD, current implementation QA references and fingerprints. Ready/completed require current source/input hashes and full owning task coverage. Completed additionally binds the uniquely claimed accepted owning distillation and its SHA-256. Entire owning collections, including invalid sibling claims, participate in duplicate detection; no foreign runtime is scanned.
+
+Schema 3 is explicit opt-in only: the same consumer invokes immutable QA source-equivalence under `phase-commit-policy.md`. Unsupported target proof requires fresh QA, not saved eligibility. Historical fields are not upgraded/backfilled. Aggregated work units list their actual owning task IDs rather than pretending to be one Workflow task. Record source roots are local runtime metadata, never reusable product paths or permission.
+
 ## Purpose
 
 Distillation State is a per-work-unit disposition that makes reusable knowledge and unresolved capture visible. It is workspace runtime evidence, not permission to write memory or a reason to modify source artifacts.

@@ -266,6 +266,16 @@
       "exit_code": 1,
       "diagnostic": "selected AI Workflow project reports a blocker"
     },
+    "orchestration-parallel-unnegotiated-workflow": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "AI Workflow parallel capability cannot be asserted before the final counterpart contract is negotiated"
+    },
+    "orchestration-parallel-stale-source": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "source manifest is missing or stale"
+    },
     "orchestration-missing-core": {
       "suite": "core",
       "exit_code": 1,

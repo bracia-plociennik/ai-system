@@ -27,7 +27,13 @@ require_file "$core"
 require_file "$template"
 require_file "$preflight"
 require_file ".systems/scripts/check-project-orchestration"
-for script in "$preflight" ".systems/scripts/check-project-orchestration"; do
+require_file ".systems/scripts/check-parallel-orchestration"
+require_file ".systems/scripts/parallel_orchestration.py"
+require_file ".systems/scripts/tests/test_parallel_orchestration.py"
+require_file ".systems/scripts/check-orchestration-compatibility"
+require_ref "$core" 'orchestration-compatibility.md' 'strict counterpart adapter routing'
+require_file ".systems/ai/templates/workspace/project-state/parallel-run.template.json"
+for script in "$preflight" ".systems/scripts/check-project-orchestration" ".systems/scripts/check-parallel-orchestration"; do
   if [[ -f "$repo_root/$script" && ! -x "$repo_root/$script" ]]; then
     echo "Project-orchestration script is not executable: $script"
     fail=1
@@ -60,10 +66,16 @@ done
 require_ref ".systems/scripts/check-required-artifacts" 'check-project-orchestration' 'required artifacts wiring'
 require_ref ".systems/scripts/validate-ai-system" 'check-project-orchestration' 'validator chain wiring'
 require_ref ".systems/scripts/check-validator-smoke-tests" 'project-orchestration' 'behavioral fixture coverage'
+require_ref ".systems/scripts/validation-dependencies.json" '"check-parallel-orchestration"' 'scoped parallel validator registration'
 
 if [[ -f "$repo_root/$core" ]] && rg -qi 'delegat(e|ion|ed).*(grants|creates|extends) (new )?(approval|permission)|worker.*done.*(is|means) (qa|pass)' "$repo_root/$core"; then
   echo "Unsafe project-orchestration authority wording"
   fail=1
+fi
+
+if [[ "$fail" -eq 0 ]]; then
+  PYTHONDONTWRITEBYTECODE=1 "$repo_root/.systems/scripts/check-parallel-orchestration" || fail=1
+  PYTHONDONTWRITEBYTECODE=1 "$repo_root/.systems/scripts/check-orchestration-compatibility" || fail=1
 fi
 
 exit "$fail"
