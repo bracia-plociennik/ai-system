@@ -2,17 +2,17 @@
 
 ## Metadata
 - Project: ai-system-integrity-and-efficiency-v2
-- Date: 2026-10-01
+- Date: 2026-10-05
 - Workflow phase: 8. FINAL CHECK
 - Result: PASS
 - QA verification contract: `full-qa-verification-v2`
 
 ## Current QA Run
-- Run ID: final-check-integrity-efficiency-v2-owner-approved-closure
+- Run ID: integration-2026-10-05-iev2-phase-8-final-check
 - Artifact kind: final-check
 - Project/task identity: ai-system-integrity-and-efficiency-v2
-- Assessed source HEAD: 754748b135131e7d3a3732a811b52b7c9357f421
-- Assessed worktree digest: a775b458c1efd055c7a117a136f55f6991226183d6a8e0fdfacd22f0b373eafb
+- Assessed source HEAD: fd68b8ced847387c130e4868bb624fd22b0b8648
+- Assessed worktree digest: 4c4e67be99802edec504f247c7e6be169df0faca6359f7c0a720553e9975489a
 - Input artifacts: see table
 - Verdict: PASS
 - Gate Decision: PASS
@@ -21,9 +21,9 @@
 | Root kind | Relative path | SHA-256 |
 | --- | --- | --- |
 | approved-target-source | .systems/ai/core/dreaming-mode.md | 4fc26caac25a68b15b14e4455f70c26fc8535aaf9dd7011064efa30602ec36d7 |
-| approved-target-source | .systems/ai/core/operating-model.md | b8e3866b5d8174a1c1562c954f37859a128a1f91fceee789f0684a80b70bdb29 |
-| approved-target-source | .systems/ai/core/validation-profiles.md | c2a12566b920c706dfc912c1269bc4f0e6eb75e66602a58f5ae98c5595d7e1f7 |
-| approved-target-source | .systems/ai/core/validation-routing.md | 6a9147cf9430496402903b85c7a66828b9c48bc8b99d3c9d4839ce39b2e8a1f6 |
+| approved-target-source | .systems/ai/core/operating-model.md | bb3d9754ba7b7535b2699ddf8f1de026c846d7685a42aafc4f8c6b0331163af7 |
+| approved-target-source | .systems/ai/core/validation-profiles.md | 088e5a21a51350e7f218f224be5c7b91487da6d15335af1b0a5bd158c782f2d6 |
+| approved-target-source | .systems/ai/core/validation-routing.md | 5c3a5adeb5ec36291c337f367394ffeb489a277df628e2ff837f81ea87473ff9 |
 | approved-target-source | .systems/ai/skills/README.md | bd30da618424f5a7388672528c48db24358d35cb4f810f788d863bc6caf26f25 |
 | approved-target-source | .systems/ai/skills/skill-creator/agents/grader.md | 1e90d8b1b739621916e48ae7ee2a9fed32830e9b855af4a6bcbc3193237bda5a |
 | approved-target-source | .systems/ai/skills/skill-creator/references/schemas.md | ea47e8a598e3c6ddbc8bac1eebe61207540de9f986eaeca29450c53b2c754a6d |
@@ -32,36 +32,36 @@
 | approved-target-source | .systems/ai/skills/skill-creator/scripts/run_eval.py | e55a06093e345ef1d7d6e273b2182a702f18dd18082afde6b3ef47f96bcc8b66 |
 | approved-target-source | .systems/ai/templates/dreaming/dream-report.template.md | 9caa508871759cc5528f11e95a168ed0e8c25c9845d5d428a5af5fce71583225 |
 | approved-target-source | .systems/ai/templates/quality/validation-execution-record.template.md | cc55affd8c2ba19340b4c04f7b69b008d8d79c5eeb6a65ce9bb834601e5733dd |
-| approved-target-source | .systems/ai/templates/root/AGENTS.template.md | 1e9fe90a98e5bee325332919057cc1106af8b48abe5bdf3c9c9da8bd4eb6ee34 |
-| approved-target-source | .systems/scripts/README.md | 19e252adb3c904001c41e06f34dac712369c7ab740fbd1896cd24c3932d768a8 |
+| approved-target-source | .systems/ai/templates/root/AGENTS.template.md | f8606e49aaec741116bc016da262e916e30b98483210e181c1a3ee9d4d5a1944 |
+| approved-target-source | .systems/scripts/README.md | 200e12ba3b4da1627201a53094379802547da98acc3950f67a785b32f8634d01 |
 | approved-target-source | .systems/scripts/check-block-checkpoint | 8f75bc17e3c4b2ebc9ca7972d87e33ec385b3ba505713737486531da62c5daa6 |
-| approved-target-source | .systems/scripts/check-distillation-state | a65af266b591cda891b763047e21bed9c0244fcc08637c9390f386731ae814b6 |
+| approved-target-source | .systems/scripts/check-distillation-state | 61d18a7fbb18c9df91b51b3399a6575e47683355af16949c73309658587d345d |
 | approved-target-source | .systems/scripts/check-dreaming-mode | e40dc802a6b6d03b6a4ca242af1ebb32e6d83fa8b997021724572dcca84ce3f0 |
-| approved-target-source | .systems/scripts/check-required-artifacts | 5c5fad09b9cbc82e77f4b35acc6c825b18ad9e98f6cca49d9df0f85f5e8d0fd2 |
+| approved-target-source | .systems/scripts/check-required-artifacts | 5ba5f35e0b72dbd1084e8e468e1f1b9792a0458fcbb897b052717a0e46936e34 |
 | approved-target-source | .systems/scripts/check-validation-integrity | a4ffa11cecfc8f2f223f648f3e1b208fad9c32d05a48108377e62dffbd9b0db1 |
 | approved-target-source | .systems/scripts/check-validation-profiles | 3deea2250e20a1bb03aeddceb428e5c91077f09f9f6124c6d074e6b3b016d2e7 |
 | approved-target-source | .systems/scripts/check-validation-routing | 7cfa61f20648857f2488c8f46982587020567a5d034aa98fb0ac053f862df146 |
-| approved-target-source | .systems/scripts/check-validator-smoke-tests | 9398d7250d0153e5e3c4644351ab109ae857ce48e4bfb6bbb2b64c3fc9a9c28a |
+| approved-target-source | .systems/scripts/check-validator-smoke-tests | 0aa0ddb5a8c8b3c4795fc9f78507bf0f494c6087235793e6cf4c05385a668ed5 |
 | approved-target-source | .systems/scripts/discover-skills | 5b23040e09a79f717fa1bee2f92243831fff51583804f9f4661923df7dfbca3c |
 | approved-target-source | .systems/scripts/dream_recommendations.py | 0fd6fd04a503999fc16e9041d4da837afc08234eab92f5b469499204153cb5aa |
 | approved-target-source | .systems/scripts/report-contract-topology | 7d296d1cee64b85284231ac5d5f32335ed97435a6688f55d73f860003cb087e4 |
 | approved-target-source | .systems/scripts/report-validation-comparison | da46d0196fda417a14b8b8143789564052e889936a583131823bcb115e2d4f50 |
 | approved-target-source | .systems/scripts/report-workspace-freshness | 12ca8314f7246e80fdc87651bbfb94149d505b097ff0f740641e924449e724f5 |
 | approved-target-source | .systems/scripts/smoke/README.md | 20030f16a63a04e99b75e51e8313db5785ddeb881fb5f07d7b5118a2a7e2f98c |
-| approved-target-source | .systems/scripts/smoke/negative-expectations.json | be2f9f720068fa7a1b5518901a3d145593c336c40240b8d0ab77ee2aa79455f9 |
+| approved-target-source | .systems/scripts/smoke/negative-expectations.json | 63fcc0c8718b5d358bf58b4fe711879f914addd36fbf165fd109acc7aecef1a9 |
 | approved-target-source | .systems/scripts/smoke_assertion.py | d4981381a3ac05233f1fc86873d0cb46c1d2a21d665a40f76b8b6f4f07d260fa |
 | approved-target-source | .systems/scripts/smoke_coverage.py | 0c552c7920a5dfb91b5028996bb540a655dfa4fa6afdb5dffdd8b3864fbe22ae |
-| approved-target-source | .systems/scripts/smoke_fixture.py | e50e628ec964d279cdff9af73a73cdd651236c1e8a5b911b81a97eb51f87fea3 |
-| approved-target-source | .systems/scripts/tests/README.md | aeaa0708dc3c3bf832947d24c820fc98905f02c16ba687b0beffb6b014077668 |
-| approved-target-source | .systems/scripts/tests/test_validation_integrity.py | 8870f4c72c9335d30a5b583c0a97cda8a292c2665e611c5083176c44afb0a2d7 |
+| approved-target-source | .systems/scripts/smoke_fixture.py | 9e022ed885b4047d37d3743dc3ef221f468d57b68560e49322ab41211f3147ab |
+| approved-target-source | .systems/scripts/tests/README.md | e02ad08e97c90014ad967e4c991b3ffafe9c7b49b2dab2f92829f1cd40640316 |
+| approved-target-source | .systems/scripts/tests/test_validation_integrity.py | 8d3c1b58744a79852b3e250a07eebaf7526e8253d1ef3798f90cffffa0abe505 |
 | approved-target-source | .systems/scripts/update-from-upstream | 3c4959f68f07bcef3add6d4dbc4172d973e953f93f140a899220f69373f36bec |
-| approved-target-source | .systems/scripts/validate-ai-system | cee4ca7a1a78c96df91bf1595572c9cd15498f0496b14a9e487fec4448342c86 |
-| approved-target-source | .systems/scripts/validation-dependencies.json | 915273e4a758f4e983535bb9a75a5504c2ef9f2aa29c04c0256358ffe7aae0dc |
-| approved-target-source | .systems/scripts/validation_runner.py | a41469e162c89ede55ab3c4b7f5161971854771d8fffedee4bee71aa73c8d1a8 |
+| approved-target-source | .systems/scripts/validate-ai-system | f83eaebba519b48fbd9beface5b700f04487cf27230bab61d5c516aef9caf0fe |
+| approved-target-source | .systems/scripts/validation-dependencies.json | 8a503aed04779e925d7c3c9895192c47e2300a267be942af56d5ef483dfeaa47 |
+| approved-target-source | .systems/scripts/validation_runner.py | 631caa6e45b6e0648f69d99acf75761018863353fb7927443b11fc24ff5b65fc |
 | approved-target-source | .systems/scripts/validation_support.py | 834e37875531aa2ef028f39a98a8bb50b6d2c5b2b282f6485d96678395140127 |
-| approved-target-source | HUMANS.md | b0e1438d8ecda5bece215c54174fc6f7316a749c1719dd1b72d87abbee58acbf |
-| approved-target-source | README.md | 9f2df502fc92ac216aa947473993e72e8b76f1c57135df386ba0b3e652b47fd5 |
-| approved-target-source | ai-workflow-workspace/external-memory/external-memory.md | 50c2f85a0f8e1ad8cf0f03daf55a86d1b4d3c71e12eae805d9f2f42a7abad927 |
+| approved-target-source | HUMANS.md | b4ae9cd1986f126f946ee6961a84a57488385876fcd8e06bd12327a279024a61 |
+| approved-target-source | README.md | d6c07f8d5d3b8f80cdc21ed4715607f35c4fa81d7d29355d5046e104eeead780 |
+| approved-target-source | ai-workflow-workspace/external-memory/external-memory.md | 76496086974bf7f1facfcb3cf573a42c350d59d54cdda917fd9f96820f3a65e5 |
 | approved-target-source | ai-workflow-workspace/external-memory/memory/2026-10-01-integrity-efficiency-v2-ai-workflow-handoff.md | 8f938b1e298a88d9b55266c82c4c9012f217a9655affb57a515f27b83ee42da2 |
 | approved-target-source | ai-workflow-workspace/external-memory/memory/2026-10-01-isolated-smoke-optimization-ai-workflow-handoff.md | b84ff8001cf6afb87c256f0cb47abd3dafbf14eaf7a4f9a95cab999e369982c8 |
 | approved-target-source | ai-workflow-workspace/project-state/ai-system-integrity-and-efficiency-v2/capture-state/README.md | 19b6785d3b5c12a8ba1becf2d12d94161c72cd83fa76d41329f05ee17ae500f3 |
@@ -103,7 +103,7 @@
 | owning-project-evidence | quality/evidence/timing-comparison.json | 6c84f9eb051677cc0e4bdcd08a05c54070a313fe67235de30a9987d483d6d66f |
 | owning-project-evidence | quality/ownership-review.md | 5a79ea2f2bcb8b4acb40005a0c1866e053e292e49159a0e4787bd1fea1da1091 |
 | owning-project-evidence | quality/phase-1-architecture-qa.md | 127290b49c02f2b980a6cf73993dc33aa57fc9105072773342e10ef585ade5d1 |
-| owning-project-evidence | quality/phase-2-plan-qa.md | ee5afbab3dd584e26bd86c2c79cf8839a3e57bec221e9033e4e300cbe7942971 |
+| owning-project-evidence | quality/phase-2-plan-qa.md | 8a1f204d0ee7ab73f39a93b729c7b6d485d2b27689619b759191a0cc1f0021e0 |
 | owning-project-evidence | quality/phase-3-iev2-drm-010-dream-lifecycle-spec-qa.md | 2f0dbda90334ebe5f2c496a460fddad9f441fa46a60f1149e803dcebb2907f5b |
 | owning-project-evidence | quality/phase-3-iev2-ops-008-bounded-recovery-spec-qa.md | b84c6d2afd7f2dca33840030ce1cf9612c29c2a6df6160afa8ff412665ffbb4f |
 | owning-project-evidence | quality/phase-3-iev2-ops-011-freshness-topology-spec-qa.md | e0786a1014852d78648ceae849baa02043e9d06aa418b6d263eb02d6070deea5 |
@@ -115,18 +115,18 @@
 | owning-project-evidence | quality/phase-3-iev2-val-005-validation-lifecycle-spec-qa.md | 94be53ec1cf11160ea988902e66c57619eff9edd70c67e4f876df6e47e9eba72 |
 | owning-project-evidence | quality/phase-3-iev2-val-006-comparable-timing-spec-qa.md | 5c304d4e07e076c504ce89cab02aab6fbacfd432365cc5f385f165c629bf8bef |
 | owning-project-evidence | quality/phase-3-iev2-val-007-scoped-coverage-spec-qa.md | 56216c078ce457c44aa87783195c9340acc34ca026235994aac0307debc3e27f |
-| owning-project-evidence | quality/phase-5-iev2-cr-001-smoke-setup-optimization-quality.md | aab3b706005ba2e220e59a67ea7bccb43e9f32c36139b68561e3649843b9266d |
-| owning-project-evidence | quality/phase-5-iev2-drm-010-dream-lifecycle-quality.md | 88af0004b5245eaa1be6376c5787fce6999ed7e6d91618ec5618109605baa1e9 |
-| owning-project-evidence | quality/phase-5-iev2-ops-008-bounded-recovery-quality.md | c9674d5f24093b91c18404c4a10c3a1c16b8598741873d45773086f4341045ad |
-| owning-project-evidence | quality/phase-5-iev2-ops-011-freshness-topology-quality.md | 6f67f68349b7459f8e545b9040bc3b9f379108d99f313a09bb6e0878a17b5c7e |
-| owning-project-evidence | quality/phase-5-iev2-skl-002-eval-freshness-quality.md | 864e04fccef8bfe205d8806a2b2cd7294c665b99e43cabc950df707eec5b6977 |
-| owning-project-evidence | quality/phase-5-iev2-skl-009-metadata-discovery-quality.md | c271b46fbd67cbd0829e6a3f8f1f4332c95a9ae4a00df00afc55323e03eda18c |
-| owning-project-evidence | quality/phase-5-iev2-upd-004-canonical-updater-quality.md | 9e27ce4d9a16728a5da8e5373c4decaad09f1330eb3407b20216addafb57a567 |
-| owning-project-evidence | quality/phase-5-iev2-val-001-typed-negative-assertions-quality.md | c69eada5d5c3821221fb131ee8396c695ec154a81b69534a7d8ea9742c148702 |
-| owning-project-evidence | quality/phase-5-iev2-val-003-evidence-destinations-quality.md | 1be95dee0f558336986a801a089dd43ccfa102ae00b6e1ba05f9a3d1dd39f591 |
-| owning-project-evidence | quality/phase-5-iev2-val-005-validation-lifecycle-quality.md | 285dfffab322a6f3634b81e8bdfff32b8dcaa7101eef9f51577201787545473f |
-| owning-project-evidence | quality/phase-5-iev2-val-006-comparable-timing-quality.md | e464050bc13d9ab8607b916abe1df864bdda349aadb27f6c66454dad8f60c16b |
-| owning-project-evidence | quality/phase-5-iev2-val-007-scoped-coverage-quality.md | 0ee1955fb7762a23a5ca4484251ec443394474f9db9aed4ff4141e987c5af071 |
+| owning-project-evidence | quality/phase-5-iev2-cr-001-smoke-setup-optimization-quality.md | a325cd8d64de6e131faad67b89309ea33f105ae491f699b86eb25abb1f675650 |
+| owning-project-evidence | quality/phase-5-iev2-drm-010-dream-lifecycle-quality.md | 25b35d50fcd50cb1e106d77b673c63f2bcfc7b213d89fa77e991b3cc7a8bac0b |
+| owning-project-evidence | quality/phase-5-iev2-ops-008-bounded-recovery-quality.md | 201d95c06f708767bfa3ad9b389d703217da14eb6aeafa842ea3fca8816e4425 |
+| owning-project-evidence | quality/phase-5-iev2-ops-011-freshness-topology-quality.md | 0c5ec60fdafe55a61e51f8a791da3c7e366eee8ae8dfc67a2b1508508257f584 |
+| owning-project-evidence | quality/phase-5-iev2-skl-002-eval-freshness-quality.md | 1c15603a1ab2a5f615fbcf751c2d1fcfd70eab21362a859b8f1288f4c058d48c |
+| owning-project-evidence | quality/phase-5-iev2-skl-009-metadata-discovery-quality.md | e9c75a6b0e9844d006f6b87b1b2245e1864536057ebe06474bfba3bf7f8f93bb |
+| owning-project-evidence | quality/phase-5-iev2-upd-004-canonical-updater-quality.md | f926fedebb96c6e8f813f13917bbe3fb36546eb8fed1a43fa504b05db9011f2e |
+| owning-project-evidence | quality/phase-5-iev2-val-001-typed-negative-assertions-quality.md | 71b75e4edd8a4e0feb2d859c413d098b33a63fd73fb8738aa53a6a095885c762 |
+| owning-project-evidence | quality/phase-5-iev2-val-003-evidence-destinations-quality.md | 91f594c0c46b1ee533050e22f92cf0f31341a8040bc18e69b19b3222f79942d5 |
+| owning-project-evidence | quality/phase-5-iev2-val-005-validation-lifecycle-quality.md | 02ac8c66287474bc2cfd1d405e823d268805e2e4fd0183c2b3c1ecddc14aba0d |
+| owning-project-evidence | quality/phase-5-iev2-val-006-comparable-timing-quality.md | 9840a7c92da86806bdce6373572347fa216c0a78826b817aa8fbe64dc621941d |
+| owning-project-evidence | quality/phase-5-iev2-val-007-scoped-coverage-quality.md | 8cfaaf8bb5d32a6bf693f416f731f88b80a1f4bac7afd3c42c01dcb5dee61071 |
 | owning-project-evidence | quality/recovery-ledger.md | 853ac42e104acffd3ed80c19379c14ccc7a8298d2ea6f2cd4ef5520def997aac |
 | owning-project-evidence | quality/semantic-review.md | b17cdcaad2863f369ab8507527afea1cf221083e7d7002df3b6565a596ce0165 |
 | owning-project-evidence | quality/skill-routing-trace.md | c1a9444a3e06cddd25457801fc9b57db3114c2a11fc6dc37cb77b0fe17ad76c7 |
@@ -137,9 +137,9 @@
 | owning-project-evidence | specs/phase-3-program-specification.md | 824384b8391f7b37b283e4f68c10a7c322d80e0df622aaa89cd8d8cef9c8f399 |
 | owning-project-evidence | status.md | 26a4fa4cf8fc1151b6f674d6e651f7cc52ec523f4829aee7b62cdc90d6b32fd1 |
 | owning-project-evidence | tasks.md | 1db5fc8210df25c9c6ab77a863478c64f714fb17d660a6eb1e892f9c778eb1eb |
-| workflow-source | .systems/ai/workflow/phase-8-final-check.md | 3536e1687e87344e06116589edce3a5f4ee6b789f70ab9f415e2550326d54589 |
-| workflow-source | .systems/scripts/lib/qa-evidence.py | ed083aba1112eb27fd0e4b3c3b97d92d072112da023a9822367513e408f6179a |
-| workflow-source | AGENTS.md | 7e9e6246c86cda2065fab5817d3ecea268553689298983517e4535ff5bc9e8c3 |
+| workflow-source | .systems/ai/workflow/phase-8-final-check.md | d9a6766bac93e6365ff467b4436048ea32a1dd8a3b20617611f7a638596b84b0 |
+| workflow-source | .systems/scripts/lib/qa-evidence.py | 57fdcc94e7a863cee44f6c8073d78d4570825ffc5596d0c3fea8e4a86599c8cd |
+| workflow-source | AGENTS.md | 0e866ce4cb991577d49e10a6fa0487999eca7d254e7bb806dd12d28ff3dec73c |
 
 ### Evidence
 Findings-first semantic review, intent/plan/spec compliance, producer-consumer audit, adversarial path/isolation checks and post-fix behavior review found no unresolved in-scope correctness, coverage, ownership or performance findings. Eleven program tasks and the bounded IEV2-CR-001 recovery satisfy their accepted DoD. The source/input hashes below bind this assessment to the current committed product and reviewed runtime evidence.
@@ -150,9 +150,15 @@ Actual current-worktree product full completed all 33 checks, seven smoke domain
 
 Earlier Phase 8 FAIL, copy-only insufficient results, failed wrong-directory invocation and formatting recovery snapshots remain retained. No historical QA was silently converted to acceptance. Product/runtime source changes in other checkouts, root AGENTS, nested Workflow source and unrelated CR009 changes remain untouched.
 
+
+- Source integration compatibility assessment on 2026-10-05: reviewed the integrated 32-path change and declared inputs against the unchanged owning scope and DoD. Target HEAD fd68b8ced847387c130e4868bb624fd22b0b8648; installed Workflow a9a5c40430af3dec153df94f8b78a30f668bbde3.
+- Current supporting checks: execution-efficiency (15 tests), project-orchestration (85 plus 37 tests), orchestration-compatibility (37 tests), parallel-orchestration (85 tests), all exit 0. Full AI System integration run c22d6b1ecd8542b2af5c799641c9bd1f completed exit 0 with seven smoke suites and 222 expected negative cases.
+- Earlier test runs and timing/benchmark measurements above are retained historical evidence; they were not measured again in this compatibility assessment. No scope, implementation requirement, owner decision or historical final-owner-yes is changed. This run issues no new final-owner-yes.
+- Previous report preserved byte-for-byte at history/source-integration-2026-10-05/evidence/phase-8-final-check.md; its SHA-256 and provenance are recorded in the archive manifest.
+
 ### Review Completeness Gate
 - Status: complete
-- Reviewed baseline: current exact input table and committed 754748b; technical result at 628064a, original dabbf34 program and bounded IEV2-CR-001; latest writes only record owner closure
+- Reviewed baseline: fd68b8ced847387c130e4868bb624fd22b0b8648; installed Workflow a9a5c40430af3dec153df94f8b78a30f668bbde3; current declared inputs and integration compatibility review
 - Closure freshness: current
 - Post-fix full re-review: completed
 - Policy-boundary adversarial matrix: completed

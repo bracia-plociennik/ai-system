@@ -2,7 +2,7 @@
 
 ## Scope And Entry
 
-- Source: preserved failed entry assessment `quality/asys-cr-009/phase-8-final-check.md`, accepted CR-009 specification and latest explicit owner approval.
+- Source: preserved failed entry assessment `history/asys-cr-009/entry-dabbf34/evidence/phase-8-final-check.md`, accepted CR-009 specification and latest explicit owner approval.
 - Route: relevant runtime/status correction after Phase 8 FAIL, as allowed by Phase 8; no product fix or new feature.
 - Retry count: 1
 - Maximum retry count: 2

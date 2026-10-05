@@ -10,11 +10,11 @@
 
 ## Current QA Run
 
-- Run ID: cr-010-quality-2026-10-02
+- Run ID: approved-compatibility-2026-10-05-phase-5-asys-pops-018-overnight-schedules-quality
 - Artifact kind: implementation-quality
 - Project/task identity: ai-system:ASYS-POPS-018-overnight-schedules
-- Assessed source HEAD: 25ee18623e09ddf94e2ede067a15cc65c7aea11b
-- Assessed worktree digest: 83b7b4ce99c5653aa725e8d9055aa3c785caf702b8a5f7715432dd2d7bee791e
+- Assessed source HEAD: fd68b8ced847387c130e4868bb624fd22b0b8648
+- Assessed worktree digest: 64926aeff26111e5d1b1e7d2de188228cf19bc46ff6b126f50ab04664a996e7b
 - Input artifacts: see table
 - Verdict: PASS
 - Gate Decision: PASS
@@ -29,14 +29,14 @@
 | approved-target-source | .systems/scripts/personal_ops_spor_proposals.py | 963a11956cd5641ed9fb747d60327fc0a74d3719f80d11c63979caa2a34a1eab |
 | approved-target-source | .systems/scripts/render-personal-ops-daily-summary-v4 | 683854c28bb1d28dc0e5896c611d676b0ca97a7f8214b63cbed1d0445d7d9794 |
 | approved-target-source | .systems/scripts/calculate-personal-ops-budgets | 53ad2e7625e4ed953ab34fe618f11e862d29687c454ecf064f44e326c5b7fd8b |
-| approved-target-source | .systems/scripts/check-spor-v4 | dc8ca892f6309a87e50ce2fc1b5c666b40718af4bef44b55c63466260fe867ba |
+| approved-target-source | .systems/scripts/check-spor-v4 | 7e75294a75c95cd61c515472c6762d7078f2dad00a5c54703fab6c402965070a |
 | approved-target-source | .systems/scripts/check-spor-proposals | f0d14a2f04da72c8575a61ffc29abced2dbf325fb3719a7b77896727b8733e5f |
 | owning-project-evidence | specs/phase-3-asys-cr-010-overnight-schedules-specification.md | 0fe45fa8d83f529c8d0d90d429abae6224983aec41dc5f05a1915ff065ce7650 |
 | owning-project-evidence | quality/phase-3-asys-cr-010-overnight-schedules-spec-qa.md | f602cb65f60444a74fb89b4827e6ebf6f2d9fac40e3fd62f2a029112fe7d168a |
 | owning-project-evidence | quality/phase-4-asys-cr-010-overnight-schedules-implementation-result.md | 0ee56fa93b6a116991cd144c8afee4cc2608a4bcfbe33e001ada1c1855225e96 |
-| owning-project-evidence | quality/asys-cr-010-review-record.md | 5c55bd49174672f684f94ab3d51ddcca2a29d32ea6e26592cff3d4cf00af9fcd |
-| owning-project-evidence | quality/asys-cr-009/history/25ee186/recovery-phase-5-asys-pops-017-unified-aggregates-quality.md | 153644d3f24382037f2f934e0262789c11512efef75c8d94d900e6336001ef07 |
-| owning-project-evidence | quality/asys-cr-009/history/25ee186/recovery-phase-8-final-check.md | 876caa6519f3630b472f93829aa0cc5c778985434ac2a4e70c6b89118c7169b9 |
+| owning-project-evidence | quality/asys-cr-010-review-record.md | d75bc8a9a406000e183f4dc2c64f6dc26fb69349408ee6f6a8e1a475bcde7761 |
+| owning-project-evidence | history/asys-cr-009/25ee186/evidence/recovery-phase-5-asys-pops-017-unified-aggregates-quality.md | 153644d3f24382037f2f934e0262789c11512efef75c8d94d900e6336001ef07 |
+| owning-project-evidence | history/asys-cr-009/25ee186/evidence/recovery-phase-8-final-check.md | 876caa6519f3630b472f93829aa0cc5c778985434ac2a4e70c6b89118c7169b9 |
 
 ### Findings
 
@@ -47,6 +47,9 @@
 - No unresolved P0, P1 or material P2. Publication and installation are subsequent delivery gates; this is implementation Quality, not unperformed delivery acceptance.
 
 ### Evidence
+- 2026-10-05 source compatibility re-review only: historical scope and final owner decisions are unchanged. No new final-owner-yes or repeated acceptance is issued.
+- Historical inputs were relocated byte-for-byte outside active quality scanning. Original report: history/approved-report-reconciliation-2026-10-05/evidence/phase-5-asys-pops-018-overnight-schedules-quality.md. Relocation proof: reviews/2026-10-05-approved-report-reconciliation.json.
+- Current overnight consumer review: the sole post-delivery check-spor-v4 delta replaces BSD date fixtures with Python date arithmetic; overnight assertions are unchanged. Fresh SPOR V4 and proposal regressions exit 0. Prior whole-product and timing claims are historical, not rerun measurements in this assessment.
 
 - Command: `.systems/scripts/check-spor-v4`, exit 0. Canonical parsing, task preflight, sync and CLI renderer use an overnight synthetic daily; deliberate invalid renderer and unavailable mapping fixtures retain their expected diagnostics.
 - Command: `.systems/scripts/check-spor-proposals`, exit 0, 21 tests. Sleep/work capacity, exact midnight and short-checkpoint assertions pass.

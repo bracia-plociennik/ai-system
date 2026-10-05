@@ -3,16 +3,16 @@
 ## Metadata
 - Project: ai-system-integrity-and-efficiency-v2
 - Task/package ID: IEV2-CR-001-smoke-setup-optimization
-- Date: 2026-10-01
+- Date: 2026-10-05
 - Result: PASS
 - QA verification contract: `full-qa-verification-v2`
 
 ## Current QA Run
-- Run ID: qa-iev2-cr-001-smoke-setup-optimization-2026-10-01-format-recovery-smoke-optimization
+- Run ID: integration-2026-10-05-iev2-phase-5-iev2-cr-001-smoke-setup-optimization-quality
 - Artifact kind: implementation-quality
 - Project/task identity: ai-system-integrity-and-efficiency-v2:IEV2-CR-001-smoke-setup-optimization
-- Assessed source HEAD: 3e8b795821bc46d7d91f6a620d6a3272e8a5cafb
-- Assessed worktree digest: 094f31431718c9fda1b3edebd0a61c432cc2761c1aeed2890c2b707c68109577
+- Assessed source HEAD: fd68b8ced847387c130e4868bb624fd22b0b8648
+- Assessed worktree digest: f5ef522cfc9f55db6958e21bbedd35115f80424e4a085f1a37b9c6006a22f2c2
 - Input artifacts: see table
 - Verdict: PASS
 - Gate Decision: PASS
@@ -21,16 +21,16 @@
 | Root kind | Relative path | SHA-256 |
 | --- | --- | --- |
 | approved-target-source | .systems/scripts/check-block-checkpoint | 8f75bc17e3c4b2ebc9ca7972d87e33ec385b3ba505713737486531da62c5daa6 |
-| approved-target-source | .systems/scripts/check-distillation-state | a65af266b591cda891b763047e21bed9c0244fcc08637c9390f386731ae814b6 |
-| approved-target-source | .systems/scripts/check-required-artifacts | 5c5fad09b9cbc82e77f4b35acc6c825b18ad9e98f6cca49d9df0f85f5e8d0fd2 |
+| approved-target-source | .systems/scripts/check-distillation-state | 61d18a7fbb18c9df91b51b3399a6575e47683355af16949c73309658587d345d |
+| approved-target-source | .systems/scripts/check-required-artifacts | 5ba5f35e0b72dbd1084e8e468e1f1b9792a0458fcbb897b052717a0e46936e34 |
 | approved-target-source | .systems/scripts/check-validation-profiles | 3deea2250e20a1bb03aeddceb428e5c91077f09f9f6124c6d074e6b3b016d2e7 |
-| approved-target-source | .systems/scripts/check-validator-smoke-tests | 9398d7250d0153e5e3c4644351ab109ae857ce48e4bfb6bbb2b64c3fc9a9c28a |
+| approved-target-source | .systems/scripts/check-validator-smoke-tests | 0aa0ddb5a8c8b3c4795fc9f78507bf0f494c6087235793e6cf4c05385a668ed5 |
 | approved-target-source | .systems/scripts/smoke/README.md | 20030f16a63a04e99b75e51e8313db5785ddeb881fb5f07d7b5118a2a7e2f98c |
-| approved-target-source | .systems/scripts/smoke_fixture.py | e50e628ec964d279cdff9af73a73cdd651236c1e8a5b911b81a97eb51f87fea3 |
-| approved-target-source | .systems/scripts/tests/README.md | aeaa0708dc3c3bf832947d24c820fc98905f02c16ba687b0beffb6b014077668 |
-| approved-target-source | .systems/scripts/tests/test_validation_integrity.py | 8870f4c72c9335d30a5b583c0a97cda8a292c2665e611c5083176c44afb0a2d7 |
-| approved-target-source | .systems/scripts/validation-dependencies.json | 915273e4a758f4e983535bb9a75a5504c2ef9f2aa29c04c0256358ffe7aae0dc |
-| approved-target-source | .systems/scripts/validation_runner.py | a41469e162c89ede55ab3c4b7f5161971854771d8fffedee4bee71aa73c8d1a8 |
+| approved-target-source | .systems/scripts/smoke_fixture.py | 9e022ed885b4047d37d3743dc3ef221f468d57b68560e49322ab41211f3147ab |
+| approved-target-source | .systems/scripts/tests/README.md | e02ad08e97c90014ad967e4c991b3ffafe9c7b49b2dab2f92829f1cd40640316 |
+| approved-target-source | .systems/scripts/tests/test_validation_integrity.py | 8d3c1b58744a79852b3e250a07eebaf7526e8253d1ef3798f90cffffa0abe505 |
+| approved-target-source | .systems/scripts/validation-dependencies.json | 8a503aed04779e925d7c3c9895192c47e2300a267be942af56d5ef483dfeaa47 |
+| approved-target-source | .systems/scripts/validation_runner.py | 631caa6e45b6e0648f69d99acf75761018863353fb7927443b11fc24ff5b65fc |
 | owning-project-evidence | change-requests/2026-10-01-iev2-cr-001-smoke-setup-optimization.md | c7db66f359a3de10ba32cbacafd7afb5690171048df6484781c2e33a383f6a02 |
 | owning-project-evidence | implementation/phase-4-iev2-cr-001-smoke-setup-optimization-implementation.md | 6479c9e81cd3bb625764d1badd0ee2eedcd19774e5ed3ce9bf7e39595798102c |
 | owning-project-evidence | quality/evidence/integrity-full-03.md | 75cbc61a6603b082c0ea192e145349f9a24fd3cec779db7affb103959d170dbb |
@@ -51,6 +51,12 @@
 
 ### Evidence
 Current diff and producer-consumer review for IEV2-CR-001 is documented in smoke-optimization-review.md. Complete physical copies and at most two independently owned domain processes were checked. Failure paths include missing/linked/escaping sources, unsafe targets, failed peer, future writes after failure and incomplete full runs. Executable evidence includes all five new copy/scheduling tests and the retained 15 integrity tests, nine current equivalent full repetitions and the actual current-worktree full execution. Current mean performance satisfies the explicit DoD. Formal verdict combines semantic scope/authority review, current source identity, behavior and measurement; green scripts alone do not supply acceptance.
+
+
+- Source integration compatibility assessment on 2026-10-05: reviewed the integrated 32-path change and declared inputs against the unchanged owning scope and DoD. Target HEAD fd68b8ced847387c130e4868bb624fd22b0b8648; installed Workflow a9a5c40430af3dec153df94f8b78a30f668bbde3.
+- Current supporting checks: execution-efficiency (15 tests), project-orchestration (85 plus 37 tests), orchestration-compatibility (37 tests), parallel-orchestration (85 tests), all exit 0. Full AI System integration run c22d6b1ecd8542b2af5c799641c9bd1f completed exit 0 with seven smoke suites and 222 expected negative cases.
+- Earlier test runs and timing/benchmark measurements above are retained historical evidence; they were not measured again in this compatibility assessment. No scope, implementation requirement, owner decision or historical final-owner-yes is changed. This run issues no new final-owner-yes.
+- Previous report preserved byte-for-byte at history/source-integration-2026-10-05/evidence/phase-5-iev2-cr-001-smoke-setup-optimization-quality.md; its SHA-256 and provenance are recorded in the archive manifest.
 
 ### Definition Of Done Validation
 | DoD Item | Result | Evidence |
@@ -83,7 +89,7 @@ Current diff and producer-consumer review for IEV2-CR-001 is documented in smoke
 - Negative-space / adversarial review: completed
 - Automated evidence role: supporting-only
 - Post-fix full re-review: completed
-- Reviewed baseline: original dabbf34 and current input table/digest; current actual smoke-optimization-full source matches optimized frozen records
+- Reviewed baseline: fd68b8ced847387c130e4868bb624fd22b0b8648; installed Workflow a9a5c40430af3dec153df94f8b78a30f668bbde3; current declared inputs and integration compatibility review
 - Instruction refresh: performed-targeted
 - Instruction baseline: current
 - Closure freshness: current

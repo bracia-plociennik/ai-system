@@ -3,16 +3,16 @@
 ## Metadata
 - Project: ai-system-integrity-and-efficiency-v2
 - Task/package ID: IEV2-DRM-010-dream-lifecycle
-- Date: 2026-10-01
+- Date: 2026-10-05
 - Result: PASS
 - QA verification contract: `full-qa-verification-v2`
 
 ## Current QA Run
-- Run ID: qa-iev2-drm-010-dream-lifecycle-2026-10-01-format-recovery-smoke-optimization
+- Run ID: integration-2026-10-05-iev2-phase-5-iev2-drm-010-dream-lifecycle-quality
 - Artifact kind: implementation-quality
 - Project/task identity: ai-system-integrity-and-efficiency-v2:IEV2-DRM-010-dream-lifecycle
-- Assessed source HEAD: 3e8b795821bc46d7d91f6a620d6a3272e8a5cafb
-- Assessed worktree digest: bc7ad4c6585516f6f076487bcec0570a361512418c632f341362a1f6d545b03a
+- Assessed source HEAD: fd68b8ced847387c130e4868bb624fd22b0b8648
+- Assessed worktree digest: a072c444089470fdbec311d68c385b6274735fdd0b1181bd96b5b265d558a6b1
 - Input artifacts: see table
 - Verdict: PASS
 - Gate Decision: PASS
@@ -22,14 +22,14 @@
 | --- | --- | --- |
 | approved-target-source | .systems/ai/templates/dreaming/dream-report.template.md | 9caa508871759cc5528f11e95a168ed0e8c25c9845d5d428a5af5fce71583225 |
 | approved-target-source | .systems/scripts/check-dreaming-mode | e40dc802a6b6d03b6a4ca242af1ebb32e6d83fa8b997021724572dcca84ce3f0 |
-| approved-target-source | .systems/scripts/check-required-artifacts | 5c5fad09b9cbc82e77f4b35acc6c825b18ad9e98f6cca49d9df0f85f5e8d0fd2 |
+| approved-target-source | .systems/scripts/check-required-artifacts | 5ba5f35e0b72dbd1084e8e468e1f1b9792a0458fcbb897b052717a0e46936e34 |
 | approved-target-source | .systems/scripts/check-validation-profiles | 3deea2250e20a1bb03aeddceb428e5c91077f09f9f6124c6d074e6b3b016d2e7 |
-| approved-target-source | .systems/scripts/check-validator-smoke-tests | 9398d7250d0153e5e3c4644351ab109ae857ce48e4bfb6bbb2b64c3fc9a9c28a |
+| approved-target-source | .systems/scripts/check-validator-smoke-tests | 0aa0ddb5a8c8b3c4795fc9f78507bf0f494c6087235793e6cf4c05385a668ed5 |
 | approved-target-source | .systems/scripts/dream_recommendations.py | 0fd6fd04a503999fc16e9041d4da837afc08234eab92f5b469499204153cb5aa |
 | approved-target-source | .systems/scripts/smoke/README.md | 20030f16a63a04e99b75e51e8313db5785ddeb881fb5f07d7b5118a2a7e2f98c |
-| approved-target-source | .systems/scripts/smoke_fixture.py | e50e628ec964d279cdff9af73a73cdd651236c1e8a5b911b81a97eb51f87fea3 |
-| approved-target-source | .systems/scripts/tests/README.md | aeaa0708dc3c3bf832947d24c820fc98905f02c16ba687b0beffb6b014077668 |
-| approved-target-source | .systems/scripts/tests/test_validation_integrity.py | 8870f4c72c9335d30a5b583c0a97cda8a292c2665e611c5083176c44afb0a2d7 |
+| approved-target-source | .systems/scripts/smoke_fixture.py | 9e022ed885b4047d37d3743dc3ef221f468d57b68560e49322ab41211f3147ab |
+| approved-target-source | .systems/scripts/tests/README.md | e02ad08e97c90014ad967e4c991b3ffafe9c7b49b2dab2f92829f1cd40640316 |
+| approved-target-source | .systems/scripts/tests/test_validation_integrity.py | 8d3c1b58744a79852b3e250a07eebaf7526e8253d1ef3798f90cffffa0abe505 |
 | owning-project-evidence | change-requests/2026-10-01-iev2-cr-001-smoke-setup-optimization.md | c7db66f359a3de10ba32cbacafd7afb5690171048df6484781c2e33a383f6a02 |
 | owning-project-evidence | implementation/phase-4-iev2-cr-001-smoke-setup-optimization-implementation.md | 6479c9e81cd3bb625764d1badd0ee2eedcd19774e5ed3ce9bf7e39595798102c |
 | owning-project-evidence | implementation/phase-4-iev2-drm-010-dream-lifecycle-implementation.md | 44c6c36be9984c9c537906ef94d9bf386796057740a88cd23d818ac8eb687690 |
@@ -51,6 +51,12 @@
 
 ### Evidence
 Current diff and producer-consumer review for IEV2-DRM-010-dream-lifecycle, documented in semantic-review.md. Representative behavior: Preflight inventory -> stable recommendation and source-bound history. Failure paths: stale decision/history hash, illegal transition and missing implemented-quality reference. Executable/manual evidence: test_dream_full_transition_fingerprints_and_inventory; test_dream_identity_and_historical_boundary; all 20 current integrity tests and historical full-03 (superseded by current smoke-optimization-full) validation completed. Formal verdict combines the reviewed DoD, boundaries, current hashes and behavior; scripts are supporting-only. Old failed runs remain excluded from current acceptance.
+
+
+- Source integration compatibility assessment on 2026-10-05: reviewed the integrated 32-path change and declared inputs against the unchanged owning scope and DoD. Target HEAD fd68b8ced847387c130e4868bb624fd22b0b8648; installed Workflow a9a5c40430af3dec153df94f8b78a30f668bbde3.
+- Current supporting checks: execution-efficiency (15 tests), project-orchestration (85 plus 37 tests), orchestration-compatibility (37 tests), parallel-orchestration (85 tests), all exit 0. Full AI System integration run c22d6b1ecd8542b2af5c799641c9bd1f completed exit 0 with seven smoke suites and 222 expected negative cases.
+- Earlier test runs and timing/benchmark measurements above are retained historical evidence; they were not measured again in this compatibility assessment. No scope, implementation requirement, owner decision or historical final-owner-yes is changed. This run issues no new final-owner-yes.
+- Previous report preserved byte-for-byte at history/source-integration-2026-10-05/evidence/phase-5-iev2-drm-010-dream-lifecycle-quality.md; its SHA-256 and provenance are recorded in the archive manifest.
 
 ### Definition Of Done Validation
 | DoD Item | Result | Evidence |
@@ -83,7 +89,7 @@ Current diff and producer-consumer review for IEV2-DRM-010-dream-lifecycle, docu
 - Negative-space / adversarial review: completed
 - Automated evidence role: supporting-only
 - Post-fix full re-review: completed
-- Reviewed baseline: original dabbf34 and current input table/digest; current actual smoke-optimization-full source matches optimized frozen records
+- Reviewed baseline: fd68b8ced847387c130e4868bb624fd22b0b8648; installed Workflow a9a5c40430af3dec153df94f8b78a30f668bbde3; current declared inputs and integration compatibility review
 - Instruction refresh: performed-targeted
 - Instruction baseline: current
 - Closure freshness: current

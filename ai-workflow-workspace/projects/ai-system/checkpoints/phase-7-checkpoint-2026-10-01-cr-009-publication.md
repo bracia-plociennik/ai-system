@@ -10,7 +10,7 @@
 
 ## Inputs And Current Baseline
 
-Current Quality is quality/asys-cr-009/history/25ee186/recovery-phase-5-asys-pops-017-unified-aggregates-quality.md, run asys-pops-017-publication-quality-2026-10-01-7c624ef, 43 hashed inputs, digest 6ad9b306d2cb89c5ad51e9738e0a74673fbcd9fa4feb8954907c9218840dd36a. Product baseline is 7c624efeb80455ec9258ad7310e0440f045504e7; Workflow is 0c767da0385723560d1b0d4794a9091316c23140.
+Current Quality is history/asys-cr-009/25ee186/evidence/recovery-phase-5-asys-pops-017-unified-aggregates-quality.md, run asys-pops-017-publication-quality-2026-10-01-7c624ef, 43 hashed inputs, digest 6ad9b306d2cb89c5ad51e9738e0a74673fbcd9fa4feb8954907c9218840dd36a. Product baseline is 7c624efeb80455ec9258ad7310e0440f045504e7; Workflow is 0c767da0385723560d1b0d4794a9091316c23140.
 
 The accepted additive aggregate spec, publication plan, task/CR routers, architecture, original plan and technical memory are reviewed. Earlier dabbf34 completion checkpoint remains a point-in-time record, not proof of this baseline.
 

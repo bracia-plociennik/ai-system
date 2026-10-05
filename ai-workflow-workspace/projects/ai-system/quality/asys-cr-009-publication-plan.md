@@ -2,7 +2,7 @@
 
 ## Scope And Authority
 
-Source: owner-approved preservation, upstream fast-forward, verification on the new baseline, required QA, scoped commit/push and official management update, without migration/backfill. The owner additionally approved moving exactly the two stale V2 reports into `quality/asys-cr-009/history/dabbf34/` unchanged and creating new assessments at their original paths. Previous final-owner-yes applies only to CR-009; this delivery does not approve or close other iterations.
+Source: owner-approved preservation, upstream fast-forward, verification on the new baseline, required QA, scoped commit/push and official management update, without migration/backfill. The owner additionally approved moving exactly the two stale V2 reports into `history/asys-cr-009/dabbf34/evidence/` unchanged and creating new assessments at their original paths. Previous final-owner-yes applies only to CR-009; this delivery does not approve or close other iterations.
 
 Co zostaje: original product, canonical history, TaskNotes, approved closure and immutable failed evidence.
 Co jest do poprawy: stale current-source QA after upstream contract/validator changes.

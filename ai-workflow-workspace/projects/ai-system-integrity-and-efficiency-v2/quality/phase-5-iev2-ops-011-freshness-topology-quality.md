@@ -3,16 +3,16 @@
 ## Metadata
 - Project: ai-system-integrity-and-efficiency-v2
 - Task/package ID: IEV2-OPS-011-freshness-topology
-- Date: 2026-10-01
+- Date: 2026-10-05
 - Result: PASS
 - QA verification contract: `full-qa-verification-v2`
 
 ## Current QA Run
-- Run ID: qa-iev2-ops-011-freshness-topology-2026-10-01-format-recovery-smoke-optimization
+- Run ID: integration-2026-10-05-iev2-phase-5-iev2-ops-011-freshness-topology-quality
 - Artifact kind: implementation-quality
 - Project/task identity: ai-system-integrity-and-efficiency-v2:IEV2-OPS-011-freshness-topology
-- Assessed source HEAD: 3e8b795821bc46d7d91f6a620d6a3272e8a5cafb
-- Assessed worktree digest: 2abeff7522f4440d94a86f53d090eab27c4c306446bff1111291108816ae1afd
+- Assessed source HEAD: fd68b8ced847387c130e4868bb624fd22b0b8648
+- Assessed worktree digest: cd913d1b7871a18e3fbfba26df78b1f0869745efdd1bec8b6464aaae7b1a2ff3
 - Input artifacts: see table
 - Verdict: PASS
 - Gate Decision: PASS
@@ -20,16 +20,16 @@
 ### Input Artifacts
 | Root kind | Relative path | SHA-256 |
 | --- | --- | --- |
-| approved-target-source | .systems/ai/core/operating-model.md | b8e3866b5d8174a1c1562c954f37859a128a1f91fceee789f0684a80b70bdb29 |
-| approved-target-source | .systems/scripts/check-required-artifacts | 5c5fad09b9cbc82e77f4b35acc6c825b18ad9e98f6cca49d9df0f85f5e8d0fd2 |
+| approved-target-source | .systems/ai/core/operating-model.md | bb3d9754ba7b7535b2699ddf8f1de026c846d7685a42aafc4f8c6b0331163af7 |
+| approved-target-source | .systems/scripts/check-required-artifacts | 5ba5f35e0b72dbd1084e8e468e1f1b9792a0458fcbb897b052717a0e46936e34 |
 | approved-target-source | .systems/scripts/check-validation-profiles | 3deea2250e20a1bb03aeddceb428e5c91077f09f9f6124c6d074e6b3b016d2e7 |
-| approved-target-source | .systems/scripts/check-validator-smoke-tests | 9398d7250d0153e5e3c4644351ab109ae857ce48e4bfb6bbb2b64c3fc9a9c28a |
+| approved-target-source | .systems/scripts/check-validator-smoke-tests | 0aa0ddb5a8c8b3c4795fc9f78507bf0f494c6087235793e6cf4c05385a668ed5 |
 | approved-target-source | .systems/scripts/report-contract-topology | 7d296d1cee64b85284231ac5d5f32335ed97435a6688f55d73f860003cb087e4 |
 | approved-target-source | .systems/scripts/report-workspace-freshness | 12ca8314f7246e80fdc87651bbfb94149d505b097ff0f740641e924449e724f5 |
 | approved-target-source | .systems/scripts/smoke/README.md | 20030f16a63a04e99b75e51e8313db5785ddeb881fb5f07d7b5118a2a7e2f98c |
-| approved-target-source | .systems/scripts/smoke_fixture.py | e50e628ec964d279cdff9af73a73cdd651236c1e8a5b911b81a97eb51f87fea3 |
-| approved-target-source | .systems/scripts/tests/README.md | aeaa0708dc3c3bf832947d24c820fc98905f02c16ba687b0beffb6b014077668 |
-| approved-target-source | .systems/scripts/tests/test_validation_integrity.py | 8870f4c72c9335d30a5b583c0a97cda8a292c2665e611c5083176c44afb0a2d7 |
+| approved-target-source | .systems/scripts/smoke_fixture.py | 9e022ed885b4047d37d3743dc3ef221f468d57b68560e49322ab41211f3147ab |
+| approved-target-source | .systems/scripts/tests/README.md | e02ad08e97c90014ad967e4c991b3ffafe9c7b49b2dab2f92829f1cd40640316 |
+| approved-target-source | .systems/scripts/tests/test_validation_integrity.py | 8d3c1b58744a79852b3e250a07eebaf7526e8253d1ef3798f90cffffa0abe505 |
 | owning-project-evidence | change-requests/2026-10-01-iev2-cr-001-smoke-setup-optimization.md | c7db66f359a3de10ba32cbacafd7afb5690171048df6484781c2e33a383f6a02 |
 | owning-project-evidence | implementation/phase-4-iev2-cr-001-smoke-setup-optimization-implementation.md | 6479c9e81cd3bb625764d1badd0ee2eedcd19774e5ed3ce9bf7e39595798102c |
 | owning-project-evidence | implementation/phase-4-iev2-ops-011-freshness-topology-implementation.md | 245662b838fcc573443b23dfba48de4bbe4a1f63829a94e2e7818e474fcccc4a |
@@ -51,6 +51,12 @@
 
 ### Evidence
 Current diff and producer-consumer review for IEV2-OPS-011-freshness-topology, documented in semantic-review.md. Representative behavior: Explicit repository or product-contract selectors -> stdout metadata. Failure paths: unsafe selectors rejected; remote not fetched and links not treated as semantic proof. Executable/manual evidence: Explicit report-workspace-freshness/report-contract-topology invocations and source review; all 20 current integrity tests and historical full-03 (superseded by current smoke-optimization-full) validation completed. Formal verdict combines the reviewed DoD, boundaries, current hashes and behavior; scripts are supporting-only. Old failed runs remain excluded from current acceptance.
+
+
+- Source integration compatibility assessment on 2026-10-05: reviewed the integrated 32-path change and declared inputs against the unchanged owning scope and DoD. Target HEAD fd68b8ced847387c130e4868bb624fd22b0b8648; installed Workflow a9a5c40430af3dec153df94f8b78a30f668bbde3.
+- Current supporting checks: execution-efficiency (15 tests), project-orchestration (85 plus 37 tests), orchestration-compatibility (37 tests), parallel-orchestration (85 tests), all exit 0. Full AI System integration run c22d6b1ecd8542b2af5c799641c9bd1f completed exit 0 with seven smoke suites and 222 expected negative cases.
+- Earlier test runs and timing/benchmark measurements above are retained historical evidence; they were not measured again in this compatibility assessment. No scope, implementation requirement, owner decision or historical final-owner-yes is changed. This run issues no new final-owner-yes.
+- Previous report preserved byte-for-byte at history/source-integration-2026-10-05/evidence/phase-5-iev2-ops-011-freshness-topology-quality.md; its SHA-256 and provenance are recorded in the archive manifest.
 
 ### Definition Of Done Validation
 | DoD Item | Result | Evidence |
@@ -83,7 +89,7 @@ Current diff and producer-consumer review for IEV2-OPS-011-freshness-topology, d
 - Negative-space / adversarial review: completed
 - Automated evidence role: supporting-only
 - Post-fix full re-review: completed
-- Reviewed baseline: original dabbf34 and current input table/digest; current actual smoke-optimization-full source matches optimized frozen records
+- Reviewed baseline: fd68b8ced847387c130e4868bb624fd22b0b8648; installed Workflow a9a5c40430af3dec153df94f8b78a30f668bbde3; current declared inputs and integration compatibility review
 - Instruction refresh: performed-targeted
 - Instruction baseline: current
 - Closure freshness: current

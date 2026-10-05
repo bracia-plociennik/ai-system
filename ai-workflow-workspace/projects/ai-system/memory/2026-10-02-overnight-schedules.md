@@ -6,6 +6,6 @@ V4 schedule rows accept an explicit integer `end_day_offset` 0/1. Default zero m
 
 Next-day rendering labels the endpoint. Sleep is not work capacity. OSNR remains in the final five minutes of work with day offsets near midnight. A next-day meal incompatible with the same-day macro template is unavailable, not guessed. Established meal clipping behavior remains unchanged.
 
-No schema bump, history/settings migration or private write. Planning duration does not claim DST-adjusted actual sleep. Two stale CR-009 assessments are archived byte-for-byte under `quality/asys-cr-009/history/25ee186/` with explicit owner approval; historical final-owner-yes is unchanged. CR-010 formal final check requires a separate owner trigger.
+No schema bump, history/settings migration or private write. Planning duration does not claim DST-adjusted actual sleep. Two stale CR-009 assessments are archived byte-for-byte under `history/asys-cr-009/25ee186/evidence/` with explicit owner approval; historical final-owner-yes is unchanged. CR-010 formal final check requires a separate owner trigger.
 
 Official publication/update and installed tests must be evidenced separately from this prepublication technical capture. Do not treat a Quality PASS as proof of a later push or installation.

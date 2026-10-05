@@ -14,8 +14,8 @@ The owner approved archiving both CR-009 reports under the exact directory below
 
 | Archived report relative to project | Original/current SHA-256 |
 | --- | --- |
-| quality/asys-cr-009/history/25ee186/recovery-phase-5-asys-pops-017-unified-aggregates-quality.md | 153644d3f24382037f2f934e0262789c11512efef75c8d94d900e6336001ef07 |
-| quality/asys-cr-009/history/25ee186/recovery-phase-8-final-check.md | 876caa6519f3630b472f93829aa0cc5c778985434ac2a4e70c6b89118c7169b9 |
+| history/asys-cr-009/25ee186/evidence/recovery-phase-5-asys-pops-017-unified-aggregates-quality.md | 153644d3f24382037f2f934e0262789c11512efef75c8d94d900e6336001ef07 |
+| history/asys-cr-009/25ee186/evidence/recovery-phase-8-final-check.md | 876caa6519f3630b472f93829aa0cc5c778985434ac2a4e70c6b89118c7169b9 |
 
 Both original/current hashes match. Routers, technical memory, checkpoints, distillations and CR-009's narrative references point at these approved paths. Frozen QA input tables and earlier archived reports remain byte-preserved; their paths and source fingerprints describe their historical run, not the new source state.
 
