@@ -1,5 +1,8 @@
 # Editorial Request
 
+V1 is preserved below. For independent topic routing, blogs and video concepts,
+use [v2/README.md](v2/README.md). Do not mix schema markers or reuse v1 approvals.
+
 Request: schema_version=1, topic_id, claims, brands, queue_start (Monday), weeks
 (1-8), drafts. Configure existing local destination_root under editorial_policy;
 no automatic init or cloud export. See work_evidence_editorial.py for strict fields.

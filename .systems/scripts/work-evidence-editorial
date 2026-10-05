@@ -6,10 +6,12 @@ import sys
 from work_evidence import EvidenceError, require, read_json, safe_path, digest
 from work_evidence_ledger import Ledger
 from work_evidence_editorial import bundle, persist_bundle
+from work_evidence_editorial_v2 import (editorial_version, prepare, review_source,
+                                      bundle as bundle_v2, persist_bundle as persist_v2)
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("preview", "write"))
+    parser.add_argument("action", choices=("review-source", "prepare", "preview", "write"))
     parser.add_argument("--workspace", required=True)
     parser.add_argument("--request", required=True)
     parser.add_argument("--expected-hash")
@@ -20,11 +22,18 @@ def main():
             require(args.owner_approved, "owner-approval-required", "editorial")
         ledger = Ledger(args.workspace)
         request = read_json(safe_path(ledger.workspace, args.request))
-        if args.action == "preview":
-            result = bundle(ledger, request)
+        version = editorial_version(request)
+        preview = bundle_v2 if version == 2 else bundle
+        persist = persist_v2 if version == 2 else persist_bundle
+        if args.action == "review-source":
+            result = review_source(ledger, request)
+        elif args.action == "prepare":
+            result = prepare(ledger, request)
+        elif args.action == "preview":
+            result = preview(ledger, request)
             result = {"bundle": result, "bundle_hash": digest(result)}
         else:
-            result = persist_bundle(ledger, request, args.expected_hash, owner_approved=True)
+            result = persist(ledger, request, args.expected_hash, owner_approved=True)
         print(json.dumps(result, ensure_ascii=False, allow_nan=False))
         return 0
     except (EvidenceError, OSError, ValueError, TypeError, KeyError):
