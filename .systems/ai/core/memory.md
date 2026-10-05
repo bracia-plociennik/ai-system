@@ -1,5 +1,7 @@
 # Memory Model
 
+Current formal capture follows `distillation-state.md` and shared `capture_parity.py`: exact owning task QA, current source/input fingerprints and one uniquely accepted owning distillation. History is advisory, not current QA PASS. A counterpart distillation reference does not duplicate technical memory or grant phase/Git approval.
+
 ## Purpose
 
 Memory turns local work into durable context without replacing current filesystem review.

@@ -1,5 +1,7 @@
 # Command Routing
 
+Compatibility adaptation between AI System and AI Workflow routes through `project-orchestration.md` and `orchestration-compatibility.md`, after scoped owner approval and planning QA. Handoffs and schema/version metadata are advisory, not implementation, native dispatch or Git approval. Future phase Git decisions use `phase-commit-policy.md`; explicit no-commit wins and final-owner-yes remains separate.
+
 ## Efficiency Routing
 
 Validation reuse, bounded-defect eligibility, historical assessment lifecycle, schema-driven
@@ -36,6 +38,8 @@ If more than one workspace plausibly matches, stop and ask the owner to choose t
 For project status, memory, checkpoints, distillations, and decisions, use `.systems/ai/core/project-state.md`. `projects/` may contain git repositories or source materials; `project-state/` is the default runtime state namespace.
 
 For `w projekcie X zrob Y` or equivalent work in a managed repository, use `.systems/ai/core/project-orchestration.md`. Resolve the real repo and local AI Workflow project before choosing continuation, change request, micro-task, micro-project, or full iteration. Local Workflow owns execution gates and evidence; an AI System orchestration record may reference them but cannot authorize a new write or start owner-only final check.
+
+For parallel project work, use the same contract and one flat coordinator across both systems. Choose agent count dynamically from ready independent units, actual runtime capacity, resource ownership and local gates; there is no fixed product cap or recursive delegation. `check-parallel-orchestration` provides supporting-only run inspection, never automatic agent startup or commits. Final Workflow interoperability is pending; absent support falls back to installed-local-gates and permitted serial/read-only work, not inferred parallel permission.
 
 Block-boundary checkpoint requests route through `.systems/ai/core/block-checkpoint.md`. Exact checkpoint triggers and the contract's listed write-intent aliases, such as `przyjmij ten checkpoint blok`, `przyjmij checkpoint bloku`, `zaakceptuj ten checkpoint bloku`, and `zapisz checkpoint bloku`, write only a new append-only block checkpoint and its `latest.md` router in the nearest owner namespace. Preparation, review, display, and diagnosis wording remains read-only. The route captures the last completed step, next step, blocker, and `scope_fate`; it does not write memory, distillation, TaskNotes, project status, commits, or external effects. After a successful write, re-read the checkpoint and router and return the required read-only block summary.
 

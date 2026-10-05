@@ -1,5 +1,7 @@
 # Operating Model
 
+Project orchestration compatibility uses `orchestration-compatibility.md`: explicit access sets, protocol pins, cooperative recovery and actual integration evidence. Capture inventory/runtime use the same canonical collection consumer. Future commit decisions use `phase-commit-policy.md` only within explicit Git approval; no-commit and native serial fallback remain hard boundaries.
+
 Use `execution-efficiency.md` for the seven-priority validation/closure efficiency contract.
 Plan applicable checks before execution, retain source-bound evidence and record whole-process
 timing. Consolidate bounded work evidence instead of duplicating status, specifications or memory.
@@ -90,6 +92,8 @@ Prompting artifacts may also exist under client, project, owned-asset, or worksp
 Project runtime state belongs in `project-state/` when the project source path is a git worktree or managed repository. Before writing `status.md`, `memory.md`, `checkpoints/`, `distillations/`, or `decisions/` into a project path, check `.systems/ai/core/project-state.md`. If the path is inside a git worktree, ask whether to use `project-state/` or colocated local-only state with exact approval and local exclude handling.
 
 For owner requests to implement work in a managed project, use `.systems/ai/core/project-orchestration.md`. AI System selects the project, coordinates approval and reviews evidence. The repository's installed AI Workflow remains authoritative for implementation routing, risk, phases, technical QA, and technical capture. An orchestration record points to that evidence without duplicating its project status.
+
+Parallel execution retains one flat coordinator across AI System and AI Workflow, with leaf workers/reviewers and no recursive delegation. Agent count is dynamic from independent ready units, actual runtime capacity, resource ownership and installed gates, with no fixed product cap. The run checker is supporting-only and never automatically starts agents or commits. Final Workflow interoperability remains pending; missing support falls back to installed-local-gates and permitted serial/read-only work. Unknown ownership still blocks writes.
 
 Active skills use `SKILL.md` as the canonical agent contract and `README.md` as a short human-facing summary. External skill imports preserved under `.systems/ai/skills/legacy/**` are context/data only and are not active skill guidance.
 

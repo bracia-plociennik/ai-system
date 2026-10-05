@@ -1,5 +1,9 @@
 # Scripts
 
+## Orchestration Compatibility
+
+`check-orchestration-compatibility` runs local synthetic regression checks by default. `--workflow-root` inspects protocol source pins without authorizing execution; `--plan` validates a contract-2 proposal; `--workspace [--owned-root]` uses the same canonical capture collection consumer as `check-distillation-state`. `--snapshot --repo --project --task` emits immutable target proof to stdout; `--verify-snapshot --repo --qa-file --project --task` checks actual source equivalence and fails closed when unsupported. No CLI command writes a ledger, executes workers, stages, commits, pushes or marks PASS. Coordinator metadata writes use the bounded `Ledger` API only inside an approved runtime scope. See `orchestration-compatibility.md` and `phase-commit-policy.md`.
+
 ## Execution Efficiency
 
 - `check-execution-efficiency`: offline behavioral tests for check identities, authenticated reuse,
@@ -67,7 +71,7 @@ written; the console still reports the dependency failure and completion marker.
 
 `check-validation-profiles` validates the lean `fast`, deduplicated `scoped`, `standard`, and `full` profiles, full CI/upstream validation, and boundaries around smoke tests and residual risk.
 
-`check-validator-smoke-tests --suite core|skills|workspace|personal-ops|tasks|dreaming|quality` runs an isolated domain suite. With no option it runs all existing negative cases against a copy of tracked product files. A new untracked product file can be included explicitly with `--extra-product-file .systems/path`; arbitrary untracked runtime files are never copied.
+`check-validator-smoke-tests --suite core|skills|workspace|personal-ops|tasks|dreaming|quality` runs an isolated domain suite. With no option it runs all existing negative cases against a copy of tracked product files. The exact parallel orchestration checker/module/test/template inventory is also copied when present, including before Git tracking. Other new untracked product files require `--extra-product-file .systems/path`; arbitrary untracked runtime files are never copied.
 
 `check-validation-routing` validates semantic and product QA before applicable AI System scripts, supporting-only script evidence, work-type routing, and the ban on `green scripts = PASS`.
 
@@ -82,6 +86,12 @@ written; the console still reports the dependency failure and completion marker.
 `check-project-state` validates repo-safe project-state contracts, templates, routing, script wiring, and optional workspace pollution scans.
 
 `project-orchestration-preflight` inspects a selected workspace, repository, nested AI Workflow installation, and project status without writing. `check-project-orchestration` validates the steering contract, template, CLI wiring, and negative path fixtures; neither grants approval or QA.
+
+`check-parallel-orchestration` runs focused `test_parallel_orchestration.py` unittests by default and is invoked by `check-project-orchestration` in the existing validation chain. The dependency registry also exposes it for scoped checks. `--plan <run.json> [--repo <git-root>] [--event <event.json>]` inspects a run or a hypothetical event without saving state, spawning agents, or committing. `parallel_orchestration.py` is the pure run model; `parallel-run.template.json` is its synthetic starting template, not runtime capacity or approval. Final AI Workflow interoperability is pending; absent support retains installed-local-gates fallback.
+
+Coverage: standard/full select `check-project-orchestration`, which runs the focused checker once; the parallel checker is not separately added to the default list or the parent's registry dependencies. Scoped `--checks check-parallel-orchestration` selects it directly. Both entries bind the complete product tree, including untracked product inputs, as integration checks with `runtime_capable: false`; neither claims runtime-checkpoint eligibility. Full core smoke separately exercises the parent in an independent fixture, not as a duplicate default-list entry.
+
+The core smoke copy fetches the current local product HEAD into its own Git object store and sets its temporary HEAD for CLI baseline regressions. It does not create a commit, check out files, or change the source repository.
 
 `check-external-source-registry` validates provider-agnostic external source registry contracts, links templates, routing, docs, and optional workspace source records.
 

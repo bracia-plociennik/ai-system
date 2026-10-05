@@ -1,5 +1,7 @@
 # AI System
 
+Parallel protocol compatibility has explicit access sets and current inventory/capture proofs; native backend verification remains separate and unknown uses serial fallback. See `.systems/ai/core/orchestration-compatibility.md`. Future phase Git decisions use explicit approved scope under `phase-commit-policy.md`; no-commit wins and push is never implied.
+
 Validation and closure efficiency is governed by `.systems/ai/core/execution-efficiency.md`:
 explicit authenticated per-check reuse for iteration, compact typed quality records and
 immutable historical assessments. Full CI/update gates remain freshly executed and scripts
@@ -214,6 +216,8 @@ Use:
 for project status, memory, memory entries, checkpoints, distillations, decisions, and `links.md`.
 
 For a request such as `w projekcie X zrob Y`, `.systems/ai/core/project-orchestration.md` makes AI System the owner's coordinator. It resolves the real repository and reads that project's own `AGENTS.md`, nested AI Workflow contract, current status, risk and approval gates. A scoped `orchestration/<work-id>.md` record links to execution evidence; local AI Workflow keeps technical phase status, QA, and distillation. A local commit may follow approved scope and QA. Push, production, and owner-only final check require separate owner authority. Use `.systems/scripts/project-orchestration-preflight --workspace <workspace> --project-state <relative-project-state> --project-id <workflow-id>` for read-only discovery; inspect the local gates before any write.
+
+Parallel work uses one flat coordinator across AI System and AI Workflow, with leaf workers/reviewers and no recursive delegation. Agent count is dynamic from ready independent work, actual runtime capacity, resource ownership and local gates, with no fixed product cap. `check-parallel-orchestration` validates the run model; it never automatically starts agents or commits. Final Workflow interoperability remains pending; unavailable support uses installed-local-gates fallback, not inferred compatibility.
 
 Project implementation capture state belongs in `<workspace>/project-state/<project-slug>/capture-state/`, outside the project repository.
 

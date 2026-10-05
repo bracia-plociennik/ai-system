@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Each suite uses an isolated copy of tracked product files. Run all suites for full validation.
+# Each suite uses an isolated product copy, including explicit parallel orchestration inputs.
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 suite="all"
@@ -61,6 +61,10 @@ done <<< "$extra_product_files"
 python3 -B "$repo_root/.systems/scripts/smoke_fixture.py" "${copy_args[@]}"
 
 (cd "$copy_repo" && git init -q)
+# Every suite can call the full validator, whose CLI regressions inspect HEAD.
+# Import local baseline objects only; do not commit or check out fixture files.
+git -C "$copy_repo" fetch -q --no-tags --depth=1 "$repo_root" HEAD
+git -C "$copy_repo" update-ref HEAD FETCH_HEAD
 
 run_must_fail() {
   local name="$1"
@@ -465,6 +469,18 @@ run_must_pass "project-state-clean-project-repos-pass" "$project_state_validator
 
 orchestration_validator="$copy_repo/.systems/scripts/check-project-orchestration"
 orchestration_preflight="$copy_repo/.systems/scripts/project-orchestration-preflight"
+for path in \
+  .systems/scripts/check-parallel-orchestration \
+  .systems/scripts/check-orchestration-compatibility \
+  .systems/scripts/orchestration_compatibility.py \
+  .systems/scripts/capture_parity.py \
+  .systems/scripts/qa_source_binding.py \
+  .systems/scripts/tests/test_orchestration_compatibility.py \
+  .systems/scripts/parallel_orchestration.py \
+  .systems/scripts/tests/test_parallel_orchestration.py \
+  .systems/ai/templates/workspace/project-state/parallel-run.template.json; do
+  run_must_pass "parallel-orchestration-fixture-${path##*/}" test -f "$copy_repo/$path"
+done
 run_must_pass "project-orchestration-contract" "$orchestration_validator"
 
 orchestration_workspace="$tmp/orchestration-workspace"
@@ -491,6 +507,29 @@ orchestration_args=(--workspace "$orchestration_workspace" --project-state proje
 run_must_pass_capture "orchestration-valid" "$tmp/orchestration-valid.json" "$orchestration_preflight" "${orchestration_args[@]}"
 rg -q '"result": "inspect-local-gates"' "$tmp/orchestration-valid.json" || { echo "Preflight did not return inspect-local-gates"; exit 1; }
 rg -q '"workflow_project": "selected"' "$tmp/orchestration-valid.json" || { echo "Preflight selected wrong project"; exit 1; }
+
+python3 - "$copy_repo" "$orchestration_repo" "$tmp" <<'PY'
+import hashlib
+import json
+import subprocess
+import sys
+from pathlib import Path
+product, repo, tmp = map(Path, sys.argv[1:])
+plan = json.loads((product / '.systems/ai/templates/workspace/project-state/parallel-run.template.json').read_text())
+digest = hashlib.sha256((repo / 'AGENTS.md').read_bytes()).hexdigest()
+plan['baseline'] = {'commit': subprocess.check_output(['git', '-C', str(repo), 'rev-parse', 'HEAD'], text=True).strip(),
+                    'source_digest': hashlib.sha256(('AGENTS.md=' + digest + '\n').encode()).hexdigest()}
+plan['source_manifest'] = [{'path': 'AGENTS.md', 'sha256': digest}]
+(tmp / 'parallel-preflight.json').write_text(json.dumps(plan))
+plan['workflow_parallel_supported'] = True
+(tmp / 'parallel-unnegotiated.json').write_text(json.dumps(plan))
+plan['workflow_parallel_supported'] = False
+plan['source_manifest'][0]['sha256'] = '0' * 64
+(tmp / 'parallel-stale.json').write_text(json.dumps(plan))
+PY
+run_must_pass "orchestration-parallel-local-plan" "$orchestration_preflight" "${orchestration_args[@]}" --parallel-plan "$tmp/parallel-preflight.json"
+run_must_fail "orchestration-parallel-unnegotiated-workflow" "$orchestration_preflight" "${orchestration_args[@]}" --parallel-plan "$tmp/parallel-unnegotiated.json"
+run_must_fail "orchestration-parallel-stale-source" "$orchestration_preflight" "${orchestration_args[@]}" --parallel-plan "$tmp/parallel-stale.json"
 
 run_must_pass "orchestration-single-project" "$orchestration_preflight" --workspace "$orchestration_workspace" --repo "$orchestration_repo"
 mkdir -p "$orchestration_repo/ai-workflow-workspace/projects/other"

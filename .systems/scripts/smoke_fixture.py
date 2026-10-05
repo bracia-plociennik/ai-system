@@ -9,6 +9,20 @@ from pathlib import Path
 
 sys.dont_write_bytecode = True
 SUITES = ("core", "skills", "workspace", "personal-ops", "tasks", "dreaming", "quality")
+PARALLEL_PRODUCT_FILES = (
+    ".systems/scripts/check-orchestration-compatibility",
+    ".systems/scripts/orchestration_compatibility.py",
+    ".systems/scripts/capture_parity.py",
+    ".systems/scripts/qa_source_binding.py",
+    ".systems/scripts/tests/test_orchestration_compatibility.py",
+    ".systems/ai/core/orchestration-compatibility.md",
+    ".systems/ai/core/phase-commit-policy.md",
+    ".systems/ai/templates/workspace/project-state/compatibility-plan.template.json",
+    ".systems/scripts/check-parallel-orchestration",
+    ".systems/scripts/parallel_orchestration.py",
+    ".systems/scripts/tests/test_parallel_orchestration.py",
+    ".systems/ai/templates/workspace/project-state/parallel-run.template.json",
+)
 
 
 def run_transactions(commands):
@@ -43,7 +57,10 @@ def copy_fixture(root, destination, extras=()):
                 or any(marker in name for marker in ("..", ".env", "private", "secret"))
                 or name.endswith((".pem", ".key", ".p12", ".pfx"))):
             raise ValueError("Unsafe extra product path: " + name)
-    names = sorted(set(inventory + list(extras)))
+    # Keep new orchestration inputs in fixtures before they enter the Git index.
+    parallel_files = [name for name in PARALLEL_PRODUCT_FILES
+                      if (root / name).is_file() or (root / name).is_symlink()]
+    names = sorted(set(inventory + parallel_files + list(extras)))
     sources = []
     for name in names:
         path = Path(name)

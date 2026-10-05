@@ -1,5 +1,9 @@
 # HUMANS.md
 
+## Cross-System Parallel Compatibility
+
+Use the installed local Workflow contract, not a handoff as authority. AI System inspects explicit protocol mapping and access sets under `orchestration-compatibility.md`; verified source pins alone do not prove native isolation/capacity. Unknown backend means serial fallback. Results, integration and formal QA remain separate; history/current capture is not conflated. Future phase commits need an explicitly approved Git scope, and `bez commit/push` always wins. Unsupported source-equivalence needs fresh QA; do not silently reuse a verdict after commit.
+
 ## Validation And Closure Efficiency
 
 Use explicit targeted checks after semantic QA. An authenticated unchanged check may be reused
@@ -183,6 +187,8 @@ for standalone projects, or the nearest owner namespace for nested projects:
 Use `links.md` in project-state to point to the real repo or source folder.
 
 For `w projekcie X zrob Y`, AI System first selects the workspace and verifies the real repo, local `AGENTS.md`, nested AI Workflow, and the selected Workflow project. `.systems/ai/core/project-orchestration.md` defines the routing, delegated work scope, evidence review, and resume behavior. The target Workflow owns execution status, quality evidence, and technical distillation; `project-state/<project>/orchestration/<work-id>.md` is a short coordination reference.
+
+Parallel runs have one flat coordinator across both systems; leaf workers/reviewers cannot delegate again. Choose agent count dynamically from independent ready units, actual runtime capacity, resource ownership and installed gates, never a fixed product cap. `check-parallel-orchestration` is inspection-only and does not automatically start agents or commits. Final Workflow interoperability is pending; absent support falls back to installed-local-gates, with serial execution or read-only delegation only where local gates permit it.
 
 Read-only preflight example:
 

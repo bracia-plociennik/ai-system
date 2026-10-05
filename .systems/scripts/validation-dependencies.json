@@ -111,7 +111,21 @@
     },
     "check-project-orchestration": {
       "dependencies": [],
+      "category": "integration",
+      "inputs": {"complete": true, "mode": "product-tree"},
       "runtime_capable": false
+    },
+    "check-parallel-orchestration": {
+      "dependencies": [],
+      "category": "integration",
+      "inputs": {"complete": true, "mode": "product-tree"},
+      "runtime_capable": false
+    },
+    "check-orchestration-compatibility": {
+      "dependencies": [],
+      "category": "integration",
+      "inputs": {"complete": true, "mode": "product-tree"},
+      "runtime_capable": true
     },
     "check-external-source-registry": {
       "dependencies": [],

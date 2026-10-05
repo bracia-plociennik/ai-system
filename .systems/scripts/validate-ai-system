@@ -30,6 +30,7 @@ standard_checks=(
   check-update-workspace
   check-project-state
   check-project-orchestration
+  check-orchestration-compatibility
   check-external-source-registry
   check-external-export-import-workflow
   check-personal-ops

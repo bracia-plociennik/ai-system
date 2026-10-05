@@ -247,6 +247,10 @@ if [[ -n "$workspace" ]]; then
   echo "blocked: $count_blocked"
   echo "completed: $count_completed"
   echo "not-applicable: $count_not_applicable"
+  # One canonical collection consumer serves formal inventory and runtime gates.
+  parity_args=(--workspace "$workspace")
+  [[ -z "$owned_root" ]] || parity_args+=(--owned-root "$owned_root")
+  python3 -B "$repo_root/.systems/scripts/check-orchestration-compatibility" "${parity_args[@]}" || fail=1
 fi
 
 exit "$fail"
