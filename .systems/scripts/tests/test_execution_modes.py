@@ -7,10 +7,11 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from execution_modes import InvalidWork, SUPPORT, inspect_work, read_json, select_mode, workflow_support
+from execution_modes import InvalidWork, WORKFLOW_SOURCES, inspect_work, inspect_workflow_state, read_json, resolve_selection, select_mode, workflow_support
 
 
 def unit(uid="build", dependencies=None, action="implementation"):
@@ -42,6 +43,34 @@ def complete(record):
 
 
 class ExecutionTests(unittest.TestCase):
+    def test_selection_scope_and_precedence(self):
+        task = {"mode": "auto", "scope": "task", "scope_id": "task-1", "source": "current owner"}
+        resumed = {"mode": "human", "scope": "project", "scope_id": "project-1", "source": "recorded owner"}
+        session = {"mode": "auto", "scope": "session", "scope_id": "session-1", "source": "explicit session owner"}
+        project = {"mode": "auto", "scope": "project", "scope_id": "project-1", "source": "project owner"}
+        self.assertEqual(resolve_selection(task, resumed, session, project, "session-1"), task)
+        self.assertEqual(resolve_selection(resumed=resumed, session=session, project=project, session_id="session-1"), resumed)
+        self.assertEqual(resolve_selection(session=session, project=project, session_id="session-1"), session)
+        self.assertEqual(resolve_selection(project=project), project)
+        self.assertEqual(resolve_selection()["mode"], "auto")
+
+    def test_selection_rejects_cross_session_or_missing_history(self):
+        session = {"mode": "human", "scope": "session", "scope_id": "previous-session", "source": "explicit owner"}
+        with self.assertRaises(InvalidWork):
+            resolve_selection(session=session, session_id="current-session")
+        with self.assertRaises(InvalidWork):
+            resolve_selection(resumed=session, session_id="current-session")
+        with self.assertRaises(InvalidWork):
+            resolve_selection(resumed={"scope": "task"})
+
+    def test_selection_rejects_scope_substitution_and_unknown_mode(self):
+        choice = {"mode": "human", "scope": "project", "scope_id": "project-1", "source": "owner"}
+        with self.assertRaises(InvalidWork):
+            resolve_selection(task=choice)
+        choice["mode"] = "unrecognized"
+        with self.assertRaises(InvalidWork):
+            resolve_selection(project=choice)
+
     def test_new_default_and_explicit_human(self):
         self.assertEqual(select_mode(), "auto")
         for name in ("human", "human mode", "Human Coop"):
@@ -292,26 +321,42 @@ class CapabilityTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
+        self.profile = self.root.parent / (self.root.name + "-profile.json")
+        self.addCleanup(lambda: self.profile.unlink(missing_ok=True))
+        self.profile_patch = patch("execution_modes.PROFILE_PATH", self.profile)
+        self.profile_patch.start()
+        self.addCleanup(self.profile_patch.stop)
+
+    def git(self, *args):
+        return subprocess.check_output(["git", "-C", str(self.root), *args], stderr=subprocess.DEVNULL, text=True).strip()
 
     def install(self):
-        names = ("execution-modes", "autopilot", "owner-decision-checkpoints", "delivery-constraints")
         sources = {}
-        for name in names:
-            relative = ".systems/ai/core/" + name + ".md"
+        for relative in sorted(WORKFLOW_SOURCES):
             path = self.root / relative
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text("synthetic source: " + name)
-            sources[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
-        self.capability = self.root / ".systems/ai/capabilities/execution-modes-v1.json"
-        self.capability.parent.mkdir(parents=True, exist_ok=True)
-        self.record = {"contract": 1, "capability": "execution-modes-v1", "behaviors": sorted(SUPPORT), "sources": sources,
-                       "mode_mapping": {"auto": "auto", "human": "human-coop"}}
+            path.write_text("synthetic source: " + relative)
+            if relative.endswith("scripts/lib/execution-modes.py"):
+                path.write_text("import argparse,json\np=argparse.ArgumentParser()\np.add_argument('--state')\na=p.parse_args()\nr=json.load(open(a.state))\nprint(json.dumps({'authority':'inspection-only','mode':r['execution']['mode']}))\n")
+            sources[relative] = {"sha256": hashlib.sha256(path.read_bytes()).hexdigest(), "mode": "100644"}
+        self.git("init")
+        self.git("add", ".systems")
+        self.git("-c", "user.name=Synthetic Test", "-c", "user.email=test@example.invalid", "commit", "-m", "synthetic baseline")
+        self.record = {"contract": 1, "tested_commit": self.git("rev-parse", "HEAD"),
+                       "inspector": ".systems/scripts/lib/execution-modes.py", "sources": sources,
+                       "mode_mapping": {"auto": "auto", "human": "human-coop"},
+                       "delivery_mapping": {"auto-unconstrained": "auto-unbounded"}}
         self.save()
 
     def save(self):
-        self.capability.write_text(json.dumps(self.record))
+        self.profile.write_text(json.dumps(self.record))
 
     def test_old_workflow_falls_back(self):
+        self.install()
+        path = self.root / ".systems/ai/core/execution-modes.md"
+        path.write_text("unknown historical contract")
+        self.git("add", ".")
+        self.git("-c", "user.name=Synthetic Test", "-c", "user.email=test@example.invalid", "commit", "-m", "unknown contract")
         result = workflow_support(self.root)
         self.assertEqual(result["status"], "unsupported")
         self.assertEqual(result["fallback"], "installed-local-gates")
@@ -327,6 +372,23 @@ class CapabilityTests(unittest.TestCase):
         (self.root / ".systems/ai/core/autopilot.md").write_text("changed")
         self.assertEqual(workflow_support(self.root)["status"], "invalid")
 
+    def test_unrelated_committed_change_keeps_exact_source_support(self):
+        self.install()
+        (self.root / "notes.md").write_text("unrelated")
+        self.git("add", "notes.md")
+        self.git("-c", "user.name=Synthetic Test", "-c", "user.email=test@example.invalid", "commit", "-m", "unrelated")
+        self.assertEqual(workflow_support(self.root)["status"], "source-bound")
+
+    def test_changed_index_and_modes_fail(self):
+        self.install()
+        path = self.root / ".systems/ai/core/autopilot.md"
+        path.chmod(0o755)
+        self.assertEqual(workflow_support(self.root)["status"], "invalid")
+        path.chmod(0o644)
+        path.write_text("index change")
+        self.git("add", ".")
+        self.assertEqual(workflow_support(self.root)["status"], "invalid")
+
     def test_mode_mapping_must_be_explicit_and_supported(self):
         self.install()
         del self.record["mode_mapping"]
@@ -338,10 +400,10 @@ class CapabilityTests(unittest.TestCase):
 
     def test_missing_behavior_and_source_rejected(self):
         self.install()
-        self.record["behaviors"].pop()
+        del self.record["delivery_mapping"]
         self.save()
         self.assertEqual(workflow_support(self.root)["status"], "invalid")
-        self.record["behaviors"] = sorted(SUPPORT)
+        self.record["delivery_mapping"] = {"auto-unconstrained": "auto-unbounded"}
         del self.record["sources"][".systems/ai/core/autopilot.md"]
         self.save()
         self.assertEqual(workflow_support(self.root)["status"], "invalid")
@@ -363,17 +425,44 @@ class CapabilityTests(unittest.TestCase):
 
     def test_capability_duplicate_json_fields_rejected(self):
         self.install()
-        self.capability.write_text('{"contract":1,"contract":1}')
+        self.profile.write_text('{"contract":1,"contract":1}')
         self.assertEqual(workflow_support(self.root)["status"], "invalid")
 
-    def test_missing_or_linked_root_and_capability_directory_fail(self):
+    def test_missing_or_linked_root_and_source_directory_fail(self):
         self.assertEqual(workflow_support(self.root / "missing")["status"], "invalid")
         self.install()
-        directory = self.capability.parent
+        directory = self.root / ".systems/ai/core"
         moved = self.root / "moved"
         directory.rename(moved)
         directory.symlink_to(moved, target_is_directory=True)
         self.assertEqual(workflow_support(self.root)["status"], "invalid")
+
+    def test_original_workflow_state_preserves_scope_and_never_changes_input(self):
+        self.install()
+        state = self.root / "projection.json"
+        value = {"execution": {"mode": "human-coop", "scope": "project", "scope_id": "example-project", "source": "owner project decision"}}
+        state.write_text(json.dumps(value))
+        before = state.read_bytes()
+        result = inspect_workflow_state(self.root, state)
+        self.assertEqual(result["selection"], {**value["execution"], "mode": "human"})
+        self.assertEqual(state.read_bytes(), before)
+        self.assertEqual(result["workflow_readiness"]["authority"], "inspection-only")
+
+    def test_original_workflow_state_requires_recognized_sources(self):
+        self.install()
+        state = self.root / "projection.json"
+        state.write_text("{}")
+        (self.root / ".systems/ai/core/autopilot.md").write_text("uncommitted")
+        with self.assertRaises(InvalidWork):
+            inspect_workflow_state(self.root, state)
+
+    def test_input_linked_parent_fails(self):
+        directory = self.root / "actual"
+        directory.mkdir()
+        (directory / "input.json").write_text("{}")
+        (self.root / "alias").symlink_to(directory, target_is_directory=True)
+        with self.assertRaises(InvalidWork):
+            read_json(self.root / "alias/input.json")
 
     def test_cli_inspection_is_read_only_and_valid_json(self):
         path = self.root / "work.json"

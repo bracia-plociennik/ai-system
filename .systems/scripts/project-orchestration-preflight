@@ -11,7 +11,7 @@ sys.dont_write_bytecode = True
 from execution_efficiency import capability_record
 from validation_support import InvalidEvidence
 from orchestration_compatibility import negotiate, inspect_plan, Blocked
-from execution_modes import workflow_support
+from execution_modes import workflow_support, inspect_workflow_state, InvalidWork
 
 
 def git(path, *args):
@@ -36,7 +36,8 @@ def main():
     parser.add_argument("--repo", type=Path, help="explicit owner-selected repo path")
     parser.add_argument("--project-state", help="workspace-relative project-state directory")
     parser.add_argument("--project-id", help="explicit AI Workflow project ID")
-    parser.add_argument("--execution-mode", choices=("auto", "human"), default="auto", help="interaction choice only; never approval")
+    parser.add_argument("--execution-mode", choices=("auto", "human"), help="explicit task-local interaction choice; new work defaults to auto")
+    parser.add_argument("--workflow-state", type=Path, help="original source run readiness; preserve recorded mode/scope on resume")
     parser.add_argument("--parallel-plan", type=Path, help="inspect an AI System parallel run; never starts workers")
     parser.add_argument("--compatibility-plan", type=Path, help="inspect contract-2 access sets; proposal only")
     args = parser.parse_args()
@@ -51,7 +52,7 @@ def main():
         "dirty_entry_count": None,
         "project_status": None,
         "workflow_efficiency": {"capabilities": {}, "fallback": "installed-local-gates"},
-        "workflow_execution": {"requested_mode": args.execution_mode, "status": "unverified", "fallback": "installed-local-gates"},
+        "workflow_execution": {"requested_mode": args.execution_mode or "auto", "status": "unverified", "fallback": "installed-local-gates"},
         "parallel_execution": {"workflow_interoperability": "pending-final-counterpart-contract", "fallback": "local-workflow-linear-or-read-only"},
         "blockers": blockers,
         "evidence_role": "read-only inspection; not approval or QA",
@@ -127,11 +128,30 @@ def main():
         else:
             result["workflow_version"] = git(workflow, "rev-parse", "HEAD")
             support = workflow_support(workflow)
-            result["workflow_execution"] = {**support, "requested_mode": args.execution_mode}
+            selected_mode = args.execution_mode or "auto"
+            result["workflow_execution"] = {**support, "requested_mode": selected_mode}
             if support["status"] == "source-bound":
-                result["workflow_execution"]["counterpart_mode"] = support["mode_mapping"][args.execution_mode]
+                if args.workflow_state:
+                    try:
+                        inspected = inspect_workflow_state(workflow, args.workflow_state)
+                        selection = inspected["selection"]
+                        result["workflow_execution"]["source_state"] = inspected
+                        readiness = inspected["workflow_readiness"]
+                        if readiness["result"] in {"blocked", "awaiting-owner"}:
+                            blockers.append("original Workflow readiness has no runnable independent units")
+                        if args.execution_mode and args.execution_mode != selection["mode"]:
+                            blockers.append("explicit mode change requires refreshed original Workflow readiness")
+                        else:
+                            selected_mode = selection["mode"]
+                        result["workflow_execution"]["selection"] = selection
+                    except (InvalidWork, OSError, subprocess.SubprocessError) as exc:
+                        blockers.append("invalid Workflow execution state: " + str(exc))
+                result["workflow_execution"]["requested_mode"] = selected_mode
+                result["workflow_execution"]["counterpart_mode"] = support["mode_mapping"][selected_mode]
             elif support["status"] == "invalid":
                 blockers.append("invalid Workflow execution-mode support: " + support["reason"])
+            if args.workflow_state and support["status"] != "source-bound":
+                blockers.append("Workflow state requires verified execution-mode sources")
             try:
                 result["workflow_efficiency"] = capability_record(workflow)
             except (InvalidEvidence, OSError, ValueError) as exc:
@@ -167,6 +187,9 @@ def main():
                     blockers.append("selected AI Workflow project status is missing")
                 else:
                     result["workflow_project"] = project_id
+                    selection = result["workflow_execution"].get("selection")
+                    if selection and selection["scope"] == "project" and selection["scope_id"] != project_id:
+                        blockers.append("Workflow execution selection belongs to another project")
                     result["project_status"] = str(project_status)
                     fields = status_fields(project_status)
                     if "blocking-reason" not in fields:

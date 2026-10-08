@@ -9,6 +9,13 @@ scope, risk, quality, accepted evidence or permission. Do not migrate or resume
 historical stopped runs automatically. On resume, retain the recorded mode;
 missing historical mode needs a disposition before adopting a new default.
 
+Record mode, scope (`task|session|project`), scope ID and choice source. Resolve
+current explicit task choice, resumed recorded choice, explicit matching-session
+choice, project choice, then Auto. Session scope never leaks into another session;
+task scope expires with that task. In Workflow projects preserve the source run's
+selection. A new explicit mode choice requires refreshed source readiness rather
+than overwriting its stored selection inside a read-only preflight.
+
 This is an execution/interaction contract, not a work mode, formal phase, scheduler
 or agent backend. Analysis remains analysis; planning remains planning. A plan-only
 request never authorizes implementation. Use `owner-approval.md`: an ordinary
@@ -67,7 +74,8 @@ local contract explicitly permits controlled delegation with real approval.
 After three attempts on the same cause without new evidence or improvement, stop
 the affected loop and preserve its diagnosis/failures. Measurable progress resets
 the stalled count; changing a label or asserting progress does not. Honor a
-stricter installed limit until counterpart support is verified. After interruption,
+stricter installed limit even after counterpart support is verified. Workflow's two
+Spec/Quality fix-loop limits are not increased to three. After interruption,
 inspect current Git, scope/approval, dependencies, decisions and evidence hashes.
 Do not replay completed effects or accept stale completion evidence.
 
@@ -97,17 +105,32 @@ closure or Phase 8 commit permission. Ordinary tasks do not gain artificial phas
 Scoped local commits require explicit approved Git scope and current QA. Explicit
 no-commit wins; merge to main and push need owner approval, never mode inference.
 
-`workflow_support` inspects an installed source-bound execution-modes-v1 capability.
-The proposed JSON interface declares `contract: 1`, `capability: execution-modes-v1`,
-`behaviors`, `sources` (relative source paths to SHA-256), and explicit `mode_mapping`
-of `auto` to `auto` and `human` to `human-coop`. The adapter does not infer this
-mapping from prose or a branch. This interface must be reconciled with the actual
-counterpart release before declaring shared integration complete.
-A proposed handoff, branch name, version label or saved eligible flag is not proof.
-Missing/invalid support returns installed-local-gates fallback and an explicit
-compatibility dependency. Perform only permitted independent work; never update,
-install or override a target Workflow automatically. Native behavior and agent
-obedience remain unverified by capability metadata and deterministic fixtures.
+`workflow_support` uses the AI System-owned profile
+`.systems/ai/capabilities/workflow-execution-modes-v1.json`. It records the tested
+Workflow commit, required source SHA-256 and file modes, and explicit mappings
+`auto -> auto`, `human -> human-coop`, `auto-unconstrained -> auto-unbounded`.
+Recognition checks current committed blobs, index and live files against the
+reviewed profile. Unrelated changes may retain support only when every required
+source remains identical. A branch name, ancestry, version label or saved eligible
+flag is not evidence. Workflow need not supply a separate capability document.
+
+`check-execution-modes --workflow-root <root> --workflow-state <json>` inspects
+the original Workflow readiness projection using its verified pure `--state`
+inspector on a frozen synthetic copy. It preserves source selection, exact action
+names, approval references and readiness outcomes. It never translates an AI
+System `implementation` permission into blanket Workflow actions or synthesizes
+gates, quality, capture or isolation flags. AI System and Workflow JSON records
+remain separate; summary decision IDs require the referenced full source decisions.
+Sources and input are rechecked after inspection. This is a point-in-time check,
+not an execution lock. The Workflow projection remains data, not authenticated
+approval or real isolation evidence.
+
+Unknown support returns `unsupported`; malformed, linked or uncommitted inputs
+return `invalid`. Both retain installed-local-gates and the affected compatibility
+dependency. Perform only permitted independent work; never install or override a
+target Workflow automatically. The actual local committed version is sufficient
+for synthetic integration; publication is not a prerequisite. Native behavior and
+agent obedience remain unverified by deterministic fixtures.
 
 ## Quality And Closure
 

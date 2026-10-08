@@ -10,6 +10,7 @@ from pathlib import Path
 sys.dont_write_bytecode = True
 SUITES = ("core", "skills", "workspace", "personal-ops", "tasks", "dreaming", "quality")
 PARALLEL_PRODUCT_FILES = (
+    ".systems/ai/capabilities/workflow-execution-modes-v1.json",
     ".systems/scripts/check-orchestration-compatibility",
     ".systems/scripts/orchestration_compatibility.py",
     ".systems/scripts/capture_parity.py",

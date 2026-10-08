@@ -94,6 +94,22 @@ class Fixtures(unittest.TestCase):
         (copies[0] / ".systems/scripts/fixture").write_text("mutated\n")
         self.assertEqual((copies[1] / ".systems/scripts/fixture").read_bytes(), script.read_bytes())
 
+    def test_smoke_copy_untracked_workflow_profile(self):
+        source = self.root / "source"
+        init(source)
+        (source / "README.md").write_text("fixture\n")
+        git(source, "add", "README.md")
+        name = ".systems/ai/capabilities/workflow-execution-modes-v1.json"
+        profile = source / name
+        profile.parent.mkdir(parents=True)
+        profile.write_text('{"contract": 1}\n')
+        target = self.root / "copy"
+        target.mkdir()
+        names = smoke_fixture.copy_fixture(source, target)
+        self.assertIn(name, names)
+        self.assertEqual((target / name).read_bytes(), profile.read_bytes())
+        self.assertNotEqual((target / name).stat().st_ino, profile.stat().st_ino)
+
     def test_smoke_copy_invalid_sources_before_any_write(self):
         for mode in ("missing", "linked", "escape", "traversal", "foreign", "secret"):
             with self.subTest(mode=mode):

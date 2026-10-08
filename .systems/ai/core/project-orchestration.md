@@ -231,7 +231,7 @@ writer or automatically extends approval.
 
 ## Installed Workflow And Checkpoints
 
-Inspect the target's actually installed Workflow contracts and declared capabilities, including
+Inspect the target's actually installed Workflow contracts and recognized source profiles, including
 `parallel-work-policy.md`, not a proposed upstream document or presumed version feature.
 The final counterpart parallel contract is pending until explicitly agreed and installed;
 do not invent published capability names/schemas or claim cross-system interoperability.

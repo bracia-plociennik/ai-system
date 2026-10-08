@@ -3,6 +3,8 @@ import hashlib
 import json
 import re
 import subprocess
+import sys
+import tempfile
 from pathlib import Path
 
 
@@ -13,8 +15,15 @@ class InvalidWork(ValueError):
 ID = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*\Z")
 ACTIONS = {"read-only", "artifact-write", "implementation", "external", "production",
            "migration", "security", "billing", "credentials", "destructive", "permissions"}
-SUPPORT = {"scoped-approval", "dependency-local-blocking", "auto-unconstrained",
-           "three-stalled-attempts", "technical-phase-8", "human-material-questions"}
+PROFILE_PATH = Path(__file__).resolve().parents[1] / "ai/capabilities/workflow-execution-modes-v1.json"
+WORKFLOW_SOURCES = {".systems/ai/core/" + name + ".md" for name in (
+    "execution-modes", "autopilot", "owner-decision-checkpoints", "delivery-constraints",
+    "permissions", "risk-model", "phase-commit-policy", "quality-review")}
+WORKFLOW_SOURCES.update({".systems/scripts/check-execution-modes", ".systems/scripts/lib/execution-modes.py",
+    ".systems/ai/templates/autopilot/execution-readiness.template.json",
+    ".systems/ai/templates/autopilot/readiness.template.md",
+    ".systems/ai/templates/autopilot/state.template.md",
+    ".systems/ai/templates/autopilot/task-decisions.template.md"})
 
 
 def text(value, label):
@@ -43,6 +52,35 @@ def select_mode(requested=None, active=None, resuming=False):
     if resuming or active is not None:
         raise InvalidWork("historical mode requires explicit disposition")
     return "auto"
+
+
+def resolve_selection(task=None, resumed=None, session=None, project=None, session_id=None):
+    """Resolve already verified owner choices; references themselves grant no authority."""
+    for choice in (task, resumed, session, project):
+        if choice is None:
+            continue
+        if not isinstance(choice, dict) or set(choice) != {"mode", "scope", "scope_id", "source"}:
+            raise InvalidWork("invalid execution selection")
+        select_mode(choice["mode"])
+        if choice["scope"] not in {"task", "session", "project"}:
+            raise InvalidWork("invalid execution selection scope")
+        text(choice["scope_id"], "execution scope ID")
+        text(choice["source"], "execution selection source")
+    for expected, choice in (("task", task), ("session", session), ("project", project)):
+        if choice is not None and choice["scope"] != expected:
+            raise InvalidWork("execution selection scope mismatch")
+    selected = task or resumed
+    if selected is None and session is not None:
+        if not session_id or session["scope_id"] != session_id:
+            raise InvalidWork("session selection does not match current session")
+        selected = session
+    if selected is None:
+        selected = project
+    if selected is None:
+        return {"mode": "auto", "scope": "task", "scope_id": None, "source": "new-work-default"}
+    if selected["scope"] == "session" and selected["scope_id"] != session_id:
+        raise InvalidWork("resumed session selection does not match current session")
+    return {**selected, "mode": select_mode(selected["mode"])}
 
 
 def stalled(attempts):
@@ -247,55 +285,114 @@ def read_json(path):
                 raise InvalidWork("duplicate JSON field")
             result[key] = value
         return result
-    if path.is_symlink():
+    aliases = {Path("/tmp"): Path("/private/tmp"), Path("/var"): Path("/private/var")}
+    if any(p.is_symlink() and aliases.get(p) != p.resolve() for p in (path, *path.parents)):
         raise InvalidWork("linked JSON input")
     return json.loads(path.read_text(), object_pairs_hook=pairs)
 
 
+def workflow_profile():
+    record = read_json(PROFILE_PATH)
+    if not isinstance(record, dict) or set(record) != {
+            "contract", "tested_commit", "mode_mapping", "delivery_mapping", "inspector", "sources"}:
+        raise InvalidWork("invalid AI System compatibility profile")
+    if type(record["contract"]) is not int or record["contract"] != 1 or not re.fullmatch(r"[0-9a-f]{40}", record["tested_commit"]):
+        raise InvalidWork("invalid compatibility baseline")
+    if record["mode_mapping"] != {"auto": "auto", "human": "human-coop"}:
+        raise InvalidWork("unsupported counterpart mode mapping")
+    if record["delivery_mapping"] != {"auto-unconstrained": "auto-unbounded"}:
+        raise InvalidWork("unsupported counterpart delivery mapping")
+    if record["inspector"] != ".systems/scripts/lib/execution-modes.py" or not isinstance(record["sources"], dict) or set(record["sources"]) != WORKFLOW_SOURCES:
+        raise InvalidWork("incomplete compatibility source coverage")
+    for entry in record["sources"].values():
+        if not isinstance(entry, dict) or set(entry) != {"sha256", "mode"} or entry["mode"] not in {"100644", "100755"} or not isinstance(entry["sha256"], str) or not re.fullmatch(r"[0-9a-f]{64}", entry["sha256"]):
+            raise InvalidWork("invalid compatibility source fingerprint")
+    return record
+
+
+def git_bytes(root, *args):
+    return subprocess.check_output(["git", "-C", str(root), *args], stderr=subprocess.DEVNULL)
+
+
 def workflow_support(root):
     """Inspect installed source pins; no installation, dispatch or QA claim."""
-    result = {"status": "unsupported", "fallback": "installed-local-gates", "reason": "missing capability",
+    result = {"status": "unsupported", "fallback": "installed-local-gates", "reason": "unrecognized Workflow sources",
               "evidence_role": "source inspection; native behavior unverified"}
-    relative = ".systems/ai/capabilities/execution-modes-v1.json"
-    if root.is_symlink():
+    aliases = {Path("/tmp"): Path("/private/tmp"), Path("/var"): Path("/private/var")}
+    if any(p.is_symlink() and aliases.get(p) != p.resolve() for p in (root, *root.parents)):
         return {**result, "status": "invalid", "reason": "linked workflow root"}
     if not root.is_dir():
         return {**result, "status": "invalid", "reason": "missing workflow root"}
     root = root.resolve()
-    path = root / relative
-    for candidate in [path, *path.parents]:
-        if candidate == root:
-            break
-        if candidate.is_symlink():
-            return {**result, "status": "invalid", "reason": "linked capability path"}
-    if not path.exists():
-        return result
     try:
-        record = read_json(path)
-        if set(record) != {"contract", "capability", "behaviors", "sources", "mode_mapping"} or type(record["contract"]) is not int or record["contract"] != 1 or record["capability"] != "execution-modes-v1":
-            raise InvalidWork("invalid execution capability")
-        mapping = record["mode_mapping"]
-        if not isinstance(mapping, dict) or mapping != {"auto": "auto", "human": "human-coop"}:
-            raise InvalidWork("unsupported counterpart mode mapping")
-        if not isinstance(record["behaviors"], list) or any(not isinstance(v, str) for v in record["behaviors"]) or len(set(record["behaviors"])) != len(record["behaviors"]) or not SUPPORT.issubset(record["behaviors"]):
-            raise InvalidWork("incomplete execution semantics")
-        if not isinstance(record["sources"], dict) or not record["sources"]:
-            raise InvalidWork("missing source bindings")
-        required = {".systems/ai/core/execution-modes.md", ".systems/ai/core/autopilot.md", ".systems/ai/core/owner-decision-checkpoints.md", ".systems/ai/core/delivery-constraints.md"}
-        if not required.issubset(record["sources"]):
-            raise InvalidWork("incomplete source coverage")
-        for name, checksum in record["sources"].items():
-            if not name.startswith(".systems/") or "\\" in name or any(p in {"", ".", ".."} for p in name.split("/")):
-                raise InvalidWork("unsafe capability source")
+        record = workflow_profile()
+        try:
+            top = Path(git_bytes(root, "rev-parse", "--show-toplevel").decode().strip()).resolve()
+            head = git_bytes(root, "rev-parse", "HEAD").decode().strip()
+        except subprocess.SubprocessError:
+            return {**result, "reason": "missing committed Workflow root"}
+        if top != root:
+            raise InvalidWork("Workflow root is not an independent Git repository")
+        mismatches = []
+        for name, entry in record["sources"].items():
             candidate = root / name
             if any(p.is_symlink() for p in [candidate, *candidate.parents] if p != root and p.is_relative_to(root)):
-                raise InvalidWork("linked capability source")
-            if not isinstance(checksum, str) or not re.fullmatch(r"[0-9a-f]{64}", checksum) or not candidate.is_file() or hashlib.sha256(candidate.read_bytes()).hexdigest() != checksum:
-                raise InvalidWork("stale capability source")
-        head = subprocess.run(["git", "-C", str(root), "rev-parse", "HEAD"], capture_output=True, text=True, check=False)
-        return {**result, "status": "source-bound", "fallback": "none", "reason": "declared semantics and current source pins inspected",
-                "mode_mapping": mapping,
-                "source_head": head.stdout.strip() if head.returncode == 0 else None,
-                "capability_sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
-    except (OSError, ValueError, TypeError) as error:
+                raise InvalidWork("linked compatibility source")
+            tree = git_bytes(root, "ls-tree", "HEAD", "--", name).decode().strip()
+            if not tree:
+                mismatches.append(name)
+                continue
+            mode = tree.split()[0]
+            if not candidate.is_file():
+                raise InvalidWork("missing live compatibility source: " + name)
+            live = candidate.read_bytes()
+            live_mode = "100755" if candidate.stat().st_mode & 0o111 else "100644"
+            if mode != live_mode or live != git_bytes(root, "show", "HEAD:" + name) or live != git_bytes(root, "show", ":" + name):
+                raise InvalidWork("uncommitted compatibility source: " + name)
+            if mode != entry["mode"] or hashlib.sha256(live).hexdigest() != entry["sha256"]:
+                mismatches.append(name)
+        if mismatches:
+            return {**result, "source_head": head, "mismatched_sources": mismatches}
+        return {**result, "status": "source-bound", "fallback": "none", "reason": "reviewed actual Workflow sources match committed, index and live inputs",
+                "mode_mapping": record["mode_mapping"], "delivery_mapping": record["delivery_mapping"],
+                "source_head": head, "tested_commit": record["tested_commit"],
+                "profile_sha256": hashlib.sha256(PROFILE_PATH.read_bytes()).hexdigest()}
+    except (OSError, ValueError, TypeError, subprocess.SubprocessError) as error:
         return {**result, "status": "invalid", "reason": str(error)}
+
+
+def inspect_workflow_state(root, path):
+    """Run the verified pure inspector on a frozen copy of its original projection."""
+    support = workflow_support(root)
+    if support["status"] != "source-bound":
+        raise InvalidWork("Workflow state inspection requires source-bound support: " + support["reason"])
+    profile = workflow_profile()
+    record = read_json(path)
+    raw = path.read_bytes()
+    if path.read_bytes() != raw:
+        raise InvalidWork("Workflow state changed before freeze")
+    source = root / profile["inspector"]
+    content = source.read_bytes()
+    expected = profile["sources"][profile["inspector"]]["sha256"]
+    if hashlib.sha256(content).hexdigest() != expected:
+        raise InvalidWork("Workflow inspector changed before freeze")
+    with tempfile.TemporaryDirectory() as directory:
+        frozen = Path(directory)
+        inspector, state = frozen / "inspector.py", frozen / "state.json"
+        inspector.write_bytes(content)
+        state.write_bytes(raw)
+        result = subprocess.run([sys.executable, "-I", "-B", str(inspector), "--state", str(state)],
+                                capture_output=True, text=True, timeout=15, check=False)
+        if result.returncode:
+            raise InvalidWork("Workflow rejected original projection: " + result.stderr.strip())
+        output = json.loads(result.stdout)
+    if workflow_support(root) != support or read_json(path) != record or path.read_bytes() != raw:
+        raise InvalidWork("Workflow sources or state changed during inspection")
+    if not isinstance(output, dict) or output.get("authority") != "inspection-only":
+        raise InvalidWork("unexpected Workflow inspector response")
+    execution = record["execution"]
+    reverse = {v: k for k, v in support["mode_mapping"].items()}
+    selection = {"mode": reverse[execution["mode"]], **{k: execution[k] for k in ("scope", "scope_id", "source")}}
+    return {"support": support, "selection": selection, "workflow_readiness": output,
+            "state_sha256": hashlib.sha256(raw).hexdigest(),
+            "evidence_role": "supporting-only; original Workflow state inspected; approval, isolation and model behavior unverified"}

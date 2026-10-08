@@ -15,6 +15,7 @@ fi
 required=(
   ".systems/ai/core/execution-modes.md"
   ".systems/scripts/execution_modes.py"
+  ".systems/ai/capabilities/workflow-execution-modes-v1.json"
   ".systems/scripts/check-execution-modes"
   ".systems/scripts/tests/test_execution_modes.py"
   ".systems/scripts/tests/verify_execution_modes_counterpart.py"

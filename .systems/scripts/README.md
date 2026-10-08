@@ -4,14 +4,16 @@
 
 `check-execution-modes` checks routing and runs offline decision/adapter regressions.
 `--record <json>` inspects a declared execution projection; `--workflow-root <path>`
-inspects source-bound installed support, returning explicit fallback when absent.
+inspects source-bound installed support using the AI System-owned compatibility profile.
+`--workflow-state <json>` with that root inspects the original Workflow projection
+through its verified pure inspector, preserving recorded mode, scope and actions.
 Both are read-only; a reference/boolean in input is not real approval, QA or native
 behavior evidence. `execution_modes.py` owns the shared pure consumer. See
 `.systems/ai/core/execution-modes.md`; the test fixtures define the projection.
 `python3 -B .systems/scripts/tests/verify_execution_modes_counterpart.py --workflow-root <explicit-candidate>`
 freezes selected technical candidate sources and exercises its pure inspector with
 synthetic data. Source fingerprints and draft limitations are reported separately
-from installed capability. This optional compatibility observation launches no
+from source recognition. This optional compatibility observation launches no
 model session and does not install, publish or accept the counterpart release.
 
 ## Orchestration Compatibility
