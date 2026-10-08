@@ -21,7 +21,7 @@ Use `.systems/ai/core/owner-approval.md` to recognize either direct `owner-appro
 
 ## Pre-routing
 
-If root `AGENTS.md` is missing, run or recommend `.systems/scripts/init-ai-system` before normal AI System usage. The committed source is `.systems/ai/templates/root/AGENTS.template.md`; root `AGENTS.md` is local-only.
+Read-only intake may inspect an unconfigured checkout. Before implementation-class writes, resolve its local role using `checkout-role.md` and `.systems/scripts/init-ai-system --status`. Missing configuration requires explicit bootstrap approval and `--role management|development`; never infer role from a branch or basename. Management uses the committed `.systems/ai/templates/root/AGENTS.template.md`; development preserves its project-local contract. Root `AGENTS.md` is local-only.
 
 Before planning or implementing new work, apply `.systems/ai/core/task-intake.md`.
 

@@ -16,7 +16,7 @@ Use it when the owner says:
 
 Read the smallest set needed to answer safely:
 
-1. `AGENTS.md`; if it is missing, use `.systems/ai/templates/root/AGENTS.template.md` only to recommend local initialization with `.systems/scripts/init-ai-system`.
+1. `AGENTS.md` and the local role under `checkout-role.md`; when unconfigured, recommend explicit initialization with `.systems/scripts/init-ai-system --role management|development`. The management template is guidance only until the role is selected; do not apply it to development or infer role from a branch.
 2. `.systems/ai/core/operating-model.md`.
 3. `.systems/ai/core/workspaces.md`.
 4. `.systems/ai/core/command-routing.md`.

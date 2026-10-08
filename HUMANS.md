@@ -23,7 +23,7 @@ approval or formal PASS. Historical evidence stays immutable. See `execution-eff
 
 ## Purpose
 
-This is the human runbook for the `ai-system` branch.
+This is the human runbook for AI System.
 
 AI System helps organize local client and project work without turning private files into public repository content.
 
@@ -66,12 +66,21 @@ Only approve writes after the proposed action and target are explicit. Use `owne
 After a fresh clone or if root `AGENTS.md` is missing, ask:
 
 ```text
-owner-approved: uruchom .systems/scripts/init-ai-system, żeby wygenerować lokalny AGENTS.md z template’u.
+owner-approved: uruchom .systems/scripts/init-ai-system --role management, żeby zapisać lokalną rolę checkoutu i wygenerować zarządczy AGENTS.md z template’u.
 ```
 
 Root `AGENTS.md` is local-only. In management checkouts, commit changes to `.systems/ai/templates/root/AGENTS.template.md` upstream, not to root `AGENTS.md`.
 
 In `ai-system-dev`, local root `AGENTS.md` can intentionally differ from `.systems/ai/templates/root/AGENTS.template.md` because product development may be governed by a separate local workflow. Do not refresh it from the management template unless that is the explicit task.
+
+Use `init-ai-system --role development` in the product checkout. It records the
+role without overwriting or generating `AGENTS.md`, installing AI Workflow or
+creating a workspace. `init-ai-system --status` inspects the local role and agent
+contract without writes. Missing configuration requires an explicit role;
+conflicting configuration or AGENTS requires review before any write.
+The ignored `ai-system.local.json` is defined in `checkout-role.md`; branch names
+and directory names never decide the role. Management does not require a root
+AI Workflow installation.
 
 Ask:
 

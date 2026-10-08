@@ -110,6 +110,7 @@ if [[ "$suite" == "all" || "$suite" == "core" ]]; then
 validator="$copy_repo/.systems/scripts/check-prompt-composition"
 
 run_must_pass "prompt-composition-baseline" "$validator"
+run_must_pass "checkout-role-bootstrap" "$copy_repo/.systems/scripts/check-checkout-role"
 run_must_pass "weekly-planning-baseline" "$copy_repo/.systems/scripts/check-weekly-planning"
 run_must_pass "spor-v4-baseline" "$copy_repo/.systems/scripts/check-spor-v4"
 run_must_pass "life-alignment-v4" "$copy_repo/.systems/scripts/check-life-alignment-v4"
@@ -234,7 +235,7 @@ rm "$copy_repo/AGENTS.md"
 cat > "$copy_repo/AGENTS.md" <<'MD'
 # AGENTS.md
 
-This file is the generated local root agent contract for the `ai-system` branch.
+This file is the generated local root agent contract for AI System management.
 MD
 run_must_fail "generated-root-agents-missing-prompt-composition" "$validator"
 rm "$copy_repo/AGENTS.md"

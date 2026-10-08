@@ -5,6 +5,10 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 fail=0
 
 if git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  if git -C "$repo_root" ls-files --error-unmatch ai-system.local.json >/dev/null 2>&1; then
+    echo "Forbidden tracked artifact: ai-system.local.json"
+    fail=1
+  fi
   if git -C "$repo_root" ls-files --error-unmatch AGENTS.md >/dev/null 2>&1; then
     echo "Forbidden tracked artifact: AGENTS.md"
     echo "Root AGENTS.md is generated local-only. Run: git rm --cached AGENTS.md"
@@ -13,6 +17,11 @@ if git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 fi
 
 required=(
+  ".systems/ai/core/checkout-role.md"
+  ".systems/ai/templates/root/ai-system.local.template.json"
+  ".systems/scripts/checkout_role.py"
+  ".systems/scripts/check-checkout-role"
+  ".systems/scripts/tests/test_checkout_role.py"
   ".systems/scripts/check-execution-efficiency"
   ".systems/scripts/prepare-quality-record"
   ".systems/scripts/execution_efficiency.py"

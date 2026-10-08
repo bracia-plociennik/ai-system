@@ -8,6 +8,7 @@ profile="standard"
 # AI_SYSTEM_SKIP_SMOKE_TESTS always produces supporting-only non-final evidence.
 standard_checks=(
   check-required-artifacts
+  check-checkout-role
   check-readmes
   check-naming
   check-privacy-boundary
