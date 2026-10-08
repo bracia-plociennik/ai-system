@@ -43,6 +43,13 @@ Start with this file and the source files needed to identify the request. Open o
 
 ## Task Intake
 
+Use `.systems/ai/core/execution-modes.md`: new work defaults to Auto; `human mode`
+or `human coop` selects task-local Human. Mode selection never grants approval.
+Auto resolves approved technical choices, queues blockers and continues proven
+independent work. Missing Auto deadline/timebox is recorded as unconstrained.
+Human asks grouped material questions. Local Workflow support must be verified
+before using extended execution; final-owner-yes is never inferred.
+
 Before planning or implementing new work, apply `.systems/ai/core/task-intake.md`.
 
 The response or artifact must identify:
@@ -55,7 +62,7 @@ The response or artifact must identify:
 
 Task intake does not grant write permission.
 
-Before implementation-class writes, apply `.systems/ai/core/delivery-constraints.md` to resolve constraints from the owner request or accepted plan. Ask only for missing deadline/time budget, must-have, quality floor, cutline, or overrun decisions; never repeat already-resolved questions or invent a deadline. A strictly eligible, reversible micro-change may report `Mode: micro-exempt` instead of asking a separate deadline/timebox question; reclassify if scope expands.
+Before implementation-class writes, apply `.systems/ai/core/delivery-constraints.md` with the resolved execution mode. Reuse supplied constraints; Human asks material missing questions, Auto records absent time limits as `auto-unconstrained`. Never repeat resolved questions or invent a deadline. A strictly eligible, reversible micro-change may report `Mode: micro-exempt`; reclassify if scope expands.
 
 For each new planning, implementation, or QA scope, report the non-blocking Model recommendation from `.systems/ai/core/model-selection-guidance.md`.
 
@@ -78,6 +85,11 @@ AI must not move, copy, rename, delete, rewrite, archive, or expose files unless
 AI must not store customer data, secrets, private documents, credentials, or identifiable client facts in `.systems/`.
 
 ## Stop Conditions
+
+Apply these conditions to affected actions and their dependents. In Auto Mode,
+queue the exact missing decision and continue only demonstrably independent
+approved work; shared uncertainty blocks every affected unit. Human may ask
+before dependent work. Do not guess missing ownership, permissions or evidence.
 
 Stop before continuing when:
 
@@ -103,7 +115,7 @@ Select the target workspace in this order:
 3. `ai-system-workspaces.md` registry row with `default=yes`.
 4. Legacy `ai-system-workspace/` only when no registry/default exists and there is no ambiguity.
 
-If more than one plausible workspace matches the request, stop and ask the owner to choose the target workspace.
+If more than one plausible workspace matches, block the affected operations. Human asks the owner to choose; Auto queues the choice and continues only proven independent work. Never guess the target workspace.
 
 Writes must target exactly one selected workspace unless the owner gives exact `owner-approved` permission for cross-workspace movement.
 

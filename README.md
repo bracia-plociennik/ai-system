@@ -1,5 +1,11 @@
 # AI System
 
+New work defaults to Auto Mode under `.systems/ai/core/execution-modes.md`.
+After scoped approval, AI chooses technical solutions, runs QA and queues decisions
+that block only dependent work. `human mode` / `human coop` enables material questions.
+Missing Auto deadline/timebox means unconstrained work. Mode selection grants no
+write, push, merge or final-owner-yes permission; local Workflow support is inspected.
+
 Parallel protocol compatibility has explicit access sets and current inventory/capture proofs; native backend verification remains separate and unknown uses serial fallback. See `.systems/ai/core/orchestration-compatibility.md`. Future phase Git decisions use explicit approved scope under `phase-commit-policy.md`; no-commit wins and push is never implied.
 
 Validation and closure efficiency is governed by `.systems/ai/core/execution-efficiency.md`:

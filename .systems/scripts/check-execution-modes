@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+"""Check execution-mode contracts or inspect a declared work record without writes."""
+import argparse
+import json
+import re
+from pathlib import Path
+import subprocess
+import sys
+
+sys.dont_write_bytecode = True
+from execution_modes import InvalidWork, inspect_work, read_json, workflow_support
+
+ROOT = Path(__file__).resolve().parents[2]
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--record", type=Path)
+    parser.add_argument("--workflow-root", type=Path)
+    args = parser.parse_args()
+    try:
+        if args.record or args.workflow_root:
+            result = {}
+            if args.record:
+                result["execution"] = inspect_work(read_json(args.record))
+            if args.workflow_root:
+                result["workflow"] = workflow_support(args.workflow_root)
+            print(json.dumps(result, indent=2))
+            return 1 if result.get("workflow", {}).get("status") == "invalid" else 0
+        required = {
+            ".systems/ai/core/execution-modes.md": ["New work defaults to `auto`", "owner-approval.md", "dependent-blocker", "three attempts", "final-owner-yes", "auto-unconstrained"],
+            ".systems/ai/core/owner-approval.md": ["execution-modes.md"],
+            ".systems/ai/core/task-intake.md": ["execution-modes.md"],
+            ".systems/ai/core/command-routing.md": ["execution-modes.md"],
+            ".systems/ai/core/delivery-constraints.md": ["auto-unconstrained"],
+            ".systems/ai/core/operating-model.md": ["execution-modes.md"],
+            ".systems/ai/core/project-orchestration.md": ["execution-modes.md"],
+            ".systems/ai/core/response-contract.md": ["execution-modes.md"],
+            ".systems/scripts/project-orchestration-preflight": ["workflow_support", "--execution-mode"],
+            ".systems/ai/templates/root/AGENTS.template.md": ["execution-modes.md"],
+            ".systems/ai/templates/workspace/project-state/orchestration-record.template.md": ["Execution mode:", "Workflow execution support:", "Owner decision queue:"],
+            ".systems/scripts/check-required-artifacts": ["check-execution-modes", "execution_modes.py"],
+            ".systems/scripts/validate-ai-system": ["check-execution-modes"],
+            ".systems/scripts/validation-dependencies.json": ['"check-execution-modes"'],
+            ".systems/scripts/check-validator-smoke-tests": ["execution-modes-baseline"],
+            "README.md": ["execution-modes"],
+            "HUMANS.md": ["execution-modes"],
+            ".systems/scripts/README.md": ["check-execution-modes"],
+        }
+        for name, markers in required.items():
+            path = ROOT / name
+            if not path.is_file() or path.is_symlink():
+                raise InvalidWork("missing execution-modes artifact: " + name)
+            body = path.read_text()
+            if re.search(r"auto(?: mode)? (?:grants|authorizes) (?:implementation|writes|push|merge|final-owner-yes)", body, re.I):
+                raise InvalidWork("unsafe execution-modes authority: " + name)
+            for marker in markers:
+                if marker not in body:
+                    raise InvalidWork("missing execution-modes contract: " + name + " (" + marker + ")")
+        result = subprocess.run([sys.executable, "-B", str(ROOT / ".systems/scripts/tests/test_execution_modes.py")], check=False)
+        if result.returncode:
+            return result.returncode
+        print("Execution modes checks completed successfully; supporting-only")
+        return 0
+    except (OSError, ValueError, TypeError) as error:
+        print("Execution modes error: " + str(error), file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

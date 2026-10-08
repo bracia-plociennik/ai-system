@@ -1,5 +1,19 @@
 # Scripts
 
+## Execution Modes
+
+`check-execution-modes` checks routing and runs offline decision/adapter regressions.
+`--record <json>` inspects a declared execution projection; `--workflow-root <path>`
+inspects source-bound installed support, returning explicit fallback when absent.
+Both are read-only; a reference/boolean in input is not real approval, QA or native
+behavior evidence. `execution_modes.py` owns the shared pure consumer. See
+`.systems/ai/core/execution-modes.md`; the test fixtures define the projection.
+`python3 -B .systems/scripts/tests/verify_execution_modes_counterpart.py --workflow-root <explicit-candidate>`
+freezes selected technical candidate sources and exercises its pure inspector with
+synthetic data. Source fingerprints and draft limitations are reported separately
+from installed capability. This optional compatibility observation launches no
+model session and does not install, publish or accept the counterpart release.
+
 ## Orchestration Compatibility
 
 `check-orchestration-compatibility` runs local synthetic regression checks by default. `--workflow-root` inspects protocol source pins without authorizing execution; `--plan` validates a contract-2 proposal; `--workspace [--owned-root]` uses the same canonical capture collection consumer as `check-distillation-state`. `--snapshot --repo --project --task` emits immutable target proof to stdout; `--verify-snapshot --repo --qa-file --project --task` checks actual source equivalence and fails closed when unsupported. No CLI command writes a ledger, executes workers, stages, commits, pushes or marks PASS. Coordinator metadata writes use the bounded `Ledger` API only inside an approved runtime scope. See `orchestration-compatibility.md` and `phase-commit-policy.md`.

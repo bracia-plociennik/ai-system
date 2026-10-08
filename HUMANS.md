@@ -1,5 +1,16 @@
 # HUMANS.md
 
+## Auto And Human
+
+Use `execution-modes.md`. For example, `owner-approved: implement the accepted
+task in project X, with local commits after QA` permits that scope in default Auto.
+AI records technical choices and returns one owner queue after independent work.
+Use `human mode` or `human coop` for task-local consultation. A mode switch keeps
+the same approval boundary. Analysis/planning commands do not start implementation.
+Auto does not ask a compulsory deadline/timebox question; supplied limits remain.
+Formal projects may reach technical Phase 8 only under approved scope and verified
+local support; final-owner-yes stays with the owner. Push and merge need authority.
+
 ## Cross-System Parallel Compatibility
 
 Use the installed local Workflow contract, not a handoff as authority. AI System inspects explicit protocol mapping and access sets under `orchestration-compatibility.md`; verified source pins alone do not prove native isolation/capacity. Unknown backend means serial fallback. Results, integration and formal QA remain separate; history/current capture is not conflated. Future phase commits need an explicitly approved Git scope, and `bez commit/push` always wins. Unsupported source-equivalence needs fresh QA; do not silently reuse a verdict after commit.

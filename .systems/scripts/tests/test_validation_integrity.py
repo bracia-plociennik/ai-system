@@ -199,7 +199,8 @@ class Fixtures(unittest.TestCase):
 
     def test_all_declared_negative_causes_are_specific(self):
         cases = json.loads((SCRIPTS / "smoke/negative-expectations.json").read_text())["cases"]
-        self.assertEqual(len(cases), 222)
+        self.assertEqual(len(cases), 223)
+        self.assertEqual(cases["execution-modes-missing-contract"]["suite"], "core")
         self.assertEqual(cases["orchestration-parallel-unnegotiated-workflow"]["suite"], "core")
         self.assertEqual(cases["orchestration-parallel-stale-source"]["suite"], "core")
         for name, case in cases.items():

@@ -1,6 +1,11 @@
 {
   "contract": 1,
   "cases": {
+    "execution-modes-missing-contract": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "missing execution-modes artifact: .systems/ai/core/execution-modes.md"
+    },
     "block-checkpoint-missing-contract": {
       "suite": "core",
       "exit_code": 1,
