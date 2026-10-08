@@ -1,3 +1,0 @@
-AI_SYSTEM_VALIDATE_START run_id=4dd3000841e640ddbc04c3b01daa5d56 supporting_only=true
-AI_SYSTEM_VALIDATION_RESULT run_id=4dd3000841e640ddbc04c3b01daa5d56 profile=scoped status=failed exit_code=2 supporting_only=true smoke=not-started
-Stale scope input fingerprint

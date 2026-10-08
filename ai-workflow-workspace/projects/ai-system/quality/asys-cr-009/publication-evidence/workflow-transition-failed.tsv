@@ -1,7 +1,0 @@
-command/check_id	group	duration_seconds	result	profile	schema_version	run_id	record_kind	parent_id
-check-required-artifacts	validator	0.376327	pass	full	2	f1055a96b5de76ca8108672068fea8a6bdfb010344f56718eb50c5e4d92c19c8-20261001T163318-13883	child	validation-wall
-check-prompt-composition	validator	0.503867	pass	full	2	f1055a96b5de76ca8108672068fea8a6bdfb010344f56718eb50c5e4d92c19c8-20261001T163318-13883	child	validation-wall
-check-branch-policy	validator	0.340193	pass	full	2	f1055a96b5de76ca8108672068fea8a6bdfb010344f56718eb50c5e4d92c19c8-20261001T163318-13883	child	validation-wall
-check-naming	validator	7.272796	pass	full	2	f1055a96b5de76ca8108672068fea8a6bdfb010344f56718eb50c5e4d92c19c8-20261001T163318-13883	child	validation-wall
-check-status-consistency	validator	1.072983	fail	full	2	f1055a96b5de76ca8108672068fea8a6bdfb010344f56718eb50c5e4d92c19c8-20261001T163318-13883	child	validation-wall
-validation-wall	wall	11.602289	fail	full	2	f1055a96b5de76ca8108672068fea8a6bdfb010344f56718eb50c5e4d92c19c8-20261001T163318-13883	wall	none

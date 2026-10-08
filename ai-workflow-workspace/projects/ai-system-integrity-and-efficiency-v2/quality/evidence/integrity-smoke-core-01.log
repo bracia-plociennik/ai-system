@@ -1,2 +1,0 @@
-SMOKE_NEGATIVE_COVERAGE suite=core count=54 complete=true
-Validator smoke suite passed: core (supporting-only; not semantic PASS)
