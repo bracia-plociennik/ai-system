@@ -9,6 +9,7 @@ profile="standard"
 standard_checks=(
   check-execution-modes
   check-required-artifacts
+  check-checkout-role
   check-readmes
   check-naming
   check-privacy-boundary

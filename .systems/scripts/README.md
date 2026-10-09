@@ -69,7 +69,14 @@ written; the console still reports the dependency failure and completion marker.
 
 `prepare-personal-ops-spor-proposal --workspace <path> --date YYYY-MM-DD --json` prepares a source-labeled read-only advisory package on stdout. `--scheduled` selects the current Warsaw date, `--seen-id` deduplicates chat delivery and explicit `--regenerate` permits rerendering. `personal_ops_spor_proposals.py` implements the bounded collector; `check-spor-proposals` runs synthetic safety, period, coverage and capacity regressions.
 
-`init-ai-system` generates the ignored root `AGENTS.md` from `.systems/ai/templates/root/AGENTS.template.md`.
+`init-ai-system --role management|development` explicitly records the ignored
+`ai-system.local.json`. Management generates its local AGENTS; development
+preserves its own project contract. Missing or conflicting roles stop writes.
+Later invocations reuse the selected role; `--status` is read-only.
+`--refresh-agents` is management-only and never overwrites a Workflow shim.
+No branch or basename determines role; no workspace or Workflow is installed.
+`checkout_role.py` implements strict configuration and preflight.
+`check-checkout-role` runs synthetic role/bootstrap/ownership regressions.
 
 `init-workspace` creates or completes a selected private workspace from workspace templates.
 

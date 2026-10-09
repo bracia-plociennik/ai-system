@@ -24,13 +24,34 @@ they never authorize execution. See Validation Profiles and Dreaming Mode core c
 
 AI System is a local Mac workspace system for managing clients, projects, tasks, materials, memory, and personal work-quality insights.
 
-This branch is the dedicated `ai-system` branch. The system-owned files live at the repository root, and private client/workspace data belongs in ignored local workspace directories.
+The system-owned files live at the repository root, and private client/workspace data belongs in ignored local workspace directories. A Git branch name does not define the checkout's role.
 
 ## Product Source And Management Installs
 
 `ai-system-dev` is the product-development checkout for AI System. It is the place to change `.systems/**`, validators, templates, root contract templates, update scripts, validation scripts, `HUMANS.md`, and `README.md`.
 
-Downloaded or installed AI System checkouts are management checkouts. Use them for workspace, client, project, dump, memory, checkpoint, prompt composition, and system-insight operations. Do not develop the AI System product inside a management checkout.
+For normal operational installations, explicitly select the management role. Use them for workspace, client, project, dump, memory, checkpoint, prompt composition, and system-insight operations. Do not develop the AI System product inside a management checkout.
+
+Select the local role explicitly during bootstrap:
+
+```sh
+.systems/scripts/init-ai-system --role management
+# In a separate product-development checkout instead:
+.systems/scripts/init-ai-system --role development
+.systems/scripts/init-ai-system --status
+```
+
+The ignored `ai-system.local.json` records `schema_version: 1` and
+`role: management|development`. The first invocation requires `--role`;
+later invocations reuse the recorded role. Neither repository names, branches
+nor the presence of AI Workflow select it implicitly. Existing installations
+without this file are unconfigured until explicitly bootstrapped; no migration
+is performed. See `.systems/ai/core/checkout-role.md`.
+
+Management generates its local agent contract. Development preserves its local
+project contract and never generates the management contract. AI Workflow is
+not required in the management root; its installation is checked only in a
+target project that uses it. A role record is not approval or proof of readiness.
 
 When a management checkout needs a system change, prepare that change in the upstream `ai-system-dev` product project and update the management checkout with:
 
@@ -93,7 +114,7 @@ Committed source template:
 Create or refresh the local file with:
 
 ```text
-.systems/scripts/init-ai-system
+.systems/scripts/init-ai-system --role management
 ```
 
 Use `--refresh-agents` only when you explicitly want to overwrite local `AGENTS.md` from the committed template.

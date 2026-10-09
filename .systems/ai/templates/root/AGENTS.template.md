@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This file is the generated local root agent contract for the `ai-system` branch.
+This file is the generated local root agent contract for AI System management.
 
 It is generated from `.systems/ai/templates/root/AGENTS.template.md`.
 Do not commit root `AGENTS.md`; update the template and regenerate the local file instead.
@@ -12,6 +12,13 @@ AI System manages one or more local Mac workspaces for clients, projects, tasks,
 ## Product Development Boundary / Upstream Boundary
 
 This generated root contract is for AI System management checkouts.
+
+Read the ignored `ai-system.local.json` under `.systems/ai/core/checkout-role.md`
+before implementation-class writes. `role: management` identifies this checkout's
+operational role; it is not approval. Missing or conflicting configuration stops
+dependent writes and routes to explicit `init-ai-system --role management`.
+Do not infer a role from the branch, directory name or AI Workflow presence.
+Development uses its own local project contract, not this generated template.
 
 Use this checkout to manage workspaces, clients, projects, dump triage, memory, owned assets, system insights, personal-ops, prompt composition, and owner-facing operations.
 

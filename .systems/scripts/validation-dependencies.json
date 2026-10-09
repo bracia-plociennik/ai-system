@@ -1,6 +1,12 @@
 {
   "contract": 1,
   "checks": {
+    "check-checkout-role": {
+      "dependencies": [],
+      "runtime_capable": false,
+      "category": "integration",
+      "inputs": {"complete": true, "mode": "product-tree"}
+    },
     "check-execution-modes": {
       "dependencies": [],
       "runtime_capable": false,

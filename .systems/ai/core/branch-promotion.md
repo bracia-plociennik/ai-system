@@ -2,17 +2,17 @@
 
 ## Purpose
 
-This document records the branch-promotion rule used to create the dedicated `ai-system` branch from the staged project implementation.
+This document records the historical pattern for promoting a staged project implementation into a repository root. It does not prescribe a branch name or define a checkout role.
 
-The current branch is already promoted. Use this file only when repeating or auditing that migration pattern.
+The product files already live at the repository root. Use this file only when auditing that historical migration pattern, not for normal installation or updates.
 
 ## Promotion Steps
 
-1. Create or checkout the dedicated `ai-system` branch.
+1. Select the owner-approved migration branch explicitly.
 2. Move contents of staged `ai-system/` to branch root.
 3. Move the agent contract into `.systems/ai/templates/root/AGENTS.template.md`.
 4. Rename `humans.template.md` to `HUMANS.md`.
-5. Generate local root `AGENTS.md` with `.systems/scripts/init-ai-system`.
+5. Explicitly bootstrap a management checkout with `.systems/scripts/init-ai-system --role management`; development preserves its own local contract.
 6. Keep root `AGENTS.md` and private workspace runtime ignored. Legacy branch promotion used `ai-system-workspace/`; multi-workspace installations also ignore registered workspace roots.
 7. Run all validators before commit.
 

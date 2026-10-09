@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+for file in .gitignore README.md HUMANS.md .systems/ai/templates/root/AGENTS.template.md \
+  .systems/ai/core/command-routing.md .systems/ai/core/operating-model.md; do
+  rg -q 'ai-system.local.json|checkout-role.md' "$repo_root/$file" || {
+    echo "Missing checkout role consumer: $file" >&2; exit 1;
+  }
+done
+for phrase in '--role management' '--role development' 'First run requires' 'not authority' 'before writes'; do
+  rg -Fq -- "$phrase" "$repo_root/.systems/ai/core/checkout-role.md" || {
+    echo "Missing checkout role contract: $phrase" >&2; exit 1;
+  }
+done
+if rg -n 'dedicated.*`ai-system`.*branch|for the `ai-system` branch' \
+  "$repo_root/README.md" "$repo_root/HUMANS.md" "$repo_root/.systems/ai/templates/root/AGENTS.template.md" \
+  "$repo_root/.systems/ai/core/branch-promotion.md"; then
+  echo "Obsolete dedicated branch requirement" >&2; exit 1
+fi
+python3 -B "$repo_root/.systems/scripts/tests/test_checkout_role.py"
+echo 'Checkout role checks completed; supporting-only.'
