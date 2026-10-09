@@ -18,9 +18,11 @@ This file indexes project-local change requests for the `ai-system` project.
 | `ASYS-CR-009-unified-aggregates` | `post-final-approval` | `follow-up-enhancement` | `done` | `new-project-iteration` |
 | `ASYS-CR-010-overnight-schedules` | `post-final-approval` | `defect` | `done` | `new-project-iteration` |
 
+| `ASYS-CR-011-local-paths` | `post-final-approval` | `follow-up-enhancement` | `in-progress` | `new-project-iteration` |
+
 ## Active Change Request
 
-No change request is selected as the current active request. CR-010 closed on 2026-10-02; independent in-progress requests remain unchanged.
+CR-011 is selected for the explicitly approved local path iteration. CR-010 closed on 2026-10-02; independent in-progress requests remain unchanged.
 
 CR-009 closed on 2026-10-01 after status/scope reconciliation, fresh full Quality with smoke, technical capture/checkpoint and scoped Phase 8. Explicit owner final-owner-yes is applied in `history/asys-cr-009/25ee186/evidence/recovery-phase-8-final-check.md`. No independent open CR is auto-selected or closed.
 

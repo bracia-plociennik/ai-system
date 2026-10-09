@@ -6,18 +6,18 @@
 | `workflow-scope` | `plan-derived` |
 | `project-workspace` | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system` |
 | `active-plan-status` | `implementation` |
-| `current-task` | `none` |
-| `active-change-request` | `none` |
-| `current-phase` | `phase-8-final-check` |
+| `current-task` | `ASYS-CORE-019-local-paths` |
+| `active-change-request` | `ASYS-CR-011-local-paths` |
+| `current-phase` | `phase-7-checkpoint` |
 | `phase-result` | `PASS` |
-| `final-owner-approval` | `approved` |
-| `next-phase` | `owner-final-approval` |
+| `final-owner-approval` | `not-requested` |
+| `next-phase` | `phase-8-final-check` |
 | `next-task` | `none` |
 | `blocking-reason` | `none` |
-| `updated-at` | `2026-10-02` |
+| `updated-at` | `2026-10-09` |
 | `autopilot-mode` | `supervised` |
-| `autopilot-state` | `stopped` |
-| `autopilot-run` | `autopilot-001` |
+| `autopilot-state` | `completed` |
+| `autopilot-run` | `autopilot-003` |
 
 ## Notes
 
@@ -91,3 +91,17 @@
 - The original project-package approval did not authorize CR-006 closure; the owner separately supplied `final-owner-yes` for CR-006 on 2026-09-25.
 - Current CR-006 product QA for commit `1a10404` is in `quality/phase-5-asys-cr-006-follow-up-quality.md`. The earlier Phase 5 report remains immutable and is admitted by exact SHA-256 as `pre-v1`. With owner approval, the POPS-014 filename was normalized without changing its contents. Nested AI Workflow `e8b99e8` passed project-scoped full validation and smoke; refreshed Phase 7 and Phase 8 evidence closes CR-006/POPS-015 only. Other post-final work is unchanged.
 - `next-phase: owner-final-approval` is the validator-supported Phase 8 transition token; owner `final-owner-yes` has already been supplied and applied for CR-006. `active-plan-status: implementation` reflects other independent in-progress post-final work, not an open CR-006 gate.
+
+## CR-011 Active Iteration
+
+Owner approved analysis/planning and implementation range plus local commits. New architecture/plan/spec QA PASS is scoped to CR-011; earlier approvals remain immutable history. Source worktree: /home/ubuntu/ai-system/onlinen-workspace/projects/ai-system-paths-dev. Runtime evidence remains this owner. No Phase 8, push, publication, management update or old Capture repair.
+
+## CR-011 Previous Blocked Boundary
+
+Product/current-task implementation, fresh Phase 5 and own Phase 6 were complete at 960e461. The initial Phase 7 assessment was blocked by the installed historical status gate: 27 old task references to nine distinct missing artifacts. Current task references were valid. Exact immutable review: checkpoints/phase-7-checkpoint-2026-10-09-cr-011-local-paths.md. Parent AI System Capture retains one separately recorded historical missing-project error.
+
+- Historical rerun entry on 2026-10-09: two originals restored byte-for-byte and one exact pre-V1 QA registered; seven unavailable originals marked unknown-historical with honest task labels. The rerun was then in progress; its completed outcome follows. Existing Capture separate.
+
+## CR-011 Current Checkpoint Boundary
+
+- Current CR-011 Phase 7 rerun PASS after exact owner-approved historical evidence reconciliation and fresh complete eligible runtime checks. Checkpoint: checkpoints/phase-7-checkpoint-2026-10-09-cr-011-history-rerun.md. Implementation-range completed. Seven unavailable historical inputs remain unknown; existing Capture unchanged. Next phase names an owner-triggered Phase 8 only; final-owner-yes not requested, no push. Earlier blocked notes remain chronological history.

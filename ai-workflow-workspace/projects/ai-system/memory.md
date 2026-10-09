@@ -20,6 +20,8 @@ Detailed entries live in `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/`
 | 2026-10-01 | CR-009 completion boundaries | project-constraint | active | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/2026-10-01-cr-009-completion.md` |
 | 2026-10-01 | CR-009 publication evidence boundaries | project-constraint | active | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/2026-10-01-cr-009-publication.md` |
 | 2026-10-02 | Explicit overnight SPOR schedule boundaries | project-decision | active | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/2026-10-02-overnight-schedules.md` |
+| 2026-10-09 | Portable local roots and transaction context | project-constraint | active | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/2026-10-09-portable-local-paths.md` |
+| 2026-10-09 | Historical evidence availability and acceptance boundaries | project-constraint | active | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/2026-10-09-historical-evidence-availability.md` |
 
 ## Rules
 
