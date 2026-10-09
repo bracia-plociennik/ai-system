@@ -7,6 +7,7 @@ profile="standard"
 # Scoped checks use explicit registry dependencies; fast uses shared sanity checks.
 # AI_SYSTEM_SKIP_SMOKE_TESTS always produces supporting-only non-final evidence.
 standard_checks=(
+  check-product-publication
   check-execution-modes
   check-required-artifacts
   check-checkout-role

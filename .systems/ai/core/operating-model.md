@@ -1,5 +1,10 @@
 # Operating Model
 
+Product development and filtered publication follow `product-publication.md`:
+implementation worktrees start from current dev; a separate main-based worktree
+publishes only the complete committed product projection after scoped QA/approval.
+Runtime evidence and its commit ancestry remain on dev, not main.
+
 Project orchestration compatibility uses `orchestration-compatibility.md`: explicit access sets, protocol pins, cooperative recovery and actual integration evidence. Capture inventory/runtime use the same canonical collection consumer. Future commit decisions use `phase-commit-policy.md` only within explicit Git approval; no-commit and native serial fallback remain hard boundaries.
 
 Use `execution-efficiency.md` for the seven-priority validation/closure efficiency contract.

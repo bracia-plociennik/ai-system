@@ -30,6 +30,12 @@ The system-owned files live at the repository root, and private client/workspace
 
 `ai-system-dev` is the product-development checkout for AI System. It is the place to change `.systems/**`, validators, templates, root contract templates, update scripts, validation scripts, `HUMANS.md`, and `README.md`.
 
+It uses `dev`; implementation worktrees start from current dev. Approved technical
+workspace evidence may remain on dev, while main receives a filtered product-only
+publication commit, not a dev-to-main merge. See
+[product-publication](.systems/ai/core/product-publication.md). Preparation is
+read-only by default; commit/push and management updates remain separately scoped.
+
 For normal operational installations, explicitly select the management role. Use them for workspace, client, project, dump, memory, checkpoint, prompt composition, and system-insight operations. Do not develop the AI System product inside a management checkout.
 
 Select the local role explicitly during bootstrap:

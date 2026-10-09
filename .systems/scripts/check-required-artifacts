@@ -17,6 +17,11 @@ if git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 fi
 
 required=(
+  ".systems/ai/core/product-publication.md"
+  ".systems/scripts/product_publication.py"
+  ".systems/scripts/prepare-product-release"
+  ".systems/scripts/check-product-publication"
+  ".systems/scripts/tests/test_product_publication.py"
   ".systems/ai/core/checkout-role.md"
   ".systems/ai/templates/root/ai-system.local.template.json"
   ".systems/scripts/checkout_role.py"

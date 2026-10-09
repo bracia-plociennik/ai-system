@@ -84,6 +84,12 @@ Root `AGENTS.md` is local-only. In management checkouts, commit changes to `.sys
 
 In `ai-system-dev`, local root `AGENTS.md` can intentionally differ from `.systems/ai/templates/root/AGENTS.template.md` because product development may be governed by a separate local workflow. Do not refresh it from the management template unless that is the explicit task.
 
+Develop from `dev` and start feature worktrees from its verified current tip.
+Use [product-publication](.systems/ai/core/product-publication.md) for a reviewed,
+filtered release into main: product only, without dev workspace or its commit
+ancestry. Do not merge dev into main. The release preparer is read-only unless
+explicitly asked to prepare a new worktree; it never commits or pushes itself.
+
 Use `init-ai-system --role development` in the product checkout. It records the
 role without overwriting or generating `AGENTS.md`, installing AI Workflow or
 creating a workspace. `init-ai-system --status` inspects the local role and agent
