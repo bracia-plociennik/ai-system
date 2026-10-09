@@ -1,5 +1,10 @@
 # Contract Compliance
 
+Execution uses `execution-modes.md`. At closure disclose mode, approved scope,
+completed/dependent-blocked work, decision queue and current QA/capture. Mode never
+supplies approval or full PASS. Missing Auto time limits use auto-unconstrained;
+Human retains material delivery discovery. Final-owner-yes remains a real owner gate.
+
 ## Purpose
 
 This policy defines the advisory work-mode compliance check and Knowledge Capture Gate for AI System.

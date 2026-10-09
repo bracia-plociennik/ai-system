@@ -25,6 +25,11 @@ AI System manages one or more local Mac workspaces for clients, projects, tasks,
 
 ## Modes
 
+Task-local interaction uses `execution-modes.md`: new work defaults to Auto and
+Human is explicit. Workspace profiles and work modes below remain separate.
+Approved Auto work resolves technical choices, queues dependent blockers and
+continues demonstrably independent scope. It never grants implementation authority.
+
 - `AI_SYSTEM_HOME`: `~/ai-system/`.
 - Registered workspace: private runtime directory listed in local `ai-system-workspaces.md`.
 - Selected workspace: exactly one workspace targeted by the current chat or operation.
@@ -51,7 +56,7 @@ In management checkouts, system-owned files are upstream-owned. Do not implement
 
 Use `.systems/ai/core/owner-approval.md` for recognized write approval. Direct `owner-approved: <action + target>` and strict acceptance of the immediately preceding complete plan are equivalent only for that plan's explicit scope. Neither form bypasses target-specific write rules, privacy, validation, evidence, risk, workspace selection, stop conditions, or final acceptance.
 
-Before new implementation-class work creates or changes system, project, client, or owned-asset artifacts, use `.systems/ai/core/delivery-constraints.md`. Reuse constraints already present in the owner request or accepted plan; ask only for material missing deadline/time-budget decisions. A strictly eligible micro-change records `Mode: micro-exempt` without a separate deadline/timebox question. Scope may be reduced through the agreed cutline, but the must-have outcome and quality floor remain protected.
+Before new implementation-class work creates or changes system, project, client, or owned-asset artifacts, use `.systems/ai/core/delivery-constraints.md`. Reuse supplied constraints; Human asks material missing questions, while Auto uses `auto-unconstrained` for absent time limits. A strictly eligible micro-change records `Mode: micro-exempt`. Scope may be reduced through the agreed cutline, but the must-have outcome and quality floor remain protected.
 
 Every non-exempt implementation-class write also creates or updates one nearest-owner Distillation State record under `.systems/ai/core/distillation-state.md`. An eligible micro-change records `Distillation State: micro-exempt` with a reason in the response instead of creating a per-work file. The record tracks the coherent work unit and its artifact paths; it does not inject `is_distilled` into source files or project repositories.
 

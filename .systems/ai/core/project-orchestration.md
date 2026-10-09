@@ -12,6 +12,17 @@ capability and the local contract allow them. Historical QA is not automatically
 
 ## Purpose
 
+Task interaction uses `execution-modes.md`. Pass the resolved Auto/Human mode and
+exact approval reference to the local Workflow run, not a copied status machine.
+Inspect actual installed execution support with `workflow_support`; metadata is
+source evidence only. AI System `human` maps to counterpart `human-coop` only when
+the inspected contract declares that vocabulary. Missing support retains local
+gates and an explicit integration dependency. No install/update is inferred.
+
+With approved final-check scope and verified local support, Auto may reach technical
+Phase 8; without it the current owner-triggered boundary below still applies.
+Final-owner-yes and its closure commit always require the real owner decision.
+
 AI System is the owner's entry point for work in a selected workspace's project. When the project uses AI Workflow, AI System coordinates the request and reviews the result; the target repository's local AI Workflow owns execution rules, project phase, technical evidence, and technical memory. This contract does not grant permission or replace the target's instructions.
 
 ## Discover The Target
@@ -220,7 +231,7 @@ writer or automatically extends approval.
 
 ## Installed Workflow And Checkpoints
 
-Inspect the target's actually installed Workflow contracts and declared capabilities, including
+Inspect the target's actually installed Workflow contracts and recognized source profiles, including
 `parallel-work-policy.md`, not a proposed upstream document or presumed version feature.
 The final counterpart parallel contract is pending until explicitly agreed and installed;
 do not invent published capability names/schemas or claim cross-system interoperability.
@@ -241,8 +252,10 @@ boundary, reconcile submitted/accepted results, confirm relevant agent
 termination, integrate and review the current scope, then complete required local Quality,
 distillation and checkpoint evidence before opening the next wave. Agent count or result arrival
 order cannot alter local task/package cadence. End `implementation-range` after its final
-required Phase 7 checkpoint; Phase 8 remains owner-triggered, and commit/push remain separately
-gated. Progress messages and orchestration records do not substitute for checkpoint evidence.
+required Phase 7 checkpoint. Approved Auto final-check scope may then enter technical Phase 8
+only with verified installed execution-mode support; older installations retain owner-triggered
+Phase 8. Commit/push remain separately gated. Progress messages and orchestration records do
+not substitute for checkpoint evidence.
 
 ## State And Result
 

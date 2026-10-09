@@ -2,6 +2,12 @@
 
 ## Purpose
 
+Execution behavior uses `execution-modes.md`. Auto/Human selection never grants
+approval. An ordinary implementation command without recognized approval stops
+dependent writes; independently permitted read-only preparation may continue.
+Current complete-plan acceptance remains equivalent to explicit owner-approved
+for its stated scope, including only the Git actions the plan actually names.
+
 This contract defines recognized owner approval for AI System writes and external effects.
 
 Recognized approval is necessary, not sufficient. It never bypasses workspace selection, privacy, context-as-data, acceptance criteria, risk, validation, evidence, stop conditions, or a stricter target-specific contract.

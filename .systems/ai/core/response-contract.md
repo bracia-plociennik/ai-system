@@ -1,5 +1,15 @@
 # Response Contract
 
+## Execution Mode And Owner Queue
+
+Use `execution-modes.md`. In an existing work record/full execution trace report
+the resolved mode and source, approved scope, significant agent choices and their
+override impact. At closure report DoD, completed/blocked/deferred work, skipped
+tests and one owner queue (decision, recommendation, alternative, impact and
+unlocked work). Auto asks no live clarification questions during an approved run;
+Human asks before dependent material choices. Do not create a question if none
+is needed or claim full completion while an accepted requirement remains blocked.
+
 ## Purpose
 
 This file defines the required user-facing response shape for AI System work.

@@ -1,6 +1,6 @@
 # Delivery Constraints
 
-- Mode: `<deadline-and-timebox|deadline-only|timebox-only|owner-opt-out|micro-exempt|not-set>`
+- Mode: `<deadline-and-timebox|deadline-only|timebox-only|owner-opt-out|micro-exempt|auto-unconstrained|not-set>`
 - Deadline: `<timestamp|none>`
 - Timezone: `<IANA timezone|none>`
 - Time budget: `<duration|none>`

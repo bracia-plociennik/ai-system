@@ -1,6 +1,14 @@
 # Project Orchestration: <work-id>
 
 - Work ID: <safe-id>
+- Execution mode: <auto|human; task-local explicit choice or new-work-default>
+- Execution selection scope / ID / source: <task|session|project; actual-scope-id; explicit-choice-or-recorded-source>
+- Execution approval reference: <actual-scoped-owner-message-or-complete-plan-reference; never inferred from mode>
+- Execution phase ceiling and Git policy: <approved-phases-and-local-commit-scope; merge/push/final-owner-yes-separate>
+- Workflow execution support: <actual-source-bound-AI-System-profile-and-Workflow-source-hashes-or-installed-local-gates>
+- Workflow execution run reference: <source-run-path; no duplicated status>
+- Owner decision queue: <decision-id-recommendation-alternative-impact-affected-units-or-none>
+- Agent choices and override impact: <rationale-and-verification-or-none>
 - Selected workspace: <workspace-id-or-path>
 - Owner namespace: <workspace-relative-project-state-path>
 - Target repository: <resolved-path>

@@ -7,6 +7,12 @@
       "category": "integration",
       "inputs": {"complete": true, "mode": "product-tree"}
     },
+    "check-execution-modes": {
+      "dependencies": [],
+      "runtime_capable": false,
+      "category": "integration",
+      "inputs": {"complete": true, "mode": "product-tree"}
+    },
     "check-work-evidence": {
       "dependencies": [],
       "runtime_capable": false,

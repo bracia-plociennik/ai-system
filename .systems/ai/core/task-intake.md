@@ -101,11 +101,16 @@ Never store private client details in `.systems/`.
 
 ## Delivery Constraint Discovery
 
+Resolve task-local mode through `execution-modes.md` first. Auto records absent
+deadline/timebox as `auto-unconstrained` and queues material blockers after safe
+independent work. Human uses the grouped discovery below. Neither mode supplies
+approval, changes an analysis/planning request into implementation or guesses ownership.
+
 For new implementation work that will create or change system, project, client, or owned-asset artifacts, apply `.systems/ai/core/delivery-constraints.md` after discoverable repository and workspace facts are known.
 
-Resolve an existing deadline, time budget, must-have outcome, quality floor, and cutline from the current owner message, accepted plan, or active work artifact. Ask only material missing questions, grouped into at most `1-3` questions. Do not repeat deadline or time-budget questions when the answer is already present.
+Resolve an existing deadline, time budget, must-have outcome, quality floor, and cutline from the current owner message, accepted plan, or active work artifact. Human asks only material missing questions, grouped into at most `1-3` questions. Auto queues blocking outcome questions and records missing time limits without asking. Do not repeat deadline or time-budget questions when the answer is already present.
 
-A missing constraint is not permission to invent one. Stop before dependent implementation unless the owner supplies the missing constraint or explicitly opts out for the current work.
+A missing constraint is not permission to invent one. In Human Mode, stop before dependent implementation unless the owner supplies the missing constraint or explicitly opts out for the current work. Auto Mode does not stop solely for absent time constraints.
 
 For a change meeting the strict micro-change criteria in `delivery-constraints.md`, record the exception instead of asking a separate deadline/timebox question. A small file count alone is insufficient; API, schema, policy, security, external effects, and cross-module changes remain on the normal route. If the scope grows, reclassify before further writes.
 

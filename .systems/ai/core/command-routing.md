@@ -23,19 +23,26 @@ Use `.systems/ai/core/owner-approval.md` to recognize either direct `owner-appro
 
 Read-only intake may inspect an unconfigured checkout. Before implementation-class writes, resolve its local role using `checkout-role.md` and `.systems/scripts/init-ai-system --status`. Missing configuration requires explicit bootstrap approval and `--role management|development`; never infer role from a branch or basename. Management uses the committed `.systems/ai/templates/root/AGENTS.template.md`; development preserves its project-local contract. Root `AGENTS.md` is local-only.
 
+Resolve `execution-modes.md` for new work: Auto is default; `human mode` or
+`human coop` chooses task-local Human. Neither choice grants approval or changes
+requested scope. Auto queues blockers and continues proven independent work;
+Human asks material grouped questions. Missing Auto deadline/timebox is not a gate.
+
 Before planning or implementing new work, apply `.systems/ai/core/task-intake.md`.
 
 For every new planning, implementation, or QA scope, append the advisory Model recommendation from `.systems/ai/core/model-selection-guidance.md`. It is non-blocking and changes no gate.
 
-Before new implementation-class writes, apply `.systems/ai/core/delivery-constraints.md`. Ask only for missing deadline/time budget, must-have, quality-floor, cutline, or overrun decisions; do not repeat constraints already present in the owner request or accepted plan. Strictly eligible micro-changes may use `Mode: micro-exempt`; scope expansion returns to the normal gate before further writes.
+Before new implementation-class writes, apply `.systems/ai/core/delivery-constraints.md` with the resolved execution mode. Human asks only material missing questions; Auto records missing time limits as unconstrained and queues blockers. Do not repeat constraints already present in the owner request or accepted plan. Strictly eligible micro-changes may use `Mode: micro-exempt`; scope expansion returns to the normal gate before further writes.
 
 If the request is only orientation or status, use guide mode.
 
 Before reading or writing runtime artifacts, select exactly one workspace using `.systems/ai/core/workspaces.md`.
 
-If more than one workspace plausibly matches, stop and ask the owner to choose the target workspace.
+If more than one workspace plausibly matches, block operations in that workspace.
+Human asks the owner to choose; Auto queues the choice and continues only work
+independent of that destination.
 
-For project status, memory, checkpoints, distillations, and decisions, use `.systems/ai/core/project-state.md`. `projects/` may contain git repositories or source materials; `project-state/` is the default runtime state namespace.
+For project status, memory, checkpoints, distillations, and decisions, use `.systems/ai/core/project-state.md`. `projects/` may contain git repositories or source materials; `project-state/` is the default runtime state namespace. A mode label never overrides those placement/approval rules.
 
 For `w projekcie X zrob Y` or equivalent work in a managed repository, use `.systems/ai/core/project-orchestration.md`. Resolve the real repo and local AI Workflow project before choosing continuation, change request, micro-task, micro-project, or full iteration. Local Workflow owns execution gates and evidence; an AI System orchestration record may reference them but cannot authorize a new write or start owner-only final check.
 
