@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+"""Check the publication contract and offline synthetic regressions."""
+from pathlib import Path
+import subprocess
+import sys
+
+root = Path(__file__).resolve().parents[2]
+for name in (".systems/ai/core/product-publication.md", "README.md", "HUMANS.md",
+             ".systems/ai/core/checkout-role.md", ".systems/ai/templates/root/AGENTS.template.md",
+             ".systems/ai/core/command-routing.md", ".systems/ai/core/operating-model.md"):
+    path = root / name
+    if path.is_symlink() or not path.is_file() or "product-publication" not in path.read_text():
+        raise SystemExit("Missing product-publication consumer: " + name)
+result = subprocess.run([sys.executable, "-B", str(root / ".systems/scripts/tests/test_product_publication.py")])
+if result.returncode:
+    raise SystemExit(result.returncode)
+print("Product publication checks completed; supporting-only")

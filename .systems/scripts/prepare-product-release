@@ -1,0 +1,7 @@
+#!/usr/bin/env python3
+"""Inspect or prepare a filtered release; never commit, push or merge."""
+import sys
+sys.dont_write_bytecode = True
+from product_publication import main
+
+raise SystemExit(main())

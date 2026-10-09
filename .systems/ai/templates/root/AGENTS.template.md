@@ -24,6 +24,10 @@ Use this checkout to manage workspaces, clients, projects, dump triage, memory, 
 
 Do not use a management checkout to develop the AI System product itself. Product development belongs in the upstream `ai-system-dev` product project.
 
+Product development follows `.systems/ai/core/product-publication.md`: development
+worktrees start from current `dev`; `main` receives only a reviewed filtered product
+snapshot, never dev runtime. This does not grant commit, push or update authority.
+
 System-owned files are upstream-owned in management checkouts. This includes `.systems/**`, validators, templates, root `AGENTS.md` contract changes, `HUMANS.md`, `README.md`, update scripts, and validation scripts.
 
 If the owner asks to change system-owned files in a management checkout, STOP before local implementation. The safe local action is read-only analysis, task intake, and a recommendation. Route the actual product change to the upstream `ai-system-dev` product project, then update this checkout with `.systems/scripts/update-from-upstream`.

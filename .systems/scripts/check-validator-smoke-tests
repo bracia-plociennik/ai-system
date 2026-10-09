@@ -111,6 +111,7 @@ validator="$copy_repo/.systems/scripts/check-prompt-composition"
 
 run_must_pass "prompt-composition-baseline" "$validator"
 run_must_pass "checkout-role-bootstrap" "$copy_repo/.systems/scripts/check-checkout-role"
+run_must_pass "product-publication-baseline" "$copy_repo/.systems/scripts/check-product-publication"
 run_must_pass "execution-modes-baseline" "$copy_repo/.systems/scripts/check-execution-modes"
 execution_modes_core="$copy_repo/.systems/ai/core/execution-modes.md"
 mv "$execution_modes_core" "$execution_modes_core.bak"

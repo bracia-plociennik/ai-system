@@ -44,6 +44,10 @@ work, not an implicit migration. Existing installations are not backfilled.
 
 ## Workflow Boundary
 
+Product branch/worktree and filtered release rules live in `product-publication.md`.
+Develop on `dev`; feature worktrees start from current dev, publication worktrees
+from current main. This does not change checkout-role validation or write gates.
+
 Management does not require AI Workflow in its own root. A managed project using
 Workflow must satisfy its installed local project-orchestration preflight. The
 development role likewise does not install, initialize or upgrade Workflow.

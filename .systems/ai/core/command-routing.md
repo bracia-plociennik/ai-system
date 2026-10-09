@@ -1,5 +1,9 @@
 # Command Routing
 
+Product branch reconciliation, development worktrees and filtered release requests
+route through `product-publication.md`. Default preparation is read-only; an
+approved release uses a new main-based worktree, never a dev-to-main merge.
+
 Compatibility adaptation between AI System and AI Workflow routes through `project-orchestration.md` and `orchestration-compatibility.md`, after scoped owner approval and planning QA. Handoffs and schema/version metadata are advisory, not implementation, native dispatch or Git approval. Future phase Git decisions use `phase-commit-policy.md`; explicit no-commit wins and final-owner-yes remains separate.
 
 ## Efficiency Routing

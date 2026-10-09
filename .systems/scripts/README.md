@@ -1,5 +1,17 @@
 # Scripts
 
+## Product Publication
+
+`prepare-product-release --source dev --target origin/main` reports the complete
+committed product projection read-only. `--prepare <new-absolute-worktree>` plus
+`--branch codex/publish/<work-id> --owner-approved` prepares an isolated main-based
+index; `--verify-candidate <worktree>` verifies live bytes, modes, index and commit
+parentage. No command commits, pushes, fetches, updates or deletes a workspace.
+`product_publication.py` owns the shared projection consumer;
+`check-product-publication` runs offline synthetic safety/regression tests.
+See `.systems/ai/core/product-publication.md` for mandatory dev worktree policy,
+privacy review, main-to-dev reconciliation and independent publication approval.
+
 ## Execution Modes
 
 `check-execution-modes` checks routing and runs offline decision/adapter regressions.
