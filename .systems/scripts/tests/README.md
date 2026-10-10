@@ -1,5 +1,10 @@
 # Integrity Regression Tests
 
+`check-naming` also runs `test_naming.py`: synthetic nearest-owner contracts,
+source/history boundaries, strict managed artifact names, immutable Git-bound
+root inputs and contained Personal Ops aggregate aliases. No real private
+sources are loaded by these regressions.
+
 Offline synthetic fixtures for validation lifecycle, evidence ownership, eval freshness,
 scope completeness, skill metadata and updater relations. Run `check-validation-integrity`.
 No private runtime, external model sessions or network remotes are used.
