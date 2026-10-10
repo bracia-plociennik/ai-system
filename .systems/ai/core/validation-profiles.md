@@ -120,3 +120,8 @@ Validation profiles must not:
 - weaken CI, privacy, evidence, contract compliance, Knowledge Capture Gate, owner approval, or final acceptance.
 
 When scripts are used, record the semantic QA result, findings/blockers, product checks, script applicability, targeted commands, `Script evidence role: supporting-only`, final verdict, skipped checks, and residual risk.
+
+
+## Intent brief supporting verification
+
+check-intent-to-execution-brief runs standalone synthetic profile/corpus regressions in standard/full. With --workflow-root and explicit --expected-head it purely inspects accepted installed source capability; no writes, install, native proof or owner consent. Full source gates include smoke. Native25-case paired original-input review is separate required implementation evidence; green scripts are supporting-only. Existing execution-mode fixed14 contract1/readiness2/QA2/Capture2 unchanged.

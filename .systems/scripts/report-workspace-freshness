@@ -4,6 +4,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from local_paths import LocalPathError, resolve_path
 sys.dont_write_bytecode = True
 from validation_support import git_output
 
@@ -13,9 +14,11 @@ args = parser.parse_args()
 rows = []
 for name in args.repo:
     try:
-        root = Path(name).resolve(strict=True)
-    except OSError as exc:
-        parser.error(f"Selected repository is unavailable: {exc}")
+        root = resolve_path(name, base=Path.cwd(), allow_relative=True)
+        if not root.is_dir():
+            parser.error("Selected repository is unavailable")
+    except (OSError, LocalPathError):
+        parser.error("Selected repository path context is invalid")
     top = git_output(root, "rev-parse", "--show-toplevel")
     if not top or Path(top).resolve() != root:
         parser.error("Selected path must be a repository root; recursive discovery is forbidden")

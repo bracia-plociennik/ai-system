@@ -9,6 +9,7 @@ profile="standard"
 standard_checks=(
   check-product-publication
   check-execution-modes
+  check-intent-to-execution-brief
   check-required-artifacts
   check-checkout-role
   check-readmes

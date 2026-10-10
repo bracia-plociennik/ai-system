@@ -36,7 +36,11 @@ def decimal_string(value):
 class TaxRegister:
     def __init__(self, workspace, taxpayer_id):
         identifier(taxpayer_id, "taxpayer_id")
-        path = Path(workspace).absolute()
+        from local_paths import LocalPathError, resolve_path
+        try:
+            path = resolve_path(workspace, base=Path.cwd(), allow_relative=True)
+        except LocalPathError:
+            require(False, "invalid-workspace", "tax")
         require(path.is_dir() and not path.is_symlink(), "invalid-workspace", "workspace")
         self.workspace = path.resolve()
         self.home = self.workspace / "private-tax" / taxpayer_id
@@ -60,6 +64,10 @@ class TaxRegister:
         self.ledgers = {}
         for owner, root in self.config["allowed_workspaces"].items():
             identifier(owner, "owner_workspace")
+            try:
+                root = str(resolve_path(root, workspace=self.workspace))
+            except LocalPathError:
+                require(False, "invalid-root", "allowed_workspaces")
             require(isinstance(root, str) and Path(root).is_absolute(),
                     "invalid-root", "allowed_workspaces")
             ledger = Ledger(root)

@@ -10,6 +10,7 @@ import re
 import sys
 import unicodedata
 from pathlib import Path
+from local_paths import resolve_path
 
 from personal_ops_properties_v3 import (
     CURRENT_TASK_GENERATION_POLICY,
@@ -1040,20 +1041,23 @@ def write_candidates(candidates: list[dict[str, object]], task_vault: Path) -> t
     return written, skipped, extended, updated
 
 
-def task_vault_from_config(path: Path) -> Path:
+def task_vault_from_config(path: Path, workspace: Path | None = None) -> Path:
     if not path.is_file():
         raise ValueError(f"TaskForge vault configuration is missing: {path}")
     values = parse_frontmatter(read_text(path))
     vault_path = values.get("vault_path", "")
     if values.get("enabled", "").lower() not in {"true", "yes"} or not vault_path:
         raise ValueError(f"TaskForge vault configuration is disabled or incomplete: {path}")
-    return Path(vault_path).expanduser().resolve()
+    return resolve_path(vault_path, workspace=workspace,
+                        base=workspace or path.absolute().parent, allow_relative=True)
 
 
 def task_vault_for_discovery(args: argparse.Namespace, config_path: Path) -> tuple[Path | None, str]:
     """Resolve an optional vault for read-only project discovery without blocking proposals."""
     try:
-        task_vault = args.task_vault.resolve() if args.task_vault else task_vault_from_config(config_path)
+        task_vault = (resolve_path(args.task_vault, workspace=args.workspace,
+                                  base=args.workspace, allow_relative=True)
+                      if args.task_vault else task_vault_from_config(config_path, args.workspace))
         if not task_vault.is_dir():
             raise ValueError(f"TaskForge vault does not exist or is not a directory: {task_vault}")
         return task_vault, ""
@@ -1126,7 +1130,9 @@ def update_v3_task_generation_status(path: Path, status: str, reason: str, refer
 
 def task_preflight(args: argparse.Namespace, config_path: Path) -> tuple[Path | None, str]:
     try:
-        task_vault = args.task_vault.resolve() if args.task_vault else task_vault_from_config(config_path)
+        task_vault = (resolve_path(args.task_vault, workspace=args.workspace,
+                                  base=args.workspace, allow_relative=True)
+                      if args.task_vault else task_vault_from_config(config_path, args.workspace))
         task_dir = task_vault / "TaskNotes" / "Tasks"
         if not task_vault.is_dir():
             raise ValueError(f"TaskForge vault does not exist or is not a directory: {task_vault}")
@@ -1163,9 +1169,13 @@ def main() -> int:
     parser.add_argument("--json", action="store_true", help="Print JSON instead of Markdown")
     args = parser.parse_args()
 
-    workspace = args.workspace.resolve()
-    config_path = args.task_vault_config or (workspace / "tasks" / "taskforge-vault.local.md")
-    task_vault = args.task_vault.resolve() if args.task_vault else None
+    workspace = resolve_path(args.workspace, base=Path.cwd(), allow_relative=True)
+    args.workspace = workspace
+    config_path = (resolve_path(args.task_vault_config, workspace=workspace,
+                                base=workspace, allow_relative=True)
+                   if args.task_vault_config else workspace / "tasks" / "taskforge-vault.local.md")
+    task_vault = (resolve_path(args.task_vault, workspace=workspace,
+                              base=workspace, allow_relative=True) if args.task_vault else None)
     if args.write and not args.owner_approved:
         raise SystemExit("--write requires --owner-approved")
     is_v3_check_in = False

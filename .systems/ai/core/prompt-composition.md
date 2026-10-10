@@ -1,5 +1,10 @@
 # Prompt Composition
 
+## Intent brief and private style context
+
+Use intent-to-execution-brief.md during existing intake: minimal inline/embedded fields with provenance and disposition; preserve original request/accepted decisions as independent QA anchors. Batch triage and current action/phase ceilings remain first. This adds no phase or approval. Use style-profile.md for optional explicitly enabled local style; recording needs actual exact-target consent and minimal provenance/privacy, observations stay tentative and current instruction overrides profile. Invalid/disabled profile supplies no preferences. Auto chooses only covered reversible options and queues protected owner decisions; Human groups material questions, settled answers not repeated and noninteractive routes stay so.
+
+
 ## Purpose
 
 Prompt composition defines how AI System may use prompt modules, role profiles, client collaboration profiles, variable packs, and generated prompting artifacts.
@@ -212,7 +217,7 @@ Every variable pack must identify:
 
 Inference is allowed only when the source is approved or evidence-backed, the inference is low risk, and an incorrect value would not change scope, risk, acceptance, permissions, external effects, data handling, billing, production, security, legal, client commitments, or final acceptance.
 
-Ask the owner before relying on a value that affects scope, risk, acceptance, billing, production, security, legal, client commitments, external effects, write permissions, or final approval.
+For a value that affects scope, risk, acceptance, billing, production, security, legal, client commitments, external effects, write permissions or final approval, Human asks before dependent work; Auto queues the exact missing owner decision and blocks affected work. Reuse actual already resolved owner evidence. Covered reversible presentation choices remain agent-resolvable under execution-modes.md; prompting never resolves protected owner decisions.
 
 ## Proactivity Policy
 

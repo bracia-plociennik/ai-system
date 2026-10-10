@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
+from local_paths import LocalPathError, resolve_path
 
 from work_evidence import (
     ACTUAL_BASES, EvidenceError, actual_seconds, canonical_bytes, digest,
@@ -47,7 +48,10 @@ def now():
 
 class Ledger:
     def __init__(self, workspace):
-        candidate = Path(workspace)
+        try:
+            candidate = resolve_path(workspace, base=Path.cwd(), allow_relative=True)
+        except LocalPathError:
+            raise EvidenceError("invalid-workspace", "workspace") from None
         require(candidate.is_dir() and not candidate.is_symlink(), "invalid-workspace", "workspace")
         self.workspace = candidate.resolve()
         self.home = self.workspace / "work-evidence"
@@ -56,6 +60,7 @@ class Ledger:
         self.loaded_config_hash = file_hash(self.config_path)
         self.loaded_registry_hash = file_hash(self.registry_path)
         self.config = validate_config(read_json(self.config_path), self.workspace)
+        self.loaded_path_context = self.path_context(self.config)
         self.registry = read_json(self.registry_path)
         validate_registry(self.registry)
         self.check_loaded()
@@ -66,6 +71,50 @@ class Ledger:
         require(file_hash(self.config_path) == self.loaded_config_hash
                 and file_hash(self.registry_path) == self.loaded_registry_hash,
                 "configuration-changed-after-load", "configuration")
+        current = validate_config(read_json(self.config_path), self.workspace)
+        require(self.path_context(current) == self.loaded_path_context,
+                "stale-path-context", "configuration")
+
+    def path_context(self, config):
+        return {"schema_version": 1, "workspace": str(self.workspace),
+                "source_roots": dict(config["source_roots"]),
+                "ledger_roots": list(config["ledger_roots"])}
+
+    def validate_manifest(self, manifest, *, replay=False):
+        fields = {"schema_version", "transaction_id", "prepared_at", "snapshot",
+                  "rows", "sessions", "candidate_sources", "projection_source", "candidate_digest"}
+        version = manifest.get("schema_version")
+        require(type(version) is int and version in {1, 2}, "unsupported-version", "transaction")
+        shape(manifest, fields | ({"path_context"} if version == 2 else set()))
+        shape(manifest["snapshot"], {"config_hash", "registry_hash", "ledger_hash"})
+        for field in ("config_hash", "registry_hash", "ledger_hash"):
+            sha(manifest["snapshot"][field], field)
+        if version == 2:
+            context = manifest["path_context"]
+            shape(context, {"schema_version", "workspace", "source_roots", "ledger_roots"})
+            require(type(context["schema_version"]) is int and context["schema_version"] == 1,
+                    "unsupported-version", "path_context")
+            require(isinstance(context["source_roots"], dict)
+                    and isinstance(context["ledger_roots"], list) and context["ledger_roots"],
+                    "invalid-shape", "path_context")
+            for alias in context["source_roots"]:
+                identifier(alias, "root_alias")
+            # Structural historical validation must not dereference an old host.
+            for value in [context["workspace"], *context["source_roots"].values(), *context["ledger_roots"]]:
+                require(isinstance(value, str) and Path(value).is_absolute()
+                        and "$" not in value and not any(ord(c) < 32 for c in value)
+                        and os.path.normpath(value) == value,
+                        "invalid-root", "path_context")
+            require(len(set(context["ledger_roots"])) == len(context["ledger_roots"]),
+                    "duplicate-root", "path_context")
+            if replay:
+                require(context == self.loaded_path_context, "stale-path-context", "transaction")
+        elif replay:
+            raw = read_json(self.config_path)
+            roots = [*raw["source_roots"].values(), *raw["ledger_roots"]]
+            require(all(isinstance(value, str) and Path(value).is_absolute()
+                        and "$" not in value and not value.startswith("~") for value in roots),
+                    "legacy-path-context-unverifiable", "transaction")
 
     def runtime(self, relative, *, exists=False):
         return safe_path(self.workspace, "work-evidence/" + relative, must_exist=exists)
@@ -104,6 +153,7 @@ class Ledger:
         raise EvidenceError("lock-owner-active-or-unknown", "pid")
 
     def committed(self):
+        self.check_loaded()
         entries, sessions, manifests = {}, {}, []
         directory = self.runtime("commits")
         if not directory.exists():
@@ -123,6 +173,7 @@ class Ledger:
         for sequence, manifest in enumerate(manifests, 1):
             require(manifest["sequence"] == sequence, "commit-sequence-conflict", "commit")
             prepared = read_json(self.runtime("transactions/" + manifest["transaction_id"] + "/manifest.json", exists=True))
+            self.validate_manifest(prepared)
             require(digest(prepared) == manifest["manifest_hash"],
                     "commit-approval-conflict", "manifest")
             require(prepared["snapshot"]["ledger_hash"] == digest(manifests[:sequence - 1]),
@@ -271,6 +322,7 @@ class Ledger:
                 for path in sorted(transactions.glob("*/manifest.json")):
                     existing = read_json(self.runtime(str(path.relative_to(self.home)), exists=True))
                     if existing.get("candidate_digest") == digest(candidate):
+                        self.validate_manifest(existing, replay=True)
                         for source in existing["candidate_sources"]:
                             require(file_hash(source["path"]) == source["sha256"],
                                     "stale-candidate", "candidate")
@@ -282,11 +334,12 @@ class Ledger:
                 path, expected = candidate_source
                 require(file_hash(path) == expected, "stale-candidate", "candidate")
                 sources.append({"path": str(Path(path).resolve()), "sha256": expected})
-            manifest = {"schema_version": 1, "transaction_id": str(uuid.uuid4()),
+            manifest = {"schema_version": 2, "transaction_id": str(uuid.uuid4()),
                         "prepared_at": now(), "snapshot": self.snapshot(),
                         "rows": rows, "sessions": sessions, "candidate_sources": sources,
                         "projection_source": candidate.get("projection_source"),
-                        "candidate_digest": digest(candidate)}
+                        "candidate_digest": digest(candidate),
+                        "path_context": self.loaded_path_context}
             directory = "transactions/" + manifest["transaction_id"] + "/"
             atomic_write(self.runtime(directory + "manifest.json"), canonical_bytes(manifest), immutable=True)
             self.progress(manifest["transaction_id"], "prepared")
@@ -300,11 +353,11 @@ class Ledger:
     def apply(self, transaction_id, expected_hash, *, failpoint=None):
         uuid_id(transaction_id, "transaction_id")
         sha(expected_hash, "manifest_hash")
+        self.check_loaded()
         with self.lock():
             manifest = read_json(self.runtime("transactions/" + transaction_id + "/manifest.json", exists=True))
-            shape(manifest, {"schema_version", "transaction_id", "prepared_at", "snapshot",
-                             "rows", "sessions", "candidate_sources", "projection_source", "candidate_digest"})
-            require(manifest["schema_version"] == 1 and manifest["transaction_id"] == transaction_id,
+            self.validate_manifest(manifest, replay=True)
+            require(manifest["transaction_id"] == transaction_id,
                     "transaction-conflict", "transaction_id")
             require(digest(manifest) == expected_hash, "stale-approval", "manifest_hash")
             entries, sessions, commits = self.committed()

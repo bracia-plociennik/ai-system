@@ -6,10 +6,14 @@ import hashlib
 from work_evidence import (require, shape, version, digest, canonical_bytes, read_json,
                            safe_path, file_hash, validate_config, validate_registry)
 from work_evidence_ledger import Ledger, atomic_write
+from local_paths import LocalPathError, resolve_path
 
 
 def init_preview(workspace, request):
-    workspace = Path(workspace)
+    try:
+        workspace = resolve_path(workspace, base=Path.cwd(), allow_relative=True)
+    except LocalPathError:
+        require(False, "invalid-workspace", "init")
     require(workspace.is_dir() and not workspace.is_symlink(), "invalid-workspace", "init")
     shape(request, {"schema_version", "config", "entities"})
     version(request)
