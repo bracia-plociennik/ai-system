@@ -85,6 +85,14 @@ For multiple registered workspaces:
 
 ## Local Paths
 
+Task vaults, Work Evidence roots and project orchestration share the bounded
+[local path contract](.systems/ai/core/local-paths.md). `${HOME}`, `${AI_SYSTEM_HOME}`
+and `${AI_SYSTEM_WORKSPACE_HOME}` resolve to absolute selected roots without shell
+execution. Markdown tasks operate without TaskForge. Work Evidence keeps raw config
+hashes and binds new prepared transactions to their resolved path context; existing
+history is not rewritten. This capability does not migrate local workspace configs
+or change the installed AI Workflow resolver.
+
 Recommended system root:
 
 ```text

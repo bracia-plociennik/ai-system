@@ -7,6 +7,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from local_paths import LocalPathError, resolve_path
 sys.dont_write_bytecode = True
 from execution_efficiency import capability_record
 from validation_support import InvalidEvidence
@@ -59,10 +60,10 @@ def main():
     }
 
     try:
-        workspace = args.workspace.resolve(strict=True)
+        workspace = resolve_path(args.workspace, base=Path.cwd(), allow_relative=True)
         if not workspace.is_dir():
             blockers.append("selected workspace is not a directory")
-    except OSError:
+    except (OSError, LocalPathError):
         blockers.append("selected workspace does not exist")
         print(json.dumps(result, indent=2))
         return 1
@@ -93,10 +94,18 @@ def main():
                 if len(values) != 1 or not values[0] or values[0].startswith("<"):
                     blockers.append("links.md must have exactly one resolved repo-path")
                 else:
-                    source = Path(values[0])
-                    linked_repo = (source if source.is_absolute() else workspace / source).resolve()
+                    try:
+                        linked_repo = resolve_path(values[0], workspace=workspace,
+                                                   base=workspace, allow_relative=True)
+                    except LocalPathError:
+                        blockers.append("invalid linked repository path context")
 
-    explicit_repo = args.repo.resolve() if args.repo else None
+    try:
+        explicit_repo = (resolve_path(args.repo, workspace=workspace,
+                                      base=Path.cwd(), allow_relative=True) if args.repo else None)
+    except LocalPathError:
+        blockers.append("invalid explicit repository path context")
+        explicit_repo = None
     if linked_repo and explicit_repo and linked_repo != explicit_repo:
         blockers.append("explicit repo and project-state repo-path disagree")
     repo = explicit_repo or linked_repo
@@ -104,6 +113,7 @@ def main():
         blockers.append("an explicit repo or project-state repo-path is required")
     elif not repo.is_dir():
         blockers.append("target repository does not exist")
+        result["source_availability"] = "pending"
     else:
         result["repository"] = str(repo)
         root = git(repo, "rev-parse", "--show-toplevel")

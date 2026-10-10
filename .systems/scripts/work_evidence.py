@@ -166,6 +166,9 @@ def safe_path(root, relative, *, must_exist=True):
 
 
 def validate_config(config, workspace=None):
+    from copy import deepcopy
+    from local_paths import LocalPathError, resolve_path
+    config = deepcopy(config)
     shape(config, {"schema_version", "workspace_id", "source_roots", "ledger_roots"},
           {"timezone", "report_policy", "editorial_policy"})
     version(config)
@@ -173,6 +176,11 @@ def validate_config(config, workspace=None):
     require(isinstance(config["source_roots"], dict), "invalid-shape", "source_roots")
     for alias, root in config["source_roots"].items():
         identifier(alias, "root_alias")
+        try:
+            root = str(resolve_path(root, workspace=workspace))
+        except LocalPathError:
+            raise EvidenceError("invalid-root", "source_roots") from None
+        config["source_roots"][alias] = root
         require(isinstance(root, str) and Path(root).is_absolute()
                 and Path(root).is_dir() and not Path(root).is_symlink(),
                 "invalid-root", "source_roots")
@@ -180,7 +188,12 @@ def validate_config(config, workspace=None):
                 "forbidden-source", "source_roots")
     require(isinstance(config["ledger_roots"], list) and bool(config["ledger_roots"]),
             "missing-root", "ledger_roots")
-    for root in config["ledger_roots"]:
+    for index, root in enumerate(config["ledger_roots"]):
+        try:
+            root = str(resolve_path(root, workspace=workspace))
+        except LocalPathError:
+            raise EvidenceError("invalid-root", "ledger_roots") from None
+        config["ledger_roots"][index] = root
         require(isinstance(root, str) and Path(root).is_absolute() and Path(root).is_dir()
                 and not Path(root).is_symlink(), "invalid-root", "ledger_roots")
         if workspace:

@@ -1,5 +1,11 @@
 # Task Management
 
+Local root expressions follow `local-paths.md`. Markdown TaskNotes are the task
+store; TaskForge is optional UI. The historical taskforge-vault.local.md filename
+and enabled flag select an available local store, not a running UI requirement.
+Config and explicit vault arguments use the shared resolver; no directories or
+task lifecycle changes are implied by resolution.
+
 ## Purpose
 
 AI System can work with a local TaskForge/Obsidian vault as a `local-markdown-task-store`.

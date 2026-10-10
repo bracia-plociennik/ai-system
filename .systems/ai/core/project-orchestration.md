@@ -1,5 +1,10 @@
 # Project Orchestration
 
+Repository/workspace roots and project-state repo-path expressions follow
+`local-paths.md`. Links use the selected workspace as their relative base; explicit
+repo arguments retain the caller's explicit CWD base. Missing source directories
+stay pending and block dependent execution, without cloning or status writes.
+
 Strict cross-system adaptation uses `orchestration-compatibility.md` and the contract-2 access-set template. Original contract-1 reducer snapshots remain inspection-only, not installed capability proof. Complete source pins never prove native isolation/capacity; unknown uses serial fallback. Future Git decisions follow `phase-commit-policy.md`; current explicit no-commit remains in force.
 
 ## Efficiency Capability Boundary

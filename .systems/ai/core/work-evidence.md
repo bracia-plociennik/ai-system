@@ -12,7 +12,12 @@ Default entry visibility is internal; downstream text has separate approvals.
 
 The shared validator is .systems/scripts/work_evidence.py, schema version 1.
 Unknown versions fail closed without migration. Each workspace config selects
-explicit absolute source roots and nearest-owner ledger roots. Roots are local,
+explicit source roots and nearest-owner ledger roots resolved to absolute paths
+under `local-paths.md`. New prepared transaction manifests use schema 2 with a
+hash-covered resolved path context; legacy schema-1 manifests remain immutable
+and replay only under literal absolute root configuration. Canonical entries,
+sessions, config and commit records retain schema 1. Unknown versions fail closed.
+Roots are local,
 approved namespaces; no discovery of private data through recursive scans.
 
 An entry carries UUID entry_id and work_id, immutable owner_workspace, revision,
