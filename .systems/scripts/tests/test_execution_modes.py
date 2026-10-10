@@ -351,6 +351,22 @@ class CapabilityTests(unittest.TestCase):
     def save(self):
         self.profile.write_text(json.dumps(self.record))
 
+    def test_tested_tree_cannot_be_restamped_to_new_live_sources(self):
+        self.install()
+        relative='.systems/ai/core/autopilot.md';p=self.root/relative;p.write_text('new committed contract')
+        self.git('add',relative);self.git('-c','user.name=Synthetic Test','-c','user.email=test@example.invalid','commit','-m','synthetic changed source')
+        self.record['sources'][relative]['sha256']=hashlib.sha256(p.read_bytes()).hexdigest();self.save()
+        self.assertEqual(workflow_support(self.root)['status'],'invalid')
+
+    def test_missing_tested_commit_and_tested_mode_rejected(self):
+        self.install();self.record['tested_commit']='0'*40;self.save()
+        self.assertEqual(workflow_support(self.root)['status'],'invalid')
+        self.record['tested_commit']=self.git('rev-parse','HEAD')
+        relative='.systems/ai/core/autopilot.md';p=self.root/relative;p.chmod(0o755)
+        self.git('add',relative);self.git('-c','user.name=Synthetic Test','-c','user.email=test@example.invalid','commit','-m','synthetic mode drift')
+        self.record['sources'][relative]['mode']='100755';self.save()
+        self.assertEqual(workflow_support(self.root)['status'],'invalid')
+
     def test_old_workflow_falls_back(self):
         self.install()
         path = self.root / ".systems/ai/core/execution-modes.md"

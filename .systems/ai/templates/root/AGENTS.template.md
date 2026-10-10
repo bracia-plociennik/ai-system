@@ -1,5 +1,8 @@
 # AGENTS.md
 
+For free-form new work, use `.systems/ai/core/intent-to-execution-brief.md` inside existing intake. Preserve original intent, minimal provenance/disposition and exact permission/phase ceiling. Optional private style follows `.systems/ai/core/style-profile.md`; current instruction wins, observations stay tentative, feedback writes require exact scoped consent. No new phase, automatic TaskNotes or profile-based approval.
+
+
 ## Purpose
 
 This file is the generated local root agent contract for AI System management.

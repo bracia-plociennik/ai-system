@@ -1,5 +1,10 @@
 # Task Intake
 
+## Intent brief and private style context
+
+Use intent-to-execution-brief.md during existing intake: minimal inline/embedded fields with provenance and disposition; preserve original request/accepted decisions as independent QA anchors. Batch triage and current action/phase ceilings remain first. This adds no phase or approval. Use style-profile.md for optional explicitly enabled local style; recording needs actual exact-target consent and minimal provenance/privacy, observations stay tentative and current instruction overrides profile. Invalid/disabled profile supplies no preferences. Auto chooses only covered reversible options and queues protected owner decisions; Human groups material questions, settled answers not repeated and noninteractive routes stay so.
+
+
 ## Bounded Defect Eligibility
 
 Use `execution-efficiency.md` for an approved reversible defect with known consumers, observable
