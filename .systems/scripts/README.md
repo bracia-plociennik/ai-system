@@ -157,3 +157,10 @@ The core smoke copy fetches the current local product HEAD into its own Git obje
 `check-naming` validates strict Markdown filenames while allowing canonical `SKILL.md` contracts and legacy/context source material.
 
 SPOR V4 daily artifacts use `sync-personal-ops-check-ins-v4` and the V4-aware daily renderer. A real refresh atomically writes `check-ins-v4.jsonl`, `check-ins-v4.csv`, `check-ins-v4.metrics.csv`, `check-ins-v4.md`, and `check-ins-v4.trends.md`; `--status-only` is read-only. The compatibility read model combines fresh V3 and V4 records without rewriting either source and stops on a partial V4 official set. Combined weekly artifacts use `render-personal-ops-weekly-summary`; private V4 trends exclude raw review, finance, calorie, macro, sleep, and client details.
+
+
+## Intent brief and private style
+
+`style-profile inspect|project|prepare|apply` manages a private schema1 advisory profile using explicit selected absolute workspace, canonical owner path, scope and revision guard. Coordinator must verify real exact-target consent and semantic privacy; metadata cannot authenticate it. `style_profile.py` is standalone; TaskForge and nested Workflow are optional. Profile/key disable and history/provenance are preserved.
+
+`check-intent-to-execution-brief` runs offline synthetic state/corpus tests. `--workflow-root <absolute-install> --expected-head <accepted-sha>` checks AI System-owned Workflow brief16 pins against real tested tree/current tree/index/live bytes/modes. `intent_brief.py` is a pure independent consumer. Mode14 reader now also verifies real tested-tree integrity; `verify_execution_modes_counterpart.py` uses disposable fixtures with only local accepted tested objects. These checks are supporting-only; native behavior and authority are independently reviewed.

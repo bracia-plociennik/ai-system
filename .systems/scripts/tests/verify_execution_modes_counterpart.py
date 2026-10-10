@@ -34,7 +34,7 @@ def run(root, projection, expected=None, reject=False):
                 raise ValueError("counterpart mismatch for " + key)
 
 
-def preflight_cases(frozen_root, initial):
+def preflight_cases(frozen_root, initial, accepted_root):
     """Build a disposable target installation; never mutate the counterpart."""
     with tempfile.TemporaryDirectory() as directory:
         target = Path(directory) / "target"
@@ -51,6 +51,10 @@ def preflight_cases(frozen_root, initial):
                 subprocess.run(["git", "-C", str(repository), "add", ".systems"], capture_output=True, check=True)
             subprocess.run(["git", "-C", str(repository), "-c", "user.name=Synthetic Test", "-c",
                             "user.email=test@example.invalid", "commit", "-m", "synthetic installation"], capture_output=True, check=True)
+        # Preserve strict tested-tree proof without inheriting producer history in HEAD.
+        tested = workflow_support(accepted_root)["tested_commit"]
+        subprocess.run(["git", "-C", str(workflow), "fetch", "--no-tags", str(accepted_root), tested],
+                       capture_output=True, check=True)
         runtime = target / "ai-workflow-workspace"
         repo_state = runtime / "repo/core"
         project = runtime / "projects/example-project"
@@ -204,7 +208,7 @@ def main():
             state["execution"]["mode"] = "human-coop"
             run(source, state, reject=True)
             scenarios.append("human-material-choice-retains-owner-gate")
-            scenarios.extend(preflight_cases(clone, initial))
+            scenarios.extend(preflight_cases(clone, initial, root))
             for name, digest in pinned.items():
                 if hashlib.sha256((root / name).read_bytes()).hexdigest() != digest:
                     raise ValueError("counterpart changed during inspection; refresh snapshot")

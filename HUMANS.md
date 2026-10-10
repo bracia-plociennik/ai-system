@@ -694,3 +694,8 @@ Najpierw wykonaj semantic QA, findings-first review i product checks. Jeśli AI 
 Wszystkie profile dostarczają tylko supporting evidence. PASS wymaga pełnego semantic/product evidence. Skipped checks potrzebują reason, impact i residual risk.
 
 `fast` is limited to diff, path-oriented privacy, and required-artifact checks. `scoped --checks` runs only shared diff/privacy checks plus unique selected validators. Use risk and behavioral scope, not file path alone, to classify a high-impact change. CI runs `full` for PRs and pushes to `main`.
+
+
+## Intent brief and local style
+
+Free-form requests are interpreted inside existing intake, preserving goal, explicit exclusions and authorization. Auto resolves covered choices; Human asks grouped material questions. Optional local schema1 style profile learns only under scoped owner opt-in from explicit corrections and marked tentative observations, preserves revisions/provenance and supports correction/disable. Current instructions always win; no raw conversation ingestion or new permission. See `.systems/ai/core/intent-to-execution-brief.md` and `.systems/ai/core/style-profile.md`.

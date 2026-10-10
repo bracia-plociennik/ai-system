@@ -353,7 +353,16 @@ def workflow_support(root):
                 mismatches.append(name)
         if mismatches:
             return {**result, "source_head": head, "mismatched_sources": mismatches}
-        return {**result, "status": "source-bound", "fallback": "none", "reason": "reviewed actual Workflow sources match committed, index and live inputs",
+        tested = record["tested_commit"]
+        if git_bytes(root, "cat-file", "-t", tested).decode().strip() != "commit":
+            raise InvalidWork("tested Workflow source is not a commit")
+        for name, entry in record["sources"].items():
+            row = git_bytes(root, "ls-tree", tested, "--", name).decode().strip().split()
+            if len(row) != 4 or row[0] != entry["mode"] or row[1] != "blob" or row[3] != name:
+                raise InvalidWork("tested Workflow tree shape/mode mismatch: " + name)
+            if hashlib.sha256(git_bytes(root, "cat-file", "blob", row[2])).hexdigest() != entry["sha256"]:
+                raise InvalidWork("tested Workflow tree bytes mismatch: " + name)
+        return {**result, "status": "source-bound", "fallback": "none", "reason": "reviewed actual Workflow sources match tested tree, committed, index and live inputs",
                 "mode_mapping": record["mode_mapping"], "delivery_mapping": record["delivery_mapping"],
                 "source_head": head, "tested_commit": record["tested_commit"],
                 "profile_sha256": hashlib.sha256(PROFILE_PATH.read_bytes()).hexdigest()}

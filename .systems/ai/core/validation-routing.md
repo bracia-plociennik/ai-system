@@ -92,3 +92,8 @@ This contract decides whether scripts are applicable and when they run. Profile 
 Validation routing does not weaken privacy, risk, permissions, owner approvals, acceptance criteria, evidence, Delivery Constraints, Distillation State, contract compliance, or final acceptance.
 
 A skipped inapplicable AI System script is not a skipped product check.
+
+
+## Intent brief supporting verification
+
+check-intent-to-execution-brief runs standalone synthetic profile/corpus regressions in standard/full. With --workflow-root and explicit --expected-head it purely inspects accepted installed source capability; no writes, install, native proof or owner consent. Full source gates include smoke. Native25-case paired original-input review is separate required implementation evidence; green scripts are supporting-only. Existing execution-mode fixed14 contract1/readiness2/QA2/Capture2 unchanged.

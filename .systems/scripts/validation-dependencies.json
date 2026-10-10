@@ -1,6 +1,12 @@
 {
   "contract": 1,
   "checks": {
+    "check-intent-to-execution-brief": {
+      "dependencies": ["check-execution-modes"],
+      "runtime_capable": false,
+      "category": "integration",
+      "inputs": {"complete": true, "mode": "product-tree"}
+    },
     "check-product-publication": {
       "dependencies": [],
       "runtime_capable": false,

@@ -277,3 +277,8 @@ Use semantic and product QA first. AI Workflow validation applies to its own art
 For an approved non-exempt work unit, use `.systems/ai/templates/workspace/project-state/orchestration-record.template.md` at the nearest owner's `project-state/<project>/orchestration/<work-id>.md`. Keep the record limited to coordination metadata and privacy-safe paths. It does not replace local Workflow status, AI System Distillation State, or a required workflow change request. Do not put it inside a managed repository or copy private client content into a cross-project artifact.
 
 V1 has no scheduler, background agent launcher, or lock service. Inspect the target's installed Workflow version; do not assume all nested clones have the same features. Changes needed in upstream AI Workflow follow a separate approved change and a privacy-safe cross-system handoff.
+
+
+## Intent brief boundary
+
+Use intent-to-execution-brief.md: original owner intent and accepted decisions remain independent verification inputs; an inferred brief or style profile cannot supply permission, scope or final acceptance. Style-profile.md permits only explicitly scoped, provenance-bearing private advisory feedback. Consumer handoff preserves original scope/DoD/exclusions, mode/source, supplied limits, actual action ceiling, corrections and sanitized optional style projection; consumer verifies local gates itself.

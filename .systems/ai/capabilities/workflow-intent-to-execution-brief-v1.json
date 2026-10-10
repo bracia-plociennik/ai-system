@@ -1,0 +1,78 @@
+{
+  "contract": "intent-to-execution-brief-v1",
+  "semantic_version": 1,
+  "tested_commit": "f9b6553d458def1ef5f419f96938e143d567dd0c",
+  "mode_mapping": {
+    "auto": "auto",
+    "human": "human-coop"
+  },
+  "delivery_mapping": {
+    "auto-unconstrained": "auto-unbounded"
+  },
+  "sources": {
+    ".systems/ai/core/command-routing.md": {
+      "sha256": "9a7b57202686c5d36105f1d0023d21239dee28b07fbe36c28fa7cae60cf3af84",
+      "mode": "100644"
+    },
+    ".systems/ai/core/delivery-constraints.md": {
+      "sha256": "e1be1e98058c84eabdd0a677e786ee95c1ede381e260572e4343984e2c146382",
+      "mode": "100644"
+    },
+    ".systems/ai/core/execution-modes.md": {
+      "sha256": "1085407af66d6766150e1f532173ace83196dfa70dc8b5e33ea1542c4e388d15",
+      "mode": "100644"
+    },
+    ".systems/ai/core/full-qa-verification.md": {
+      "sha256": "e70455ba241feea045468819c08a269b838066afd4ea75a6f6439da29dec55ef",
+      "mode": "100644"
+    },
+    ".systems/ai/core/intent-to-execution-brief.md": {
+      "sha256": "48cf18e3e6bd1fee00afb0389ac91c7ff2dd7b9dcaca7ad289d6e79bef393e51",
+      "mode": "100644"
+    },
+    ".systems/ai/core/owner-decision-checkpoints.md": {
+      "sha256": "705b8c700fd2ff4ffc36906645ff412bdad9ad6f763c14c8a9bf169130933c76",
+      "mode": "100644"
+    },
+    ".systems/ai/core/permissions.md": {
+      "sha256": "3e676e7b54f96301f5fe5dc435fc81ea95756cb9aba3f797dc642699ce405a18",
+      "mode": "100644"
+    },
+    ".systems/ai/core/phase-commit-policy.md": {
+      "sha256": "3b4e51dc119e7d686ff0c81f190c92c2dff62d4467abbe7a5006d4f1bdf99b93",
+      "mode": "100644"
+    },
+    ".systems/ai/core/prompt-composition.md": {
+      "sha256": "d993c16a5bde926c44934b301cc9222ce9ce567bd36b1bcdf7251f3d04211922",
+      "mode": "100644"
+    },
+    ".systems/ai/core/quality-review.md": {
+      "sha256": "0b16489ab1896edbdc1582ec72c85b2ba3710a1c1b62468b08bab95fc28f0cd8",
+      "mode": "100644"
+    },
+    ".systems/ai/core/risk-model.md": {
+      "sha256": "24acc42aa62d71d52622343ddc89d6167e335d1cd8c651fe05e70fb85184a5d1",
+      "mode": "100644"
+    },
+    ".systems/ai/core/style-profile.md": {
+      "sha256": "b0f16b820b43ca71ba3f0bb9597ceca9cd7240ed9c413d7573bec568d1f82e05",
+      "mode": "100644"
+    },
+    ".systems/ai/core/task-intake.md": {
+      "sha256": "922282704b4683a081d5bb87f833d2bdb654ab582c5c87d864dab04441242231",
+      "mode": "100644"
+    },
+    ".systems/scripts/lib/style-profile.py": {
+      "sha256": "148af5af2b220271d1cdac5068a558b4dc6b77097e806c0ec04a8ed7424124f8",
+      "mode": "100644"
+    },
+    ".systems/scripts/style-profile": {
+      "sha256": "99960df4c10e4b0e5bc1e4a02b4047f7cda9dfa6576f8a3262f507cd5b6b8abe",
+      "mode": "100755"
+    },
+    "AGENTS.md": {
+      "sha256": "05494df3518f0ba1d00f2ab9cda41b0df2c584f043c40e6658e6527f72104811",
+      "mode": "100644"
+    }
+  }
+}
