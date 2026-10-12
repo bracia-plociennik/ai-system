@@ -70,6 +70,9 @@ def snapshot(repo, project, task, dependencies=()):
 
 
 def verify_snapshot(value, repo):
+    if isinstance(value, dict) and isinstance(value.get("body"), dict) and value["body"].get("binding") == "runtime-scope-v1":
+        from runtime_source_binding import verify_runtime_snapshot
+        return verify_runtime_snapshot(value, repo)
     require(isinstance(value, dict) and value.get("sha256") == digest(value.get("body")), "snapshot fingerprint mismatch")
     body = value["body"]
     require(body.get("schema") == 1 and body.get("role") == "implementation-quality", "unsupported QA snapshot role")

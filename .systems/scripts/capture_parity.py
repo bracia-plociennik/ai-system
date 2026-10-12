@@ -71,7 +71,10 @@ def validate_formal(path, workspace):
         if value["Capture schema"] == "3":
             snapshot_file = contained(evidence, item["snapshot_path"])
             require(fingerprint(snapshot_file) == item["snapshot_sha256"], "snapshot file changed")
-            verify_qa_binding(json.loads(snapshot_file.read_text()), source, qpath, p["project"], task)
+            snapshot = json.loads(snapshot_file.read_text())
+            if snapshot["body"].get("binding") == "runtime-scope-v1":
+                require(p["source_head"] == snapshot["body"]["head"], "capture assessed HEAD provenance mismatch")
+            verify_qa_binding(snapshot, source, qpath, p["project"], task)
         else:
             quality_gate(text)
             require(text.splitlines().count('- QA verification contract: `full-qa-verification-v2`') == 1, "unsupported formal QA contract")
