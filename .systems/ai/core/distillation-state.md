@@ -88,3 +88,12 @@ For existing canonical records, a single pair of Markdown backticks around a fie
 ## Privacy And Scope
 
 State records contain paths and workflow metadata only. Do not copy raw client data, secrets, credentials, private keys, production data, check-in content, or project-specific domain content into cross-project reports.
+
+## Opt-in runtime source binding
+
+Capture schema 3 may bind fresh full-qa-verification-v3 QA to a namespace-complete
+`runtime-scope-v1` snapshot (snapshot schema 2). See runtime-capture-binding.md.
+This is separate from schema-1 whole-repository source-only commit equivalence.
+No historical QA or Capture conversion is automatic; a new assessed QA and
+checksum-bound scope definition are required. The source_head remains the exact
+assessed commit from the snapshot, not a rewritten current workspace HEAD.

@@ -253,4 +253,8 @@ if [[ -n "$workspace" ]]; then
   python3 -B "$repo_root/.systems/scripts/check-orchestration-compatibility" "${parity_args[@]}" || fail=1
 fi
 
+if [[ -z "$workspace" ]]; then
+  python3 -B "$repo_root/.systems/scripts/tests/test_runtime_source_binding.py" || fail=1
+fi
+
 exit "$fail"
