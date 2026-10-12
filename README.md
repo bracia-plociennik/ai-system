@@ -502,3 +502,8 @@ Review selected workspace dump/incoming and classify files. Do not move, rename,
 ## Intent brief and local style
 
 Free-form requests are interpreted inside existing intake, preserving goal, explicit exclusions and authorization. Auto resolves covered choices; Human asks grouped material questions. Optional local schema1 style profile learns only under scoped owner opt-in from explicit corrections and marked tentative observations, preserves revisions/provenance and supports correction/disable. Current instructions always win; no raw conversation ingestion or new permission. See `.systems/ai/core/intent-to-execution-brief.md` and `.systems/ai/core/style-profile.md`.
+
+
+## Goal-focused maintenance (scoped opt-in)
+
+See `.systems/ai/core/goal-focused-maintenance.md`. Incidental issues use one private owner queue, 600 seconds per stable parent across resumes/adapters, editable escalation floors E01–E05, and a consolidated summary at five active distinct causes or the third actually affected task. Immediate/current-goal risks retain truthful gates. Request, milestone and authorized Dreaming reviews are read-only; no background executor, TaskNotes, migration or install follows. `.systems/scripts/check-goal-focused-maintenance` tests standalone policy and actual canonical consumers. Paired runtime projection additionally requires complete reviewed committed Workflow source support; the counterpart profile is evidence, never activation or approval.

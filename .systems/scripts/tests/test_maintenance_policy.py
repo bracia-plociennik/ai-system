@@ -6,6 +6,8 @@ import os
 import sys
 import tempfile
 import unittest
+from importlib.machinery import SourceFileLoader
+import subprocess
 from copy import deepcopy
 from datetime import datetime,timedelta,timezone
 
@@ -22,7 +24,7 @@ def load_tests(loader,tests,pattern):
     # a second private queue or a forked list of scenario expectations.
     source=WORKFLOW/'.systems/scripts/lib/maintenance-tests.py'
     if not source.is_file():
-        return unittest.TestSuite([loader.loadTestsFromTestCase(StandalonePolicyTests), loader.loadTestsFromTestCase(AdapterTests), loader.loadTestsFromTestCase(SystemCaptureGoalTests)])
+        return unittest.TestSuite([loader.loadTestsFromTestCase(StandalonePolicyTests), loader.loadTestsFromTestCase(AdapterTests), loader.loadTestsFromTestCase(SystemCaptureGoalTests), loader.loadTestsFromTestCase(ReviewIntegrationTests)])
     spec=importlib.util.spec_from_file_location('shared_maintenance_tests',source)
     module=importlib.util.module_from_spec(spec);sys.modules[spec.name]=module;spec.loader.exec_module(module)
     module.m=system
@@ -31,6 +33,7 @@ def load_tests(loader,tests,pattern):
         suite.addTests(loader.loadTestsFromTestCase(cls))
     suite.addTests(loader.loadTestsFromTestCase(AdapterTests))
     suite.addTests(loader.loadTestsFromTestCase(SystemCaptureGoalTests))
+    suite.addTests(loader.loadTestsFromTestCase(ReviewIntegrationTests))
     return suite
 
 
@@ -355,5 +358,71 @@ class StandalonePolicyTests(unittest.TestCase):
         self.assertRaises(m.Invalid, self.start, q, start=0, interval='clock-reset')
         q = self.observed(); q['issues'][0]['source_refs'] = [str(self.owner / 'missing')]
         self.assertRaises(m.Invalid, m.validate_queue, q, str(self.owner))
+
+class ReviewIntegrationTests(unittest.TestCase):
+    def test_actual_dreaming_guard_and_review_preserve_all_inputs(self):
+        loader=SourceFileLoader('actual_dreaming_guard',str(SCRIPTS/'check-dreaming-scope'))
+        spec=importlib.util.spec_from_loader(loader.name,loader);guard=importlib.util.module_from_spec(spec);loader.exec_module(guard)
+        with tempfile.TemporaryDirectory() as temp:
+            workspace=Path(temp);owner=workspace/'project-state/example'
+            owner.mkdir(parents=True);evidence=owner/'evidence.md';evidence.write_text('synthetic independent source')
+            queue=owner/'maintenance/queue.json';queue.parent.mkdir()
+            queue.write_text(json.dumps(system.empty_queue(owner))) # synthetic fixture, not a live queue creation route
+            runs=workspace/'dreams/runs/example';runs.mkdir(parents=True)
+            scope=workspace/'dreams/dreaming-scope.local.md'
+            scope.write_text('- Scope contract: 1\n- Policy mode: narrow-only\n## Allowed Workspace Sources\n| Source path |\n| --- |\n| project-state/example/maintenance/queue.json |\n## Excluded Workspace Paths\n| Match type | Value | Reason |\n| --- | --- | --- |\n| basename | .env | secret |\n')
+            report=runs/'dream-report.md'
+            report.write_text('- Scope contract: 1\n- Scope policy: dreams/dreaming-scope.local.md\n- Scope preflight: pending\n- Dream variant: workspace-artifacts-only\n- Project/source path: not-applicable\n## Source Inventory\n| Source path | Source type | Reviewed? | Notes |\n| --- | --- | --- | --- |\n| project-state/example/maintenance/queue.json | project-state | no | synthetic |\n')
+            before={str(p):p.read_bytes() for p in workspace.rglob('*') if p.is_file()}
+            guard.validate_report(workspace,report,False)
+            result=system.read_only_review(str(owner),str(queue),str(owner/'policy.json'),reason='dreaming')
+            self.assertEqual(result['mutations'],[]);self.assertFalse(result['delivered'])
+            self.assertEqual(before,{str(p):p.read_bytes() for p in workspace.rglob('*') if p.is_file()})
+            # A Workflow repository queue is not a workspace-artifact source.
+            repo=workspace/'projects/repository';canonical=repo/'ai-workflow-workspace/projects/example/maintenance/queue.json'
+            canonical.parent.mkdir(parents=True);canonical.write_bytes(queue.read_bytes())
+            invalid=report.read_text().replace('project-state/example/maintenance/queue.json','projects/repository/ai-workflow-workspace/projects/example/maintenance/queue.json')
+            report.write_text(invalid)
+            self.assertRaises(guard.ScopeError,guard.validate_report,workspace,report,False)
+            report.write_text(invalid.replace('Dream variant: workspace-artifacts-only','Dream variant: full-repo').replace('Project/source path: not-applicable','Project/source path: '+str(repo)).replace('projects/repository/ai-workflow-workspace','ai-workflow-workspace').replace('| project-state |','| repo-source |'))
+            guard.validate_report(workspace,report,False)
+
+    def test_registered_counterpart_profile_is_typed_complete_evidence(self):
+        profile=system.decode((SCRIPTS.parents[1]/'.systems/ai/capabilities/workflow-goal-focused-maintenance-v1.json').read_text())
+        self.assertEqual(profile['authority'],'none');self.assertEqual(profile['wire_schema'],1)
+        self.assertGreater(len(profile['source_population']),100)
+        self.assertIn('.systems/scripts/lib/capture-record.py',profile['source_population'])
+
+    def test_actual_committed_pair_uses_one_queue_budget_and_projection(self):
+        source=WORKFLOW/'.systems/scripts/lib/maintenance-policy.py'
+        if not source.is_file():
+            self.skipTest('supported paired source absent; standalone core and System consumers remain mandatory')
+        spec=importlib.util.spec_from_file_location('verified_workflow_core',source)
+        workflow=importlib.util.module_from_spec(spec);sys.modules[spec.name]=workflow;spec.loader.exec_module(workflow)
+        profile=system.decode((SCRIPTS.parents[1]/'.systems/ai/capabilities/workflow-goal-focused-maintenance-v1.json').read_text())
+        head=subprocess.check_output(['git','-C',str(WORKFLOW),'rev-parse','HEAD'],text=True).strip()
+        proof=system.verify_support(WORKFLOW,head,profile)
+        self.assertFalse(proof['activated']);self.assertEqual(proof['authority'],'none')
+        with tempfile.TemporaryDirectory() as temp:
+            owner=Path(temp);ev=owner/'evidence.md';ev.write_text('synthetic verified own scope')
+            q=system.empty_queue(owner)
+            issue=dict(id='issue',cause_key='cause',safe_summary='Independent index',source_refs=[str(ev)],goal_ref='goal',affected_scope=['goal'],first_seen=time_at(),last_seen=time_at(),occurrence_task_ids=[],impact='none',independence_evidence=str(ev),immediate_rule_ids=[],state='open',defer_reason=None,next_trigger=None,resolution_evidence=None,notification_episode=None)
+            q=workflow.observe(q,issue,'parent',time_at())
+            q=workflow.begin_interval(q,'parent',dict(id='interval',start=time_at(),end=None,state='active',reason='diagnosis',evidence_ref=str(ev)),0,str(ev),0)
+            q=system.end_interval(q,'parent','interval',time_at(600),str(ev))
+            (owner/'maintenance').mkdir()
+            path=str(owner/'maintenance/queue.json')
+            q=workflow.atomic_update(str(owner),path,0,lambda _:q,lambda *_:True)
+            policy=system.defaults();facts=system.Facts('goal','parent',str(owner),True,False,(),True,True,True,True)
+            before=Path(path).read_bytes()
+            actual=system.workflow_projection(WORKFLOW,head,profile,q,policy,'issue',facts)
+            self.assertEqual(actual,workflow.project(q,policy,'issue',facts))
+            self.assertEqual(actual['repair_eligibility'],'ineligible');self.assertEqual(len(q['budgets']),1)
+            self.assertEqual(system.consumed(q['budgets'][0],time_at(601)),600)
+            self.assertEqual(Path(path).read_bytes(),before)
+            corrupt=deepcopy(profile);corrupt['wire_schema']=2
+            self.assertRaises(system.Invalid,system.workflow_projection,WORKFLOW,head,corrupt,q,policy,'issue',facts)
+            self.assertEqual(Path(path).read_bytes(),before)
+
 
 if __name__=='__main__':unittest.main()
