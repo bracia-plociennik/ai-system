@@ -19,6 +19,9 @@ fi
 required=(
   ".systems/ai/core/runtime-capture-binding.md"
   ".systems/scripts/runtime_source_binding.py"
+  ".systems/scripts/product_source_binding.py"
+  ".systems/scripts/tests/test_product_source_binding.py"
+  ".systems/ai/core/product-capture-binding.md"
   ".systems/scripts/tests/test_runtime_source_binding.py"
   ".systems/ai/core/product-publication.md"
   ".systems/scripts/product_publication.py"

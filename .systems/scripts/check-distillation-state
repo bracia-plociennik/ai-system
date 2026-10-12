@@ -255,6 +255,7 @@ fi
 
 if [[ -z "$workspace" ]]; then
   python3 -B "$repo_root/.systems/scripts/tests/test_runtime_source_binding.py" || fail=1
+  python3 -B "$repo_root/.systems/scripts/tests/test_product_source_binding.py" || fail=1
 fi
 
 exit "$fail"

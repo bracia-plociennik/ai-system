@@ -72,7 +72,7 @@ def validate_formal(path, workspace):
             snapshot_file = contained(evidence, item["snapshot_path"])
             require(fingerprint(snapshot_file) == item["snapshot_sha256"], "snapshot file changed")
             snapshot = json.loads(snapshot_file.read_text())
-            if snapshot["body"].get("binding") == "runtime-scope-v1":
+            if snapshot["body"].get("binding") in {"runtime-scope-v1", "product-scope-v1"}:
                 require(p["source_head"] == snapshot["body"]["head"], "capture assessed HEAD provenance mismatch")
             verify_qa_binding(snapshot, source, qpath, p["project"], task)
         else:
