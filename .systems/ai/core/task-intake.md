@@ -122,3 +122,10 @@ For a change meeting the strict micro-change criteria in `delivery-constraints.m
 ## Undistilled Work Reminder
 
 When a selected workspace and scope are known, inspect applicable Distillation State records from `.systems/ai/core/distillation-state.md` before switching to an unrelated implementation unit. Report unresolved counts and owner actions without blocking the new task automatically or changing any state.
+
+
+## Goal-Focused Maintenance Integration
+
+Use goal-focused-maintenance.md only after explicit scoped activation and verified local support. One nearest-owner private maintenance/queue.json records proven independent incidental debt; project coordination references the Workflow-owned queue rather than duplicating it. E01–E05 and actual current-goal blockers are immediate. Five distinct active project causes or the third actual affected parent task schedule one consolidated milestone summary; scans/resumes do not count or repeat receipts. One stable approved parent shares TOTAL 600 seconds incidental diagnosis/edit/review/test/record work across both adapters. No background executor, scheduler or automatic TaskNotes. Required current QA and full release/updater failures remain binding. Missing counterpart support keeps existing gates; labels are not activation or authority.
+
+Record accepted goal/DoD/architecture, actual required identities, canonical owner, stable parent and exact approved maintenance roots. Classify unknown impact honestly; no guessed independent scope.

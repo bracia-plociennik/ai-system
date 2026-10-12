@@ -4,6 +4,7 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 workspace=""
 owned_root=""
+goal_work_ids=()
 fail=0
 
 usage() {
@@ -17,6 +18,9 @@ EOF
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --goal-work-id)
+      [[ "$#" -ge 2 ]] || { echo "Missing current work identity" >&2; exit 2; }
+      goal_work_ids+=("$2"); shift 2 ;;
     --owned-root)
       owned_root="${2:-}"
       [[ -n "$owned_root" ]] || { echo "Missing value for --owned-root"; exit 2; }
@@ -112,7 +116,20 @@ if rg -n -i -- 'is_distilled[^.\n]{0,100}(authori[sz]e|permit|grant|allow)[^.\n]
   fail=1
 fi
 
-if [[ -n "$workspace" ]]; then
+if [[ "${#goal_work_ids[@]}" -gt 0 ]]; then
+  [[ -n "$workspace" && -n "$owned_root" ]] || { echo "Current-goal selection requires exact --workspace and --owned-root" >&2; exit 2; }
+  python3 -B - "$repo_root/.systems/scripts" "$workspace" "$owned_root" "${goal_work_ids[@]}" <<'GOAL_GATE' || fail=1
+import json,sys
+from pathlib import Path
+sys.path.insert(0,sys.argv[1])
+from capture_parity import goal_collection
+owner=sys.argv[3].rstrip('/')
+if owner != 'capture-state': owner += '/capture-state'
+out=goal_collection(Path(sys.argv[2]),owner,sys.argv[4:])
+print(json.dumps(out,sort_keys=True))
+raise SystemExit(bool(out['invalid']))
+GOAL_GATE
+elif [[ -n "$workspace" ]]; then
   [[ -d "$workspace" ]] || { echo "Workspace does not exist: $workspace"; exit 2; }
   workspace="$(cd "$workspace" && pwd -P)"
 
