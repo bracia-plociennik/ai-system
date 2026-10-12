@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "assessments": [
+    {
+      "path": "quality/phase-1-architecture-qa.md",
+      "sha256": "02560f3884e6bf2081d78fd65fcdd500649d4579d3bd0d5389ccb272ec94c857",
+      "state": "historical",
+      "assessed_head": "1c9efd74a569be68c96b3cc347c8210deaf3cfa9",
+      "decision": "decisions/2026-10-10-history-phase-1-architecture-qa.md",
+      "decision_sha256": "e8588851b88f06f397dc8cfb65e7060cf400e7080f65ba6350741f1b229ef0e0"
+    },
+    {
+      "path": "quality/phase-2-plan-qa.md",
+      "sha256": "9136f3859be86bfdc054e32b14df2ede3008d71b6fcdb62f395e252eeb22c845",
+      "state": "historical",
+      "assessed_head": "1c9efd74a569be68c96b3cc347c8210deaf3cfa9",
+      "decision": "decisions/2026-10-10-history-phase-2-plan-qa.md",
+      "decision_sha256": "d786bf9fa29e4d5d7481672a773d9a8b64a12e24bac36788665ec78c14325a69"
+    },
+    {
+      "path": "quality/phase-3-asys-core-019-local-paths-spec-qa.md",
+      "sha256": "0dedbe55db0ca0d5919677aefe0b9b17dc260350cb4fc25b3d714236f91f7b65",
+      "state": "historical",
+      "assessed_head": "1c9efd74a569be68c96b3cc347c8210deaf3cfa9",
+      "decision": "decisions/2026-10-10-history-phase-3-asys-core-019-local-paths-spec-qa.md",
+      "decision_sha256": "b1867a84e06094b24ccf945d81ee93a2ad136e93518dc77621c68110a5c4754f"
+    },
+    {
+      "path": "quality/phase-3-asys-core-020-intent-brief-spec-qa.md",
+      "sha256": "12681cbbb591707573c90d3cdc7fde196cb53368f9c297a093aeb94d17cf64fe",
+      "state": "historical",
+      "assessed_head": "1799bafbc144e7b5638fd0e009954b2518a682ee",
+      "decision": "decisions/2026-10-10-history-phase-3-asys-core-020-intent-brief-spec-qa.md",
+      "decision_sha256": "f848febb26c85c211ae9ae5e7ff7efcacdd11031bbfc7fb26f081a06333e2355"
+    },
+    {
+      "path": "quality/phase-3-asys-int-021-intent-brief-compatibility-spec-qa.md",
+      "sha256": "d75cd741b419c6141335f0d8b89ff747e31119b2be913bf9c37c76d292d448f9",
+      "state": "historical",
+      "assessed_head": "1799bafbc144e7b5638fd0e009954b2518a682ee",
+      "decision": "decisions/2026-10-10-history-phase-3-asys-int-021-intent-brief-compatibility-spec-qa.md",
+      "decision_sha256": "c2f2940ee688460d2d6565aa44cead3286e47826f86b11a6b08b1f57642a4c62"
+    },
+    {
+      "path": "quality/phase-5-asys-core-019-local-paths-quality.md",
+      "sha256": "a9cf9c06562c2380e82ec01d16dcb2f23c212f04938e274e9c255e00ed85f6fd",
+      "state": "historical",
+      "assessed_head": "1c9efd74a569be68c96b3cc347c8210deaf3cfa9",
+      "decision": "decisions/2026-10-10-history-phase-5-asys-core-019-local-paths-quality.md",
+      "decision_sha256": "7aa66da6f7cc8cf532186d677691adb691a6e689b9e50bfd8731c4f696157193"
+    },
+    {
+      "path": "quality/recovery-phase-1-architecture-qa.md",
+      "sha256": "a8f99bebc59f7e30a6a8513e071f9ae48d42808b5167dd8a3e5ec6216e34c673",
+      "state": "historical",
+      "assessed_head": "1c9efd74a569be68c96b3cc347c8210deaf3cfa9",
+      "decision": "decisions/2026-10-10-history-recovery-phase-1-architecture-qa.md",
+      "decision_sha256": "65b470a33847d20fb9b2584b02fe430c0dd4bae454948721715e7fed19d74fb5"
+    },
+    {
+      "path": "quality/recovery-phase-2-plan-qa.md",
+      "sha256": "b3a9fe047c7c33a25f59895fed30b2e81b9ae9bb825addcc48e22744c60a59e0",
+      "state": "historical",
+      "assessed_head": "1c9efd74a569be68c96b3cc347c8210deaf3cfa9",
+      "decision": "decisions/2026-10-10-history-recovery-phase-2-plan-qa.md",
+      "decision_sha256": "c0da64c15fa6e6b877abbe66beda672dbf64654a29633dbb0563447f21ed5312"
+    },
+    {
+      "path": "quality/recovery-phase-3-asys-core-019-local-paths-spec-qa.md",
+      "sha256": "0f54e2cb5ffb24eabea9f12abed7e68146807f20aec4f07b6cc2ac4fc9dce271",
+      "state": "historical",
+      "assessed_head": "1c9efd74a569be68c96b3cc347c8210deaf3cfa9",
+      "decision": "decisions/2026-10-10-history-recovery-phase-3-asys-core-019-local-paths-spec-qa.md",
+      "decision_sha256": "ec64c658dbaaf0d3b0598e375bc25872eff8ec2c2c52d61bc5aaa72bcf0395ce"
+    },
+    {
+      "path": "quality/recovery-phase-5-asys-core-019-local-paths-quality.md",
+      "sha256": "98457fb824f66ad62b8654d47e28bbf09f6bcab63ff5e9132330cde77d80c7c8",
+      "state": "historical",
+      "assessed_head": "960e4610d5c86945cf2d87f894531794efa7da60",
+      "decision": "decisions/2026-10-10-history-recovery-phase-5-asys-core-019-local-paths-quality.md",
+      "decision_sha256": "81fa2bca98df870256496f2b32c5f26d6586018705cee27f562f700a18f5def0"
+    },
+    {
+      "path": "quality/cr-011-final-2026-10-09/phase-8-final-check.md",
+      "sha256": "22113b59b6cb33612a5ee384747497183eb8133d53e36feba49845a5b0b2f98f",
+      "state": "historical",
+      "assessed_head": "960e4610d5c86945cf2d87f894531794efa7da60",
+      "decision": "decisions/2026-10-10-history-cr-011-final-2026-10-09-phase-8-final-check.md",
+      "decision_sha256": "1c0e4894d8a9395900070d2321a1cb2fa06bd0646fa197a243605b47e5289b0c"
+    },
+    {
+      "path": "quality/cr-012/phase-1-architecture-qa.md",
+      "sha256": "eea12295793242e7ebfb1c045f9cbbb6ee122a734a1b7fcc5d4320c68e3e15c1",
+      "state": "historical",
+      "assessed_head": "1799bafbc144e7b5638fd0e009954b2518a682ee",
+      "decision": "decisions/2026-10-10-history-cr-012-phase-1-architecture-qa.md",
+      "decision_sha256": "11ab1c669c82757fc36c2f80b4c8eaf7f4e0730d0efcd48c064bd6f93643343a"
+    },
+    {
+      "path": "quality/cr-012/phase-2-plan-qa.md",
+      "sha256": "17d724c5d0371b4f2e7ceda7342653979b582420a443b35331a4ce027a71d3e7",
+      "state": "historical",
+      "assessed_head": "1799bafbc144e7b5638fd0e009954b2518a682ee",
+      "decision": "decisions/2026-10-10-history-cr-012-phase-2-plan-qa.md",
+      "decision_sha256": "b29936f65297043bbf156ae3a850b340c4d1280153d6a8d44302afa1c51a3af0"
+    }
+  ]
+}

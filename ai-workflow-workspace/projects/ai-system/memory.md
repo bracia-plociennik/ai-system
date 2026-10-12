@@ -10,10 +10,10 @@ Detailed entries live in `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/`
 
 | Date | Topic | Type | Status | Route |
 | --- | --- | --- | --- | --- |
-| 2026-06-09 | Local workspace architecture decisions | project-decision | active | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/2026-06-09-local-workspace-architecture-decisions.md` |
-| 2026-06-09 | Compact contract operating rules | project-decision | active | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/2026-06-09-compact-contract-operating-rules.md` |
-| 2026-06-15 | Post-final AI System dev state | project-state-memory | active | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/2026-06-15-post-final-ai-system-dev-state.md` |
-| 2026-07-14 | Daily Check-In V3 integrity rules | project-decision | active | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/2026-07-14-daily-check-in-v3-integrity.md` |
+| 2026-06-09 | Local workspace architecture decisions | project-decision | unknown-historical | unavailable original; see evidence-inventory.json |
+| 2026-06-09 | Compact contract operating rules | project-decision | unknown-historical | unavailable original; see evidence-inventory.json |
+| 2026-06-15 | Post-final AI System dev state | project-state-memory | unknown-historical | unavailable original; see evidence-inventory.json |
+| 2026-07-14 | Daily Check-In V3 integrity rules | project-decision | unknown-historical | unavailable original; see evidence-inventory.json |
 | 2026-09-28 | Project Orchestration V1 rules | project-decision | active | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/2026-09-28-project-orchestration-v1.md` |
 | 2026-09-30 | SPOR proposal product boundary | project-decision | active | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/2026-09-30-spor-proposals.md` |
 | 2026-10-01 | Unified aggregate product boundary | project-decision | active | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/2026-10-01-unified-aggregates.md` |
@@ -28,3 +28,7 @@ Detailed entries live in `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/memory/`
 - Project memory records durable project facts only.
 - Future `system-insights` entries must be anonymized.
 - Do not store real customer data or secrets here.
+
+## Current interpretation
+
+Technical entries retain their original dates. Their older deployment/Phase 8 boundaries are historical; subsequent CR-011 delivery is recorded in `implementation/dev-evidence-reconciliation-2026-10-12/delivery-and-history.md`. Unknown early memory entries are unavailable originals, not active rules. Historical evidence references may include private unexported inputs; the versioned inventory states availability explicitly. No archival source, decision or memory grants approval to current work.

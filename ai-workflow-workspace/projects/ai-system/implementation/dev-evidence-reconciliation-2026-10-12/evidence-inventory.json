@@ -1,0 +1,582 @@
+{
+  "schema": 1,
+  "source_baseline": "6e38d0fe89a8d8e758f5d3664c2deca6c5297ab3",
+  "selection": "exact direct indexed artifacts plus historical registry/report/decision closure; not whole workspace",
+  "privacy_review": "Technical product specifications, fake regression inputs, provenance and scoped decisions only; private checkpoint containing author contact information omitted. No credentials, customer records, check-in sources or live scheduler data selected. Regex checks are supplemental to semantic source and scope review.",
+  "historical_inputs": "Original source snapshots and omitted local runtime dependencies are historical provenance, not actionable current references; old QA requires fresh gates for changed-source acceptance.",
+  "artifacts": [
+    {
+      "path": "change-requests/2026-06-09-ai-system-cr-001-compact-contracts.md",
+      "availability": "unavailable",
+      "disposition": "unknown-historical; no placeholder or acceptance inferred"
+    },
+    {
+      "path": "change-requests/2026-09-15-ai-system-cr-006-life-alignment-cards.md",
+      "availability": "tracked",
+      "sha256": "43dfb885b22ab1d95f47bb3cad83d28f1293fd353d3f8896da9b02e16445e96f",
+      "bytes": 1709,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "change-requests/2026-09-28-ai-system-cr-007-project-orchestration.md",
+      "availability": "tracked",
+      "sha256": "450c970104f33e0bdf0cbe843ba9bba8980070f9e62c19fb095f7ad03f1fc882",
+      "bytes": 5879,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "change-requests/2026-10-01-ai-system-cr-009-unified-aggregates.md",
+      "availability": "tracked",
+      "sha256": "f9a38b84932557faf8f090fe5dc30aadc9a7322314e35daabab5a577c376ff99",
+      "bytes": 2284,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "change-requests/2026-10-02-ai-system-cr-010-overnight-schedules.md",
+      "availability": "tracked",
+      "sha256": "4a439295631c84a6af9f943b7648422f2fd5b1fe4f728cd5bbf1d467a9056d19",
+      "bytes": 2828,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "change-requests/2026-10-09-ai-system-cr-011-local-paths.md",
+      "availability": "local-only",
+      "sha256": "c7eb043fa13d6e6b10634c6156d1e8c04d7f82845c9b1b3f8c0da8d77673a519",
+      "bytes": 2430,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "change-requests/2026-10-09-ai-system-cr-012-intent-to-execution-brief.md",
+      "availability": "local-only",
+      "sha256": "61db160832c6d618ef211bd64c57b5db71da49ffd18bb8241e4ccf84270963a5",
+      "bytes": 1852,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "checkpoints/phase-7-checkpoint-2026-09-25-asys-cr-006-follow-up.md",
+      "availability": "tracked",
+      "sha256": "04cdb0ca2c82413c1477349dad33a05d76d113444a3e8ee005b65e3acb1bad70",
+      "bytes": 3791,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "checkpoints/phase-7-checkpoint-2026-09-28-asys-cr-007-project-orchestration.md",
+      "availability": "tracked",
+      "sha256": "aa87391ef2305a219f64bbe806fd8b9d72663456975ec7b5b958028cb329941e",
+      "bytes": 3762,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "checkpoints/phase-7-checkpoint-2026-10-01-cr-009-completion.md",
+      "availability": "tracked",
+      "sha256": "55901fb36fab1be7dc23d8047d7a49b9f04ba873db6ce3172a1ef8c9a5a34025",
+      "bytes": 7376,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "checkpoints/phase-7-checkpoint-2026-10-02-overnight-schedules.md",
+      "availability": "tracked",
+      "sha256": "89111aef324a8e9cc5ffd7bffb0814b38cbf75e767655941bd97339a684d0b40",
+      "bytes": 4035,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "checkpoints/phase-7-checkpoint-2026-10-09-cr-011-history-rerun.md",
+      "availability": "local-only",
+      "sha256": "44e0f14eea694246266e6edee5151ca1bb37b5d68f5b214590066673f836ef9e",
+      "bytes": 9952,
+      "disposition": "local-private-historical; not published"
+    },
+    {
+      "path": "decisions/2026-10-09-history-reconciliation.md",
+      "availability": "local-only",
+      "sha256": "a249818d5d8a7dced3ba389d0561141043c39b9216f933a3efe8b490760c7ad7",
+      "bytes": 8675,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "decisions/2026-10-09-phase-8-final-owner-approval.md",
+      "availability": "local-only",
+      "sha256": "043337266b6dae86afc554cd96e7464e79d8a56bff62633cc8abeecdbdb65fd3",
+      "bytes": 1048,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "decisions/2026-10-10-history-cr-011-final-2026-10-09-phase-8-final-check.md",
+      "availability": "local-only",
+      "sha256": "1c0e4894d8a9395900070d2321a1cb2fa06bd0646fa197a243605b47e5289b0c",
+      "bytes": 732,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "decisions/2026-10-10-history-cr-012-phase-1-architecture-qa.md",
+      "availability": "local-only",
+      "sha256": "11ab1c669c82757fc36c2f80b4c8eaf7f4e0730d0efcd48c064bd6f93643343a",
+      "bytes": 688,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "decisions/2026-10-10-history-cr-012-phase-2-plan-qa.md",
+      "availability": "local-only",
+      "sha256": "b29936f65297043bbf156ae3a850b340c4d1280153d6a8d44302afa1c51a3af0",
+      "bytes": 680,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "decisions/2026-10-10-history-phase-1-architecture-qa.md",
+      "availability": "local-only",
+      "sha256": "e8588851b88f06f397dc8cfb65e7060cf400e7080f65ba6350741f1b229ef0e0",
+      "bytes": 990,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "decisions/2026-10-10-history-phase-2-plan-qa.md",
+      "availability": "local-only",
+      "sha256": "d786bf9fa29e4d5d7481672a773d9a8b64a12e24bac36788665ec78c14325a69",
+      "bytes": 982,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "decisions/2026-10-10-history-phase-3-asys-core-019-local-paths-spec-qa.md",
+      "availability": "local-only",
+      "sha256": "b1867a84e06094b24ccf945d81ee93a2ad136e93518dc77621c68110a5c4754f",
+      "bytes": 1008,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "decisions/2026-10-10-history-phase-3-asys-core-020-intent-brief-spec-qa.md",
+      "availability": "local-only",
+      "sha256": "f848febb26c85c211ae9ae5e7ff7efcacdd11031bbfc7fb26f081a06333e2355",
+      "bytes": 978,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "decisions/2026-10-10-history-phase-3-asys-int-021-intent-brief-compatibility-spec-qa.md",
+      "availability": "local-only",
+      "sha256": "c2f2940ee688460d2d6565aa44cead3286e47826f86b11a6b08b1f57642a4c62",
+      "bytes": 991,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "decisions/2026-10-10-history-phase-5-asys-core-019-local-paths-quality.md",
+      "availability": "local-only",
+      "sha256": "7aa66da6f7cc8cf532186d677691adb691a6e689b9e50bfd8731c4f696157193",
+      "bytes": 1016,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "decisions/2026-10-10-history-recovery-phase-1-architecture-qa.md",
+      "availability": "local-only",
+      "sha256": "65b470a33847d20fb9b2584b02fe430c0dd4bae454948721715e7fed19d74fb5",
+      "bytes": 999,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "decisions/2026-10-10-history-recovery-phase-2-plan-qa.md",
+      "availability": "local-only",
+      "sha256": "c0da64c15fa6e6b877abbe66beda672dbf64654a29633dbb0563447f21ed5312",
+      "bytes": 991,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "decisions/2026-10-10-history-recovery-phase-3-asys-core-019-local-paths-spec-qa.md",
+      "availability": "local-only",
+      "sha256": "ec64c658dbaaf0d3b0598e375bc25872eff8ec2c2c52d61bc5aaa72bcf0395ce",
+      "bytes": 1017,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "decisions/2026-10-10-history-recovery-phase-5-asys-core-019-local-paths-quality.md",
+      "availability": "local-only",
+      "sha256": "81fa2bca98df870256496f2b32c5f26d6586018705cee27f562f700a18f5def0",
+      "bytes": 1025,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "history/asys-cr-009/25ee186/evidence/recovery-phase-5-asys-pops-017-unified-aggregates-quality.md",
+      "availability": "tracked",
+      "sha256": "153644d3f24382037f2f934e0262789c11512efef75c8d94d900e6336001ef07",
+      "bytes": 19711,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "history/asys-cr-009/25ee186/evidence/recovery-phase-8-final-check.md",
+      "availability": "tracked",
+      "sha256": "876caa6519f3630b472f93829aa0cc5c778985434ac2a4e70c6b89118c7169b9",
+      "bytes": 14945,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "implementation/asys-cr-011/publication-2026-10-10/current-status.md",
+      "availability": "local-only",
+      "sha256": "fb70b952bbd3813f1e2d87ec76b45596ccbe74a304503dd1d34acd03bcbc84bc",
+      "bytes": 3143,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "implementation/history-reconciliation-2026-10-09/original-task-rows.json",
+      "availability": "local-only",
+      "sha256": "9a54a60351059ee51c232398c37ba411d1c07ecc58cf8c1050e41c4b1544f192",
+      "bytes": 1703,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "implementation/history-reconciliation-2026-10-09/provenance.json",
+      "availability": "local-only",
+      "sha256": "60a8fa880c82ebc55c1ea155c7e61610a087377a958d38836527e726c22a1c8c",
+      "bytes": 2260,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "memory/2026-06-09-compact-contract-operating-rules.md",
+      "availability": "unavailable",
+      "disposition": "unknown-historical; no placeholder or acceptance inferred"
+    },
+    {
+      "path": "memory/2026-06-09-local-workspace-architecture-decisions.md",
+      "availability": "unavailable",
+      "disposition": "unknown-historical; no placeholder or acceptance inferred"
+    },
+    {
+      "path": "memory/2026-06-15-post-final-ai-system-dev-state.md",
+      "availability": "unavailable",
+      "disposition": "unknown-historical; no placeholder or acceptance inferred"
+    },
+    {
+      "path": "memory/2026-07-14-daily-check-in-v3-integrity.md",
+      "availability": "unavailable",
+      "disposition": "unknown-historical; no placeholder or acceptance inferred"
+    },
+    {
+      "path": "memory/2026-09-28-project-orchestration-v1.md",
+      "availability": "tracked",
+      "sha256": "2dd6a053e7edae66d4a85befcd59a97904e08b05971bea2de65cd2ff4d5f29b5",
+      "bytes": 1068,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "memory/2026-09-30-spor-proposals.md",
+      "availability": "tracked",
+      "sha256": "1b41b32ae57ff82f02f9c8146bb08c595b96e1f78423e68102f95a9a0ad6c7c1",
+      "bytes": 634,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "memory/2026-10-01-cr-009-completion.md",
+      "availability": "tracked",
+      "sha256": "9de36b23a24f77316a964f365652d38650f9d871b0290d0e166d279f6500ce8a",
+      "bytes": 1157,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "memory/2026-10-01-cr-009-publication.md",
+      "availability": "tracked",
+      "sha256": "3bb1e9ce564e7fc5e0b531d54e17294d1145da8f5ce6815c51b7a5edbfa0d6a7",
+      "bytes": 1168,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "memory/2026-10-01-unified-aggregates.md",
+      "availability": "tracked",
+      "sha256": "f971a112c3bd0db3acd60e8dfe3ac19ba16a358641feaa30f34d726a2d64754f",
+      "bytes": 843,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "memory/2026-10-02-overnight-schedules.md",
+      "availability": "tracked",
+      "sha256": "992dee31e932912633d00017dbf316fbeda7f0ed9f7ac8af490ba772e4857872",
+      "bytes": 1380,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "memory/2026-10-09-historical-evidence-availability.md",
+      "availability": "local-only",
+      "sha256": "9628bd2a5d7630bbbfbc083d99e53965f4ce04391400a9b446d8cafd41e0d009",
+      "bytes": 1231,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "memory/2026-10-09-portable-local-paths.md",
+      "availability": "local-only",
+      "sha256": "1a8cbd595cf67850b211454b54ea4147f663233a450d262d3a97666d69eafda5",
+      "bytes": 1466,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "quality-assessments.json",
+      "availability": "local-only",
+      "sha256": "53bc9b41e3b40258f79f07d3ede38c84c4b691d31bf7dd376b68cbfa35c6ff4a",
+      "bytes": 5761,
+      "disposition": "immutable historical integrity; not current PASS"
+    },
+    {
+      "path": "quality/cr-011-final-2026-10-09/phase-8-final-check.md",
+      "availability": "local-only",
+      "sha256": "22113b59b6cb33612a5ee384747497183eb8133d53e36feba49845a5b0b2f98f",
+      "bytes": 12384,
+      "disposition": "immutable historical integrity; not current PASS"
+    },
+    {
+      "path": "quality/cr-012/phase-1-architecture-qa.md",
+      "availability": "local-only",
+      "sha256": "eea12295793242e7ebfb1c045f9cbbb6ee122a734a1b7fcc5d4320c68e3e15c1",
+      "bytes": 9446,
+      "disposition": "immutable historical integrity; not current PASS"
+    },
+    {
+      "path": "quality/cr-012/phase-2-plan-qa.md",
+      "availability": "local-only",
+      "sha256": "17d724c5d0371b4f2e7ceda7342653979b582420a443b35331a4ce027a71d3e7",
+      "bytes": 10142,
+      "disposition": "immutable historical integrity; not current PASS"
+    },
+    {
+      "path": "quality/phase-1-architecture-qa.md",
+      "availability": "local-only",
+      "sha256": "02560f3884e6bf2081d78fd65fcdd500649d4579d3bd0d5389ccb272ec94c857",
+      "bytes": 3068,
+      "disposition": "immutable historical integrity; not current PASS"
+    },
+    {
+      "path": "quality/phase-2-plan-qa.md",
+      "availability": "local-only",
+      "sha256": "9136f3859be86bfdc054e32b14df2ede3008d71b6fcdb62f395e252eeb22c845",
+      "bytes": 3189,
+      "disposition": "immutable historical integrity; not current PASS"
+    },
+    {
+      "path": "quality/phase-3-asys-core-019-local-paths-spec-qa.md",
+      "availability": "local-only",
+      "sha256": "0dedbe55db0ca0d5919677aefe0b9b17dc260350cb4fc25b3d714236f91f7b65",
+      "bytes": 3209,
+      "disposition": "immutable historical integrity; not current PASS"
+    },
+    {
+      "path": "quality/phase-3-asys-core-020-intent-brief-spec-qa.md",
+      "availability": "local-only",
+      "sha256": "12681cbbb591707573c90d3cdc7fde196cb53368f9c297a093aeb94d17cf64fe",
+      "bytes": 10339,
+      "disposition": "immutable historical integrity; not current PASS"
+    },
+    {
+      "path": "quality/phase-3-asys-cr-001-compact-contracts-spec-qa.md",
+      "availability": "unavailable",
+      "disposition": "unknown-historical; no placeholder or acceptance inferred"
+    },
+    {
+      "path": "quality/phase-3-asys-int-021-intent-brief-compatibility-spec-qa.md",
+      "availability": "local-only",
+      "sha256": "d75cd741b419c6141335f0d8b89ff747e31119b2be913bf9c37c76d292d448f9",
+      "bytes": 10456,
+      "disposition": "immutable historical integrity; not current PASS"
+    },
+    {
+      "path": "quality/phase-4-asys-cr-001-compact-contracts-implementation-result.md",
+      "availability": "unavailable",
+      "disposition": "unknown-historical; no placeholder or acceptance inferred"
+    },
+    {
+      "path": "quality/phase-5-ai-system-implementation-package-quality.md",
+      "availability": "local-only",
+      "sha256": "3eb41ea7d4f169861c998b3198f8139d713cff8b28f9d01a8f0847e9b2195723",
+      "bytes": 3484,
+      "disposition": "immutable historical integrity; not current PASS"
+    },
+    {
+      "path": "quality/phase-5-asys-core-019-local-paths-quality.md",
+      "availability": "local-only",
+      "sha256": "a9cf9c06562c2380e82ec01d16dcb2f23c212f04938e274e9c255e00ed85f6fd",
+      "bytes": 16567,
+      "disposition": "immutable historical integrity; not current PASS"
+    },
+    {
+      "path": "quality/phase-5-asys-cr-001-compact-contracts-quality.md",
+      "availability": "unavailable",
+      "disposition": "unknown-historical; no placeholder or acceptance inferred"
+    },
+    {
+      "path": "quality/phase-5-asys-cr-006-follow-up-quality.md",
+      "availability": "tracked",
+      "sha256": "e6d9156c8fd2dbf305f680802ab3c8d303759ed5b8766b054f37b113a9ee79fd",
+      "bytes": 8308,
+      "disposition": "immutable historical integrity; not current PASS"
+    },
+    {
+      "path": "quality/phase-5-asys-cr-007-project-orchestration-quality.md",
+      "availability": "tracked",
+      "sha256": "983f9aba5debc251994556205b44c9c4a6a1a8c39a363d7cb460562ec48f9d6a",
+      "bytes": 12911,
+      "disposition": "immutable historical integrity; not current PASS"
+    },
+    {
+      "path": "quality/phase-5-asys-pops-018-overnight-schedules-quality.md",
+      "availability": "tracked",
+      "sha256": "b9bb84d4ece87bbcd9b3a5d02f8330b05c2e703a9692e49ec1c5c63368458b34",
+      "bytes": 13837,
+      "disposition": "immutable historical integrity; not current PASS"
+    },
+    {
+      "path": "quality/phase-8-asys-cr-006-final-check.md",
+      "availability": "tracked",
+      "sha256": "22e591953fe12601bab2f67022dd5bb35ce093c36f72816582609093bcca4b18",
+      "bytes": 4742,
+      "disposition": "immutable historical integrity; not current PASS"
+    },
+    {
+      "path": "quality/phase-8-asys-cr-007-final-check-installed-2026-09-28.md",
+      "availability": "tracked",
+      "sha256": "9d397f8d7c84b2e2061ab5a8e10c599d5e96258f84ff849aacc2f3b2c39282f6",
+      "bytes": 5411,
+      "disposition": "immutable historical integrity; not current PASS"
+    },
+    {
+      "path": "quality/phase-8-asys-cr-007-final-owner-approval-2026-09-28.md",
+      "availability": "tracked",
+      "sha256": "ef71dfb6caede3d5c82372e942f4b533a490437e28fcfa65dbc509cdfca4e9f9",
+      "bytes": 3837,
+      "disposition": "immutable historical integrity; not current PASS"
+    },
+    {
+      "path": "quality/phase-8-asys-cr-010-final-owner-approval-2026-10-02.md",
+      "availability": "unavailable",
+      "disposition": "unknown-historical; no placeholder or acceptance inferred"
+    },
+    {
+      "path": "quality/phase-8-cr-011-final-owner-approval-2026-10-09.md",
+      "availability": "local-only",
+      "sha256": "e948c6f4fe49bb55952cd67a8e555f88ef02a2223bb036f5cb986708104e189c",
+      "bytes": 957,
+      "disposition": "immutable historical integrity; not current PASS"
+    },
+    {
+      "path": "quality/recovery-phase-1-architecture-qa.md",
+      "availability": "local-only",
+      "sha256": "a8f99bebc59f7e30a6a8513e071f9ae48d42808b5167dd8a3e5ec6216e34c673",
+      "bytes": 3077,
+      "disposition": "immutable historical integrity; not current PASS"
+    },
+    {
+      "path": "quality/recovery-phase-2-plan-qa.md",
+      "availability": "local-only",
+      "sha256": "b3a9fe047c7c33a25f59895fed30b2e81b9ae9bb825addcc48e22744c60a59e0",
+      "bytes": 3216,
+      "disposition": "immutable historical integrity; not current PASS"
+    },
+    {
+      "path": "quality/recovery-phase-3-asys-core-019-local-paths-spec-qa.md",
+      "availability": "local-only",
+      "sha256": "0f54e2cb5ffb24eabea9f12abed7e68146807f20aec4f07b6cc2ac4fc9dce271",
+      "bytes": 3236,
+      "disposition": "immutable historical integrity; not current PASS"
+    },
+    {
+      "path": "quality/recovery-phase-5-asys-core-019-local-paths-quality.md",
+      "availability": "local-only",
+      "sha256": "98457fb824f66ad62b8654d47e28bbf09f6bcab63ff5e9132330cde77d80c7c8",
+      "bytes": 17903,
+      "disposition": "immutable historical integrity; not current PASS"
+    },
+    {
+      "path": "quality/recovery-phase-8-final-check.md",
+      "availability": "unavailable",
+      "disposition": "unknown-historical; no placeholder or acceptance inferred"
+    },
+    {
+      "path": "specs/phase-3-ai-system-implementation-package-specification.md",
+      "availability": "local-only",
+      "sha256": "61432f04e474ea7fcaf0784a6af6d59ed174bf4440701e8a06b91338633c35d3",
+      "bytes": 4750,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "specs/phase-3-asys-core-020-intent-brief-specification.md",
+      "availability": "local-only",
+      "sha256": "1e302626261826b2d03075b7a684fa9ec9528a01d70b50199265c266c4328bef",
+      "bytes": 12883,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "specs/phase-3-asys-cr-001-compact-contracts-specification.md",
+      "availability": "unavailable",
+      "disposition": "unknown-historical; no placeholder or acceptance inferred"
+    },
+    {
+      "path": "specs/phase-3-asys-cr-006-life-alignment-specification.md",
+      "availability": "tracked",
+      "sha256": "c2fbef1118deecedd5bc0ebd13cbbdef8525ad2e69971a0f556d08d96761382b",
+      "bytes": 787,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "specs/phase-3-asys-cr-007-project-orchestration-specification.md",
+      "availability": "tracked",
+      "sha256": "4c044bba0f873348c92ae1a9e4a295dd53754805d6e95659574ef2eb1b04527d",
+      "bytes": 2453,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "specs/phase-3-asys-cr-008-spor-proposals-specification.md",
+      "availability": "tracked",
+      "sha256": "7b0fb3e1890ac520ce708c605dcc5f393151dffdd480176c084fab6efa556d53",
+      "bytes": 3542,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "specs/phase-3-asys-cr-009-unified-aggregates-specification.md",
+      "availability": "tracked",
+      "sha256": "190d679eb374a3d0ee82df56b667666d512fb7940152ab56492d6480bb4c3bf7",
+      "bytes": 5191,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "specs/phase-3-asys-int-021-intent-brief-compatibility-specification.md",
+      "availability": "local-only",
+      "sha256": "29877774a02c6f68cf6cf6e5d396c915b72bdbb12738e818ba4ca6dabd73691b",
+      "bytes": 13758,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "specs/recovery-phase-3-asys-core-019-local-paths-specification.md",
+      "availability": "local-only",
+      "sha256": "15341233c71e6f643941d3113e63fd4c6445e8a466c314945c88373227eb1bc7",
+      "bytes": 6580,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "tasks/asys-core-020-intent-brief.md",
+      "availability": "local-only",
+      "sha256": "5b9e50da1c6c05598c3a3ef79788de398043486196cce6b63fde812ca4fcaf38",
+      "bytes": 5522,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "tasks/asys-int-021-intent-brief-compatibility.md",
+      "availability": "local-only",
+      "sha256": "650d4a65ce2097eff41b2f8c45a126c92568dfad84d0b816639034e32a6b1426",
+      "bytes": 5829,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "tasks/asys-pops-015-life-alignment-cards.md",
+      "availability": "tracked",
+      "sha256": "c6c1189d61ff7c8a83a96c45c5921577bcc36c97aab47920860b709378362860",
+      "bytes": 1093,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "tasks/asys-pops-016-spor-proposals.md",
+      "availability": "tracked",
+      "sha256": "813adf83d25871046f9e0ae91eaa208870cfb97add83a63a3590626584380e4f",
+      "bytes": 1352,
+      "disposition": "reviewed technical history; original date/scope retained"
+    },
+    {
+      "path": "tasks/asys-pops-017-unified-aggregates.md",
+      "availability": "tracked",
+      "sha256": "9f55f6fb7dc6d2ce0562321a5678ba16ab9cc2d4a4773ce22162485ee0f401d8",
+      "bytes": 1537,
+      "disposition": "reviewed technical history; original date/scope retained"
+    }
+  ]
+}

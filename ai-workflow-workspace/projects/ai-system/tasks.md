@@ -10,7 +10,7 @@
 
 ## Tasks
 
-Task index state: `phase-2-project-plan-pass`
+Task index state: historical tasks and delivered CR-011; no active implementation selected
 
 | Task ID | Title | Risk | Status | Task Card | Spec | Quality | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -33,7 +33,7 @@ Task index state: `phase-2-project-plan-pass`
 
 ## Post-final Release Work
 
-- `ASYS-POPS-018-overnight-schedules`: done, medium risk; implementation and installed delivery complete; CR-010 Phase 8 and owner final approval recorded in `quality/recovery-phase-8-final-check.md` and `quality/phase-8-asys-cr-010-final-owner-approval-2026-10-02.md`. No history migration or backfill.
+- `ASYS-POPS-018-overnight-schedules`: done, medium risk; implementation and installed delivery complete; CR-010 Phase 8 and owner final approval recorded in unavailable historical original (see inventory) and unavailable historical original (see inventory). No history migration or backfill.
 
 - `ASYS-POPS-017-unified-aggregates`: done for implementation, high risk; task `tasks/asys-pops-017-unified-aggregates.md`, spec `specs/phase-3-asys-cr-009-unified-aggregates-specification.md`. Installed delivery complete; CR-009 final acceptance is a separate gate. Historical canonical sources preserved.
 
@@ -46,4 +46,18 @@ Task index state: `phase-2-project-plan-pass`
 
 | Task ID | Title | Risk | Status | Task Card | Spec | Quality | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `ASYS-CORE-019-local-paths` | Portable local roots and transaction context | high | done | none | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/specs/recovery-phase-3-asys-core-019-local-paths-specification.md` | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/quality/recovery-phase-5-asys-core-019-local-paths-quality.md` | CR-011, solo, old Capture excluded |
+| `ASYS-CORE-019-local-paths` | Portable local roots and transaction context | high | done | none | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/specs/recovery-phase-3-asys-core-019-local-paths-specification.md` | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/quality/recovery-phase-5-asys-core-019-local-paths-quality.md` | CR-011 delivered; original QA is registered historical, never current source PASS; delivery-and-history.md records separate acceptance/publication |
+
+## CR-012 Intent To Execution Brief Iteration
+
+| Task ID | Title | Risk | Status | Task Card | Spec | Quality | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `ASYS-CORE-020-intent-brief` | Interpretacja intencji w AI System | high | conditional | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/tasks/asys-core-020-intent-brief.md` | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/specs/phase-3-asys-core-020-intent-brief-specification.md` | none | archived planning snapshot; original Spec QA is historical; no current task selected or approval inferred |
+| `ASYS-INT-021-intent-brief-compatibility` | Zgodność instalacji i dowody zachowania | high | conditional | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/tasks/asys-int-021-intent-brief-compatibility.md` | `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/specs/phase-3-asys-int-021-intent-brief-compatibility-specification.md` | none | archived planning snapshot; original Spec QA is historical; no current task selected or approval inferred |
+
+## Evidence eligibility and current continuation
+
+All prior done/deferred/conditional/blocked labels retain their historical scope. Original package evidence is byte-restored pre-V1 history. CR-011 Quality and final assessment are admitted historical via `quality-assessments.json`; the actual original final-owner decision is separately bound. No report listed here grants fresh current-HEAD QA. The documented task card/spec references are committed historical inputs, not a selected new execution.
+
+Current continuation and delivery: `implementation/dev-evidence-reconciliation-2026-10-12/delivery-and-history.md`.
+Historical availability/provenance: `implementation/dev-evidence-reconciliation-2026-10-12/evidence-inventory.json` and `decisions/2026-10-09-history-reconciliation.md`.

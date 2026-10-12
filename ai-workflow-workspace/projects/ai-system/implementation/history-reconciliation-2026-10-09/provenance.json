@@ -1,0 +1,56 @@
+{
+  "recovered": [
+    {
+      "path": "specs/phase-3-ai-system-implementation-package-specification.md",
+      "source_repository": "/home/ubuntu/ai-system/onlinen-workspace/projects/ai-system-dev/ai-workflow",
+      "commit": "25ec02505fb70a1ff44ecef8b70539566bedeb00",
+      "git_path": "ai-workflow-workspace/projects/ai-system/specs/phase-3-ai-system-implementation-package-specification.md",
+      "blob": "6ea7d680344b18a1e6d9008471b5d13e9645980a",
+      "sha256": "61432f04e474ea7fcaf0784a6af6d59ed174bf4440701e8a06b91338633c35d3",
+      "bytes": 4750,
+      "disposition": "restored-original"
+    },
+    {
+      "path": "quality/phase-5-ai-system-implementation-package-quality.md",
+      "source_repository": "/home/ubuntu/ai-system/onlinen-workspace/projects/ai-system-dev/ai-workflow",
+      "commit": "25ec02505fb70a1ff44ecef8b70539566bedeb00",
+      "git_path": "ai-workflow-workspace/projects/ai-system/quality/phase-5-ai-system-implementation-package-quality.md",
+      "blob": "303829597ecd7ec19eb220bf16eea9e3d122391c",
+      "sha256": "3eb41ea7d4f169861c998b3198f8139d713cff8b28f9d01a8f0847e9b2195723",
+      "bytes": 3484,
+      "disposition": "restored-original"
+    }
+  ],
+  "unavailable": [
+    {
+      "path": "specs/phase-3-asys-pops-011-daily-check-in-v3-integrity-specification.md",
+      "disposition": "unknown-historical"
+    },
+    {
+      "path": "quality/phase-5-asys-pops-011-daily-check-in-v3-integrity-quality.md",
+      "disposition": "unknown-historical"
+    },
+    {
+      "path": "specs/phase-3-asys-pops-012-all-planned-work-to-6d-do-specification.md",
+      "disposition": "unknown-historical"
+    },
+    {
+      "path": "quality/phase-5-asys-pops-012-all-planned-work-to-6d-do-quality.md",
+      "disposition": "unknown-historical"
+    },
+    {
+      "path": "change-requests/2026-07-14-ai-system-cr-004-remove-v3-compatibility.md",
+      "disposition": "unknown-historical"
+    },
+    {
+      "path": "specs/phase-3-asys-pops-014-spor-v4-specification.md",
+      "disposition": "unknown-historical"
+    },
+    {
+      "path": "quality/phase-5-asys-pops-014-quality.md",
+      "disposition": "unknown-historical"
+    }
+  ],
+  "original_task_rows": "original-task-rows.json",
+  "protected_baseline": "baseline.json"
+}

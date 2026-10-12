@@ -1,0 +1,72 @@
+[
+  {
+    "path": "quality/phase-1-architecture-qa.md",
+    "exit_code": 0,
+    "output": "{\"artifact_kind\": \"architecture-qa\", \"assessed_source_head\": \"1c9efd74a569be68c96b3cc347c8210deaf3cfa9\", \"current_gate_eligible\": false, \"identity\": \"ai-system\", \"input_count\": 4, \"lifecycle\": \"historical\", \"run_id\": \"cr-011-architecture-qa-2026-10-09\", \"verdict\": \"PASS\", \"worktree_digest\": \"c0649ad32f514ed99c19e1d52d43eeb8f9292cf07bbd6322ed8f477d91a718c2\"}\n"
+  },
+  {
+    "path": "quality/phase-2-plan-qa.md",
+    "exit_code": 0,
+    "output": "{\"artifact_kind\": \"plan-qa\", \"assessed_source_head\": \"1c9efd74a569be68c96b3cc347c8210deaf3cfa9\", \"current_gate_eligible\": false, \"identity\": \"ai-system\", \"input_count\": 5, \"lifecycle\": \"historical\", \"run_id\": \"cr-011-plan-qa-2026-10-09\", \"verdict\": \"PASS\", \"worktree_digest\": \"6e9ea3e72574e709e35a57e883094cef44bcb9eae1b788cf2ef5d70d1c8f02ab\"}\n"
+  },
+  {
+    "path": "quality/phase-3-asys-core-019-local-paths-spec-qa.md",
+    "exit_code": 0,
+    "output": "{\"artifact_kind\": \"spec-qa\", \"assessed_source_head\": \"1c9efd74a569be68c96b3cc347c8210deaf3cfa9\", \"current_gate_eligible\": false, \"identity\": \"ai-system:ASYS-CORE-019-local-paths\", \"input_count\": 5, \"lifecycle\": \"historical\", \"run_id\": \"cr-011-spec-qa-2026-10-09\", \"verdict\": \"PASS\", \"worktree_digest\": \"3a7c5fcfac93cb44304c5424f1af76e38ce4f8da6c604d6cf6ff2670923fc8ff\"}\n"
+  },
+  {
+    "path": "quality/phase-3-asys-core-020-intent-brief-spec-qa.md",
+    "exit_code": 0,
+    "output": "{\"artifact_kind\": \"spec-qa\", \"assessed_source_head\": \"1799bafbc144e7b5638fd0e009954b2518a682ee\", \"current_gate_eligible\": false, \"identity\": \"ai-system:ASYS-CORE-020-intent-brief\", \"input_count\": 40, \"lifecycle\": \"historical\", \"run_id\": \"asys-cr-012-spec-asys-core-020-intent-brief-2026-10-09\", \"verdict\": \"PASS\", \"worktree_digest\": \"ae84d2fc5beb9519e394fd6693924844f25b7b12cee05ab0831e00fc97e3e955\"}\n"
+  },
+  {
+    "path": "quality/phase-3-asys-int-021-intent-brief-compatibility-spec-qa.md",
+    "exit_code": 0,
+    "output": "{\"artifact_kind\": \"spec-qa\", \"assessed_source_head\": \"1799bafbc144e7b5638fd0e009954b2518a682ee\", \"current_gate_eligible\": false, \"identity\": \"ai-system:ASYS-INT-021-intent-brief-compatibility\", \"input_count\": 40, \"lifecycle\": \"historical\", \"run_id\": \"asys-cr-012-spec-asys-int-021-intent-brief-compatibility-2026-10-09\", \"verdict\": \"PASS\", \"worktree_digest\": \"51c05e239a6b5899688a3c9fbe808cc8262028fc3908657240956b06bc04de81\"}\n"
+  },
+  {
+    "path": "quality/phase-5-asys-core-019-local-paths-quality.md",
+    "exit_code": 0,
+    "output": "{\"artifact_kind\": \"implementation-quality\", \"assessed_source_head\": \"1c9efd74a569be68c96b3cc347c8210deaf3cfa9\", \"current_gate_eligible\": false, \"identity\": \"ai-system:ASYS-CORE-019-local-paths\", \"input_count\": 40, \"lifecycle\": \"historical\", \"run_id\": \"cr-011-quality-pre-commit-2026-10-09\", \"verdict\": \"PASS\", \"worktree_digest\": \"ae9de020ece0f1e4d5185969a26feb06702c2695688052ecc83912d181226187\"}\n"
+  },
+  {
+    "path": "quality/recovery-phase-1-architecture-qa.md",
+    "exit_code": 0,
+    "output": "{\"artifact_kind\": \"architecture-qa\", \"assessed_source_head\": \"1c9efd74a569be68c96b3cc347c8210deaf3cfa9\", \"current_gate_eligible\": false, \"identity\": \"ai-system\", \"input_count\": 4, \"lifecycle\": \"historical\", \"run_id\": \"cr-011-architecture-qa-2026-10-09\", \"verdict\": \"PASS\", \"worktree_digest\": \"e8a1b4ef17882fcc34a78ee752b561d62bec53f6ec7bef813e0834a9f7adc105\"}\n"
+  },
+  {
+    "path": "quality/recovery-phase-2-plan-qa.md",
+    "exit_code": 0,
+    "output": "{\"artifact_kind\": \"plan-qa\", \"assessed_source_head\": \"1c9efd74a569be68c96b3cc347c8210deaf3cfa9\", \"current_gate_eligible\": false, \"identity\": \"ai-system\", \"input_count\": 5, \"lifecycle\": \"historical\", \"run_id\": \"cr-011-plan-qa-2026-10-09\", \"verdict\": \"PASS\", \"worktree_digest\": \"a40123f2bacdb5b113dad5bfb789f6ead1ff517fa00a49a3bb87cba730803c5f\"}\n"
+  },
+  {
+    "path": "quality/recovery-phase-3-asys-core-019-local-paths-spec-qa.md",
+    "exit_code": 0,
+    "output": "{\"artifact_kind\": \"spec-qa\", \"assessed_source_head\": \"1c9efd74a569be68c96b3cc347c8210deaf3cfa9\", \"current_gate_eligible\": false, \"identity\": \"ai-system:ASYS-CORE-019-local-paths\", \"input_count\": 5, \"lifecycle\": \"historical\", \"run_id\": \"cr-011-spec-qa-2026-10-09\", \"verdict\": \"PASS\", \"worktree_digest\": \"3df29e9752058e797b0331c99ad0d86afc73bcc39085baac9e9f5cee9edc8f78\"}\n"
+  },
+  {
+    "path": "quality/recovery-phase-5-asys-core-019-local-paths-quality.md",
+    "exit_code": 0,
+    "output": "{\"artifact_kind\": \"implementation-quality\", \"assessed_source_head\": \"960e4610d5c86945cf2d87f894531794efa7da60\", \"current_gate_eligible\": false, \"identity\": \"ai-system:ASYS-CORE-019-local-paths\", \"input_count\": 45, \"lifecycle\": \"historical\", \"run_id\": \"cr-011-quality-post-commit-2026-10-09\", \"verdict\": \"PASS\", \"worktree_digest\": \"1878f04c821779d6cb76807a60d6707556f2e2f041e1ddbd7da2c79df53c308e\"}\n"
+  },
+  {
+    "path": "quality/cr-011-final-2026-10-09/phase-8-final-check.md",
+    "exit_code": 0,
+    "output": "{\"artifact_kind\": \"final-check\", \"assessed_source_head\": \"960e4610d5c86945cf2d87f894531794efa7da60\", \"current_gate_eligible\": false, \"identity\": \"ai-system\", \"input_count\": 23, \"lifecycle\": \"historical\", \"run_id\": \"cr-011-final-check-2026-10-09\", \"verdict\": \"PASS\", \"worktree_digest\": \"af7cc09f63bb398992841b05040b706e599ec00e9526b423f47b5413a5861c18\"}\n"
+  },
+  {
+    "path": "quality/cr-012/phase-1-architecture-qa.md",
+    "exit_code": 0,
+    "output": "{\"artifact_kind\": \"architecture-qa\", \"assessed_source_head\": \"1799bafbc144e7b5638fd0e009954b2518a682ee\", \"current_gate_eligible\": false, \"identity\": \"ai-system\", \"input_count\": 34, \"lifecycle\": \"historical\", \"run_id\": \"asys-cr-012-architecture-2026-10-09\", \"verdict\": \"PASS\", \"worktree_digest\": \"0c3a0736ca7d0008c113988e782f72a3bc6b2b375741b0cab4bfbe488c4b5d44\"}\n"
+  },
+  {
+    "path": "quality/cr-012/phase-2-plan-qa.md",
+    "exit_code": 0,
+    "output": "{\"artifact_kind\": \"plan-qa\", \"assessed_source_head\": \"1799bafbc144e7b5638fd0e009954b2518a682ee\", \"current_gate_eligible\": false, \"identity\": \"ai-system\", \"input_count\": 40, \"lifecycle\": \"historical\", \"run_id\": \"asys-cr-012-plan-2026-10-09\", \"verdict\": \"PASS\", \"worktree_digest\": \"f469b62e125e6eb75dc181dbfa5ed19ac2332d765f25cfa1b164c5ba363750f6\"}\n"
+  },
+  {
+    "path": "quality/phase-8-cr-011-final-owner-approval-2026-10-09.md",
+    "exit_code": 0,
+    "output": "{\"current_gate_eligible\": false, \"lifecycle\": \"historical\", \"owner_decision\": \"final-owner-yes\", \"reference\": \"decisions/2026-10-09-phase-8-final-owner-approval.md\", \"scope\": \"ai-system\"}\n"
+  }
+]

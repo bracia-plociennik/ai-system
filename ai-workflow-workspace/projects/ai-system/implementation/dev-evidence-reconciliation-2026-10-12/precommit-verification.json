@@ -1,0 +1,225 @@
+{
+  "schema": 1,
+  "baseline_head": "6e38d0fe89a8d8e758f5d3664c2deca6c5297ab3",
+  "historical_reports": 13,
+  "historical_owner_approval_verified": true,
+  "original_project_evidence_bytes_unchanged_except_four_indices": true,
+  "original_spor_capture_unchanged": true,
+  "main_product_unchanged": true,
+  "current_index_links_verified": [
+    {
+      "router": "status.md",
+      "target": "implementation/dev-evidence-reconciliation-2026-10-12/delivery-and-history.md"
+    },
+    {
+      "router": "status.md",
+      "target": "implementation/dev-evidence-reconciliation-2026-10-12/evidence-inventory.json"
+    },
+    {
+      "router": "status.md",
+      "target": "reviews/2026-10-12-dev-evidence-reconciliation.md"
+    },
+    {
+      "router": "change-requests.md",
+      "target": "change-requests/2026-09-15-ai-system-cr-006-life-alignment-cards.md"
+    },
+    {
+      "router": "change-requests.md",
+      "target": "change-requests/2026-09-28-ai-system-cr-007-project-orchestration.md"
+    },
+    {
+      "router": "change-requests.md",
+      "target": "change-requests/2026-10-01-ai-system-cr-009-unified-aggregates.md"
+    },
+    {
+      "router": "change-requests.md",
+      "target": "change-requests/2026-10-02-ai-system-cr-010-overnight-schedules.md"
+    },
+    {
+      "router": "change-requests.md",
+      "target": "change-requests/2026-10-09-ai-system-cr-012-intent-to-execution-brief.md"
+    },
+    {
+      "router": "change-requests.md",
+      "target": "checkpoints/phase-7-checkpoint-2026-09-25-asys-cr-006-follow-up.md"
+    },
+    {
+      "router": "change-requests.md",
+      "target": "checkpoints/phase-7-checkpoint-2026-09-28-asys-cr-007-project-orchestration.md"
+    },
+    {
+      "router": "change-requests.md",
+      "target": "checkpoints/phase-7-checkpoint-2026-10-01-cr-009-completion.md"
+    },
+    {
+      "router": "change-requests.md",
+      "target": "checkpoints/phase-7-checkpoint-2026-10-02-overnight-schedules.md"
+    },
+    {
+      "router": "change-requests.md",
+      "target": "history/asys-cr-009/25ee186/evidence/recovery-phase-5-asys-pops-017-unified-aggregates-quality.md"
+    },
+    {
+      "router": "change-requests.md",
+      "target": "history/asys-cr-009/25ee186/evidence/recovery-phase-8-final-check.md"
+    },
+    {
+      "router": "change-requests.md",
+      "target": "implementation/dev-evidence-reconciliation-2026-10-12/delivery-and-history.md"
+    },
+    {
+      "router": "change-requests.md",
+      "target": "quality/cr-011-final-2026-10-09/phase-8-final-check.md"
+    },
+    {
+      "router": "change-requests.md",
+      "target": "quality/phase-5-asys-cr-006-follow-up-quality.md"
+    },
+    {
+      "router": "change-requests.md",
+      "target": "quality/phase-5-asys-cr-007-project-orchestration-quality.md"
+    },
+    {
+      "router": "change-requests.md",
+      "target": "quality/phase-5-asys-pops-018-overnight-schedules-quality.md"
+    },
+    {
+      "router": "change-requests.md",
+      "target": "quality/phase-8-asys-cr-006-final-check.md"
+    },
+    {
+      "router": "change-requests.md",
+      "target": "quality/phase-8-asys-cr-007-final-check-installed-2026-09-28.md"
+    },
+    {
+      "router": "change-requests.md",
+      "target": "quality/phase-8-asys-cr-007-final-owner-approval-2026-09-28.md"
+    },
+    {
+      "router": "change-requests.md",
+      "target": "quality/phase-8-cr-011-final-owner-approval-2026-10-09.md"
+    },
+    {
+      "router": "memory.md",
+      "target": "implementation/dev-evidence-reconciliation-2026-10-12/delivery-and-history.md"
+    },
+    {
+      "router": "memory.md",
+      "target": "memory/2026-09-28-project-orchestration-v1.md"
+    },
+    {
+      "router": "memory.md",
+      "target": "memory/2026-09-30-spor-proposals.md"
+    },
+    {
+      "router": "memory.md",
+      "target": "memory/2026-10-01-cr-009-completion.md"
+    },
+    {
+      "router": "memory.md",
+      "target": "memory/2026-10-01-cr-009-publication.md"
+    },
+    {
+      "router": "memory.md",
+      "target": "memory/2026-10-01-unified-aggregates.md"
+    },
+    {
+      "router": "memory.md",
+      "target": "memory/2026-10-02-overnight-schedules.md"
+    },
+    {
+      "router": "memory.md",
+      "target": "memory/2026-10-09-historical-evidence-availability.md"
+    },
+    {
+      "router": "memory.md",
+      "target": "memory/2026-10-09-portable-local-paths.md"
+    },
+    {
+      "router": "tasks.md",
+      "target": "decisions/2026-10-09-history-reconciliation.md"
+    },
+    {
+      "router": "tasks.md",
+      "target": "implementation/dev-evidence-reconciliation-2026-10-12/delivery-and-history.md"
+    },
+    {
+      "router": "tasks.md",
+      "target": "implementation/dev-evidence-reconciliation-2026-10-12/evidence-inventory.json"
+    },
+    {
+      "router": "tasks.md",
+      "target": "quality/phase-5-ai-system-implementation-package-quality.md"
+    },
+    {
+      "router": "tasks.md",
+      "target": "quality/phase-5-asys-cr-006-follow-up-quality.md"
+    },
+    {
+      "router": "tasks.md",
+      "target": "quality/phase-5-asys-cr-007-project-orchestration-quality.md"
+    },
+    {
+      "router": "tasks.md",
+      "target": "quality/recovery-phase-5-asys-core-019-local-paths-quality.md"
+    },
+    {
+      "router": "tasks.md",
+      "target": "specs/phase-3-ai-system-implementation-package-specification.md"
+    },
+    {
+      "router": "tasks.md",
+      "target": "specs/phase-3-asys-core-020-intent-brief-specification.md"
+    },
+    {
+      "router": "tasks.md",
+      "target": "specs/phase-3-asys-cr-006-life-alignment-specification.md"
+    },
+    {
+      "router": "tasks.md",
+      "target": "specs/phase-3-asys-cr-007-project-orchestration-specification.md"
+    },
+    {
+      "router": "tasks.md",
+      "target": "specs/phase-3-asys-cr-008-spor-proposals-specification.md"
+    },
+    {
+      "router": "tasks.md",
+      "target": "specs/phase-3-asys-cr-009-unified-aggregates-specification.md"
+    },
+    {
+      "router": "tasks.md",
+      "target": "specs/phase-3-asys-int-021-intent-brief-compatibility-specification.md"
+    },
+    {
+      "router": "tasks.md",
+      "target": "specs/recovery-phase-3-asys-core-019-local-paths-specification.md"
+    },
+    {
+      "router": "tasks.md",
+      "target": "tasks/asys-core-020-intent-brief.md"
+    },
+    {
+      "router": "tasks.md",
+      "target": "tasks/asys-int-021-intent-brief-compatibility.md"
+    },
+    {
+      "router": "tasks.md",
+      "target": "tasks/asys-pops-015-life-alignment-cards.md"
+    },
+    {
+      "router": "tasks.md",
+      "target": "tasks/asys-pops-016-spor-proposals.md"
+    },
+    {
+      "router": "tasks.md",
+      "target": "tasks/asys-pops-017-unified-aggregates.md"
+    }
+  ],
+  "privacy_omission": "private historical checkpoint; fingerprint only",
+  "remote_before": {
+    "dev": "6e38d0fe89a8d8e758f5d3664c2deca6c5297ab3",
+    "main": "a3a852b47a4978dfecf457f354b3eda53241c997"
+  },
+  "validation_scope": "documentation/current routers and historical integrity; no product full gate or live scheduler turn"
+}

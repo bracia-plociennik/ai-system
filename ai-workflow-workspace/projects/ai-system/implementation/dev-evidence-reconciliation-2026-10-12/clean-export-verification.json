@@ -1,0 +1,26 @@
+{
+  "tree": "5d86545ffd381ece80c731c4c46dcb13333154df",
+  "clean_export_without_local_runtime": true,
+  "original_private_checkpoint_absent": true,
+  "staged_bytes_match_export": true,
+  "current_links": 52,
+  "historical_reports_valid": 13,
+  "historical_owner_approval_valid": true,
+  "checks": [
+    {
+      "check": "check-status-consistency",
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "check": "check-naming",
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "check": "check-distillation-state",
+      "exit_code": 0,
+      "output": ""
+    }
+  ]
+}
