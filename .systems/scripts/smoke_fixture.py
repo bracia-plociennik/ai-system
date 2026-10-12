@@ -11,8 +11,11 @@ sys.dont_write_bytecode = True
 SUITES = ("core", "skills", "workspace", "personal-ops", "tasks", "dreaming", "quality")
 PARALLEL_PRODUCT_FILES = (
     ".systems/scripts/runtime_source_binding.py",
+    ".systems/scripts/product_source_binding.py",
+    ".systems/scripts/tests/test_product_source_binding.py",
     ".systems/scripts/tests/test_runtime_source_binding.py",
     ".systems/ai/core/runtime-capture-binding.md",
+    ".systems/ai/core/product-capture-binding.md",
     ".systems/ai/capabilities/workflow-execution-modes-v1.json",
     ".systems/scripts/check-orchestration-compatibility",
     ".systems/scripts/orchestration_compatibility.py",
