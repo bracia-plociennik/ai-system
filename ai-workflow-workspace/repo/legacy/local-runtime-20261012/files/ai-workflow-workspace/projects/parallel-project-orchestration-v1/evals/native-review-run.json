@@ -1,0 +1,40 @@
+{
+  "contract": 1,
+  "run_id": "ppo-native-adversarial-review-2026-10-03",
+  "coordinator_id": "owner-facing-ai-system",
+  "approval_ref": "current owner-approved parallel-project-orchestration-v1 through Phase7",
+  "baseline": {
+    "commit": "bcd1e0dcb9b9b2def6afec9636a72ea058a79ca7",
+    "source_digest": "1bca170831e5140fbf54ed3dd6ca1eeb22bb1ce1a4cb35f25209a2db06a5d41d"
+  },
+  "source_manifest": [
+    {
+      "path": ".systems/ai/core/project-orchestration.md",
+      "sha256": "c506bdec78a082d5c005687df4e0f8997e9b31612e86be7acb3e06adb97d0543"
+    }
+  ],
+  "runtime_capacity": 1,
+  "dispatch_count": 1,
+  "checkpoint_open": true,
+  "workflow_parallel_supported": false,
+  "retired_attempt_ids": [],
+  "retired_agent_ids": [],
+  "units": [
+    {
+      "id": "adversarial-review",
+      "goal": "Independent findings-first review of integrated parallel orchestration",
+      "dod": "Review scope, state safety, permissions and executable consumers; return actual findings and evidence",
+      "dependencies": [],
+      "mode": "read-only",
+      "system": "ai-system",
+      "write_paths": [],
+      "resources": [],
+      "worktree": null,
+      "status": "failed",
+      "attempt_id": "ppo-audit-01",
+      "agent_id": "01a1032c-b64e-7082-b056-1369d4d725be",
+      "termination_confirmed": true,
+      "result": null
+    }
+  ]
+}

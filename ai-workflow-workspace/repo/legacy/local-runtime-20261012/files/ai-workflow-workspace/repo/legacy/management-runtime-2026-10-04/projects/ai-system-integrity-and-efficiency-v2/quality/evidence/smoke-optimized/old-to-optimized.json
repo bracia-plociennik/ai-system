@@ -1,0 +1,19 @@
+{
+  "baseline": {
+    "runs": 3,
+    "wall_mean_seconds": 225.59077904166668,
+    "wall_stdev_seconds": 2.768665828128654,
+    "source_digest": "6f815047e1f405c00fb8315a73e9ddcf28b7241b4e1d964e835c456c96c10c57",
+    "child_mean_seconds": 225.336900779
+  },
+  "candidate": {
+    "runs": 3,
+    "wall_mean_seconds": 169.990594764,
+    "wall_stdev_seconds": 19.090602941872678,
+    "source_digest": "dee21660d7935759ac79da9a9577947e8b66c5140e7e5badd9134c560527a3ed",
+    "child_mean_seconds": 169.732955248
+  },
+  "supporting_only": true,
+  "coverage_digest": "d0ebb4dd4b8512ed042fb9aca062d039d07e749e99e800a3c953ffa50bc45607",
+  "limitations": "Wall and child attribution are distinct; do not add them. Noise and approved source differences require review; no semantic PASS or automatic performance acceptance."
+}

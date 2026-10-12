@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-01",
+  "owner_statement": "final-owner-yes: akceptuję zamknięcie ai-system-integrity-and-efficiency-v2",
+  "authority": "current direct owner message after completed technical result",
+  "reviewed_commit": "754748b",
+  "formal_result": "PASS",
+  "active_plan_status": "closed",
+  "checks": [
+    {
+      "command": "AI_WORKFLOW_WORKSPACE_HOME=/private/tmp/ai-system-integrity-efficiency-v2/ai-workflow-workspace ai-workflow/.systems/scripts/check-qa-evidence --project ai-system-integrity-and-efficiency-v2",
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "command": "AI_WORKFLOW_WORKSPACE_HOME=/private/tmp/ai-system-integrity-efficiency-v2/ai-workflow-workspace ai-workflow/.systems/scripts/check-status-consistency --project ai-system-integrity-and-efficiency-v2",
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "output": ""
+    }
+  ],
+  "readback_hashes": [
+    "a033f5b103d7cfb3f51853b05e72ca88285a3abc78d2e5a6b427acb647f8b50c  ai-workflow-workspace/projects/ai-system-integrity-and-efficiency-v2/quality/phase-8-final-check.md",
+    "26a4fa4cf8fc1151b6f674d6e651f7cc52ec523f4829aee7b62cdc90d6b32fd1  ai-workflow-workspace/projects/ai-system-integrity-and-efficiency-v2/status.md",
+    "70f6f9c1b913c2fc1247f1837b4d7856b06d53b4f420a8ed6af741d75ea7142c  ai-workflow-workspace/projects/ai-system-integrity-and-efficiency-v2/decisions/operator-decisions.md"
+  ],
+  "supporting_only": true,
+  "full_validation": "Completed product and Workflow full retained; not repeated for owner-decision/status-only writes with unchanged product source.",
+  "publication": "no push or management rollout",
+  "capture_state": "completed"
+}

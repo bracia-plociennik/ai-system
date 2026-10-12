@@ -1,0 +1,21 @@
+# Compact Contract Operating Rules
+
+- Date: `2026-06-09`
+- Topic: `compact contract operating rules`
+- Type: `project-decision`
+- Status: `active`
+- Scope: `ASYS-CR-001-compact-contracts`
+- Source: `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/distillations/phase-6-asys-cr-001-compact-contracts-distillation.md`
+- Evidence:
+  - `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/specs/phase-3-asys-cr-001-compact-contracts-specification.md`
+  - `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/quality/phase-5-asys-cr-001-compact-contracts-quality.md`
+  - `AI_WORKFLOW_WORKSPACE_HOME/projects/ai-system/checkpoints/phase-7-checkpoint-2026-06-09-asys-cr-001-compact-contracts.md`
+- Summary: `ai-system` should stay a compact local workspace system with strong owner-approved gates, task intake, response contract, context-as-data policy, practical memory templates, and required-artifacts validation.
+- Applies to:
+  - root `AGENTS.md`
+  - root `HUMANS.md`
+  - `.systems/ai/core/**`
+  - `.systems/ai/templates/workspace/**`
+  - `.systems/scripts/**`
+- Rule: Future `ai-system` work should strengthen local workspace behavior through compact policies and templates, not by importing full AI Workflow phase machinery or adding real external API effects.
+- Review trigger: Revisit before phase 8 final check, before any post-final change request that modifies contracts, or before adding real external integrations.

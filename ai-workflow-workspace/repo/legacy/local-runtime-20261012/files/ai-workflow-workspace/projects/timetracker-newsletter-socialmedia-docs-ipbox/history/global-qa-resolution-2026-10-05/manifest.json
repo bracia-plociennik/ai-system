@@ -1,0 +1,70 @@
+{
+  "new_final_owner_yes": false,
+  "entries": [
+    {
+      "original_path": "quality/phase-1-architecture-qa.md",
+      "historical_path": "history/global-qa-resolution-2026-10-05/evidence/phase-1-architecture-qa.md",
+      "sha256": "518be4179b56d97f5cbed80688e2eee0d2939630afb82fa344fa58146f55ba5e"
+    },
+    {
+      "original_path": "quality/phase-2-plan-qa.md",
+      "historical_path": "history/global-qa-resolution-2026-10-05/evidence/phase-2-plan-qa.md",
+      "sha256": "05ca07e68dff3e89f8509ad3a900226566db44bb475f813b3e50a2a1b5fd0b4a"
+    },
+    {
+      "original_path": "quality/phase-3-wep-content-011-editorial-routing-spec-qa.md",
+      "historical_path": "history/global-qa-resolution-2026-10-05/evidence/phase-3-wep-content-011-editorial-routing-spec-qa.md",
+      "sha256": "d236c7be270e53d71158e2536e5514ce35b4a9aa99f33e818a42371883c44ce2"
+    },
+    {
+      "original_path": "quality/phase-5-wep-content-011-editorial-routing-quality.md",
+      "historical_path": "history/global-qa-resolution-2026-10-05/evidence/phase-5-wep-content-011-editorial-routing-quality.md",
+      "sha256": "aa058dfe03fae52d2c1cb8b00159aed2eae62b5c2f62bfe5ab0df94da00f232a"
+    },
+    {
+      "original_path": "quality/phase-8-final-check.md",
+      "historical_path": "history/global-qa-resolution-2026-10-05/evidence/phase-8-final-check.md",
+      "sha256": "be5a45ef2dd91cfeceb2a7137d4ecc7558a82b36c579608cfc2e9216e210e780"
+    },
+    {
+      "original_path": "status.md",
+      "historical_path": "history/global-qa-resolution-2026-10-05/state-inputs/status.md",
+      "sha256": "5821e982ca1702a7aa27be9f131e8112e5d88f4db24d1da1bb6c165a52efd166"
+    },
+    {
+      "original_path": "tasks.md",
+      "historical_path": "history/global-qa-resolution-2026-10-05/state-inputs/tasks.md",
+      "sha256": "6e4fd0a45d350302a3437863040f6bc9fe5d13ba93d06edf16e9471365790619"
+    },
+    {
+      "original_path": "change-requests.md",
+      "historical_path": "history/global-qa-resolution-2026-10-05/state-inputs/change-requests.md",
+      "sha256": "a92d46f131359f9b798dc0bd8084b1bcf70606a1799d2ab66b404c0a18e52fd5"
+    },
+    {
+      "original_path": "change-requests/2026-10-03-wep-cr-001-editorial-routing.md",
+      "historical_path": "history/global-qa-resolution-2026-10-05/state-inputs/change-requests/2026-10-03-wep-cr-001-editorial-routing.md",
+      "sha256": "87845899006e57dddb7bf3ca8ffaceddbb282ac07979384a93de5ca4a9da636b"
+    },
+    {
+      "original_path": "reviews/2026-10-05-source-integration-review.md",
+      "historical_path": "history/global-qa-resolution-2026-10-05/state-inputs/reviews/2026-10-05-source-integration-review.md",
+      "sha256": "f713b54489efec98161dd9f68abe6f34a04e390ee4655b666f892b8b13777921"
+    },
+    {
+      "original_path": "checkpoints/phase-7-checkpoint-2026-10-05-source-integration.md",
+      "historical_path": "history/global-qa-resolution-2026-10-05/state-inputs/checkpoints/phase-7-checkpoint-2026-10-05-source-integration.md",
+      "sha256": "9422f89e1d3c6088cd98a16d09092459bc59afdb64f5372e42e54ad725ba1673"
+    },
+    {
+      "original_path": "memory/2026-10-05-source-integration.md",
+      "historical_path": "history/global-qa-resolution-2026-10-05/state-inputs/memory/2026-10-05-source-integration.md",
+      "sha256": "22f28096d9bdade6a88a800630dd05f6a432100eb1efc005aa8e6715ccc526e1"
+    },
+    {
+      "original_path": "capture-state/source-integration.md",
+      "historical_path": "history/global-qa-resolution-2026-10-05/state-inputs/capture-state/source-integration.md",
+      "sha256": "e54acd75af805f26016cd53b1e05356e6f8318228662c4042a918972acc4f5ab"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "project": "parallel-project-orchestration-v1",
+  "date": "2026-10-04",
+  "disposition": "immutable-original-v1-history-not-current-pass",
+  "owner_approval": "owner-approved: zarchiwizuj sześć wskazanych raportów w obu kopiach runtime projektu, zachowując bajty i SHA-256; zaktualizuj odwołania i ponów Phase 8 bez final-owner-yes.",
+  "entries": [
+    {
+      "original": "quality/phase-5-ppo-core-001-contract-quality.md",
+      "archive": "history/original-v1/quality/phase-5-ppo-core-001-contract-quality.md",
+      "sha256": "98c7ccfc9d6e116c514b25b84cca13af05ab7fa060fce746ffd1486fc99a5e47",
+      "bytes": 14977,
+      "mode": "0o644"
+    },
+    {
+      "original": "quality/phase-5-ppo-core-002-run-model-quality.md",
+      "archive": "history/original-v1/quality/phase-5-ppo-core-002-run-model-quality.md",
+      "sha256": "26865982cb542f57d7f228a0381296d0999842335b5da6f4bbda86ebd7dfa59d",
+      "bytes": 15006,
+      "mode": "0o644"
+    },
+    {
+      "original": "quality/phase-5-ppo-core-003-tool-adapter-quality.md",
+      "archive": "history/original-v1/quality/phase-5-ppo-core-003-tool-adapter-quality.md",
+      "sha256": "ef35d8a41efe215d66c981e2eeb4cccbeb96bd84b410f6f3eb2cc32227568993",
+      "bytes": 15061,
+      "mode": "0o644"
+    },
+    {
+      "original": "quality/phase-5-ppo-core-004-integration-quality.md",
+      "archive": "history/original-v1/quality/phase-5-ppo-core-004-integration-quality.md",
+      "sha256": "e9f3686a0ac3246cccb23736380a0d3b1310fb7ec8456a80e44f8fbf9f0f8511",
+      "bytes": 15005,
+      "mode": "0o644"
+    },
+    {
+      "original": "quality/phase-5-ppo-core-005-quality-quality.md",
+      "archive": "history/original-v1/quality/phase-5-ppo-core-005-quality-quality.md",
+      "sha256": "9c31d96769b64946f393b6193c0eeb0d9d0dc385e8cff8d724ee3240e2a59250",
+      "bytes": 15048,
+      "mode": "0o644"
+    },
+    {
+      "original": "quality/phase-8-final-check.md",
+      "archive": "history/original-v1/quality/phase-8-final-check.md",
+      "sha256": "62d3cdad9793c260591ea97a14e52ba8ad243b7f44a1aeb965dff5f853ed4057",
+      "bytes": 18056,
+      "mode": "0o644"
+    }
+  ],
+  "prior_failed_assessment": {
+    "snapshot": "history/phase-8-attempts/2026-10-04-pre-archive-final-check.md",
+    "sha256": "421e5eeb42a6a3b479614024475f8728b4eab9d2c7c92efc30e132a39168da65"
+  },
+  "verification": {
+    "both_runtime_copies": true,
+    "sha256_and_bytes_equal": true,
+    "modes_equal": true
+  },
+  "authority": {
+    "final_owner_yes": false,
+    "commit": false,
+    "push": false
+  }
+}

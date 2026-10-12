@@ -1,0 +1,15 @@
+{
+  "supporting_only": true,
+  "remote_freshness": "not-fetched; local refs only",
+  "repositories": [
+    {
+      "path": "/private/tmp/ai-system-integrity-efficiency-v2",
+      "branch": "codex/integrity-efficiency-v2",
+      "head": "dabbf3457b98cd28f44b7785f14ece51b5932017",
+      "upstream": "unknown",
+      "dirty": true,
+      "drift": "unknown",
+      "owner_action": "review metadata; no automatic reconciliation"
+    }
+  ]
+}

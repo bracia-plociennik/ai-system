@@ -1,0 +1,20 @@
+{
+  "project": "parallel-project-orchestration-v1",
+  "commit": "297b6a971f272f9636d50eaf66d0f01cbc35a8ce",
+  "remote": "https://github.com/bracia-plociennik/ai-system.git",
+  "ref": "refs/heads/main",
+  "push_exit_code": 0,
+  "ls_remote_verified_head": "297b6a971f272f9636d50eaf66d0f01cbc35a8ce",
+  "product_file_count": 32,
+  "post_commit_parallel_tests": 85,
+  "post_commit_compatibility_tests": 37,
+  "qa_evidence_exit_code": 0,
+  "status_consistency_exit_code": 0,
+  "capture_current_quality": true,
+  "final_owner_yes": true,
+  "runtime_evidence_published": false,
+  "installed_rollout": false,
+  "nested_workflow_updated": false,
+  "supporting_only": true,
+  "remaining_unstaged_change": "external-memory/external-memory.md: existing router change excluded"
+}

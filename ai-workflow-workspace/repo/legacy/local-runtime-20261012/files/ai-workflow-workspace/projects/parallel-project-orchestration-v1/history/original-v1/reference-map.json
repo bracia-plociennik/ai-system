@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "entries": [
+    {
+      "original_path": "quality/phase-5-ppo-core-001-contract-quality.md",
+      "archive_path": "history/original-v1/evidence/phase-5-ppo-core-001-contract-quality.md",
+      "sha256": "98c7ccfc9d6e116c514b25b84cca13af05ab7fa060fce746ffd1486fc99a5e47",
+      "interpretation": "historical-only-not-current-quality"
+    },
+    {
+      "original_path": "quality/phase-5-ppo-core-002-run-model-quality.md",
+      "archive_path": "history/original-v1/evidence/phase-5-ppo-core-002-run-model-quality.md",
+      "sha256": "26865982cb542f57d7f228a0381296d0999842335b5da6f4bbda86ebd7dfa59d",
+      "interpretation": "historical-only-not-current-quality"
+    },
+    {
+      "original_path": "quality/phase-5-ppo-core-003-tool-adapter-quality.md",
+      "archive_path": "history/original-v1/evidence/phase-5-ppo-core-003-tool-adapter-quality.md",
+      "sha256": "ef35d8a41efe215d66c981e2eeb4cccbeb96bd84b410f6f3eb2cc32227568993",
+      "interpretation": "historical-only-not-current-quality"
+    },
+    {
+      "original_path": "quality/phase-5-ppo-core-004-integration-quality.md",
+      "archive_path": "history/original-v1/evidence/phase-5-ppo-core-004-integration-quality.md",
+      "sha256": "e9f3686a0ac3246cccb23736380a0d3b1310fb7ec8456a80e44f8fbf9f0f8511",
+      "interpretation": "historical-only-not-current-quality"
+    },
+    {
+      "original_path": "quality/phase-5-ppo-core-005-quality-quality.md",
+      "archive_path": "history/original-v1/evidence/phase-5-ppo-core-005-quality-quality.md",
+      "sha256": "9c31d96769b64946f393b6193c0eeb0d9d0dc385e8cff8d724ee3240e2a59250",
+      "interpretation": "historical-only-not-current-quality"
+    },
+    {
+      "original_path": "quality/phase-8-final-check.md",
+      "archive_path": "history/original-v1/evidence/phase-8-final-check.md",
+      "sha256": "62d3cdad9793c260591ea97a14e52ba8ad243b7f44a1aeb965dff5f853ed4057",
+      "interpretation": "historical-only-not-current-quality"
+    }
+  ],
+  "rule": "Use archive path only when interpreting historical references. Current task Quality references stay recovery-phase-5; archived verdicts grant no current PASS."
+}

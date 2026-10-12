@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "scope": "owner-approved source compatibility reassessment only",
+  "target_source_head": "fd68b8ced847387c130e4868bb624fd22b0b8648",
+  "installed_workflow_head": "a9a5c40430af3dec153df94f8b78a30f668bbde3",
+  "new_final_owner_yes": false,
+  "entries": [
+    {
+      "original_path": "quality/recovery-phase-5-ppo-comp-001-capability-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/recovery-phase-5-ppo-comp-001-capability-quality.md",
+      "sha256": "db927301cf1d9ae477b006e614f96a2a13ad4d89a933b39b9b1595fea6c7983b",
+      "bytes": 15866,
+      "previous_run_id": "ppo-current-integrated-quality-6-2026-10-04-publication-reassessment",
+      "previous_source_head": "297b6a971f272f9636d50eaf66d0f01cbc35a8ce",
+      "current_run_id": "integration-2026-10-05-ppo-recovery-phase-5-ppo-comp-001-capability-quality",
+      "current_report_sha256": "1bdacf150449a69029b92b4bf3148c6dc9060f494741c8ddfb95dbe0d7c06128"
+    },
+    {
+      "original_path": "quality/recovery-phase-5-ppo-comp-002-access-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/recovery-phase-5-ppo-comp-002-access-quality.md",
+      "sha256": "bb5ae7a29ddaa97022007c77539c5979eb915b9f6da0504a8ab72019d09b5929",
+      "bytes": 15880,
+      "previous_run_id": "ppo-current-integrated-quality-7-2026-10-04-publication-reassessment",
+      "previous_source_head": "297b6a971f272f9636d50eaf66d0f01cbc35a8ce",
+      "current_run_id": "integration-2026-10-05-ppo-recovery-phase-5-ppo-comp-002-access-quality",
+      "current_report_sha256": "b400435a18a885c8b139931c7f3e5b1c2e12d7ed9ebcb79f62cb111a7d4ae8ce"
+    },
+    {
+      "original_path": "quality/recovery-phase-5-ppo-comp-003-integration-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/recovery-phase-5-ppo-comp-003-integration-quality.md",
+      "sha256": "eae8c278fc6f620a3205f49f8abc160151f20bdc99079d0847ade863215ea0e3",
+      "bytes": 15884,
+      "previous_run_id": "ppo-current-integrated-quality-8-2026-10-04-publication-reassessment",
+      "previous_source_head": "297b6a971f272f9636d50eaf66d0f01cbc35a8ce",
+      "current_run_id": "integration-2026-10-05-ppo-recovery-phase-5-ppo-comp-003-integration-quality",
+      "current_report_sha256": "08ac841db39961abcdedeb5f65a3b26bff35f4ab3836bf603436b33ee7529307"
+    },
+    {
+      "original_path": "quality/recovery-phase-5-ppo-comp-004-recovery-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/recovery-phase-5-ppo-comp-004-recovery-quality.md",
+      "sha256": "35e93f1a72e07a123fa9edd6f0bdaa24ba8c0d3c23bdf1bc187bf7dd65f025a4",
+      "bytes": 15848,
+      "previous_run_id": "ppo-current-integrated-quality-9-2026-10-04-publication-reassessment",
+      "previous_source_head": "297b6a971f272f9636d50eaf66d0f01cbc35a8ce",
+      "current_run_id": "integration-2026-10-05-ppo-recovery-phase-5-ppo-comp-004-recovery-quality",
+      "current_report_sha256": "ada660189a96c932cacbb183ecb6a824ff31bf273b427adc480642016e576c51"
+    },
+    {
+      "original_path": "quality/recovery-phase-5-ppo-comp-005-capture-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/recovery-phase-5-ppo-comp-005-capture-quality.md",
+      "sha256": "af0f9ed63a34637f01e1f51fe9babae2fa835772c14bf2b91623d10e34593472",
+      "bytes": 15901,
+      "previous_run_id": "ppo-current-integrated-quality-10-2026-10-04-publication-reassessment",
+      "previous_source_head": "297b6a971f272f9636d50eaf66d0f01cbc35a8ce",
+      "current_run_id": "integration-2026-10-05-ppo-recovery-phase-5-ppo-comp-005-capture-quality",
+      "current_report_sha256": "23b239b63b29f1a651efa7774d6cca6c21e2400821e4b1d34df7a3fb5121ed19"
+    },
+    {
+      "original_path": "quality/recovery-phase-5-ppo-comp-006-phase-commits-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/recovery-phase-5-ppo-comp-006-phase-commits-quality.md",
+      "sha256": "f308f1983ca7517a4889737f5f79f1f311621a4ce3510acb77e7d3be51eb0a38",
+      "bytes": 15877,
+      "previous_run_id": "ppo-current-integrated-quality-11-2026-10-04-publication-reassessment",
+      "previous_source_head": "297b6a971f272f9636d50eaf66d0f01cbc35a8ce",
+      "current_run_id": "integration-2026-10-05-ppo-recovery-phase-5-ppo-comp-006-phase-commits-quality",
+      "current_report_sha256": "faacb6e8ad5d687a52d9d475199ba290a6c105926d5ed43059b40c7161d7e42c"
+    },
+    {
+      "original_path": "quality/recovery-phase-5-ppo-comp-007-qa-binding-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/recovery-phase-5-ppo-comp-007-qa-binding-quality.md",
+      "sha256": "7b1c93dfec2f59a77d897489905af9adf679176dece724444b2146b19128da7b",
+      "bytes": 15925,
+      "previous_run_id": "ppo-current-integrated-quality-12-2026-10-04-publication-reassessment",
+      "previous_source_head": "297b6a971f272f9636d50eaf66d0f01cbc35a8ce",
+      "current_run_id": "integration-2026-10-05-ppo-recovery-phase-5-ppo-comp-007-qa-binding-quality",
+      "current_report_sha256": "f33aa6cd5501dfe34829dc3fe4b5eec938e756beefed433ab8d7d4a759f33a1c"
+    },
+    {
+      "original_path": "quality/recovery-phase-5-ppo-core-001-contract-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/recovery-phase-5-ppo-core-001-contract-quality.md",
+      "sha256": "925fdde4f327c5b803d054b6a1001988a6de29becfe7bc354fc801bc14b842b7",
+      "bytes": 15869,
+      "previous_run_id": "ppo-current-integrated-quality-1-2026-10-04-publication-reassessment",
+      "previous_source_head": "297b6a971f272f9636d50eaf66d0f01cbc35a8ce",
+      "current_run_id": "integration-2026-10-05-ppo-recovery-phase-5-ppo-core-001-contract-quality",
+      "current_report_sha256": "e1b497e319df1cf0456be28f130e205e5da13245ad905157f2e5405e0494e3de"
+    },
+    {
+      "original_path": "quality/recovery-phase-5-ppo-core-002-run-model-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/recovery-phase-5-ppo-core-002-run-model-quality.md",
+      "sha256": "8c8c08084c1efb322e8bab08209828257c8da3bc196653b52e9d322e74731257",
+      "bytes": 15876,
+      "previous_run_id": "ppo-current-integrated-quality-2-2026-10-04-publication-reassessment",
+      "previous_source_head": "297b6a971f272f9636d50eaf66d0f01cbc35a8ce",
+      "current_run_id": "integration-2026-10-05-ppo-recovery-phase-5-ppo-core-002-run-model-quality",
+      "current_report_sha256": "ef53fd10d34c0ae9c4bdcfccfd20e988127669b83d0c43b9ef9400fe998172f8"
+    },
+    {
+      "original_path": "quality/recovery-phase-5-ppo-core-003-tool-adapter-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/recovery-phase-5-ppo-core-003-tool-adapter-quality.md",
+      "sha256": "cc17cea0e68dd39e86b33737eef2eb1db011717bdaf3b7b896c9c088a259f2d2",
+      "bytes": 15895,
+      "previous_run_id": "ppo-current-integrated-quality-3-2026-10-04-publication-reassessment",
+      "previous_source_head": "297b6a971f272f9636d50eaf66d0f01cbc35a8ce",
+      "current_run_id": "integration-2026-10-05-ppo-recovery-phase-5-ppo-core-003-tool-adapter-quality",
+      "current_report_sha256": "06e422e9757da369fa04ee229894661b4a7281235eb0f1c37f4f531f9698f840"
+    },
+    {
+      "original_path": "quality/recovery-phase-5-ppo-core-004-integration-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/recovery-phase-5-ppo-core-004-integration-quality.md",
+      "sha256": "9583582c7f9ba00c1890c3a627b59321dd2d87aa0b055ecdcd7574286653a860",
+      "bytes": 15884,
+      "previous_run_id": "ppo-current-integrated-quality-4-2026-10-04-publication-reassessment",
+      "previous_source_head": "297b6a971f272f9636d50eaf66d0f01cbc35a8ce",
+      "current_run_id": "integration-2026-10-05-ppo-recovery-phase-5-ppo-core-004-integration-quality",
+      "current_report_sha256": "35404aec83ac4d989702c4d430e4d2143aea6d82b8a3cd30c1711950c66d0009"
+    },
+    {
+      "original_path": "quality/recovery-phase-5-ppo-core-005-quality-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/recovery-phase-5-ppo-core-005-quality-quality.md",
+      "sha256": "de7cb4bb34a8654f8e693b650e5040b347800186e8028bf3004ed6b9e256f8fa",
+      "bytes": 15860,
+      "previous_run_id": "ppo-current-integrated-quality-5-2026-10-04-publication-reassessment",
+      "previous_source_head": "297b6a971f272f9636d50eaf66d0f01cbc35a8ce",
+      "current_run_id": "integration-2026-10-05-ppo-recovery-phase-5-ppo-core-005-quality-quality",
+      "current_report_sha256": "9cd3ca0fc13e0496bc6bb10a3068998eb22871a2585ea1652560f220f53a0a22"
+    },
+    {
+      "original_path": "quality/recovery-phase-8-final-check.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/recovery-phase-8-final-check.md",
+      "sha256": "5f51be3349a3bf45ef7e209ce727b320988fc3e9aa52abea503814802a53beb7",
+      "bytes": 20322,
+      "previous_run_id": "ppo-whole-scope-owner-accepted-final-check-2026-10-04",
+      "previous_source_head": "297b6a971f272f9636d50eaf66d0f01cbc35a8ce",
+      "current_run_id": "integration-2026-10-05-ppo-recovery-phase-8-final-check",
+      "current_report_sha256": "92dcc6c88ac3459f394ee6f4c7099ba38b1d7e64a1d8df1c19758413d36b479e"
+    }
+  ]
+}

@@ -1,0 +1,794 @@
+AI_WORKFLOW_VALIDATE_START profile=full progress=summary
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-required-artifacts status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-required-artifacts status=pass duration_seconds=0
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-prompt-composition status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-prompt-composition status=pass duration_seconds=0
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-branch-policy status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-branch-policy status=pass duration_seconds=0
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-naming --project ai-system-integrity-and-efficiency-v2 status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-naming --project ai-system-integrity-and-efficiency-v2 status=pass duration_seconds=3
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-status-consistency --project ai-system-integrity-and-efficiency-v2 status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-status-consistency --project ai-system-integrity-and-efficiency-v2 status=pass duration_seconds=1
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-qa-evidence --project ai-system-integrity-and-efficiency-v2 status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-qa-evidence --project ai-system-integrity-and-efficiency-v2 status=pass duration_seconds=2
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-full-qa-verification status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-full-qa-verification status=pass duration_seconds=0
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-system-insights status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-system-insights status=pass duration_seconds=1
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-system-skills status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-system-skills status=pass duration_seconds=2
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-contract-compliance status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-contract-compliance status=pass duration_seconds=0
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-knowledge-capture-gate status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-knowledge-capture-gate status=pass duration_seconds=1
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-default-quality-phase-chaining status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-default-quality-phase-chaining status=pass duration_seconds=1
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-dreaming-mode status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-dreaming-mode status=pass duration_seconds=0
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-global-quality-review-stance status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-global-quality-review-stance status=pass duration_seconds=1
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-review-completeness-gate status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-review-completeness-gate status=pass duration_seconds=0
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-intent-plan-spec-compliance-review status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-intent-plan-spec-compliance-review status=pass duration_seconds=0
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-implementation-slicing status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-implementation-slicing status=pass duration_seconds=2
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-plan-quality-contract status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-plan-quality-contract status=pass duration_seconds=0
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-validation-profiles status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-validation-profiles status=pass duration_seconds=1
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-knowledge-capture-reminder status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-knowledge-capture-reminder status=pass duration_seconds=0
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-instruction-adherence-refresh status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-instruction-adherence-refresh status=pass duration_seconds=1
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-owner-decision-checkpoints status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-owner-decision-checkpoints status=pass duration_seconds=2
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-request-batch-triage status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-request-batch-triage status=pass duration_seconds=0
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-response-evidence-trace status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-response-evidence-trace status=pass duration_seconds=0
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-phase-skill-discovery status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-phase-skill-discovery status=pass duration_seconds=1
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-default-quality-closure status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-default-quality-closure status=pass duration_seconds=0
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-default-idea-validation-opt-out status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-default-idea-validation-opt-out status=pass duration_seconds=0
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-end-of-task-capture status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-end-of-task-capture status=pass duration_seconds=1
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-cross-system-upgrade-handoff status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-cross-system-upgrade-handoff status=pass duration_seconds=0
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-worktree-bootstrap status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-worktree-bootstrap status=pass duration_seconds=1
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-validation-routing status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-validation-routing status=pass duration_seconds=0
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-model-selection-guidance status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-model-selection-guidance status=pass duration_seconds=1
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-delivery-constraints status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-delivery-constraints status=pass duration_seconds=0
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-distillation-state status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-distillation-state status=pass duration_seconds=1
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-workspace-freshness status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-workspace-freshness status=pass duration_seconds=0
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-contract-topology status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-contract-topology status=pass duration_seconds=0
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-validation-observability status=started
+Smoke manifest and live coverage index verified.
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-validation-observability status=pass duration_seconds=1
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-validation-completion status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-validation-completion status=pass duration_seconds=0
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-skill-evaluation-contract status=started
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-skill-evaluation-contract status=pass duration_seconds=0
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-validator-smoke-tests status=started
+AI_WORKFLOW_SMOKE_START group=all progress=summary
+AI_WORKFLOW_SMOKE_GROUP_START group=core progress=summary
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-timing-rejects-existing-output status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-timing-rejects-escaping-output status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-timing-rejects-tmpdir-override status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-timing-rejects-symlink status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-timing-rejects-tracked-temporary-output status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-timing-rejects-unignored-temporary-repo-output status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-timing-rejects-foreign-tracked-output status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-timing-rejects-foreign-deleted-tracked-output status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-timing-rejects-foreign-unignored-output status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-comparison-captures-1 status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-comparison-captures-2 status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-comparison-captures-3 status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-comparison-captures-4 status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-comparison-captures-5 status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-comparison-captures-6 status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-comparison-summarizes-complete status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-comparison-preserves-inconclusive status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-comparison-captures-incomplete status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-comparison-rejects-incomplete status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-comparison-rejects-source-mismatch status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-comparison-rejects-duplicate-record status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-comparison-rejects-missing-smoke-check status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-comparison-rejects-nonfinite-duration status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-comparison-rejects-separate-output status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-comparison-rejects-oversized-smoke-wall status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-comparison-rejects-private-fingerprint status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-scope-dedup status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-scope-projects status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-scope-graph status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-scope-git status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-scope-freshness status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-scope-ownership status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-scope-paths status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-scope-checkpoint status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-scope-source status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-scope-finish status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-scope-consumers status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-completion-validator-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validate-workflow-emits-one-completion-marker status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validate-workflow-emits-failure-marker status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=timeout-wrapper-returns-124 status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=timeout-wrapper-kills-process-group status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=update-equal-canonical status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=update-validation-failure status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=update-validation-timeout status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=update-behind-canonical status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=update-ahead-stops status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=update-diverged-stops status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-observability-validator-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-observability-preserves-pass-integrity status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=smoke-partition-manifest-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=smoke-partition-rejects-missing-id status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=smoke-partition-rejects-duplicate-id status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=smoke-partition-rejects-missing-region status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=smoke-partition-rejects-missing-audit status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=smoke-partition-rejects-missing-nested-audit status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=smoke-partition-rejects-wrong-assertion-line status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=smoke-partition-rejects-wrong-nested-owner status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=smoke-partition-rejects-wrong-test-region status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=smoke-partition-rejects-removed-post-call-assertion status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=smoke-observability-allows-safe-prohibition status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=smoke-observability-rejects-direct status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=smoke-observability-rejects-but status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=smoke-observability-rejects-however status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=smoke-observability-rejects-period status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=smoke-observability-rejects-colon status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=smoke-observability-rejects-unless status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=smoke-observability-rejects-yet status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=smoke-observability-rejects-semicolon status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=smoke-observability-rejects-missing-source status=started
+Owned smoke group passed.
+AI_WORKFLOW_SMOKE_GROUP_COMPLETE group=core result=pass exit_code=0 duration_seconds=56
+AI_WORKFLOW_SMOKE_GROUP_START group=policy progress=summary
+AI_WORKFLOW_SMOKE_PROGRESS test=contract-compliance-requires-side-task-mode status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=contract-compliance-requires-micro-task-knowledge-capture status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=contract-compliance-blocks-medium-risk-micro-project-template status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=contract-compliance-requires-micro-project-work-mode status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-insights-missing-privacy-check status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-insights-missing-operational-validation status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-insights-blocks-raw-client-data status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-insights-blocks-product-domain-external-memory status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-insights-allows-ad-hoc-external-memory-note status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-insights-valid-anonymized-insights status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=prompt-composition-blocks-unsafe-authority status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=prompt-composition-blocks-mixed-denial-grant status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=prompt-composition-blocks-prompting-artifacts-authority status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=prompt-composition-blocks-prompt-modules-authority status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-autopilot-range-in-readiness status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-micro-task-template status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-micro-project-template status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=request-batch-triage-blocks-automatic-implementation-wording status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=request-batch-triage-requires-high-risk-owner-decision status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=response-evidence-trace-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=response-evidence-trace-requires-section status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=response-evidence-trace-requires-skills-field status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=response-evidence-trace-blocks-no-sources-needed status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=response-evidence-trace-requires-agents-routing status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=phase-skill-discovery-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=skill-eval-freshness-regression status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=phase-skill-discovery-requires-metadata-first-agents status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=phase-skill-discovery-requires-metadata-first-operating-model status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=phase-skill-discovery-requires-frontmatter-boundary status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=phase-skill-discovery-requires-operating-model status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=phase-skill-discovery-requires-workspace-first status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=phase-skill-discovery-requires-none-fallback status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=phase-skill-discovery-blocks-skill-approval status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=default-quality-closure-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=default-quality-closure-requires-contract status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=default-quality-closure-requires-opt-out-report status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=default-quality-closure-blocks-opt-out-pass status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=default-quality-closure-requires-verification-opt-out status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=default-quality-closure-blocks-without-verification-pass status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=default-idea-validation-opt-out-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=default-idea-validation-requires-single-work-default status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=default-idea-validation-requires-batch-validation-route status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=default-idea-validation-requires-opt-out-grammar status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=default-idea-validation-requires-opt-out-reporting status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=default-idea-validation-blocks-risk-bypass-wording status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=end-of-task-capture-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=end-of-task-capture-requires-trigger-grammar status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=end-of-task-capture-requires-precedence status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=end-of-task-capture-requires-privacy-field status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=end-of-task-capture-preserves-distillation-route status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=end-of-task-capture-preserves-checkpoint-route status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=end-of-task-capture-blocks-final-review-final-check status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=end-of-task-capture-blocks-auto-pass status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=end-of-task-capture-blocks-auto-final-check status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=end-of-task-capture-blocks-project-close status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=end-of-task-capture-blocks-client-names status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=end-of-task-capture-blocks-external-memory-domain-lessons status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-requires-contract status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-requires-template status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-requires-implementation-trigger status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-requires-new-unrelated-task-trigger status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-blocks-auto-memory status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-blocks-auto-memory-with-trailing-negation status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-blocks-auto-push status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-blocks-ignored-workspace-commit status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-blocks-skip-bypass status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-blocks-skip-permission-bypass status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-blocks-skip-stop-condition-bypass status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-blocks-external-memory-frontend-lessons status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-blocks-external-memory-backend-lessons status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-blocks-external-memory-smart-contract-lessons status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-blocks-external-memory-SEO-lessons status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-blocks-external-memory-ads-lessons status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-blocks-external-memory-advertising-lessons status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-blocks-external-memory-paid-media-lessons status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-blocks-external-memory-offer-lessons status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-blocks-external-memory-client-work-lessons status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-blocks-external-memory-product-lessons status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-blocks-inverse-external-memory-domain-routing status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-allows-valid-memory-targets status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-allows-negated-domain-boundaries status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-reminder-blocks-system-insights-raw-client-data status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-requires-contract status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-requires-pre-write-trigger status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-requires-pre-commit-handoff-trigger status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-requires-resume-trigger status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-requires-compaction-trigger status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-requires-source-conflict-trigger status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-requires-trace-fields status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=response-evidence-trace-requires-instruction-refresh-fields status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-blocks-chat-memory-may-override-agentsmd status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-blocks-agent-may-change-default-behavior-without-owner-approval status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-blocks-any-explicit-owner-message-may-bypass-contracts status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-blocks-instruction-adherence-refresh-grants-write-permission status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-blocks-instruction-adherence-refresh-may-bypass-permissions status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-blocks-full-refresh-is-required-before-every-message status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-blocks-not-needed-is-allowed-after-context-compaction status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-blocks-quality-closure-may-use-a-stale-instruction-baseline status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-blocks-chat-history-overrides-agentsmd status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-blocks-owner-instruction-bypasses-qa status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-blocks-instruction-adherence-refresh-allows-formal-pass status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-blocks-run-full-refresh-before-every-edit status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-blocks-not-needed-is-valid-after-resume status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-blocks-not-needed-is-valid-after-a-long-interruption status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-blocks-quality-closure-uses-stale-instruction-baseline status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-blocks-every-tracked-contract-change-requires-refresh-before-the-next-write status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=instruction-adherence-refresh-allows-safe-continuation-opt-outs-and-warning status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-requires-instruction-refresh-evidence status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=global-quality-review-requires-instruction-baseline status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=contract-compliance-requires-instruction-refresh status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-requires-contract status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-requires-phase-block status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-blocks-duplicate-phase-block status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-requires-template-fields status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-requires-owner-preference status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-requires-owner-preference-in-phase-taxonomy status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-requires-recommendation-first status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-requires-question-batch-limit status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-requires-option-impact status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-blocks-ask-the-owner-about-every-uncertainty status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-blocks-auto-resolve-high-impact-decisions status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-blocks-critical-risk-decisions-are-auto-resolvable status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-blocks-nie-dopytuj-may-bypass-qa status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-blocks-no-question-opt-out-allows-guessed-acceptance-criteria status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-blocks-autopilot-may-ask-live-questions-while-running status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-blocks-autopilot-asks-clarification-questions-while-running status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-blocks-autopilot-may-continue-with-a-pending-material-decision status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-blocks-autopilot-continues-with-a-pending-material-decision status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-blocks-dreaming-mode-may-ask-live-questions status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-blocks-dreaming-mode-asks-follow-up-questions status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-blocks-read-only-review-may-interrupt-to-ask status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-blocks-optional-knowledge-capture-requires-interactive-question status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=review-completeness-gate-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=cross-system-yes-requires-existing-safe-handoff status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=cross-system-yes-without-handoff-fails status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=cross-system-pending-blocks-handoff status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=cross-system-handoff-blocks-raw-client-data status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=cross-system-handoff-blocks-email-shaped-data status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=cross-system-handoff-requires-external-memory-namespace status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=end-of-task-capture-requires-koniec-pracy status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=end-of-task-capture-blocks-acknowledge-only status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-requires-response-trace status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=response-evidence-trace-requires-owner-decision-fields status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-blocks-quality-chain-with-pending-decision status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=default-quality-chaining-blocks-pending-owner-decision status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-allows-deterministic-and-phase-end-recap status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=delivery-constraints-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=delivery-constraints-blocks-quality-bypass status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=distillation-state-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=distillation-state-blocks-dreaming-write status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=distillation-state-requires-state-field status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=delivery-constraints-requires-phase5-evidence status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=distillation-state-requires-mandatory-producer status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=dreaming-queue-requires-all-columns status=started
+Owned smoke group passed.
+AI_WORKFLOW_SMOKE_GROUP_COMPLETE group=policy result=pass exit_code=0 duration_seconds=181
+AI_WORKFLOW_SMOKE_GROUP_START group=quality progress=summary
+AI_WORKFLOW_SMOKE_PROGRESS test=global-quality-review-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=global-quality-review-requires-cross-contract-consistency status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=global-quality-review-requires-formal-negative-space-field status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=global-quality-review-blocks-green-validator-verdict status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=global-quality-review-blocks-fixed-lines-only-review status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=global-quality-review-blocks-current-closure-without-rereview status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=global-quality-review-blocks-no-findings-with-stale-closure status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=global-quality-review-requires-find-blockers-routing status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=global-quality-review-blocks-advisory-pass-wording status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=global-quality-review-blocks-advisory-produce-pass-wording status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=global-quality-review-blocks-final-review-final-check-wording status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=global-quality-review-blocks-final-review-starts-final-check-wording status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=global-quality-review-requires-formal-gate-eligibility-field status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=global-quality-review-preserves-formal-phase5-pass-fail status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=intent-plan-spec-compliance-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=intent-plan-spec-compliance-requires-global-review-lens status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=intent-plan-spec-compliance-requires-phase5-lens status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=intent-plan-spec-compliance-requires-template-status status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=intent-plan-spec-compliance-blocks-qa-pass-without-ac status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=intent-plan-spec-compliance-blocks-scope-creep-tests-pass status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-requires-core-local-failure-route status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-requires-phase4-local-failure-route status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-requires-failed-check-retest status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-safe-local-failure-prohibition status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-rejects-compound-ignore-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-rejects-direct-ignore status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-rejects-permission-bypass status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-rejects-protected-test-weakening status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-rejects-green-test-as-formal-pass status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-rejects-direct-formal-fix-loop status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-rejects-missing-local-failure-source status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-in-scope-correction-and-legitimate-stop status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-allows-conditional-retest-safety status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-rejects-forbidden-retest status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-rejects-compound-forbidden-retest status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-rejects-forbidden-diagnosis status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-requires-core-contract status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-requires-phase4-slice-plan status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-requires-template-execution-evidence status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-blocks-bypass-qa-wording status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-requires-dod-source status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-requires-quality-closure status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-blocks-pass-without-review status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-blocks-pass-before-findings-review status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-blocks-fixed-lines-only-post-fix-review status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-blocks-automated-only-pass status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-requires-micro-work-routing status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-requires-micro-task-dod status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=implementation-slicing-requires-micro-project-dod status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=plan-quality-contract-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=plan-quality-contract-requires-core-contract status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=plan-quality-contract-requires-implementation-quality-route status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=plan-quality-contract-requires-plan-artifact-qa-route status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=plan-quality-contract-allows-justified-read-only-plan status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=plan-quality-contract-blocks-implementation-plan-without-artifact-qa status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=plan-quality-contract-requires-concrete-dod-source status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=plan-quality-contract-requires-read-only-not-applicable-reason status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=plan-quality-contract-blocks-quality-bypass-wording status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-plan-quality-contract-allows-safe-prohibition status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-plan-quality-contract-blocks-direct-unsafe status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-plan-quality-contract-blocks-safe-but-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-plan-quality-contract-blocks-safe-period-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-plan-quality-contract-blocks-safe-colon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-plan-quality-contract-blocks-safe-unless-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-plan-quality-contract-blocks-safe-yet-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-plan-quality-contract-blocks-safe-semicolon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-profiles-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-profile-fast-explain status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-profile-scoped-check status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-scope-safe-coverage-prohibition status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-scope-rejects-coverage-pass status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-scope-rejects-compound-coverage-pass status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-profile-scoped-requires-checks status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-profiles-require-standard-default status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-profiles-require-ci-explicit-full status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-profiles-require-agents-final-full status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-profiles-require-commands-final-full status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-profiles-require-readme-reuse-full status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-profiles-require-full-smoke-tests status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-profiles-block-fast-enough-before-commit status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-profiles-block-standard-replaces-full status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-profiles-block-skip-smoke-pass status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=request-batch-triage-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=request-batch-triage-requires-routing-field status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=request-batch-triage-requires-risk-field status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=request-batch-triage-requires-nine-column-matrix status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=request-batch-triage-requires-mixed-list-split status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=review-completeness-gate-blocks-incomplete-v2-verdict status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=review-completeness-gate-requires-formal-policy-matrix status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=review-completeness-gate-requires-micro-producer-audit status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=review-completeness-gate-requires-dreaming-decision-artifact status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=dreaming-mode-requires-full-queued-decision-fields status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=review-completeness-gate-requires-autopilot-decision-artifact status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=owner-decision-checkpoints-requires-autopilot-decision-artifact status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=review-completeness-gate-requires-shared-policy-helper status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=review-completeness-gate-audits-full-qa-policy-validator status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=review-completeness-gate-requires-review-baseline-and-freshness-inside-gate status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundaries-fails-missing-source status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundaries-blocks-repeated-unsafe-match-after-safe-quote status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-response-evidence-allows-safe-prohibition status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-response-evidence-blocks-direct-unsafe status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-response-evidence-blocks-safe-but-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-response-evidence-blocks-safe-period-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-response-evidence-blocks-safe-colon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-response-evidence-blocks-safe-unless-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-response-evidence-blocks-safe-yet-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-response-evidence-blocks-safe-semicolon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-default-quality-allows-safe-prohibition status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-default-quality-blocks-direct-unsafe status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-default-quality-blocks-safe-but-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-default-quality-blocks-safe-period-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-default-quality-blocks-safe-colon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-default-quality-blocks-safe-unless-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-default-quality-blocks-safe-yet-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-default-quality-blocks-safe-semicolon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-instruction-refresh-allows-safe-prohibition status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-instruction-refresh-blocks-direct-unsafe status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-instruction-refresh-blocks-safe-but-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-instruction-refresh-blocks-safe-period-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-instruction-refresh-blocks-safe-colon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-instruction-refresh-blocks-safe-unless-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-instruction-refresh-blocks-safe-yet-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-instruction-refresh-blocks-safe-semicolon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-phase-skill-allows-safe-prohibition status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-phase-skill-blocks-direct-unsafe status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-phase-skill-blocks-safe-but-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-phase-skill-blocks-safe-period-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-phase-skill-blocks-safe-colon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-phase-skill-blocks-safe-unless-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-phase-skill-blocks-safe-yet-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-phase-skill-blocks-safe-semicolon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-batch-triage-allows-safe-prohibition status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-batch-triage-blocks-direct-unsafe status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-batch-triage-blocks-safe-but-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-batch-triage-blocks-safe-period-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-batch-triage-blocks-safe-colon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-batch-triage-blocks-safe-unless-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-batch-triage-blocks-safe-yet-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-batch-triage-blocks-safe-semicolon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-intent-review-allows-safe-prohibition status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-intent-review-blocks-direct-unsafe status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-intent-review-blocks-safe-but-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-intent-review-blocks-safe-period-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-intent-review-blocks-safe-colon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-intent-review-blocks-safe-unless-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-intent-review-blocks-safe-yet-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-intent-review-blocks-safe-semicolon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-global-review-allows-safe-prohibition status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-global-review-blocks-direct-unsafe status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-global-review-blocks-safe-but-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-global-review-blocks-safe-period-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-global-review-blocks-safe-colon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-global-review-blocks-safe-unless-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-global-review-blocks-safe-yet-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-global-review-blocks-safe-semicolon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-validation-profiles-allows-safe-prohibition status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-validation-profiles-blocks-direct-unsafe status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-validation-profiles-blocks-safe-but-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-validation-profiles-blocks-safe-period-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-validation-profiles-blocks-safe-colon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-validation-profiles-blocks-safe-unless-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-validation-profiles-blocks-safe-yet-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-validation-profiles-blocks-safe-semicolon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-implementation-slicing-allows-safe-prohibition status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-implementation-slicing-blocks-direct-unsafe status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-implementation-slicing-blocks-safe-but-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-implementation-slicing-blocks-safe-period-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-implementation-slicing-blocks-safe-colon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-implementation-slicing-blocks-safe-unless-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-implementation-slicing-blocks-safe-yet-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-implementation-slicing-blocks-safe-semicolon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-end-task-allows-safe-prohibition status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-end-task-blocks-direct-unsafe status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-end-task-blocks-safe-but-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-end-task-blocks-safe-period-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-end-task-blocks-safe-colon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-end-task-blocks-safe-unless-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-end-task-blocks-safe-yet-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-end-task-blocks-safe-semicolon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-idea-opt-out-allows-safe-prohibition status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-idea-opt-out-blocks-direct-unsafe status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-idea-opt-out-blocks-safe-but-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-idea-opt-out-blocks-safe-period-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-idea-opt-out-blocks-safe-colon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-idea-opt-out-blocks-safe-unless-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-idea-opt-out-blocks-safe-yet-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-idea-opt-out-blocks-safe-semicolon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-owner-checkpoints-allows-safe-prohibition status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-owner-checkpoints-blocks-direct-unsafe status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-owner-checkpoints-blocks-safe-but-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-owner-checkpoints-blocks-safe-period-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-owner-checkpoints-blocks-safe-colon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-owner-checkpoints-blocks-safe-unless-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-owner-checkpoints-blocks-safe-yet-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-owner-checkpoints-blocks-safe-semicolon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-full-qa-verification-allows-safe-prohibition status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-full-qa-verification-blocks-direct-unsafe status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-full-qa-verification-blocks-safe-but-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-full-qa-verification-blocks-safe-period-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-full-qa-verification-blocks-safe-colon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-full-qa-verification-blocks-safe-unless-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-full-qa-verification-blocks-safe-yet-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-full-qa-verification-blocks-safe-semicolon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-cross-system-handoff-allows-safe-prohibition status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-cross-system-handoff-blocks-direct-unsafe status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-cross-system-handoff-blocks-safe-but-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-cross-system-handoff-blocks-safe-period-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-cross-system-handoff-blocks-safe-colon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-cross-system-handoff-blocks-safe-unless-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-cross-system-handoff-blocks-safe-yet-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-cross-system-handoff-blocks-safe-semicolon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-worktree-bootstrap-allows-safe-prohibition status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-worktree-bootstrap-blocks-direct-unsafe status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-worktree-bootstrap-blocks-safe-but-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-worktree-bootstrap-blocks-safe-period-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-worktree-bootstrap-blocks-safe-colon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-worktree-bootstrap-blocks-safe-unless-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-worktree-bootstrap-blocks-safe-yet-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-worktree-bootstrap-blocks-safe-semicolon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-validation-routing-allows-safe-prohibition status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-validation-routing-blocks-direct-unsafe status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-validation-routing-blocks-safe-but-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-validation-routing-blocks-safe-period-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-validation-routing-blocks-safe-colon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-validation-routing-blocks-safe-unless-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-validation-routing-blocks-safe-yet-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-validation-routing-blocks-safe-semicolon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-model-selection-allows-safe-prohibition status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-model-selection-blocks-direct-unsafe status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-model-selection-blocks-safe-but-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-model-selection-blocks-safe-period-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-model-selection-blocks-safe-colon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-model-selection-blocks-safe-unless-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-model-selection-blocks-safe-yet-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=policy-boundary-model-selection-blocks-safe-semicolon-unsafe-exception status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=cross-system-upgrade-handoff-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-routing-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-routing-requires-script-applicability status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=validation-routing-blocks-green-scripts-pass status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=model-selection-guidance-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=model-selection-requires-non-blocking-field status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=model-selection-blocks-qa-bypass status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=pass-without-evidence status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=pass-with-failed-command status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-current-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=status-consistency-v2-current-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-subsection-result-conflict status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-subsection-progression status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-pass-fix-loop-route status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-failed-artifact-check status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=status-consistency-v2-rejects-unmatched-task status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-ignores-fenced-metadata status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-fenced-verdict status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-accepts-approved-target-root status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-unapproved-target-root status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-escaping-symlink status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=status-consistency-v2-rejects-two-current-assessments status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-duplicate-current status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-duplicate-run-id status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-stale-input status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=status-consistency-v2-rejects-stale-input status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-traversal status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-conflicting-gate status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=status-consistency-v2-rejects-current-fail status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-fenced-fake-section status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-wrong-task-identity status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-ignores-component-pass-in-negative-final-check status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-positive-gate-still-requires-evidence status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-punctuated-positive-still-requires-evidence status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-gate-only-positive-still-requires-evidence status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-rejects-conflicting-declared-results status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=full-qa-verification-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=full-qa-verification-requires-legacy-contract-legacy-fingerprint-admission-is-terminal-for-the-exact-registered-file status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=full-qa-verification-requires-legacy-contract-a-v1-marker-takes-precedence-over-pre-v1-admission status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=full-qa-verification-requires-legacy-contract-superseded-invalid-v1 status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=full-qa-verification-requires-legacy-contract-does-not-upgrade-the-artifact status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=full-qa-verification-requires-artifact-completeness-gate status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=full-qa-verification-requires-current-phase5-run status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=full-qa-verification-blocks-technical-only-qa status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=full-qa-verification-requires-forbidden-state-matrix-field status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-requires-artifact-completeness-for-pass status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-requires-contract-marker-for-formal-pass status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-rejects-artifact-pass-with-scope-mismatch status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-allows-registered-legacy-fingerprint status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-allows-registered-legacy-fingerprint-for-generic-quality-file status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-rejects-tampered-legacy-fingerprint status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-rejects-unregistered-legacy-fingerprint status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-rejects-wrong-legacy-checksum status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-rejects-wrong-legacy-path status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-rejects-outside-workspace-legacy status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v1-first-overrides-legacy-admission status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-project-scope-isolates-other-project status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-selected-project-still-fails status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-rejects-unsafe-project status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-rejects-missing-project status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-five-column-verified-v1-recovery status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-recovery-admits-unmarked-historical-original status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-rejects-tampered-recovery status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-rejects-wrong-recovery-fingerprint status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-rejects-tampered-v1-original status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-rejects-incomplete-v1-recovery status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-rejects-missing-v1-recovery status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-allows-plain-not-applicable-recovery-reason status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=naming-project-scope-isolates-other-project status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=naming-global-still-fails status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=naming-rejects-unsafe-project status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=status-consistency-project-scope-isolates-other-project status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=status-consistency-selected-project-still-fails status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=status-consistency-global-still-fails status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=status-consistency-rejects-unsafe-project status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=status-consistency-rejects-missing-project status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=workflow-fast-project-scope status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=workflow-fast-global-still-fails status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=workflow-fast-rejects-unsafe-project status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-requires-adaptive-matrix-for-phase-5-pass status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-allows-complete-phase-5-v2-pass status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-report-level-result-conflict status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-final-verdict-conflict status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-phase5-subsection-conflict status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-phase5-fix-loop-route status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-quality-gate-fix-loop-route status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-failed-edge-case status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-fenced-quality-field status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-owner-mismatch status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-incomplete-adversarial-review status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-unverified-quality-gate status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-incomplete-matrix-row status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-failed-completion-row status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-missing-current-dod status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-v2-rejects-final-owner-bypass status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-requires-phase-5-definition-of-done-validation status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-requires-phase-5-intent--plan--spec-compliance status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-requires-phase-5-review-completeness-gate status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-requires-phase-5-findings status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-rejects-phase-5-pass-with-failed-dod status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-rejects-phase-5-pass-with-partial-intent-compliance status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-rejects-phase-5-pass-with-stale-completeness-gate status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-rejects-phase-5-pass-with-unresolved-p1 status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-rejects-phase-5-pass-with-unsatisfied-quality-gate status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-requires-complete-required-adaptive-matrix-row status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=qa-evidence-allows-complete-required-adaptive-matrix-row status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=bad-phase-transition status=started
+Owned smoke group passed.
+AI_WORKFLOW_SMOKE_GROUP_COMPLETE group=quality result=pass exit_code=0 duration_seconds=231
+AI_WORKFLOW_SMOKE_GROUP_START group=skills progress=summary
+AI_WORKFLOW_SMOKE_PROGRESS test=system-skills-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=naming-allows-canonical-skill-md status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-skills-blocks-known-project-marker status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-skills-blocks-machine-specific-path status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-skills-allows-legacy-source-material status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=naming-allows-workspace-skill-context-materials status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-skills-valid-context-intake status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=naming-allows-system-skill-context-materials status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-skills-require-intake-plan-for-context status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-skills-block-context-active-instructions status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-skills-block-context-guidance status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=quick-validate-block-context-guidance status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-skills-block-context-guidance-in-reference status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=quick-validate-block-context-guidance-in-reference status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-skills-block-long-skill-md status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-skills-require-skill-md status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-skills-require-readme status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-skills-require-frontmatter-name status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-skills-require-authority-boundary status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-skills-block-claude-cli-marker status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-skills-allow-documentation-url status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-skills-block-external-cdn status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-skills-block-undeclared-yaml-import status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-skills-block-python-cache-artifacts status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-skills-package-blocks-output-inside-skill status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-skills-run-eval-blocks-path-traversal status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=system-skills-run-eval-blocks-config-path-traversal status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=skill-evaluation-validator-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=skill-evaluation-remains-optional status=started
+Owned smoke group passed.
+AI_WORKFLOW_SMOKE_GROUP_COMPLETE group=skills result=pass exit_code=0 duration_seconds=53
+AI_WORKFLOW_SMOKE_GROUP_START group=workspace progress=summary
+AI_WORKFLOW_SMOKE_PROGRESS test=init-workspace-creates-local-excludes status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=init-workspace-preserves-legacy-context status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=update-workspace-backfills-schema status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=update-workspace-dry-run-no-writes status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=branch-policy-public-blocks-dev-workspace status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=branch-policy-public-blocks-legacy-workspace status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=branch-policy-compat-dev-blocks-legacy-workspace status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=branch-policy-compat-dev-blocks-local-workspace status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=branch-policy-public-ignores-untracked-sibling-workspace status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-autopilot-readme-template status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-phase-0-init-template status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-autopilot-readiness-template status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-prompt-composition-contract status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-project-prompting-router-template status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-system-insights-contract status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-contract-compliance-contract status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-skill-intake-plan-template status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-knowledge-capture-gate-validator status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-dreaming-mode-contract status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-dream-report-template status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-dreaming-mode-validator status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-quality-review-contract status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-global-quality-review-validator status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-request-batch-triage-contract status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-request-batch-triage-validator status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-response-evidence-trace-validator status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-phase-skill-discovery-validator status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-default-quality-closure-validator status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-default-idea-validation-opt-out-validator status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-end-of-task-capture-contract status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-end-of-task-capture-template status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-end-of-task-capture-validator status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-update-workspace-script status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=pre-plan-empty-tasks status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=post-plan-empty-tasks status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=later-phase-empty-tasks status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=plan-qa-defaults-to-specification status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=bad-naming status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=naming-exempts-legacy-and-context-support status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=naming-allows-frozen-eval-inputs status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=naming-requires-frozen-eval-marker status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=naming-rejects-bad-canonical-eval-artifact status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=naming-rejects-bad-unrelated-workspace-artifact status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-canonical-project-context status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=missing-gate-heading status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-gate-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-requires-phase-block status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-requires-template-field status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-blocks-hard-gate-wording status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=knowledge-capture-allows-no-target-none status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=default-quality-chain-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=default-quality-chain-requires-architecture-mapping status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=default-quality-chain-requires-bez-qa-opt-out status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=default-quality-chain-blocks-unsafe-opt-out-wording status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=default-quality-chain-blocks-default-task-packaging status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=default-quality-chain-requires-owner-only-packaging status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=default-quality-chain-blocks-phase-8-auto-chain status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=dreaming-mode-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=dreaming-mode-requires-full-repo-variant status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=dreaming-mode-requires-dream-variant-template-field status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=dreaming-mode-requires-risk-privacy-template-field status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=dreaming-mode-requires-risk-privacy-per-candidate-section status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=dreaming-mode-requires-prompt-injection-boundary status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=dreaming-mode-requires-full-repo-exclusions status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=dreaming-mode-blocks-automatic-writes-wording status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=dreaming-mode-allows-valid-workflow-report status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=dreaming-mode-allows-valid-full-repo-report status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=dreaming-mode-requires-report-privacy-check status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=dreaming-mode-blocks-raw-client-data status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=dreaming-mode-blocks-full-repo-not-applicable-report status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=dreaming-v2-valid-report status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=dreaming-v2-blocks-placeholder status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=dreaming-v2-blocks-duplicate-id status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=dreaming-v2-blocks-repeated-without-evidence status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=dreaming-v2-requires-complete-privacy-scope status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=worktree-bootstrap-contract-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=worktree-bootstrap-local-bare-remote status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=worktree-bootstrap-linked-worktree status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=worktree-bootstrap-requires-approval status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=worktree-bootstrap-requires-strong-marker status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=worktree-bootstrap-rejects-symlink-marker status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=worktree-bootstrap-stops-agents-collision status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=worktree-bootstrap-stops-wrong-origin status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=worktree-bootstrap-stops-dirty-clone status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=worktree-bootstrap-stops-self-clone status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=update-blocks-dirty-template status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=update-blocks-dirty-example-micro-project status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=update-blocks-legacy-nested-workspace status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=update-leaves-external-workspace-untouched status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=workspace-freshness-validator-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=workspace-freshness-remains-advisory status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=workspace-freshness-dirty-runtime-advisory status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=contract-topology-validator-valid status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=contract-topology-remains-advisory status=started
+AI_WORKFLOW_SMOKE_PROGRESS test=update-ff-only-failure-leaves-external-workspace status=started
+Owned smoke group passed.
+AI_WORKFLOW_SMOKE_GROUP_COMPLETE group=workspace result=pass exit_code=0 duration_seconds=87
+AI_WORKFLOW_SMOKE_COMPLETE group=all result=pass exit_code=0 duration_seconds=622
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-validator-smoke-tests status=pass duration_seconds=623
+AI_WORKFLOW_VALIDATE_COMPLETE profile=full result=pass exit_code=0 duration_seconds=649 stage=validator check=.systems/scripts/check-validator-smoke-tests

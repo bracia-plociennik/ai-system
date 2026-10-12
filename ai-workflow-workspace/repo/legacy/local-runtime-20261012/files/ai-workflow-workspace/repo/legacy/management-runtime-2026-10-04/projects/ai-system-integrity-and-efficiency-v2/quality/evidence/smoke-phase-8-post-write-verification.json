@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-01",
+  "assessed_source_head": "628064a0c2dffc0641b63b89f8707c830a254629",
+  "checks": [
+    {
+      "name": "qa",
+      "command": "AI_WORKFLOW_WORKSPACE_HOME=/private/tmp/ai-system-integrity-efficiency-v2/ai-workflow-workspace ai-workflow/.systems/scripts/check-qa-evidence --project ai-system-integrity-and-efficiency-v2",
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "name": "status",
+      "command": "AI_WORKFLOW_WORKSPACE_HOME=/private/tmp/ai-system-integrity-efficiency-v2/ai-workflow-workspace ai-workflow/.systems/scripts/check-status-consistency --project ai-system-integrity-and-efficiency-v2",
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "name": "capture",
+      "command": ".systems/scripts/check-distillation-state --workspace ai-workflow-workspace --owned-root project-state/ai-system-integrity-and-efficiency-v2",
+      "exit_code": 0,
+      "output": "Distillation State records: 2\nInvalid records: 0\nUnresolved records: 0\npending-quality: 0\nready: 0\ndeferred: 0\nowner-skipped: 0\nblocked: 0\ncompleted: 2\nnot-applicable: 0\n"
+    },
+    {
+      "name": "naming",
+      "command": "AI_WORKFLOW_WORKSPACE_HOME=/private/tmp/ai-system-integrity-efficiency-v2/ai-workflow-workspace ai-workflow/.systems/scripts/check-naming",
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "name": "diff",
+      "command": "git diff --check",
+      "exit_code": 0,
+      "output": ""
+    }
+  ],
+  "readback_sha256": [
+    "6034b07ca61792b2aeb967d8f249f06fcfe6dfab2de720e3fc220e987395624e  ai-workflow-workspace/projects/ai-system-integrity-and-efficiency-v2/quality/phase-8-final-check.md",
+    "6d6b716e2c8150c34a562e20b8dca2025da0f7503f587c01ce178e20ccc9980d  ai-workflow-workspace/projects/ai-system-integrity-and-efficiency-v2/status.md"
+  ],
+  "artifact_format_recovery": [
+    {
+      "exit_code": 1,
+      "error": "unsatisfied Findings: Blockers",
+      "correction": "Use exact canonical Blockers: none; approved scope and residual limits remain separately stated."
+    },
+    {
+      "exit_code": 1,
+      "error": "missing or incomplete Findings: Unresolved findings",
+      "correction": "Add exact canonical Unresolved findings: none after completed semantic re-review."
+    }
+  ],
+  "semantic_verdict": "Technical PASS from semantic and behavior evidence, not script output",
+  "formal_owner_acceptance": "awaiting-owner-final-yes",
+  "supporting_only": true,
+  "full_validation_reuse": "Product and Workflow full completed before Phase 8 metadata-only changes; source and coverage identity unchanged."
+}

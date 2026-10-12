@@ -1,0 +1,15 @@
+# Validation Execution Record
+- Profile: `full`
+- Scope: AI System product validator chain
+- Status: `completed`
+- Exit code: `0`
+- Last check: `/Users/jakubplociennik/ai-system/onlinen-workspace/projects/ai-system/.systems/scripts/check-validator-smoke-tests`
+- Smoke status: `run`
+- Semantic QA result: not-provided-by-script
+- Findings/blockers: script result only; semantic review required
+- Product checks: not-provided-by-script
+- AI System script applicability: applicable for this validator route
+- Script evidence role: `supporting-only`
+- Final verdict: not-issued-by-script
+- Skipped checks: see smoke status and command output
+- Residual risk: green scripts do not establish semantic PASS or final acceptance

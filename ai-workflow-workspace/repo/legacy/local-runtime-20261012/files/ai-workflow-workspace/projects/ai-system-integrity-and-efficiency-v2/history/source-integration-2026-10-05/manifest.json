@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "scope": "owner-approved source compatibility reassessment only",
+  "target_source_head": "fd68b8ced847387c130e4868bb624fd22b0b8648",
+  "installed_workflow_head": "a9a5c40430af3dec153df94f8b78a30f668bbde3",
+  "new_final_owner_yes": false,
+  "entries": [
+    {
+      "original_path": "quality/phase-2-plan-qa.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/phase-2-plan-qa.md",
+      "sha256": "ee5afbab3dd584e26bd86c2c79cf8839a3e57bec221e9033e4e300cbe7942971",
+      "bytes": 7431,
+      "previous_run_id": "phase-2-plan-qa-2026-10-01-format-recovery-smoke-optimization",
+      "previous_source_head": "3e8b795821bc46d7d91f6a620d6a3272e8a5cafb",
+      "current_run_id": "integration-2026-10-05-iev2-phase-2-plan-qa",
+      "current_report_sha256": "8a1f204d0ee7ab73f39a93b729c7b6d485d2b27689619b759191a0cc1f0021e0"
+    },
+    {
+      "original_path": "quality/phase-5-iev2-cr-001-smoke-setup-optimization-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/phase-5-iev2-cr-001-smoke-setup-optimization-quality.md",
+      "sha256": "aab3b706005ba2e220e59a67ea7bccb43e9f32c36139b68561e3649843b9266d",
+      "bytes": 11954,
+      "previous_run_id": "qa-iev2-cr-001-smoke-setup-optimization-2026-10-01-format-recovery-smoke-optimization",
+      "previous_source_head": "3e8b795821bc46d7d91f6a620d6a3272e8a5cafb",
+      "current_run_id": "integration-2026-10-05-iev2-phase-5-iev2-cr-001-smoke-setup-optimization-quality",
+      "current_report_sha256": "a325cd8d64de6e131faad67b89309ea33f105ae491f699b86eb25abb1f675650"
+    },
+    {
+      "original_path": "quality/phase-5-iev2-drm-010-dream-lifecycle-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/phase-5-iev2-drm-010-dream-lifecycle-quality.md",
+      "sha256": "88af0004b5245eaa1be6376c5787fce6999ed7e6d91618ec5618109605baa1e9",
+      "bytes": 11311,
+      "previous_run_id": "qa-iev2-drm-010-dream-lifecycle-2026-10-01-format-recovery-smoke-optimization",
+      "previous_source_head": "3e8b795821bc46d7d91f6a620d6a3272e8a5cafb",
+      "current_run_id": "integration-2026-10-05-iev2-phase-5-iev2-drm-010-dream-lifecycle-quality",
+      "current_report_sha256": "25b35d50fcd50cb1e106d77b673c63f2bcfc7b213d89fa77e991b3cc7a8bac0b"
+    },
+    {
+      "original_path": "quality/phase-5-iev2-ops-008-bounded-recovery-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/phase-5-iev2-ops-008-bounded-recovery-quality.md",
+      "sha256": "c9674d5f24093b91c18404c4a10c3a1c16b8598741873d45773086f4341045ad",
+      "bytes": 11043,
+      "previous_run_id": "qa-iev2-ops-008-bounded-recovery-2026-10-01-format-recovery-smoke-optimization",
+      "previous_source_head": "3e8b795821bc46d7d91f6a620d6a3272e8a5cafb",
+      "current_run_id": "integration-2026-10-05-iev2-phase-5-iev2-ops-008-bounded-recovery-quality",
+      "current_report_sha256": "201d95c06f708767bfa3ad9b389d703217da14eb6aeafa842ea3fca8816e4425"
+    },
+    {
+      "original_path": "quality/phase-5-iev2-ops-011-freshness-topology-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/phase-5-iev2-ops-011-freshness-topology-quality.md",
+      "sha256": "6f67f68349b7459f8e545b9040bc3b9f379108d99f313a09bb6e0878a17b5c7e",
+      "bytes": 11262,
+      "previous_run_id": "qa-iev2-ops-011-freshness-topology-2026-10-01-format-recovery-smoke-optimization",
+      "previous_source_head": "3e8b795821bc46d7d91f6a620d6a3272e8a5cafb",
+      "current_run_id": "integration-2026-10-05-iev2-phase-5-iev2-ops-011-freshness-topology-quality",
+      "current_report_sha256": "0c5ec60fdafe55a61e51f8a791da3c7e366eee8ae8dfc67a2b1508508257f584"
+    },
+    {
+      "original_path": "quality/phase-5-iev2-skl-002-eval-freshness-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/phase-5-iev2-skl-002-eval-freshness-quality.md",
+      "sha256": "864e04fccef8bfe205d8806a2b2cd7294c665b99e43cabc950df707eec5b6977",
+      "bytes": 11428,
+      "previous_run_id": "qa-iev2-skl-002-eval-freshness-2026-10-01-format-recovery-smoke-optimization",
+      "previous_source_head": "3e8b795821bc46d7d91f6a620d6a3272e8a5cafb",
+      "current_run_id": "integration-2026-10-05-iev2-phase-5-iev2-skl-002-eval-freshness-quality",
+      "current_report_sha256": "1c15603a1ab2a5f615fbcf751c2d1fcfd70eab21362a859b8f1288f4c058d48c"
+    },
+    {
+      "original_path": "quality/phase-5-iev2-skl-009-metadata-discovery-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/phase-5-iev2-skl-009-metadata-discovery-quality.md",
+      "sha256": "c271b46fbd67cbd0829e6a3f8f1f4332c95a9ae4a00df00afc55323e03eda18c",
+      "bytes": 11176,
+      "previous_run_id": "qa-iev2-skl-009-metadata-discovery-2026-10-01-format-recovery-smoke-optimization",
+      "previous_source_head": "3e8b795821bc46d7d91f6a620d6a3272e8a5cafb",
+      "current_run_id": "integration-2026-10-05-iev2-phase-5-iev2-skl-009-metadata-discovery-quality",
+      "current_report_sha256": "e9c75a6b0e9844d006f6b87b1b2245e1864536057ebe06474bfba3bf7f8f93bb"
+    },
+    {
+      "original_path": "quality/phase-5-iev2-upd-004-canonical-updater-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/phase-5-iev2-upd-004-canonical-updater-quality.md",
+      "sha256": "9e27ce4d9a16728a5da8e5373c4decaad09f1330eb3407b20216addafb57a567",
+      "bytes": 10613,
+      "previous_run_id": "qa-iev2-upd-004-canonical-updater-2026-10-01-format-recovery-smoke-optimization",
+      "previous_source_head": "3e8b795821bc46d7d91f6a620d6a3272e8a5cafb",
+      "current_run_id": "integration-2026-10-05-iev2-phase-5-iev2-upd-004-canonical-updater-quality",
+      "current_report_sha256": "f926fedebb96c6e8f813f13917bbe3fb36546eb8fed1a43fa504b05db9011f2e"
+    },
+    {
+      "original_path": "quality/phase-5-iev2-val-001-typed-negative-assertions-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/phase-5-iev2-val-001-typed-negative-assertions-quality.md",
+      "sha256": "c69eada5d5c3821221fb131ee8396c695ec154a81b69534a7d8ea9742c148702",
+      "bytes": 11135,
+      "previous_run_id": "qa-iev2-val-001-typed-negative-assertions-2026-10-01-format-recovery-smoke-optimization",
+      "previous_source_head": "3e8b795821bc46d7d91f6a620d6a3272e8a5cafb",
+      "current_run_id": "integration-2026-10-05-iev2-phase-5-iev2-val-001-typed-negative-assertions-quality",
+      "current_report_sha256": "71b75e4edd8a4e0feb2d859c413d098b33a63fd73fb8738aa53a6a095885c762"
+    },
+    {
+      "original_path": "quality/phase-5-iev2-val-003-evidence-destinations-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/phase-5-iev2-val-003-evidence-destinations-quality.md",
+      "sha256": "1be95dee0f558336986a801a089dd43ccfa102ae00b6e1ba05f9a3d1dd39f591",
+      "bytes": 10906,
+      "previous_run_id": "qa-iev2-val-003-evidence-destinations-2026-10-01-format-recovery-smoke-optimization",
+      "previous_source_head": "3e8b795821bc46d7d91f6a620d6a3272e8a5cafb",
+      "current_run_id": "integration-2026-10-05-iev2-phase-5-iev2-val-003-evidence-destinations-quality",
+      "current_report_sha256": "91f594c0c46b1ee533050e22f92cf0f31341a8040bc18e69b19b3222f79942d5"
+    },
+    {
+      "original_path": "quality/phase-5-iev2-val-005-validation-lifecycle-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/phase-5-iev2-val-005-validation-lifecycle-quality.md",
+      "sha256": "285dfffab322a6f3634b81e8bdfff32b8dcaa7101eef9f51577201787545473f",
+      "bytes": 11034,
+      "previous_run_id": "qa-iev2-val-005-validation-lifecycle-2026-10-01-format-recovery-smoke-optimization",
+      "previous_source_head": "3e8b795821bc46d7d91f6a620d6a3272e8a5cafb",
+      "current_run_id": "integration-2026-10-05-iev2-phase-5-iev2-val-005-validation-lifecycle-quality",
+      "current_report_sha256": "02ac8c66287474bc2cfd1d405e823d268805e2e4fd0183c2b3c1ecddc14aba0d"
+    },
+    {
+      "original_path": "quality/phase-5-iev2-val-006-comparable-timing-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/phase-5-iev2-val-006-comparable-timing-quality.md",
+      "sha256": "e464050bc13d9ab8607b916abe1df864bdda349aadb27f6c66454dad8f60c16b",
+      "bytes": 12266,
+      "previous_run_id": "qa-iev2-val-006-comparable-timing-2026-10-01-format-recovery-smoke-optimization",
+      "previous_source_head": "3e8b795821bc46d7d91f6a620d6a3272e8a5cafb",
+      "current_run_id": "integration-2026-10-05-iev2-phase-5-iev2-val-006-comparable-timing-quality",
+      "current_report_sha256": "9840a7c92da86806bdce6373572347fa216c0a78826b817aa8fbe64dc621941d"
+    },
+    {
+      "original_path": "quality/phase-5-iev2-val-007-scoped-coverage-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/phase-5-iev2-val-007-scoped-coverage-quality.md",
+      "sha256": "0ee1955fb7762a23a5ca4484251ec443394474f9db9aed4ff4141e987c5af071",
+      "bytes": 11415,
+      "previous_run_id": "qa-iev2-val-007-scoped-coverage-2026-10-01-format-recovery-smoke-optimization",
+      "previous_source_head": "3e8b795821bc46d7d91f6a620d6a3272e8a5cafb",
+      "current_run_id": "integration-2026-10-05-iev2-phase-5-iev2-val-007-scoped-coverage-quality",
+      "current_report_sha256": "8cfaaf8bb5d32a6bf693f416f731f88b80a1f4bac7afd3c42c01dcb5dee61071"
+    },
+    {
+      "original_path": "quality/phase-8-final-check.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/phase-8-final-check.md",
+      "sha256": "a033f5b103d7cfb3f51853b05e72ca88285a3abc78d2e5a6b427acb647f8b50c",
+      "bytes": 25027,
+      "previous_run_id": "final-check-integrity-efficiency-v2-owner-approved-closure",
+      "previous_source_head": "754748b135131e7d3a3732a811b52b7c9357f421",
+      "current_run_id": "integration-2026-10-05-iev2-phase-8-final-check",
+      "current_report_sha256": "36e8a557f3922c4fa336c2957e5337349e211eb56b4067a8b3795607c4704d37"
+    }
+  ]
+}

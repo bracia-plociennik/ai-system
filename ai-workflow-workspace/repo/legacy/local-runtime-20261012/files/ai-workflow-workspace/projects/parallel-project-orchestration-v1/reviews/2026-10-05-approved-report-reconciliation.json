@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "source_head": "fd68b8ced847387c130e4868bb624fd22b0b8648",
+  "scope": "owner-approved PPO and CR-009/010 history and source compatibility only",
+  "new_final_owner_yes": false,
+  "entries": [
+    {
+      "project": "parallel-project-orchestration-v1",
+      "original_path": "parallel-project-orchestration-v1/history/original-v1/quality/phase-5-ppo-core-001-contract-quality.md",
+      "historical_path": "parallel-project-orchestration-v1/history/original-v1/evidence/phase-5-ppo-core-001-contract-quality.md",
+      "sha256": "98c7ccfc9d6e116c514b25b84cca13af05ab7fa060fce746ffd1486fc99a5e47",
+      "bytes": 14977
+    },
+    {
+      "project": "parallel-project-orchestration-v1",
+      "original_path": "parallel-project-orchestration-v1/history/original-v1/quality/phase-5-ppo-core-002-run-model-quality.md",
+      "historical_path": "parallel-project-orchestration-v1/history/original-v1/evidence/phase-5-ppo-core-002-run-model-quality.md",
+      "sha256": "26865982cb542f57d7f228a0381296d0999842335b5da6f4bbda86ebd7dfa59d",
+      "bytes": 15006
+    },
+    {
+      "project": "parallel-project-orchestration-v1",
+      "original_path": "parallel-project-orchestration-v1/history/original-v1/quality/phase-5-ppo-core-003-tool-adapter-quality.md",
+      "historical_path": "parallel-project-orchestration-v1/history/original-v1/evidence/phase-5-ppo-core-003-tool-adapter-quality.md",
+      "sha256": "ef35d8a41efe215d66c981e2eeb4cccbeb96bd84b410f6f3eb2cc32227568993",
+      "bytes": 15061
+    },
+    {
+      "project": "parallel-project-orchestration-v1",
+      "original_path": "parallel-project-orchestration-v1/history/original-v1/quality/phase-5-ppo-core-004-integration-quality.md",
+      "historical_path": "parallel-project-orchestration-v1/history/original-v1/evidence/phase-5-ppo-core-004-integration-quality.md",
+      "sha256": "e9f3686a0ac3246cccb23736380a0d3b1310fb7ec8456a80e44f8fbf9f0f8511",
+      "bytes": 15005
+    },
+    {
+      "project": "parallel-project-orchestration-v1",
+      "original_path": "parallel-project-orchestration-v1/history/original-v1/quality/phase-5-ppo-core-005-quality-quality.md",
+      "historical_path": "parallel-project-orchestration-v1/history/original-v1/evidence/phase-5-ppo-core-005-quality-quality.md",
+      "sha256": "9c31d96769b64946f393b6193c0eeb0d9d0dc385e8cff8d724ee3240e2a59250",
+      "bytes": 15048
+    },
+    {
+      "project": "parallel-project-orchestration-v1",
+      "original_path": "parallel-project-orchestration-v1/history/original-v1/quality/phase-8-final-check.md",
+      "historical_path": "parallel-project-orchestration-v1/history/original-v1/evidence/phase-8-final-check.md",
+      "sha256": "62d3cdad9793c260591ea97a14e52ba8ad243b7f44a1aeb965dff5f853ed4057",
+      "bytes": 18056
+    },
+    {
+      "project": "parallel-project-orchestration-v1",
+      "original_path": "parallel-project-orchestration-v1/checkpoints/phase-7-checkpoint-2026-10-04-historical-qa-reconciliation.md",
+      "historical_path": "parallel-project-orchestration-v1/history/approved-report-reconciliation-2026-10-05/reference-inputs/checkpoints/phase-7-checkpoint-2026-10-04-historical-qa-reconciliation.md",
+      "sha256": "e9ad58330a912b098035e7161626fb2739f898e5710186c6648ba6c8e220accf",
+      "bytes": 4809
+    },
+    {
+      "project": "parallel-project-orchestration-v1",
+      "original_path": "parallel-project-orchestration-v1/evals/phase-8-post-archive-verification.json",
+      "historical_path": "parallel-project-orchestration-v1/history/approved-report-reconciliation-2026-10-05/reference-inputs/evals/phase-8-post-archive-verification.json",
+      "sha256": "c42d55e34f3c828ab4a607f2aba26f03362c3fe3e80709aaeb869e42256515cf",
+      "bytes": 4648
+    },
+    {
+      "project": "parallel-project-orchestration-v1",
+      "original_path": "parallel-project-orchestration-v1/history/original-v1/reference-map.json",
+      "historical_path": "parallel-project-orchestration-v1/history/approved-report-reconciliation-2026-10-05/reference-inputs/history/original-v1/reference-map.json",
+      "sha256": "5a7dc564030469f4445c4e2a667bce7d4dc659dbaa7f757f23e82b799a1723b9",
+      "bytes": 2163
+    },
+    {
+      "project": "parallel-project-orchestration-v1",
+      "original_path": "parallel-project-orchestration-v1/history/original-v1/sha256-manifest.json",
+      "historical_path": "parallel-project-orchestration-v1/history/approved-report-reconciliation-2026-10-05/reference-inputs/history/original-v1/sha256-manifest.json",
+      "sha256": "3b07ec052229a71b645807c71145d37989083367fd8e97ea4926196bc447f411",
+      "bytes": 2574
+    },
+    {
+      "project": "parallel-project-orchestration-v1",
+      "original_path": "parallel-project-orchestration-v1/memory/2026-10-04-compatibility-adaptation.md",
+      "historical_path": "parallel-project-orchestration-v1/history/approved-report-reconciliation-2026-10-05/reference-inputs/memory/2026-10-04-compatibility-adaptation.md",
+      "sha256": "c969014a2378f4a55317f8f7020224a2c35e7eb0e35398ef6e3e79c23a80f11d",
+      "bytes": 2068
+    },
+    {
+      "project": "parallel-project-orchestration-v1",
+      "original_path": "parallel-project-orchestration-v1/status.md",
+      "historical_path": "parallel-project-orchestration-v1/history/approved-report-reconciliation-2026-10-05/reference-inputs/status.md",
+      "sha256": "097644cf65854dc31fb2bd06e5e6d46e2e1138a47eca53b833fd640d8ed4f825",
+      "bytes": 2332
+    },
+    {
+      "project": "parallel-project-orchestration-v1",
+      "original_path": "parallel-project-orchestration-v1/quality/recovery-phase-8-final-check.md",
+      "historical_path": "parallel-project-orchestration-v1/history/approved-report-reconciliation-2026-10-05/evidence/recovery-phase-8-final-check.md",
+      "sha256": "92dcc6c88ac3459f394ee6f4c7099ba38b1d7e64a1d8df1c19758413d36b479e",
+      "bytes": 21446
+    }
+  ]
+}

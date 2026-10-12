@@ -1,0 +1,5 @@
+AI_WORKFLOW_VALIDATE_START profile=standard progress=summary
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-required-artifacts status=started
+ai-workflow/.systems/scripts/validate-workflow: line 246: .systems/scripts/run-with-timeout: No such file or directory
+AI_WORKFLOW_VALIDATE_PROGRESS stage=validator check=.systems/scripts/check-required-artifacts status=fail duration_seconds=0
+AI_WORKFLOW_VALIDATE_COMPLETE profile=standard result=fail exit_code=127 duration_seconds=0 stage=validator check=.systems/scripts/check-required-artifacts

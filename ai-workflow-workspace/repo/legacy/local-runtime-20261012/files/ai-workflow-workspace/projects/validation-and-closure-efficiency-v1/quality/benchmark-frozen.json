@@ -1,0 +1,440 @@
+{
+  "cases": {
+    "bounded-multi-consumer-defect": {
+      "baseline": {
+        "median_wall_seconds": 1.437687,
+        "samples": [
+          {
+            "check_ids": [
+              "diff",
+              "check-privacy-boundary",
+              "check-delivery-constraints",
+              "check-owner-approval",
+              "check-distillation-state"
+            ],
+            "coverage_digest": "c8fe590752aa971672e74a1f8bcee113cd8a2a597e7a022cedfa56c80c163e45",
+            "environment_digest": "c004aa74eb6b0f3c0c0b09c6b9b701eed9d60849fde6836d902303c42f758d35",
+            "executed": 5,
+            "rerun_reasons": {
+              "check-delivery-constraints": "baseline fresh execution",
+              "check-distillation-state": "baseline fresh execution",
+              "check-owner-approval": "baseline fresh execution",
+              "check-privacy-boundary": "baseline fresh execution",
+              "diff": "baseline fresh execution"
+            },
+            "reused": 0,
+            "source_digest": "1e23638b84ff17f24dae6e37b22c82d3573a75e7c1ec7c6bcbb67bd2baffa7d2",
+            "wall_seconds": 1.470965667
+          },
+          {
+            "check_ids": [
+              "diff",
+              "check-privacy-boundary",
+              "check-delivery-constraints",
+              "check-owner-approval",
+              "check-distillation-state"
+            ],
+            "coverage_digest": "c8fe590752aa971672e74a1f8bcee113cd8a2a597e7a022cedfa56c80c163e45",
+            "environment_digest": "c004aa74eb6b0f3c0c0b09c6b9b701eed9d60849fde6836d902303c42f758d35",
+            "executed": 5,
+            "rerun_reasons": {
+              "check-delivery-constraints": "baseline fresh execution",
+              "check-distillation-state": "baseline fresh execution",
+              "check-owner-approval": "baseline fresh execution",
+              "check-privacy-boundary": "baseline fresh execution",
+              "diff": "baseline fresh execution"
+            },
+            "reused": 0,
+            "source_digest": "1e23638b84ff17f24dae6e37b22c82d3573a75e7c1ec7c6bcbb67bd2baffa7d2",
+            "wall_seconds": 1.422632458
+          },
+          {
+            "check_ids": [
+              "diff",
+              "check-privacy-boundary",
+              "check-delivery-constraints",
+              "check-owner-approval",
+              "check-distillation-state"
+            ],
+            "coverage_digest": "c8fe590752aa971672e74a1f8bcee113cd8a2a597e7a022cedfa56c80c163e45",
+            "environment_digest": "c004aa74eb6b0f3c0c0b09c6b9b701eed9d60849fde6836d902303c42f758d35",
+            "executed": 5,
+            "rerun_reasons": {
+              "check-delivery-constraints": "baseline fresh execution",
+              "check-distillation-state": "baseline fresh execution",
+              "check-owner-approval": "baseline fresh execution",
+              "check-privacy-boundary": "baseline fresh execution",
+              "diff": "baseline fresh execution"
+            },
+            "reused": 0,
+            "source_digest": "1e23638b84ff17f24dae6e37b22c82d3573a75e7c1ec7c6bcbb67bd2baffa7d2",
+            "wall_seconds": 1.437687
+          }
+        ]
+      },
+      "candidate": {
+        "median_wall_seconds": 1.606812916,
+        "samples": [
+          {
+            "check_ids": [
+              "diff",
+              "check-privacy-boundary",
+              "check-delivery-constraints",
+              "check-owner-approval",
+              "check-distillation-state"
+            ],
+            "coverage_digest": "c8fe590752aa971672e74a1f8bcee113cd8a2a597e7a022cedfa56c80c163e45",
+            "environment_digest": "ccfa4b271fdc3d4d2397ec66e448a726600c3999827aef399082df88567beccc",
+            "executed": 5,
+            "rerun_reasons": {
+              "check-delivery-constraints": "Changed inputs, implementation, parameters, environment or coverage",
+              "check-distillation-state": "Changed inputs, implementation, parameters, environment or coverage",
+              "check-owner-approval": "Changed inputs, implementation, parameters, environment or coverage",
+              "check-privacy-boundary": "Changed inputs, implementation, parameters, environment or coverage",
+              "diff": "Unknown or incomplete input declaration; execute"
+            },
+            "reused": 0,
+            "source_digest": "9cbcbf84a32a74315953efa6f22ead49062082dd22b7be7314fd72464ccf89a1",
+            "wall_seconds": 1.606812916
+          },
+          {
+            "check_ids": [
+              "diff",
+              "check-privacy-boundary",
+              "check-delivery-constraints",
+              "check-owner-approval",
+              "check-distillation-state"
+            ],
+            "coverage_digest": "c8fe590752aa971672e74a1f8bcee113cd8a2a597e7a022cedfa56c80c163e45",
+            "environment_digest": "ccfa4b271fdc3d4d2397ec66e448a726600c3999827aef399082df88567beccc",
+            "executed": 5,
+            "rerun_reasons": {
+              "check-delivery-constraints": "Changed inputs, implementation, parameters, environment or coverage",
+              "check-distillation-state": "Changed inputs, implementation, parameters, environment or coverage",
+              "check-owner-approval": "Changed inputs, implementation, parameters, environment or coverage",
+              "check-privacy-boundary": "Changed inputs, implementation, parameters, environment or coverage",
+              "diff": "Unknown or incomplete input declaration; execute"
+            },
+            "reused": 0,
+            "source_digest": "9cbcbf84a32a74315953efa6f22ead49062082dd22b7be7314fd72464ccf89a1",
+            "wall_seconds": 1.587663084
+          },
+          {
+            "check_ids": [
+              "diff",
+              "check-privacy-boundary",
+              "check-delivery-constraints",
+              "check-owner-approval",
+              "check-distillation-state"
+            ],
+            "coverage_digest": "c8fe590752aa971672e74a1f8bcee113cd8a2a597e7a022cedfa56c80c163e45",
+            "environment_digest": "ccfa4b271fdc3d4d2397ec66e448a726600c3999827aef399082df88567beccc",
+            "executed": 5,
+            "rerun_reasons": {
+              "check-delivery-constraints": "Changed inputs, implementation, parameters, environment or coverage",
+              "check-distillation-state": "Changed inputs, implementation, parameters, environment or coverage",
+              "check-owner-approval": "Changed inputs, implementation, parameters, environment or coverage",
+              "check-privacy-boundary": "Changed inputs, implementation, parameters, environment or coverage",
+              "diff": "Unknown or incomplete input declaration; execute"
+            },
+            "reused": 0,
+            "source_digest": "9cbcbf84a32a74315953efa6f22ead49062082dd22b7be7314fd72464ccf89a1",
+            "wall_seconds": 1.62153275
+          }
+        ]
+      }
+    },
+    "runtime-only-closure": {
+      "baseline": {
+        "median_wall_seconds": 1.43625725,
+        "samples": [
+          {
+            "check_ids": [
+              "diff",
+              "check-privacy-boundary",
+              "check-delivery-constraints",
+              "check-owner-approval",
+              "check-distillation-state"
+            ],
+            "coverage_digest": "c8fe590752aa971672e74a1f8bcee113cd8a2a597e7a022cedfa56c80c163e45",
+            "environment_digest": "c004aa74eb6b0f3c0c0b09c6b9b701eed9d60849fde6836d902303c42f758d35",
+            "executed": 5,
+            "rerun_reasons": {
+              "check-delivery-constraints": "baseline fresh execution",
+              "check-distillation-state": "baseline fresh execution",
+              "check-owner-approval": "baseline fresh execution",
+              "check-privacy-boundary": "baseline fresh execution",
+              "diff": "baseline fresh execution"
+            },
+            "reused": 0,
+            "source_digest": "139dc805b8ef532403cd89b90fb239b25e4c831f65452d537f28bda1e8c04edb",
+            "wall_seconds": 1.645224542
+          },
+          {
+            "check_ids": [
+              "diff",
+              "check-privacy-boundary",
+              "check-delivery-constraints",
+              "check-owner-approval",
+              "check-distillation-state"
+            ],
+            "coverage_digest": "c8fe590752aa971672e74a1f8bcee113cd8a2a597e7a022cedfa56c80c163e45",
+            "environment_digest": "c004aa74eb6b0f3c0c0b09c6b9b701eed9d60849fde6836d902303c42f758d35",
+            "executed": 5,
+            "rerun_reasons": {
+              "check-delivery-constraints": "baseline fresh execution",
+              "check-distillation-state": "baseline fresh execution",
+              "check-owner-approval": "baseline fresh execution",
+              "check-privacy-boundary": "baseline fresh execution",
+              "diff": "baseline fresh execution"
+            },
+            "reused": 0,
+            "source_digest": "139dc805b8ef532403cd89b90fb239b25e4c831f65452d537f28bda1e8c04edb",
+            "wall_seconds": 1.432382833
+          },
+          {
+            "check_ids": [
+              "diff",
+              "check-privacy-boundary",
+              "check-delivery-constraints",
+              "check-owner-approval",
+              "check-distillation-state"
+            ],
+            "coverage_digest": "c8fe590752aa971672e74a1f8bcee113cd8a2a597e7a022cedfa56c80c163e45",
+            "environment_digest": "c004aa74eb6b0f3c0c0b09c6b9b701eed9d60849fde6836d902303c42f758d35",
+            "executed": 5,
+            "rerun_reasons": {
+              "check-delivery-constraints": "baseline fresh execution",
+              "check-distillation-state": "baseline fresh execution",
+              "check-owner-approval": "baseline fresh execution",
+              "check-privacy-boundary": "baseline fresh execution",
+              "diff": "baseline fresh execution"
+            },
+            "reused": 0,
+            "source_digest": "139dc805b8ef532403cd89b90fb239b25e4c831f65452d537f28bda1e8c04edb",
+            "wall_seconds": 1.43625725
+          }
+        ]
+      },
+      "candidate": {
+        "median_wall_seconds": 0.435406,
+        "samples": [
+          {
+            "check_ids": [
+              "diff",
+              "check-privacy-boundary",
+              "check-delivery-constraints",
+              "check-owner-approval",
+              "check-distillation-state"
+            ],
+            "coverage_digest": "c8fe590752aa971672e74a1f8bcee113cd8a2a597e7a022cedfa56c80c163e45",
+            "environment_digest": "6360d14cd96f49f49dfd764fc7f9c70b617e89cd9538587037ae3f699d2e862b",
+            "executed": 1,
+            "rerun_reasons": {
+              "check-delivery-constraints": "All declared check identities revalidated",
+              "check-distillation-state": "All declared check identities revalidated",
+              "check-owner-approval": "All declared check identities revalidated",
+              "check-privacy-boundary": "All declared check identities revalidated",
+              "diff": "Unknown or incomplete input declaration; execute"
+            },
+            "reused": 4,
+            "source_digest": "ae7d8332ff46f67f323af099e9565ff86db1a8c083acdccc1cb9f3b27b806da2",
+            "wall_seconds": 0.447899084
+          },
+          {
+            "check_ids": [
+              "diff",
+              "check-privacy-boundary",
+              "check-delivery-constraints",
+              "check-owner-approval",
+              "check-distillation-state"
+            ],
+            "coverage_digest": "c8fe590752aa971672e74a1f8bcee113cd8a2a597e7a022cedfa56c80c163e45",
+            "environment_digest": "6360d14cd96f49f49dfd764fc7f9c70b617e89cd9538587037ae3f699d2e862b",
+            "executed": 1,
+            "rerun_reasons": {
+              "check-delivery-constraints": "All declared check identities revalidated",
+              "check-distillation-state": "All declared check identities revalidated",
+              "check-owner-approval": "All declared check identities revalidated",
+              "check-privacy-boundary": "All declared check identities revalidated",
+              "diff": "Unknown or incomplete input declaration; execute"
+            },
+            "reused": 4,
+            "source_digest": "ae7d8332ff46f67f323af099e9565ff86db1a8c083acdccc1cb9f3b27b806da2",
+            "wall_seconds": 0.435406
+          },
+          {
+            "check_ids": [
+              "diff",
+              "check-privacy-boundary",
+              "check-delivery-constraints",
+              "check-owner-approval",
+              "check-distillation-state"
+            ],
+            "coverage_digest": "c8fe590752aa971672e74a1f8bcee113cd8a2a597e7a022cedfa56c80c163e45",
+            "environment_digest": "6360d14cd96f49f49dfd764fc7f9c70b617e89cd9538587037ae3f699d2e862b",
+            "executed": 1,
+            "rerun_reasons": {
+              "check-delivery-constraints": "All declared check identities revalidated",
+              "check-distillation-state": "All declared check identities revalidated",
+              "check-owner-approval": "All declared check identities revalidated",
+              "check-privacy-boundary": "All declared check identities revalidated",
+              "diff": "Unknown or incomplete input declaration; execute"
+            },
+            "reused": 4,
+            "source_digest": "ae7d8332ff46f67f323af099e9565ff86db1a8c083acdccc1cb9f3b27b806da2",
+            "wall_seconds": 0.422266875
+          }
+        ]
+      }
+    },
+    "shared-contract-change": {
+      "baseline": {
+        "median_wall_seconds": 1.444960833,
+        "samples": [
+          {
+            "check_ids": [
+              "diff",
+              "check-privacy-boundary",
+              "check-delivery-constraints",
+              "check-owner-approval",
+              "check-distillation-state"
+            ],
+            "coverage_digest": "c8fe590752aa971672e74a1f8bcee113cd8a2a597e7a022cedfa56c80c163e45",
+            "environment_digest": "c004aa74eb6b0f3c0c0b09c6b9b701eed9d60849fde6836d902303c42f758d35",
+            "executed": 5,
+            "rerun_reasons": {
+              "check-delivery-constraints": "baseline fresh execution",
+              "check-distillation-state": "baseline fresh execution",
+              "check-owner-approval": "baseline fresh execution",
+              "check-privacy-boundary": "baseline fresh execution",
+              "diff": "baseline fresh execution"
+            },
+            "reused": 0,
+            "source_digest": "0271c1fd5f77351cff18fb6b696f450367fe04642ef2975eaaedbcc369da1789",
+            "wall_seconds": 1.444960833
+          },
+          {
+            "check_ids": [
+              "diff",
+              "check-privacy-boundary",
+              "check-delivery-constraints",
+              "check-owner-approval",
+              "check-distillation-state"
+            ],
+            "coverage_digest": "c8fe590752aa971672e74a1f8bcee113cd8a2a597e7a022cedfa56c80c163e45",
+            "environment_digest": "c004aa74eb6b0f3c0c0b09c6b9b701eed9d60849fde6836d902303c42f758d35",
+            "executed": 5,
+            "rerun_reasons": {
+              "check-delivery-constraints": "baseline fresh execution",
+              "check-distillation-state": "baseline fresh execution",
+              "check-owner-approval": "baseline fresh execution",
+              "check-privacy-boundary": "baseline fresh execution",
+              "diff": "baseline fresh execution"
+            },
+            "reused": 0,
+            "source_digest": "0271c1fd5f77351cff18fb6b696f450367fe04642ef2975eaaedbcc369da1789",
+            "wall_seconds": 1.46325225
+          },
+          {
+            "check_ids": [
+              "diff",
+              "check-privacy-boundary",
+              "check-delivery-constraints",
+              "check-owner-approval",
+              "check-distillation-state"
+            ],
+            "coverage_digest": "c8fe590752aa971672e74a1f8bcee113cd8a2a597e7a022cedfa56c80c163e45",
+            "environment_digest": "c004aa74eb6b0f3c0c0b09c6b9b701eed9d60849fde6836d902303c42f758d35",
+            "executed": 5,
+            "rerun_reasons": {
+              "check-delivery-constraints": "baseline fresh execution",
+              "check-distillation-state": "baseline fresh execution",
+              "check-owner-approval": "baseline fresh execution",
+              "check-privacy-boundary": "baseline fresh execution",
+              "diff": "baseline fresh execution"
+            },
+            "reused": 0,
+            "source_digest": "0271c1fd5f77351cff18fb6b696f450367fe04642ef2975eaaedbcc369da1789",
+            "wall_seconds": 1.422017708
+          }
+        ]
+      },
+      "candidate": {
+        "median_wall_seconds": 1.600854667,
+        "samples": [
+          {
+            "check_ids": [
+              "diff",
+              "check-privacy-boundary",
+              "check-delivery-constraints",
+              "check-owner-approval",
+              "check-distillation-state"
+            ],
+            "coverage_digest": "c8fe590752aa971672e74a1f8bcee113cd8a2a597e7a022cedfa56c80c163e45",
+            "environment_digest": "f20404dabb118eefe7391b2e36b5d208c1fb3524e5ac439c7a46fe3ba05ea319",
+            "executed": 5,
+            "rerun_reasons": {
+              "check-delivery-constraints": "Changed inputs, implementation, parameters, environment or coverage",
+              "check-distillation-state": "Changed inputs, implementation, parameters, environment or coverage",
+              "check-owner-approval": "Changed inputs, implementation, parameters, environment or coverage",
+              "check-privacy-boundary": "Changed inputs, implementation, parameters, environment or coverage",
+              "diff": "Unknown or incomplete input declaration; execute"
+            },
+            "reused": 0,
+            "source_digest": "15c75a3b7b43183c70ac5e7e75211a02cc12559c7e99c2f5c38a81302815c796",
+            "wall_seconds": 1.600854667
+          },
+          {
+            "check_ids": [
+              "diff",
+              "check-privacy-boundary",
+              "check-delivery-constraints",
+              "check-owner-approval",
+              "check-distillation-state"
+            ],
+            "coverage_digest": "c8fe590752aa971672e74a1f8bcee113cd8a2a597e7a022cedfa56c80c163e45",
+            "environment_digest": "f20404dabb118eefe7391b2e36b5d208c1fb3524e5ac439c7a46fe3ba05ea319",
+            "executed": 5,
+            "rerun_reasons": {
+              "check-delivery-constraints": "Changed inputs, implementation, parameters, environment or coverage",
+              "check-distillation-state": "Changed inputs, implementation, parameters, environment or coverage",
+              "check-owner-approval": "Changed inputs, implementation, parameters, environment or coverage",
+              "check-privacy-boundary": "Changed inputs, implementation, parameters, environment or coverage",
+              "diff": "Unknown or incomplete input declaration; execute"
+            },
+            "reused": 0,
+            "source_digest": "15c75a3b7b43183c70ac5e7e75211a02cc12559c7e99c2f5c38a81302815c796",
+            "wall_seconds": 1.743259083
+          },
+          {
+            "check_ids": [
+              "diff",
+              "check-privacy-boundary",
+              "check-delivery-constraints",
+              "check-owner-approval",
+              "check-distillation-state"
+            ],
+            "coverage_digest": "c8fe590752aa971672e74a1f8bcee113cd8a2a597e7a022cedfa56c80c163e45",
+            "environment_digest": "f20404dabb118eefe7391b2e36b5d208c1fb3524e5ac439c7a46fe3ba05ea319",
+            "executed": 5,
+            "rerun_reasons": {
+              "check-delivery-constraints": "Changed inputs, implementation, parameters, environment or coverage",
+              "check-distillation-state": "Changed inputs, implementation, parameters, environment or coverage",
+              "check-owner-approval": "Changed inputs, implementation, parameters, environment or coverage",
+              "check-privacy-boundary": "Changed inputs, implementation, parameters, environment or coverage",
+              "diff": "Unknown or incomplete input declaration; execute"
+            },
+            "reused": 0,
+            "source_digest": "15c75a3b7b43183c70ac5e7e75211a02cc12559c7e99c2f5c38a81302815c796",
+            "wall_seconds": 1.594728083
+          }
+        ]
+      }
+    }
+  },
+  "contract": 1,
+  "samples_per_variant": 3,
+  "scope": "synthetic scoped scripts, not whole-agent latency",
+  "supporting_only": true
+}

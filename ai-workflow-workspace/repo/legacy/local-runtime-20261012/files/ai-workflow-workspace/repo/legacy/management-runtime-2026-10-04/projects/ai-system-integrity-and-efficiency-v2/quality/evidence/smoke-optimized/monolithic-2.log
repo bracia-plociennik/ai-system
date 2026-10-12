@@ -1,0 +1,98 @@
+AI_SYSTEM_VALIDATE_START run_id=a7403d371dc345cb9ed425d9b46d9b7c supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=diff index=1/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-required-artifacts index=2/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-readmes index=3/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-naming index=4/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-privacy-boundary index=5/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-system-skills index=6/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-contract-compliance index=7/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-delivery-constraints index=8/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-owner-approval index=9/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-distillation-state index=10/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-validation-routing index=11/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-model-selection-guidance index=12/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-cross-system-upgrade-handoff index=13/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-weekly-planning index=14/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-personal-ops-v4 index=15/33 supporting_only=true
+Personal Ops V4 contract artifacts: OK
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-personal-ops-aggregates-v4 index=16/33 supporting_only=true
+.........................
+----------------------------------------------------------------------
+Ran 25 tests in 0.514s
+
+OK
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-spor-proposals index=17/33 supporting_only=true
+test_aggregate_not_artificially_split (__main__.ProposalTests.test_aggregate_not_artificially_split) ... ok
+test_budget_zero_unknown_and_nutrition_adapter (__main__.ProposalTests.test_budget_zero_unknown_and_nutrition_adapter) ... ok
+test_canonical_budget_interface_compatible (__main__.ProposalTests.test_canonical_budget_interface_compatible) ... ok
+test_closed_task_excluded_without_body_read (__main__.ProposalTests.test_closed_task_excluded_without_body_read) ... ok
+test_complete_template_sections (__main__.ProposalTests.test_complete_template_sections) ... ok
+test_draft_cannot_enter_tasknote_generator (__main__.ProposalTests.test_draft_cannot_enter_tasknote_generator) ... ok
+test_duplicate_sunday_and_existing (__main__.ProposalTests.test_duplicate_sunday_and_existing) ... ok
+test_full_macro_six_slots_and_stale_index_balance (__main__.ProposalTests.test_full_macro_six_slots_and_stale_index_balance) ... ok
+test_invalid_numeric_input_not_echoed_in_diagnostic (__main__.ProposalTests.test_invalid_numeric_input_not_echoed_in_diagnostic) ... ok
+test_missing_data_read_only_and_no_leak (__main__.ProposalTests.test_missing_data_read_only_and_no_leak) ... ok
+test_onlinen_exact_related_root_and_foreign_exclusion (__main__.ProposalTests.test_onlinen_exact_related_root_and_foreign_exclusion) ... ok
+test_osnr_and_split_capacity (__main__.ProposalTests.test_osnr_and_split_capacity) ... ok
+test_periods_and_iso_boundaries (__main__.ProposalTests.test_periods_and_iso_boundaries) ... ok
+test_real_weekly_recording_date_and_native_v3_location (__main__.ProposalTests.test_real_weekly_recording_date_and_native_v3_location) ... ok
+test_safety_redacted_symlink_and_no_instruction_authority (__main__.ProposalTests.test_safety_redacted_symlink_and_no_instruction_authority) ... ok
+test_third_source_cannot_restore_conflicting_fact (__main__.ProposalTests.test_third_source_cannot_restore_conflicting_fact) ... ok
+test_unavailable_source_cli_no_fake_form (__main__.ProposalTests.test_unavailable_source_cli_no_fake_form) ... ok
+test_v3_v4_conflicts_not_double_counted (__main__.ProposalTests.test_v3_v4_conflicts_not_double_counted) ... ok
+test_warsaw_dst_and_delayed_date (__main__.ProposalTests.test_warsaw_dst_and_delayed_date) ... ok
+test_weekly_friday_missing_and_owner_assessment (__main__.ProposalTests.test_weekly_friday_missing_and_owner_assessment) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 0.620s
+
+OK
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-weekly-planning-v4 index=18/33 supporting_only=true
+Weekly Check-In V4 contract artifacts: OK
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-block-checkpoint index=19/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-end-of-task-capture index=20/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-update-workspace index=21/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-project-state index=22/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-project-orchestration index=23/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-external-source-registry index=24/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-external-export-import-workflow index=25/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-personal-ops index=26/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-task-management index=27/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-dreaming-mode index=28/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-system-insights index=29/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-prompt-composition index=30/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-validation-profiles index=31/33 supporting_only=true
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-validation-integrity index=32/33 supporting_only=true
+test_all_declared_negative_causes_are_specific (__main__.Fixtures.test_all_declared_negative_causes_are_specific) ... ok
+test_dream_full_transition_fingerprints_and_inventory (__main__.Fixtures.test_dream_full_transition_fingerprints_and_inventory) ... ok
+test_dream_identity_and_historical_boundary (__main__.Fixtures.test_dream_identity_and_historical_boundary) ... ok
+test_eval_changed_output_invalidates_grade (__main__.Fixtures.test_eval_changed_output_invalidates_grade) ... ok
+test_eval_plan_membership_metadata_and_orphans (__main__.Fixtures.test_eval_plan_membership_metadata_and_orphans) ... ok
+test_eval_stale_source_producer_and_consumer (__main__.Fixtures.test_eval_stale_source_producer_and_consumer) ... ok
+test_evidence_directory_identity_change (__main__.Fixtures.test_evidence_directory_identity_change) ... ok
+test_evidence_no_clobber_link_and_foreign_owner (__main__.Fixtures.test_evidence_no_clobber_link_and_foreign_owner) ... ok
+test_lifecycle_success_failure_and_exact_marker (__main__.Fixtures.test_lifecycle_success_failure_and_exact_marker) ... ok
+test_metadata_discovery_stops_before_body (__main__.Fixtures.test_metadata_discovery_stops_before_body) ... ok
+test_scoped_complete_owned_inventory (__main__.Fixtures.test_scoped_complete_owned_inventory) ... ok
+test_smoke_bounded_transactions_and_independent_roots (__main__.Fixtures.test_smoke_bounded_transactions_and_independent_roots) ... ok
+test_smoke_copy_equivalence_and_independence (__main__.Fixtures.test_smoke_copy_equivalence_and_independence) ... ok
+test_smoke_copy_invalid_sources_before_any_write (__main__.Fixtures.test_smoke_copy_invalid_sources_before_any_write) ... ok
+test_smoke_copy_unsafe_destinations (__main__.Fixtures.test_smoke_copy_unsafe_destinations) ... ok
+test_smoke_transactions_drain_failed_batch_without_future_writes (__main__.Fixtures.test_smoke_transactions_drain_failed_batch_without_future_writes) ... ok
+test_timeout_and_interruption_cleanup (__main__.Fixtures.test_timeout_and_interruption_cleanup) ... ok
+test_timing_rejects_population_drift_and_partial (__main__.Fixtures.test_timing_rejects_population_drift_and_partial) ... ok
+test_typed_rejection_and_complete_ownership (__main__.Fixtures.test_typed_rejection_and_complete_ownership) ... ok
+test_updater_equal_behind_ahead_diverged (__main__.Fixtures.test_updater_equal_behind_ahead_diverged) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 9.856s
+
+OK
+AI_SYSTEM_VALIDATE_PROGRESS run_id=a7403d371dc345cb9ed425d9b46d9b7c check=check-validator-smoke-tests index=33/33 supporting_only=true
+TaskForge project mapping unavailable: TaskForge vault configuration is missing: /private/var/folders/z8/75mknv4133d06g5vwmqfl__m0000gn/T/ai-system-validator-smoke.1mRQQm/task-candidate-ai-workspace/tasks/taskforge-vault.local.md
+TaskForge project mapping unavailable: TaskForge vault configuration is missing: /private/var/folders/z8/75mknv4133d06g5vwmqfl__m0000gn/T/ai-system-validator-smoke.1mRQQm/task-candidate-ambiguous-workspace/tasks/taskforge-vault.local.md
+TaskForge project mapping unavailable: TaskForge vault configuration is missing: /private/var/folders/z8/75mknv4133d06g5vwmqfl__m0000gn/T/ai-system-validator-smoke.1mRQQm/task-candidate-workspace/tasks/taskforge-vault.local.md
+TaskForge project mapping unavailable: TaskForge vault configuration is missing: /private/var/folders/z8/75mknv4133d06g5vwmqfl__m0000gn/T/ai-system-validator-smoke.1mRQQm/task-candidate-workspace/tasks/taskforge-vault.local.md
+SMOKE_NEGATIVE_COVERAGE suite=all count=220 complete=true
+Validator smoke suite passed: all (supporting-only; not semantic PASS)
+AI_SYSTEM_VALIDATION_RESULT run_id=a7403d371dc345cb9ed425d9b46d9b7c profile=full status=completed exit_code=0 supporting_only=true smoke=completed

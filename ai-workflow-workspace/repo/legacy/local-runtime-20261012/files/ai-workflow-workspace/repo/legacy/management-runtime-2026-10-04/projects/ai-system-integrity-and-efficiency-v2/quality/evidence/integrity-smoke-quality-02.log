@@ -1,0 +1,2 @@
+SMOKE_NEGATIVE_COVERAGE suite=quality count=44 complete=true
+Validator smoke suite passed: quality (supporting-only; not semantic PASS)

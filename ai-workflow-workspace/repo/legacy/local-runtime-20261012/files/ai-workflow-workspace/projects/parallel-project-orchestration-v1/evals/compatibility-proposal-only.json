@@ -1,0 +1,30 @@
+{
+  "contract": 2,
+  "units": [
+    {
+      "contract": 2,
+      "id": "synthetic-one",
+      "task_id": "PPO-COMP-002",
+      "package_id": null,
+      "slice_id": "synthetic-one",
+      "goal": "read-only compatibility preflight",
+      "dod": [
+        "serial fallback and no execution authorization"
+      ],
+      "dependencies": [],
+      "read_set": [],
+      "write_set": [
+        "src"
+      ],
+      "resources": []
+    }
+  ],
+  "capacity": 12,
+  "checkpoint": {
+    "known": true,
+    "parent_task_slots": 3,
+    "active_tasks": []
+  },
+  "dependency_ready": [],
+  "execution_mode": "proposal-only"
+}

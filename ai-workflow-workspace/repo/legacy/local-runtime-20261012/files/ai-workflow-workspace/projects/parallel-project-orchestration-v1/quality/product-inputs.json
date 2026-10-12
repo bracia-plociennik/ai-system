@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "baseline": "bcd1e0dcb9b9b2def6afec9636a72ea058a79ca7",
+  "source_digest": "99e4df2d253974270e1a18966c70ca7ddd9d906de03ca9d472a25958470b2942",
+  "items": [
+    {
+      "path": ".systems/ai/core/command-routing.md",
+      "sha256": "c7510eee75a950a16f827444035089c81b2649b5368d02100f52630148be5558"
+    },
+    {
+      "path": ".systems/ai/core/operating-model.md",
+      "sha256": "c863c5c10bbfbddaed632264d59eff85bb52451077956aa81c4df3cfea65635c"
+    },
+    {
+      "path": ".systems/ai/core/project-orchestration.md",
+      "sha256": "53b060b67e7534cfbec61c4bc1d73ad685ce5d42544313f16108dbca212e88af"
+    },
+    {
+      "path": ".systems/ai/templates/workspace/project-state/orchestration-record.template.md",
+      "sha256": "713e2a7707bb6d448b12533c869964e8cd8b8465bcc077f4fb5707d3cfc82217"
+    },
+    {
+      "path": ".systems/ai/templates/workspace/project-state/parallel-run.template.json",
+      "sha256": "021c0364b3484503e3c4e180c41285ed49856108f2dbab52b19408d89fc1ce6a"
+    },
+    {
+      "path": ".systems/scripts/README.md",
+      "sha256": "71222c86cf1714be650184b204756fc076dc275a80200daaf7bea5f6cd65fa87"
+    },
+    {
+      "path": ".systems/scripts/check-parallel-orchestration",
+      "sha256": "ae4198779470995219fd098fa0843e5344cf561e3e14454c239a984366108be5"
+    },
+    {
+      "path": ".systems/scripts/check-project-orchestration",
+      "sha256": "aed6ff2a9390870a0edac484a13f4e55fc38323cff6449d8f98f8e2e67b7ea67"
+    },
+    {
+      "path": ".systems/scripts/check-required-artifacts",
+      "sha256": "dd245433628f1aa010ba863fe780332327e3166ad103d53bd9a8b1338e3e9019"
+    },
+    {
+      "path": ".systems/scripts/check-validator-smoke-tests",
+      "sha256": "443593b31311f05e0205e07a5abce96e365fe5285eb36677510795a22b5f123d"
+    },
+    {
+      "path": ".systems/scripts/parallel_orchestration.py",
+      "sha256": "1d3db3e49afd91a4a53b3d4bd2172caad7a518d6ae4c3f4c69d8c4962b274519"
+    },
+    {
+      "path": ".systems/scripts/project-orchestration-preflight",
+      "sha256": "37b95f749c752e78992bbf1b65687c91e79624a90cafd29f26e92b0c07c5dd12"
+    },
+    {
+      "path": ".systems/scripts/smoke/negative-expectations.json",
+      "sha256": "63fcc0c8718b5d358bf58b4fe711879f914addd36fbf165fd109acc7aecef1a9"
+    },
+    {
+      "path": ".systems/scripts/smoke_fixture.py",
+      "sha256": "3b423cdebbedffa7b1fa0ce2fd1f312459d7269a06735e681f89a3630bb5635e"
+    },
+    {
+      "path": ".systems/scripts/tests/test_parallel_orchestration.py",
+      "sha256": "6e523fd29dbf7ed9edb8479699809e1a841f57ef711dbd8765f98fe1921ad8fa"
+    },
+    {
+      "path": ".systems/scripts/tests/test_validation_integrity.py",
+      "sha256": "8d3c1b58744a79852b3e250a07eebaf7526e8253d1ef3798f90cffffa0abe505"
+    },
+    {
+      "path": ".systems/scripts/validation-dependencies.json",
+      "sha256": "0a5e0f76619248cacffc40450fe561fb16723160ef81ed72e6b71e5628acd871"
+    },
+    {
+      "path": "HUMANS.md",
+      "sha256": "e805c93a697600d15267117d906852fed82e8a3f4a58ccec4a4dd68b71d4a615"
+    },
+    {
+      "path": "README.md",
+      "sha256": "bbf13c55775c75009ab89d4c28545397f0d0edc56da7543cfae019694ed64601"
+    }
+  ]
+}

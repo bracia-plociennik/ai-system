@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "source_head": "fd68b8ced847387c130e4868bb624fd22b0b8648",
+  "scope": "owner-approved PPO and CR-009/010 history and source compatibility only",
+  "new_final_owner_yes": false,
+  "entries": [
+    {
+      "project": "ai-system",
+      "original_path": "ai-system/quality/asys-cr-009/history/dabbf34/recovery-phase-5-asys-pops-017-unified-aggregates-quality.md",
+      "historical_path": "ai-system/history/asys-cr-009/dabbf34/evidence/recovery-phase-5-asys-pops-017-unified-aggregates-quality.md",
+      "sha256": "bc1ed4b3340d95cdc4fd34cd9251072dcc30fc1658656b955a43b63e726ba467",
+      "bytes": 22705
+    },
+    {
+      "project": "ai-system",
+      "original_path": "ai-system/quality/asys-cr-009/history/dabbf34/recovery-phase-8-final-check.md",
+      "historical_path": "ai-system/history/asys-cr-009/dabbf34/evidence/recovery-phase-8-final-check.md",
+      "sha256": "2a01e8f3e3423096c1fb567dbd8639b7e7768076ec663d6be32f03c5a7822f44",
+      "bytes": 20219
+    },
+    {
+      "project": "ai-system",
+      "original_path": "ai-system/quality/asys-cr-009/history/25ee186/recovery-phase-5-asys-pops-017-unified-aggregates-quality.md",
+      "historical_path": "ai-system/history/asys-cr-009/25ee186/evidence/recovery-phase-5-asys-pops-017-unified-aggregates-quality.md",
+      "sha256": "153644d3f24382037f2f934e0262789c11512efef75c8d94d900e6336001ef07",
+      "bytes": 19711
+    },
+    {
+      "project": "ai-system",
+      "original_path": "ai-system/quality/asys-cr-009/history/25ee186/recovery-phase-8-final-check.md",
+      "historical_path": "ai-system/history/asys-cr-009/25ee186/evidence/recovery-phase-8-final-check.md",
+      "sha256": "876caa6519f3630b472f93829aa0cc5c778985434ac2a4e70c6b89118c7169b9",
+      "bytes": 14945
+    },
+    {
+      "project": "ai-system",
+      "original_path": "ai-system/quality/asys-cr-009/phase-8-final-check.md",
+      "historical_path": "ai-system/history/asys-cr-009/entry-dabbf34/evidence/phase-8-final-check.md",
+      "sha256": "4a4ef01cc05a735f670e6d6ad8d48a334d084f14eab89694b65323776edebdeb",
+      "bytes": 15972
+    },
+    {
+      "project": "ai-system",
+      "original_path": "ai-system/change-requests/2026-10-01-ai-system-cr-009-unified-aggregates.md",
+      "historical_path": "ai-system/history/approved-report-reconciliation-2026-10-05/reference-inputs/change-requests/2026-10-01-ai-system-cr-009-unified-aggregates.md",
+      "sha256": "7b8db4996e4ecd3df17b1fe2136c505cc2e2f5bfb1981886da5ae031d4636a4c",
+      "bytes": 2283
+    },
+    {
+      "project": "ai-system",
+      "original_path": "ai-system/change-requests.md",
+      "historical_path": "ai-system/history/approved-report-reconciliation-2026-10-05/reference-inputs/change-requests.md",
+      "sha256": "8d8e06a8bd730b1f81ebba7f7608eb8455e37215f1ea9a76e521b51ad631b4ae",
+      "bytes": 5355
+    },
+    {
+      "project": "ai-system",
+      "original_path": "ai-system/checkpoints/phase-7-checkpoint-2026-10-01-cr-009-completion.md",
+      "historical_path": "ai-system/history/approved-report-reconciliation-2026-10-05/reference-inputs/checkpoints/phase-7-checkpoint-2026-10-01-cr-009-completion.md",
+      "sha256": "db12e4d04d0b11aa26878e83f41b46a0fa2b2cc3ddc54d1cb1cd746bb00e4c70",
+      "bytes": 7375
+    },
+    {
+      "project": "ai-system",
+      "original_path": "ai-system/checkpoints/phase-7-checkpoint-2026-10-01-cr-009-publication.md",
+      "historical_path": "ai-system/history/approved-report-reconciliation-2026-10-05/reference-inputs/checkpoints/phase-7-checkpoint-2026-10-01-cr-009-publication.md",
+      "sha256": "5f69bbeb215745f0b08e606aa8deaf0573bb21691522ad11c0569f077efe98a6",
+      "bytes": 4746
+    },
+    {
+      "project": "ai-system",
+      "original_path": "ai-system/distillations/2026-10-01-unified-aggregates-distillation-state.md",
+      "historical_path": "ai-system/history/approved-report-reconciliation-2026-10-05/reference-inputs/distillations/2026-10-01-unified-aggregates-distillation-state.md",
+      "sha256": "cdde21b52b01b9193cdf2c7e4f95fff806f8ad6c1fd119e351ecfae009191446",
+      "bytes": 1368
+    },
+    {
+      "project": "ai-system",
+      "original_path": "ai-system/distillations/phase-6-asys-cr-009-completion-distillation.md",
+      "historical_path": "ai-system/history/approved-report-reconciliation-2026-10-05/reference-inputs/distillations/phase-6-asys-cr-009-completion-distillation.md",
+      "sha256": "2dd580cc365cb07364fc0195775d23b68c79a1b7e1324cd4f95b534595bb6d34",
+      "bytes": 2994
+    },
+    {
+      "project": "ai-system",
+      "original_path": "ai-system/distillations/phase-6-asys-cr-009-publication-distillation.md",
+      "historical_path": "ai-system/history/approved-report-reconciliation-2026-10-05/reference-inputs/distillations/phase-6-asys-cr-009-publication-distillation.md",
+      "sha256": "18be4cb96960061292ba416b61a55d5352461b302981f3f1734f37379292d60e",
+      "bytes": 2194
+    },
+    {
+      "project": "ai-system",
+      "original_path": "ai-system/memory/2026-10-01-cr-009-completion.md",
+      "historical_path": "ai-system/history/approved-report-reconciliation-2026-10-05/reference-inputs/memory/2026-10-01-cr-009-completion.md",
+      "sha256": "34152b553f04c467eec5515d6b89846c90445fe4eac31ef5c0cdb17b4427389d",
+      "bytes": 1156
+    },
+    {
+      "project": "ai-system",
+      "original_path": "ai-system/memory/2026-10-01-cr-009-publication.md",
+      "historical_path": "ai-system/history/approved-report-reconciliation-2026-10-05/reference-inputs/memory/2026-10-01-cr-009-publication.md",
+      "sha256": "ad4b5f4e1f51b7e3c9b95aeeaf90081413671577820ae17859c16fa2f1395b2d",
+      "bytes": 1167
+    },
+    {
+      "project": "ai-system",
+      "original_path": "ai-system/memory/2026-10-02-overnight-schedules.md",
+      "historical_path": "ai-system/history/approved-report-reconciliation-2026-10-05/reference-inputs/memory/2026-10-02-overnight-schedules.md",
+      "sha256": "547dad59f235828b74c4884b150fddb7e37d51b29970c78fd7c5f412291278f5",
+      "bytes": 1379
+    },
+    {
+      "project": "ai-system",
+      "original_path": "ai-system/status.md",
+      "historical_path": "ai-system/history/approved-report-reconciliation-2026-10-05/reference-inputs/status.md",
+      "sha256": "e56caaec560ea79d497087e52189cafed84b3b196bc9c1a519e27d8f2263f900",
+      "bytes": 15577
+    },
+    {
+      "project": "ai-system",
+      "original_path": "ai-system/quality/phase-5-asys-pops-018-overnight-schedules-quality.md",
+      "historical_path": "ai-system/history/approved-report-reconciliation-2026-10-05/evidence/phase-5-asys-pops-018-overnight-schedules-quality.md",
+      "sha256": "51717a31efa008bf7b26be331d92df000864be7e53dffebbb132e29a20aacce2",
+      "bytes": 13010
+    },
+    {
+      "project": "ai-system",
+      "original_path": "ai-system/quality/recovery-phase-8-final-check.md",
+      "historical_path": "ai-system/history/approved-report-reconciliation-2026-10-05/evidence/recovery-phase-8-final-check.md",
+      "sha256": "13ae4d490de9702f6452466309d5c20ddd6689c1f77af40eff874874740c7f1a",
+      "bytes": 8973
+    }
+  ]
+}

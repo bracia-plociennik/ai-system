@@ -1,0 +1,120 @@
+{
+  "date": "2026-10-04",
+  "project": "parallel-project-orchestration-v1",
+  "owner_disposition": "approved-exact-six-report-archive",
+  "archive": {
+    "archival_inventory": [
+      {
+        "original": "quality/phase-5-ppo-core-001-contract-quality.md",
+        "archive": "history/original-v1/quality/phase-5-ppo-core-001-contract-quality.md",
+        "sha256": "98c7ccfc9d6e116c514b25b84cca13af05ab7fa060fce746ffd1486fc99a5e47",
+        "bytes": 14977,
+        "mode": "0o644"
+      },
+      {
+        "original": "quality/phase-5-ppo-core-002-run-model-quality.md",
+        "archive": "history/original-v1/quality/phase-5-ppo-core-002-run-model-quality.md",
+        "sha256": "26865982cb542f57d7f228a0381296d0999842335b5da6f4bbda86ebd7dfa59d",
+        "bytes": 15006,
+        "mode": "0o644"
+      },
+      {
+        "original": "quality/phase-5-ppo-core-003-tool-adapter-quality.md",
+        "archive": "history/original-v1/quality/phase-5-ppo-core-003-tool-adapter-quality.md",
+        "sha256": "ef35d8a41efe215d66c981e2eeb4cccbeb96bd84b410f6f3eb2cc32227568993",
+        "bytes": 15061,
+        "mode": "0o644"
+      },
+      {
+        "original": "quality/phase-5-ppo-core-004-integration-quality.md",
+        "archive": "history/original-v1/quality/phase-5-ppo-core-004-integration-quality.md",
+        "sha256": "e9f3686a0ac3246cccb23736380a0d3b1310fb7ec8456a80e44f8fbf9f0f8511",
+        "bytes": 15005,
+        "mode": "0o644"
+      },
+      {
+        "original": "quality/phase-5-ppo-core-005-quality-quality.md",
+        "archive": "history/original-v1/quality/phase-5-ppo-core-005-quality-quality.md",
+        "sha256": "9c31d96769b64946f393b6193c0eeb0d9d0dc385e8cff8d724ee3240e2a59250",
+        "bytes": 15048,
+        "mode": "0o644"
+      },
+      {
+        "original": "quality/phase-8-final-check.md",
+        "archive": "history/original-v1/quality/phase-8-final-check.md",
+        "sha256": "62d3cdad9793c260591ea97a14e52ba8ad243b7f44a1aeb965dff5f853ed4057",
+        "bytes": 18056,
+        "mode": "0o644"
+      }
+    ],
+    "prior_phase8_sha256": "421e5eeb42a6a3b479614024475f8728b4eab9d2c7c92efc30e132a39168da65"
+  },
+  "verified_copies": 2,
+  "current_implementation_quality": [
+    {
+      "runtime": "/Users/jakubplociennik/ai-system/onlinen-workspace/projects/ai-system/ai-workflow-workspace",
+      "implementation_quality_count": 12,
+      "all_current_pass": true,
+      "input_counts": [
+        48
+      ]
+    },
+    {
+      "runtime": "/private/tmp/ai-system-parallel-project-orchestration-v1/ai-workflow-workspace",
+      "implementation_quality_count": 12,
+      "all_current_pass": true,
+      "input_counts": [
+        48
+      ]
+    }
+  ],
+  "capability_recheck": {
+    "counterpart_draft": {
+      "protocol": "source-verified-v1",
+      "parallel_write": false,
+      "fallback": "serial",
+      "execution_authorized": false,
+      "supporting_only": true,
+      "capability_sha256": "0aa4934467de1c0155c40dd0c5e426dc1126f19e79bdd9d7a5e870feaa7e58f1",
+      "sources": {
+        ".systems/scripts/lib/parallel-orchestration.py": "1cc2602e2bc8840f02fa155807a2f266c6da1628ad4e1388ae1b25e3648db911",
+        ".systems/scripts/plan-parallel-work": "55a0b476fef10e7c6b7d0b97a73a8938ecd9897289037ae8dfbfca61f43ad5e1",
+        ".systems/scripts/manage-parallel-run": "03f4c895af08dd4235eecd85271c4fb1088a542ebf4a5de6733ac9186862edd2",
+        ".systems/ai/templates/orchestration/run.template.json": "599c32998dd70bb8757c902f3e30b97ee75766424ccd7a5e150bc79d111406c5",
+        ".systems/ai/templates/orchestration/unit.template.json": "11200b0f6124c13a8532bb4e0c9ce149335edbedb5268a219afe84f5091b5b22",
+        ".systems/ai/templates/orchestration/result.template.json": "85f5d6ea5e5a9aa585372e4cbcc914abdea542111f764ffa83f14017f9d4d91b"
+      },
+      "native_backend": "unverified",
+      "reason": "no verified native enforcement adapter"
+    },
+    "local_installed": {
+      "protocol": "unavailable",
+      "parallel_write": false,
+      "fallback": "serial",
+      "execution_authorized": false,
+      "supporting_only": true
+    }
+  },
+  "current_capture": {
+    "validator_exit_code": 0,
+    "invalid": 0,
+    "current_quality": true,
+    "state": "completed",
+    "unrelated_ready_record_untouched": true
+  },
+  "current_status": {
+    "canonical_exit_code": 0,
+    "mirror_exit_code": 0
+  },
+  "handoff": {
+    "canonical_exit_code": 0,
+    "mirror_exit_code": 0
+  },
+  "product": {
+    "paths_unchanged": 32,
+    "previous_full_run": "1fe0e4524e1142478a2e0ee5f7234964",
+    "broad_repeat": "not-applicable-no-product-change"
+  },
+  "supporting_only": true,
+  "formal_final_owner_approval": false
+}

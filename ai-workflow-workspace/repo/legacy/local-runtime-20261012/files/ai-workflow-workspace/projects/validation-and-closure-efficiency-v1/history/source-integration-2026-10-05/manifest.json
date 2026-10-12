@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "scope": "owner-approved source compatibility reassessment only",
+  "target_source_head": "fd68b8ced847387c130e4868bb624fd22b0b8648",
+  "installed_workflow_head": "a9a5c40430af3dec153df94f8b78a30f668bbde3",
+  "new_final_owner_yes": false,
+  "entries": [
+    {
+      "original_path": "quality/phase-5-eff-core-001-efficiency-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/phase-5-eff-core-001-efficiency-quality.md",
+      "sha256": "1f3b572c1f475ae2a340237ae4ee7dc5f70b59a9a6e25d236ae33601d2d08f45",
+      "bytes": 12083,
+      "previous_run_id": "efficiency-current-quality-2026-10-02",
+      "previous_source_head": "b21295774b62fb25359d8b8a11f7a48f20e57f46",
+      "current_run_id": "integration-2026-10-05-vce-phase-5-eff-core-001-efficiency-quality",
+      "current_report_sha256": "5598dbb5e889da5e9fdb732b6b0619631b7fc6d547c35ea4a531eb225da04b1f"
+    },
+    {
+      "original_path": "quality/phase-8-final-check.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/phase-8-final-check.md",
+      "sha256": "6eb1019aa78fbe15bcc857c4be3d6e2caff3f828c04bad70ed98dbcc7bb617c1",
+      "bytes": 9028,
+      "previous_run_id": "efficiency-technical-final-2026-10-02",
+      "previous_source_head": "b21295774b62fb25359d8b8a11f7a48f20e57f46",
+      "current_run_id": "integration-2026-10-05-vce-phase-8-final-check",
+      "current_report_sha256": "1719c5117fddb562bee264e2a163f2887258b66aac3953ac10983f3c70a2be80"
+    }
+  ]
+}

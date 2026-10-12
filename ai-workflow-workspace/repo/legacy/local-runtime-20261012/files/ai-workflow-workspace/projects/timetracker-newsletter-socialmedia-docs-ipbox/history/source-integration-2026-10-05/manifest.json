@@ -1,0 +1,31 @@
+{
+  "scope": "owner-authorized integration and Phase7/8 reconciliation",
+  "new_final_owner_yes": false,
+  "entries": [
+    {
+      "original_path": "quality/phase-1-architecture-qa.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/phase-1-architecture-qa.md",
+      "sha256": "3be932d5aad2df3eb3d04ed705060cc350af527a9e6372ecbf947213b9a921db"
+    },
+    {
+      "original_path": "quality/phase-2-plan-qa.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/phase-2-plan-qa.md",
+      "sha256": "a615afddc64009292aee6b6665e45f263098bf4ea373243b82fa9fbf05c32ff9"
+    },
+    {
+      "original_path": "quality/phase-3-wep-content-011-editorial-routing-spec-qa.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/phase-3-wep-content-011-editorial-routing-spec-qa.md",
+      "sha256": "faca07176d8923d7f60205c3d1cea2ebf44485cf4849848962bf2eee4e2c24f9"
+    },
+    {
+      "original_path": "quality/phase-5-wep-content-011-editorial-routing-quality.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/phase-5-wep-content-011-editorial-routing-quality.md",
+      "sha256": "7d7b197cbd0114047108896e9e03b2942de4f9675c329b9aa41d67358c5783ca"
+    },
+    {
+      "original_path": "quality/phase-8-final-check.md",
+      "historical_path": "history/source-integration-2026-10-05/evidence/phase-8-final-check.md",
+      "sha256": "3c4d166e426c5ecee6705f6e2426db0bb341986d91d6f8d33a4ffe11df566114"
+    }
+  ]
+}

@@ -1,0 +1,386 @@
+# Current specification review
+QA verification contract: `full-qa-verification-v2`
+
+## Current QA Run
+- Run ID: wep-spec-wep-xlsx-003-local-tracker-technical-closure
+- Artifact kind: spec-qa
+- Project/task identity: timetracker-newsletter-socialmedia-docs-ipbox:WEP-XLSX-003-local-tracker
+- Assessed source HEAD: bcd1e0dcb9b9b2def6afec9636a72ea058a79ca7
+- Assessed worktree digest: 7ea3e5f2da1ba234cd905b5acf4e862ffee4767d69e982be534551d4101531e4
+- Input artifacts: see table
+- Verdict: PASS
+- Gate Decision: PASS
+
+### Input Artifacts
+| Root kind | Relative path | SHA-256 |
+| --- | --- | --- |
+| owning-project-evidence | specs/phase-3-wep-xlsx-003-local-tracker-specification.md | 7089a740658b38c7b79d89fbe952903adef62a7f0d052b7ecd7c0d3c9b775074 |
+| owning-project-evidence | planning/phase-2-project-plan.md | 6762c3b2c8fdbb69d576d97bb8e586555fbae71ba01aa54f0c29c709d4082a60 |
+| owning-project-evidence | architecture/phase-1-architecture.md | a7fd51d95e695e82ce8408c5ca295be22b8b876de035018b84ca1cf4cea4569e |
+| owning-project-evidence | decisions/2026-10-02-implementation-authorization.md | 152d38796ff741ae4a1cabfc1231a0d4fc3eb855ecd0d2cfd44579a0b3cb6bc3 |
+| owning-project-evidence | decisions/2026-10-02-technical-closure-scope.md | 58ae410f728a44a06521bd0af68621b9aa5be7c2b4b884573cccbd22a5d0e3a1 |
+
+### Findings
+- Blockers: none
+- Unresolved findings: none
+Historical planning-only assumptions are superseded by explicit current authorization, not silently inferred.
+
+### Evidence
+Accepted task contract compared to reconciled ten-task plan, architecture and exact current owner scope. Technical001-009 acceptance criteria are unchanged; concrete implemented producers/consumers and predecessor Quality have been reviewed. Spec010 is conditional/deferred design only: current interface overlay matches implemented APIs, expected pilot source remains an explicit future owner gate and no runnable kit, human outcome or activation is claimed. No task approval is inferred from artifact QA.
+
+### Review Completeness Gate
+- Status: complete
+- Reviewed baseline: input table contents and source HEAD above; no product implementation assessed
+- Closure freshness: current
+- Post-fix full re-review: completed
+- Policy-boundary adversarial matrix: completed
+- Producer-consumer field audit: completed
+- Required-field mapping: complete
+
+### QA Verification Scope
+Artifact completeness and dependency/privacy boundaries only; technical stage001-009, deferred010 retains full DoD.
+
+### Artifact QA Completeness Gate
+- Owner intent and governing sources reviewed: context.md, decisions/2026-10-02-owner-scope.md and artifact input table
+- DoD / phase acceptance criteria reviewed: yes
+- Scope and out-of-scope consistency: aligned
+- Artifact / relevant diff review: completed
+- Findings-first review: completed
+- Failure / rework / dependency scenarios: completed
+- Repository and source compatibility: aligned
+- Post-fix full artifact re-review: completed
+- Evidence reviewed: input table and scenario traces in Evidence
+- Skipped or unreadable sources: historical binary inputs not re-audited; they supply no new correctness proof
+- Residual risk: Real runtime activation, independent human replay and advisor rules remain separate hard gates.
+- Closure freshness: current
+
+### Validation Execution Record
+- Semantic QA result: PASS for this artifact only
+- Findings/blockers: none unresolved
+- Product checks: artifact assessment only; predecessor Quality evidence reviewed, no verdict for the future implementation
+- Workflow script applicability: targeted QA evidence/schema validation; not implementation evidence
+- Targeted workflow commands: project-scoped check-qa-evidence and check-status-consistency after artifact refresh; actual outcomes recorded separately
+- Script evidence role: supporting-only
+- Final verdict: PASS
+
+### Gate Decision
+Result: PASS
+Next route: completed technical task; checkpoint before owner-triggered final assessment
+
+## Owner Decision Checkpoint
+Interaction mode: queued. Decision state: clear for approved implementation; runtime activation remains separately gated. Decisions: D01-D10.
+## Optional Knowledge Capture
+Capture recommended: yes. Target: status/evidence. Owner decision: capture-now within planning scope; later implementation distillation deferred. Privacy/scope check: pass, private ignored runtime.
+## Model Recommendation
+Frontier/workhorse high reasoning; high-impact provenance/privacy design. Current model unknown. Blocking: no.
+
+## Historical Runs
+## Current specification review
+QA verification contract: `full-qa-verification-v2`
+
+### Current QA Run
+- Run ID: wep-spec-xlsx-003-local-tracker-closure
+- Artifact kind: spec-qa
+- Project/task identity: timetracker-newsletter-socialmedia-docs-ipbox:WEP-XLSX-003-local-tracker
+- Assessed source HEAD: bcd1e0dcb9b9b2def6afec9636a72ea058a79ca7
+- Assessed worktree digest: a3fce74f76b8bef76d002742b123f84fcfad884b61114cbe039001241340a438
+- Input artifacts: see table
+- Verdict: PASS
+- Gate Decision: PASS
+
+#### Input Artifacts
+| Root kind | Relative path | SHA-256 |
+| --- | --- | --- |
+| owning-project-evidence | specs/phase-3-wep-xlsx-003-local-tracker-specification.md | 7089a740658b38c7b79d89fbe952903adef62a7f0d052b7ecd7c0d3c9b775074 |
+| owning-project-evidence | planning/phase-2-project-plan.md | 42d11f419b7491156f7c5b5c25b6f10e56199295accc7378529204b52adacb34 |
+| owning-project-evidence | architecture/phase-1-architecture.md | a7fd51d95e695e82ce8408c5ca295be22b8b876de035018b84ca1cf4cea4569e |
+| owning-project-evidence | decisions/2026-10-02-implementation-authorization.md | 152d38796ff741ae4a1cabfc1231a0d4fc3eb855ecd0d2cfd44579a0b3cb6bc3 |
+
+#### Findings
+- Blockers: none
+- Unresolved findings: none
+Historical planning-only assumptions are superseded by explicit current authorization, not silently inferred.
+
+#### Evidence
+Current accepted task spec re-assessed against unchanged ten-task sequence, architecture, exact owner implementation approval and predecessor interfaces. Identity/actual-time/approval and privacy boundaries are coherent. Pilot010 specification is valid as conditional design only; human replay/access/cutover remain unmet and no implementation readiness is claimed.
+
+#### Review Completeness Gate
+- Status: complete
+- Reviewed baseline: input table contents and source HEAD above; no product implementation assessed
+- Closure freshness: current
+- Post-fix full re-review: completed
+- Policy-boundary adversarial matrix: completed
+- Producer-consumer field audit: completed
+- Required-field mapping: complete
+
+#### QA Verification Scope
+Artifact QA only. Existing scoped synthetic implementation Quality does not establish real pilot or advisor rule approval.
+
+#### Artifact QA Completeness Gate
+- Owner intent and governing sources reviewed: context.md, decisions/2026-10-02-owner-scope.md and artifact input table
+- DoD / phase acceptance criteria reviewed: yes
+- Scope and out-of-scope consistency: aligned
+- Artifact / relevant diff review: completed
+- Findings-first review: completed
+- Failure / rework / dependency scenarios: completed
+- Repository and source compatibility: aligned
+- Post-fix full artifact re-review: completed
+- Evidence reviewed: input table and scenario traces in Evidence
+- Skipped or unreadable sources: historical binary inputs not re-audited; they supply no new correctness proof
+- Residual risk: Real runtime activation, independent human replay and advisor rules remain separate hard gates.
+- Closure freshness: current
+
+#### Validation Execution Record
+- Semantic QA result: PASS for this artifact only
+- Findings/blockers: none unresolved
+- Product checks: artifact assessment only; predecessor Quality evidence reviewed, no verdict for the future implementation
+- Workflow script applicability: targeted QA evidence/schema validation; not implementation evidence
+- Targeted workflow commands: project-scoped check-qa-evidence and check-status-consistency after artifact refresh; actual outcomes recorded separately
+- Script evidence role: supporting-only
+- Final verdict: PASS
+
+#### Gate Decision
+Result: PASS
+Next route: phase-4-implementation under exact gates
+
+### Owner Decision Checkpoint
+Interaction mode: queued. Decision state: clear for approved implementation; runtime activation remains separately gated. Decisions: D01-D10.
+### Optional Knowledge Capture
+Capture recommended: yes. Target: status/evidence. Owner decision: capture-now within planning scope; later implementation distillation deferred. Privacy/scope check: pass, private ignored runtime.
+### Model Recommendation
+Frontier/workhorse high reasoning; high-impact provenance/privacy design. Current model unknown. Blocking: no.
+
+### Historical Runs
+### Current spec-qa review
+QA verification contract: `full-qa-verification-v2`
+
+#### Current QA Run
+- Run ID: wep-spec-003-003
+- Artifact kind: spec-qa
+- Project/task identity: timetracker-newsletter-socialmedia-docs-ipbox:WEP-XLSX-003-local-tracker
+- Assessed source HEAD: bcd1e0dcb9b9b2def6afec9636a72ea058a79ca7
+- Assessed worktree digest: a91b636654b22e08703184be206bf20f2aa9995545ab19c4a94eb0b4c53fe4f2
+- Input artifacts: see table
+- Verdict: PASS
+- Gate Decision: PASS
+
+##### Input Artifacts
+| Root kind | Relative path | SHA-256 |
+| --- | --- | --- |
+| owning-project-evidence | specs/phase-3-wep-xlsx-003-local-tracker-specification.md | 7089a740658b38c7b79d89fbe952903adef62a7f0d052b7ecd7c0d3c9b775074 |
+| owning-project-evidence | architecture/phase-1-architecture.md | a7fd51d95e695e82ce8408c5ca295be22b8b876de035018b84ca1cf4cea4569e |
+| owning-project-evidence | decisions/2026-10-02-implementation-authorization.md | 152d38796ff741ae4a1cabfc1231a0d4fc3eb855ecd0d2cfd44579a0b3cb6bc3 |
+| owning-project-evidence | decisions/2026-10-02-xlsx-dependency-approval.md | 1be9d06a38566e1e0510b3aed63c83ae7e4e8138c7ced0dca0726d14996209a0 |
+| owning-project-evidence | quality/phase-5-wep-data-001-contracts-quality.md | f1bd37f457650d9f46cb62e41507b0a056d90ee28b33e60c103d499d5de85877 |
+| owning-project-evidence | quality/phase-5-wep-ledger-002-transactions-quality.md | 39a771f3857c8f87b302bf763dbd8053b07dc6c0e04cbb2f3cd3cc60568d31e1 |
+
+##### Findings
+- Blockers: none
+- Unresolved findings: none
+Historical planning-only assumptions are superseded by explicit current authorization, not silently inferred.
+
+##### Evidence
+Full specification and predecessor concrete interfaces re-reviewed after dependency execution evidence. Snapshot/prepare/apply/correct/void/recover contracts remain aligned. Current Spec QA judges task003 specification; actual code/rendered workbook and regression evidence are assessed separately by Phase5. Human replay/real activation not required for this synthetic adapter gate.
+
+##### Review Completeness Gate
+- Status: complete
+- Reviewed baseline: input table contents and source HEAD above; no product implementation assessed
+- Closure freshness: current
+- Post-fix full re-review: completed
+- Policy-boundary adversarial matrix: completed
+- Producer-consumer field audit: completed
+- Required-field mapping: complete
+
+##### QA Verification Scope
+Task003 specification and dependency install evidence, not implementation verdict.
+
+##### Artifact QA Completeness Gate
+- Owner intent and governing sources reviewed: context.md, decisions/2026-10-02-owner-scope.md and artifact input table
+- DoD / phase acceptance criteria reviewed: yes
+- Scope and out-of-scope consistency: aligned
+- Artifact / relevant diff review: completed
+- Findings-first review: completed
+- Failure / rework / dependency scenarios: completed
+- Repository and source compatibility: aligned
+- Post-fix full artifact re-review: completed
+- Evidence reviewed: input table and scenario traces in Evidence
+- Skipped or unreadable sources: historical binary inputs not re-audited; they supply no new correctness proof
+- Residual risk: Real runtime activation, independent human replay and advisor rules remain separate hard gates.
+- Closure freshness: current
+
+##### Validation Execution Record
+- Semantic QA result: PASS for this artifact only
+- Findings/blockers: none unresolved
+- Product checks: artifact assessment only; predecessor Quality evidence reviewed, no verdict for the future implementation
+- Workflow script applicability: targeted QA evidence/schema validation; not implementation evidence
+- Targeted workflow commands: project-scoped check-qa-evidence and check-status-consistency after artifact refresh; actual outcomes recorded separately
+- Script evidence role: supporting-only
+- Final verdict: PASS
+
+##### Gate Decision
+Result: PASS
+Next route: phase-4-implementation
+
+#### Owner Decision Checkpoint
+Interaction mode: queued. Decision state: clear for approved implementation; runtime activation remains separately gated. Decisions: D01-D10.
+#### Optional Knowledge Capture
+Capture recommended: yes. Target: status/evidence. Owner decision: capture-now within planning scope; later implementation distillation deferred. Privacy/scope check: pass, private ignored runtime.
+#### Model Recommendation
+Frontier/workhorse high reasoning; high-impact provenance/privacy design. Current model unknown. Blocking: no.
+
+#### Historical Runs
+#### Current spec-qa review
+QA verification contract: `full-qa-verification-v2`
+
+##### Current QA Run
+- Run ID: wep-spec-003-002
+- Artifact kind: spec-qa
+- Project/task identity: timetracker-newsletter-socialmedia-docs-ipbox:WEP-XLSX-003-local-tracker
+- Assessed source HEAD: bcd1e0dcb9b9b2def6afec9636a72ea058a79ca7
+- Assessed worktree digest: 08c95b0acb77c2e32a9aec401d7c9ccd4ea2d452d96987c845cd754cdf400ec6
+- Input artifacts: see table
+- Verdict: PASS
+- Gate Decision: PASS
+
+###### Input Artifacts
+| Root kind | Relative path | SHA-256 |
+| --- | --- | --- |
+| owning-project-evidence | specs/phase-3-wep-xlsx-003-local-tracker-specification.md | 7089a740658b38c7b79d89fbe952903adef62a7f0d052b7ecd7c0d3c9b775074 |
+| owning-project-evidence | architecture/phase-1-architecture.md | a7fd51d95e695e82ce8408c5ca295be22b8b876de035018b84ca1cf4cea4569e |
+| owning-project-evidence | decisions/2026-10-02-implementation-authorization.md | 152d38796ff741ae4a1cabfc1231a0d4fc3eb855ecd0d2cfd44579a0b3cb6bc3 |
+| owning-project-evidence | decisions/2026-10-02-xlsx-dependency-approval.md | 62d4a4fa1d756e8e188d3b36c66694128c610025087f615319eac8febaf60706 |
+| owning-project-evidence | quality/phase-5-wep-data-001-contracts-quality.md | f1bd37f457650d9f46cb62e41507b0a056d90ee28b33e60c103d499d5de85877 |
+| owning-project-evidence | quality/phase-5-wep-ledger-002-transactions-quality.md | 39a771f3857c8f87b302bf763dbd8053b07dc6c0e04cbb2f3cd3cc60568d31e1 |
+
+###### Findings
+Blockers: none. Unresolved findings: none. Historical planning-only assumptions are superseded by explicit current authorization, not silently inferred.
+
+###### Evidence
+Concrete Ledger APIs reviewed: workbook snapshot bound in projection_source; durable reserved IDs and canonical visibility precede projection. Actual provenance is owner-entered workbook snapshot. Security requires ZIP budgets, defusedxml, formula/macro/link rejection and literal strings; open-file/stale-generated/stale-approval paths explicit. Visual checks required all seven sheets. Installed exact hash-pinned versions, DEFUSEDXML=True isolated Python3.14.
+
+###### Review Completeness Gate
+- Status: complete
+- Reviewed baseline: input table contents and source HEAD above; no product implementation assessed
+- Closure freshness: current
+- Post-fix full re-review: completed
+- Policy-boundary adversarial matrix: completed
+- Producer-consumer field audit: completed
+- Required-field mapping: complete
+
+###### QA Verification Scope
+Full specification review: local-only manual intake, immutable source evidence, no implicit deletes/time inference, exact workbook/transaction identity and activation boundaries.
+
+###### Artifact QA Completeness Gate
+- Owner intent and governing sources reviewed: context.md, decisions/2026-10-02-owner-scope.md and artifact input table
+- DoD / phase acceptance criteria reviewed: yes
+- Scope and out-of-scope consistency: aligned
+- Artifact / relevant diff review: completed
+- Findings-first review: completed
+- Failure / rework / dependency scenarios: completed
+- Repository and source compatibility: aligned
+- Post-fix full artifact re-review: completed
+- Evidence reviewed: input table and scenario traces in Evidence
+- Skipped or unreadable sources: historical binary inputs not re-audited; they supply no new correctness proof
+- Residual risk: Real runtime activation, independent human replay and advisor rules remain separate hard gates.
+- Closure freshness: current
+
+###### Validation Execution Record
+- Semantic QA result: PASS for this artifact only
+- Findings/blockers: none unresolved
+- Product checks: artifact assessment only; predecessor Quality evidence reviewed, no verdict for the future implementation
+- Workflow script applicability: targeted QA evidence/schema validation; not implementation evidence
+- Targeted workflow commands: project-scoped check-qa-evidence and check-status-consistency after artifact refresh; actual outcomes recorded separately
+- Script evidence role: supporting-only
+- Final verdict: PASS
+
+###### Gate Decision
+Result: PASS
+Next route: phase-4-implementation
+
+##### Owner Decision Checkpoint
+Interaction mode: queued. Decision state: clear for approved implementation; runtime activation remains separately gated. Decisions: D01-D10.
+##### Optional Knowledge Capture
+Capture recommended: yes. Target: status/evidence. Owner decision: capture-now within planning scope; later implementation distillation deferred. Privacy/scope check: pass, private ignored runtime.
+##### Model Recommendation
+Frontier/workhorse high reasoning; high-impact provenance/privacy design. Current model unknown. Blocking: no.
+
+##### Historical Runs
+##### WEP-XLSX-003-local-tracker Spec QA
+QA verification contract: `full-qa-verification-v2`
+
+###### Current QA Run
+- Run ID: wep-spec-003-001
+- Artifact kind: spec-qa
+- Project/task identity: timetracker-newsletter-socialmedia-docs-ipbox:WEP-XLSX-003-local-tracker
+- Assessed source HEAD: bcd1e0dcb9b9b2def6afec9636a72ea058a79ca7
+- Assessed worktree digest: e1e926de7d8234b801dd09ffbd92916f7888fa0a21834d79d364d304eb56fe23
+- Input artifacts: see table
+- Verdict: PASS
+- Gate Decision: PASS
+
+###### Input Artifacts
+| Root kind | Relative path | SHA-256 |
+| --- | --- | --- |
+| owning-project-evidence | context.md | 2e2dd3335c100618ca18139ade5d4ac8397bb42a6c6da1f1055434fc04bc3945 |
+| owning-project-evidence | decisions/2026-10-02-owner-scope.md | d939bc27a71bacc84c9427ba5dde59b6b3ee17428c4c88e6c7b351ae016ddc40 |
+| owning-project-evidence | architecture/phase-1-architecture.md | a7fd51d95e695e82ce8408c5ca295be22b8b876de035018b84ca1cf4cea4569e |
+| owning-project-evidence | planning/phase-2-project-plan.md | d2bd76baf99bdd90a41b23861429e75a7f480e297d86df54784b1d134eb0f2e5 |
+| owning-project-evidence | tasks.md | beaf1eceef3bb69bbeae03e155f5b6163193033f02e7057d5cca6ba2cf7701db |
+| owning-project-evidence | specs/phase-3-wep-xlsx-003-local-tracker-specification.md | 11aa46c0617857045567a5881ac297e9c1a4fe74218504becab5a274bda532c7 |
+
+###### Findings
+- Blockers: none
+- Unresolved findings: none
+Warnings: task remains conditional. This verdict accepts the specification and its blocked implementation gate, not execution permission or completed dependencies.
+
+###### Evidence
+Manual-intake walk-through: new row -> approved prepare ID -> canonical commit -> XLSX receipt; repeated/reordered row retains ID. Duplicate blank rows are held, not guessed. Generated-tab conflict and open-workbook conflict preserve user edits. Dependency install is gated; candidate library is not a granted permission. Formula and external-link negative tests included. Visual workbook QA is required at implementation, not claimed now.
+
+Producer-consumer field audit: trace source identities, versions, ownership, evidence type, visibility and approval into only this task's output; no fallback that converts missing data into confirmed values. Concrete future tests in spec were reviewed for corresponding failure and success outcomes. Second pass challenged scope boundaries and dependency order against canonical plan; no remaining material design finding.
+
+###### Review Completeness Gate
+- Status: complete
+- Reviewed baseline: input table contents and source HEAD above; no product implementation assessed
+- Closure freshness: current
+- Post-fix full re-review: not-required
+- Policy-boundary adversarial matrix: completed
+- Producer-consumer field audit: completed
+- Required-field mapping: complete
+
+###### QA Verification Scope
+Compatibility re-review: task index now uses the runtime validator's explicit task-card column, workspace-qualified paths and absent implementation Quality as none. Canonical plan names future Quality targets without claiming they exist. Scope, dependencies, DoD and conditional gates unchanged; refreshed input hashes bind this exact final set.
+Solo specification reviewed against owner intent, architecture, plan, task index, DoD and risk. Conditional predecessor/activation gates are explicit and require refresh before phase4. No product tests executed.
+
+###### Artifact QA Completeness Gate
+- Owner intent and governing sources reviewed: context.md, decisions/2026-10-02-owner-scope.md and artifact input table
+- DoD / phase acceptance criteria reviewed: yes
+- Scope and out-of-scope consistency: aligned
+- Artifact / relevant diff review: completed
+- Findings-first review: completed
+- Failure / rework / dependency scenarios: completed
+- Repository and source compatibility: aligned
+- Post-fix full artifact re-review: not-required
+- Evidence reviewed: input table and scenario traces in Evidence
+- Skipped or unreadable sources: historical binary inputs not re-audited; they supply no new correctness proof
+- Residual risk: Dependency assessment pending blocks implementation/install of adapter; owner decision recommendation reviewed pinned openpyxl, alternative approved XLSX library behind same interface.
+- Closure freshness: current
+
+###### Validation Execution Record
+- Semantic QA result: PASS for this artifact only
+- Findings/blockers: none unresolved
+- Product checks: not-applicable; no product code implemented in planning-range
+- Workflow script applicability: targeted QA evidence/schema validation; not implementation evidence
+- Targeted workflow commands: final project-scoped check-qa-evidence and check-status-consistency; command outcomes recorded in reviews/planning-verification.md
+- Script evidence role: supporting-only
+- Final verdict: PASS
+
+###### Gate Decision
+Result: PASS
+Next route: next solo task specification / stop before implementation
+
+###### Owner Decision Checkpoint
+Interaction mode: queued. Decision state: clear for planning; implementation and activation approvals remain separate. Decisions: D01-D10.
+###### Optional Knowledge Capture
+Capture recommended: yes. Target: status/evidence. Owner decision: capture-now within planning scope; later implementation distillation deferred. Privacy/scope check: pass, private ignored runtime.
+###### Model Recommendation
+Frontier/workhorse high reasoning; high-impact provenance/privacy design. Current model unknown. Blocking: no.

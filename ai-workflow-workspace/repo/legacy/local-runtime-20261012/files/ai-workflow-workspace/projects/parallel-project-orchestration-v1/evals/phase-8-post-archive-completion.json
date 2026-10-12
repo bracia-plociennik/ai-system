@@ -1,0 +1,62 @@
+{
+  "record_kind": "runtime-artifact-validation-completion",
+  "date": "2026-10-04",
+  "project": "parallel-project-orchestration-v1",
+  "source_head": "bcd1e0dcb9b9b2def6afec9636a72ea058a79ca7",
+  "scope": "exact approved archive and repeated whole-scope Phase 8",
+  "artifact": "quality/recovery-phase-8-final-check.md",
+  "artifact_sha256": "c9aacc42290dd0778e0f6491dc198dd76ede1303c53936fd1bbc4dcdfca18a1f",
+  "current_input_count": 76,
+  "current_input_digest": "f6060ca6e0082861ab7e94a19a4a2746d078511b9c40c4323fe2696d479e0c68",
+  "executed_checks": [
+    {
+      "check": "check-qa-evidence --runtime-only --scope-root projects/parallel-project-orchestration-v1",
+      "canonical_exit_code": 0,
+      "mirror_exit_code": 0
+    },
+    {
+      "check": "check-status-consistency --runtime-only --scope-root projects/parallel-project-orchestration-v1",
+      "canonical_exit_code": 0,
+      "mirror_exit_code": 0
+    },
+    {
+      "check": "qa-evidence.py current final report --require-pass",
+      "canonical_exit_code": 0,
+      "mirror_exit_code": 0
+    },
+    {
+      "check": "check-cross-system-upgrade-handoff new checkpoint",
+      "canonical_exit_code": 0,
+      "mirror_exit_code": 0
+    },
+    {
+      "check": "check-distillation-state --owned-root project-state/ai-system",
+      "exit_code": 0,
+      "current_quality": true,
+      "state": "completed"
+    },
+    {
+      "check": "git diff --check",
+      "exit_code": 0
+    },
+    {
+      "check": "exact archive/source integrity verification",
+      "exit_code": 0,
+      "archive_copies": 12,
+      "preserved_fail_snapshots": 2,
+      "unchanged_product_paths": 32,
+      "shared_runtime_differences": [],
+      "current_final_report_sha256": "c9aacc42290dd0778e0f6491dc198dd76ede1303c53936fd1bbc4dcdfca18a1f"
+    }
+  ],
+  "product_full_run": "1fe0e4524e1142478a2e0ee5f7234964",
+  "product_full_repeat": "not-applicable-unchanged-frozen-product",
+  "status": "completed",
+  "supporting_only": true,
+  "semantic_verdict_source": "coordinator findings-first current final-check artifact, not this execution record",
+  "final_owner_yes": false,
+  "formal_project_closed": false,
+  "commit_performed": false,
+  "push_performed": false,
+  "residual_risk": "Finite tests and cooperative controls; future counterpart installation/native backend remain unverified and outside this scope."
+}

@@ -1,0 +1,14 @@
+# Distillation State
+- Work ID: WEP-CONTENT-011-editorial-routing
+- Work mode: full-project
+- Project/repo scope: timetracker-newsletter-socialmedia-docs-ipbox / upstream AI System
+- Source artifact: specs/phase-3-wep-content-011-editorial-routing-specification.md
+- Quality artifact: quality/phase-5-wep-content-011-editorial-routing-quality.md
+- State: completed
+- `is_distilled` derived value: true
+- Distillation artifact: distillations/phase-6-wep-content-011-editorial-routing-distillation.md
+- Last reminder: 2026-10-05
+- Owner disposition: Phase 6 distillation accepted under owner-authorized phase6/phase7 request
+- Privacy/scope check: pass
+- Residual risk: real privacy/disclosure and independent-programmer pilot still require separate evidence. WEP-010 remains owner-deferred; this capture does not authorize activation or publication.
+- Follow-up source: decisions/2026-10-05-wep-011-owner-review.md
