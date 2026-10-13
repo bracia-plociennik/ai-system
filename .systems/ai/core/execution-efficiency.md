@@ -96,3 +96,10 @@ ordered finite start/end, reason and inputs. Union overlapping intervals; do not
 into wall time. Unmeasured phases are unknown, not zero. Reruns identify their changed input or gate.
 No raw prompts or client data enter portable comparisons. Benchmark equivalent coverage with
 three samples per variant; synthetic script savings do not prove whole-agent latency savings.
+
+
+## Goal-Focused Maintenance Integration
+
+Use goal-focused-maintenance.md only after explicit scoped activation and verified local support. One nearest-owner private maintenance/queue.json records proven independent incidental debt; project coordination references the Workflow-owned queue rather than duplicating it. E01–E05 and actual current-goal blockers are immediate. Five distinct active project causes or the third actual affected parent task schedule one consolidated milestone summary; scans/resumes do not count or repeat receipts. One stable approved parent shares TOTAL 600 seconds incidental diagnosis/edit/review/test/record work across both adapters. No background executor, scheduler or automatic TaskNotes. Required current QA and full release/updater failures remain binding. Missing counterpart support keeps existing gates; labels are not activation or authority.
+
+A live current-goal Capture selection first inspects every sibling identity/dependency/distillation/alias claim, including invalid records. It retains full inventory and isolates only proven disjoint history; unknown/shared/duplicate/foreign claims stay blocking. Default whole-history/full validators remain exhaustive, with their actual exit codes.

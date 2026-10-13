@@ -1,5 +1,7 @@
 # AGENTS.md
 
+For scoped activated work use `.systems/ai/core/goal-focused-maintenance.md`. Use goal-focused-maintenance.md only after explicit scoped activation and verified local support. One nearest-owner private maintenance/queue.json records proven independent incidental debt; project coordination references the Workflow-owned queue rather than duplicating it. E01–E05 and actual current-goal blockers are immediate. Five distinct active project causes or the third actual affected parent task schedule one consolidated milestone summary; scans/resumes do not count or repeat receipts. One stable approved parent shares TOTAL 600 seconds incidental diagnosis/edit/review/test/record work across both adapters. No background executor, scheduler or automatic TaskNotes. Required current QA and full release/updater failures remain binding. Missing counterpart support keeps existing gates; labels are not activation or authority.
+
 For free-form new work, use `.systems/ai/core/intent-to-execution-brief.md` inside existing intake. Preserve original intent, minimal provenance/disposition and exact permission/phase ceiling. Optional private style follows `.systems/ai/core/style-profile.md`; current instruction wins, observations stay tentative, feedback writes require exact scoped consent. No new phase, automatic TaskNotes or profile-based approval.
 
 

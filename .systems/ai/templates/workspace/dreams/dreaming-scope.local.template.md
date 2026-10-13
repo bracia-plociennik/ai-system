@@ -45,3 +45,10 @@ These rows add local exclusions. Supported match types are `exact`, `prefix`, `s
 - Personal Ops exposes only sanitized `personal-ops/indexes/check-ins-v4.trends.md` after unified activation; `personal-ops/indexes/check-ins-v3.trends.md` is the unmigrated compatibility source. Missing sources are not fabricated.
 - Run Dreaming scope preflight before reading any listed source.
 - Dream Reports remain advisory-only and perform no durable promotion.
+
+
+Maintenance review is opt-in. Do not add a wildcard or a repository queue to this
+workspace allowlist. Add only an explicitly approved exact safe project-state
+queue path. A canonical Workflow repository queue uses explicit full-repo plus
+repo-source inventory instead. Keep one queue; never automatically copy it.
+Review is read-only and cannot mark an alert presented or execute a repair.
