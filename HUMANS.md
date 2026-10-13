@@ -85,6 +85,10 @@ Root `AGENTS.md` is local-only. In management checkouts, commit changes to `.sys
 In `ai-system-dev`, local root `AGENTS.md` can intentionally differ from `.systems/ai/templates/root/AGENTS.template.md` because product development may be governed by a separate local workflow. Do not refresh it from the management template unless that is the explicit task.
 
 Develop from `dev` and start feature worktrees from its verified current tip.
+Keep canonical repositories in the selected workspace `projects/`, auxiliary
+implementation/release worktrees in `.worktrees/<repository-id>/<work-id>/`, and
+disposable task files in `.tmp/<work-id>/`. Use `workspace-directory-layout.md`;
+no automatic cleanup or historical QA rewriting.
 Use [product-publication](.systems/ai/core/product-publication.md) for a reviewed,
 filtered release into main: product only, without dev workspace or its commit
 ancestry. Do not merge dev into main. The release preparer is read-only unless
