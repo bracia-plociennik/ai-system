@@ -137,6 +137,12 @@ Writes must target exactly one selected workspace unless the owner gives exact `
 
 ## Runtime Artifacts
 
+Use `.systems/ai/core/workspace-directory-layout.md`: the selected workspace
+`projects/` contains canonical owner repositories, auxiliary worktrees use
+`.worktrees/<repository-id>/<work-id>/`, and disposable task files use `.tmp/<work-id>/`.
+Keep durable evidence in its owning namespace. This does not relocate existing
+materials, authorize cleanup, or change AI Workflow runtime `projects/`.
+
 Private runtime belongs under exactly one selected workspace. `.systems/ai/core/workspaces.md` defines `generic` and `primary-entity` root profiles and their allowed routers. Use the nearest owner namespace for clients, owned assets, and projects; do not infer a target from a filename alone. System-owned reusable rules, templates, examples, skills, and scripts belong under `.systems/`.
 
 System Insight proposals route through `.systems/ai/core/system-insights.md`; they require anonymization and do not follow from raw client materials or prompt modules alone.

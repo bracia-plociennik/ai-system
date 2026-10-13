@@ -2,6 +2,11 @@
 
 ## Branch And Worktree Policy
 
+Apply `workspace-directory-layout.md`: canonical repos stay in `projects/`;
+implementation and release trees use `.worktrees/<repository-id>/<work-id>/`
+under the selected collection root. Disposable task output uses `.tmp/<work-id>/`.
+The explicit `--prepare` destination below must follow that placement rule.
+
 The product-development checkout uses `dev`. Start implementation worktrees on
 `codex/<work-id>` from the verified current `dev`, not `main`. Keep local role
 `development` and the local project contract; branch names never grant authority.

@@ -55,7 +55,7 @@ Use `dump/incoming/` for files already known to belong to this owned asset.
 
 Files in owned-asset dump still require classification before movement into `documents/`, `assets/`, `projects/`, `contracts/`, `memory/`, or `archive/`.
 
-Use `project-state/<project>/` for AI System owned-asset project status, memory, checkpoints, distillations, decisions, and source links when `projects/<project>/` is a git repo or source-material folder.
+Use `project-state/<project>/` for AI System owned-asset project status, memory, checkpoints, distillations, decisions, and source links when `projects/<project>/` is a canonical git repo. Auxiliary worktrees use the approved collection `.worktrees/`; disposable task files use `.tmp/`. Existing source-material folders remain preserved until an approved relocation.
 
 Use `capture-state/` for owned-asset implementation Distillation State and `project-state/<project>/capture-state/` for project work. State records contain paths and disposition only.
 

@@ -51,7 +51,7 @@ If more than one workspace plausibly matches, block operations in that workspace
 Human asks the owner to choose; Auto queues the choice and continues only work
 independent of that destination.
 
-For project status, memory, checkpoints, distillations, and decisions, use `.systems/ai/core/project-state.md`. `projects/` may contain git repositories or source materials; `project-state/` is the default runtime state namespace. A mode label never overrides those placement/approval rules.
+For project status, memory, checkpoints, distillations, and decisions, use `.systems/ai/core/project-state.md`. `projects/` contains canonical owner repositories; auxiliary worktrees and disposable task files follow `workspace-directory-layout.md` in `.worktrees/` and `.tmp/`; `project-state/` is the default runtime state namespace. A mode label never overrides those placement/approval rules.
 
 For `w projekcie X zrob Y` or equivalent work in a managed repository, use `.systems/ai/core/project-orchestration.md`. Resolve the real repo and local AI Workflow project before choosing continuation, change request, micro-task, micro-project, or full iteration. Local Workflow owns execution gates and evidence; an AI System orchestration record may reference them but cannot authorize a new write or start owner-only final check.
 

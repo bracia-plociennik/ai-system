@@ -71,7 +71,7 @@ Every non-exempt implementation-class write also creates or updates one nearest-
 - `<workspace>/dump/`
 - `<workspace>/clients/`
 - `<workspace>/owned-assets/` for generic workspace owned assets or explicit sub-assets
-- `<workspace>/projects/` for repositories or project source materials
+- `<workspace>/projects/` for canonical owner repositories; auxiliary worktrees in `<workspace>/.worktrees/` and disposable task files in `<workspace>/.tmp/` under `workspace-directory-layout.md`
 - `<workspace>/project-state/` for AI System project status, memory, checkpoints, distillations, decisions, and source links
 - `<workspace>/capture-state/` for workspace-level Distillation State records and unresolved capture routing
 - `<workspace>/micro-projects/`
