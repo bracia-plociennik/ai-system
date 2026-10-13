@@ -10,19 +10,61 @@
   },
   "inspector": ".systems/scripts/lib/execution-modes.py",
   "sources": {
-    ".systems/ai/core/autopilot.md": "fc419f79c5072d99765487981993b8f50e762793ffa17c63153589071753fcf3",
-    ".systems/ai/core/delivery-constraints.md": "67a277f43f9ecbee328580890ecbe390a0cfdd2d637af11dd54987541836bcba",
-    ".systems/ai/core/execution-modes.md": "63c9fbb55b19ba78f9ae4050300606ce66a7f2a16722634da9e8c0883e05fefe",
-    ".systems/ai/core/owner-decision-checkpoints.md": "705b8c700fd2ff4ffc36906645ff412bdad9ad6f763c14c8a9bf169130933c76",
-    ".systems/ai/core/permissions.md": "1c76b3bcbff6a377125cf0361a342c727d7dc7304650f59c28b2f6ae45b7920c",
-    ".systems/ai/core/phase-commit-policy.md": "3b4e51dc119e7d686ff0c81f190c92c2dff62d4467abbe7a5006d4f1bdf99b93",
-    ".systems/ai/core/quality-review.md": "a0fa65a677e340341f95010982fa09717093e8d8ae3c29709fa2046d4163f6c5",
-    ".systems/ai/core/risk-model.md": "24acc42aa62d71d52622343ddc89d6167e335d1cd8c651fe05e70fb85184a5d1",
-    ".systems/ai/templates/autopilot/execution-readiness.template.json": "c9666cbd3ce8d50fb1ef85409a193fae6105e5c3dc2d1a8cab7d829dae0c8eee",
-    ".systems/ai/templates/autopilot/readiness.template.md": "2afa8eae0f055371a3afa69d6ee5af04f436afb5630345da91cc67f1c99f81f4",
-    ".systems/ai/templates/autopilot/state.template.md": "3193a29339a5d1fa0a9f613e7f7b243a3f80223a19ae7415708f72409605340f",
-    ".systems/ai/templates/autopilot/task-decisions.template.md": "a92710c7f49d64e6b36e99617437a7b6b142ea9cb478902530ef45c6772475d7",
-    ".systems/scripts/check-execution-modes": "084ae1ee68359f189e4abe626a3139a1092bd183cc21e0ef5b8316be9af53990",
-    ".systems/scripts/lib/execution-modes.py": "fc6fc0162c9380e2d301b081decc1d553395b253c115342d4360dbd09f5cb73a"
+    ".systems/ai/core/autopilot.md": {
+      "sha256": "fc419f79c5072d99765487981993b8f50e762793ffa17c63153589071753fcf3",
+      "mode": "100644"
+    },
+    ".systems/ai/core/delivery-constraints.md": {
+      "sha256": "67a277f43f9ecbee328580890ecbe390a0cfdd2d637af11dd54987541836bcba",
+      "mode": "100644"
+    },
+    ".systems/ai/core/execution-modes.md": {
+      "sha256": "63c9fbb55b19ba78f9ae4050300606ce66a7f2a16722634da9e8c0883e05fefe",
+      "mode": "100644"
+    },
+    ".systems/ai/core/owner-decision-checkpoints.md": {
+      "sha256": "705b8c700fd2ff4ffc36906645ff412bdad9ad6f763c14c8a9bf169130933c76",
+      "mode": "100644"
+    },
+    ".systems/ai/core/permissions.md": {
+      "sha256": "1c76b3bcbff6a377125cf0361a342c727d7dc7304650f59c28b2f6ae45b7920c",
+      "mode": "100644"
+    },
+    ".systems/ai/core/phase-commit-policy.md": {
+      "sha256": "3b4e51dc119e7d686ff0c81f190c92c2dff62d4467abbe7a5006d4f1bdf99b93",
+      "mode": "100644"
+    },
+    ".systems/ai/core/quality-review.md": {
+      "sha256": "a0fa65a677e340341f95010982fa09717093e8d8ae3c29709fa2046d4163f6c5",
+      "mode": "100644"
+    },
+    ".systems/ai/core/risk-model.md": {
+      "sha256": "24acc42aa62d71d52622343ddc89d6167e335d1cd8c651fe05e70fb85184a5d1",
+      "mode": "100644"
+    },
+    ".systems/ai/templates/autopilot/execution-readiness.template.json": {
+      "sha256": "c9666cbd3ce8d50fb1ef85409a193fae6105e5c3dc2d1a8cab7d829dae0c8eee",
+      "mode": "100644"
+    },
+    ".systems/ai/templates/autopilot/readiness.template.md": {
+      "sha256": "2afa8eae0f055371a3afa69d6ee5af04f436afb5630345da91cc67f1c99f81f4",
+      "mode": "100644"
+    },
+    ".systems/ai/templates/autopilot/state.template.md": {
+      "sha256": "3193a29339a5d1fa0a9f613e7f7b243a3f80223a19ae7415708f72409605340f",
+      "mode": "100644"
+    },
+    ".systems/ai/templates/autopilot/task-decisions.template.md": {
+      "sha256": "a92710c7f49d64e6b36e99617437a7b6b142ea9cb478902530ef45c6772475d7",
+      "mode": "100644"
+    },
+    ".systems/scripts/check-execution-modes": {
+      "sha256": "084ae1ee68359f189e4abe626a3139a1092bd183cc21e0ef5b8316be9af53990",
+      "mode": "100755"
+    },
+    ".systems/scripts/lib/execution-modes.py": {
+      "sha256": "fc6fc0162c9380e2d301b081decc1d553395b253c115342d4360dbd09f5cb73a",
+      "mode": "100644"
+    }
   }
 }
