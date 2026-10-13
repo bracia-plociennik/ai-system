@@ -192,3 +192,25 @@ The classification is advisory only. Durable capture must use the existing memor
 V1 has no scheduler. It does not add automations, daemon processes, hooks, cron jobs, monitors, reminders, or background execution.
 
 Nightly or AFK execution can be planned later as a separate owner-approved idea validation after this advisory contract is stable.
+
+
+## Goal-focused maintenance review
+
+Owner-request and authorized milestone review read the existing nearest-owner
+`maintenance/queue.json`; they do not create another queue. Authorized Dreaming
+may use `maintenance_policy.read_only_review(..., reason="dreaming")` only AFTER
+its existing scope preflight accepts the exact canonical source. A queue under a
+workspace project-state namespace needs the exact private allowlist row and
+Source Inventory. A Workflow queue inside a repository needs explicit `full-repo`
+Project/source path and `repo-source` inventory. The workspace-artifacts variant
+cannot read repository bodies; no allowlist widening, automatic projection/copy,
+or capability marker bypasses the Source Guard or privacy exclusions.
+
+Report full requested inventory and uncertain impact through anonymized labels,
+privacy-safe references, finding/reason/target/owner action, and eligible follow-up
+triggers. Existing Dreaming privacy applies even to safe-summary fields. Review
+changes no queue, parent identity, intervals, state, occurrence, presented receipt,
+task, Capture, status, source or scheduler. A saved report is not notification
+delivery, permission or actual repair. Ordinary chat remains silent below the
+five-distinct-cause/third-actual-task threshold unless an immediate/current-goal
+risk or explicit request applies. See goal-focused-maintenance.md.

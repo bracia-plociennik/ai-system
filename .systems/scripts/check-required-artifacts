@@ -17,6 +17,11 @@ if git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 fi
 
 required=(
+  ".systems/ai/core/goal-focused-maintenance.md"
+  ".systems/ai/capabilities/workflow-goal-focused-maintenance-v1.json"
+  ".systems/scripts/maintenance_policy.py"
+  ".systems/scripts/check-goal-focused-maintenance"
+  ".systems/scripts/tests/test_maintenance_policy.py"
   ".systems/ai/core/runtime-capture-binding.md"
   ".systems/scripts/runtime_source_binding.py"
   ".systems/scripts/product_source_binding.py"

@@ -74,3 +74,10 @@ References elsewhere to `exact owner-approved` or `exact owner approval` use thi
 ## Route-Specific Approval Aliases
 
 Some narrow routes may define explicit approval aliases when their contract names the exact write scope. The block-checkpoint route accepts only its listed checkpoint phrases, including `przyjmij ten checkpoint blok`, `przyjmij checkpoint bloku`, `zaakceptuj ten checkpoint bloku`, `zapisz checkpoint bloku`, `accept this block checkpoint`, and `write this block checkpoint`. These aliases authorize only the append-only block checkpoint and its route-local pointer; they do not generalize to other writes or external effects. Generic preparation, review, display, or diagnosis wording remains read-only.
+
+
+## Goal-Focused Maintenance Integration
+
+Use goal-focused-maintenance.md only after explicit scoped activation and verified local support. One nearest-owner private maintenance/queue.json records proven independent incidental debt; project coordination references the Workflow-owned queue rather than duplicating it. E01–E05 and actual current-goal blockers are immediate. Five distinct active project causes or the third actual affected parent task schedule one consolidated milestone summary; scans/resumes do not count or repeat receipts. One stable approved parent shares TOTAL 600 seconds incidental diagnosis/edit/review/test/record work across both adapters. No background executor, scheduler or automatic TaskNotes. Required current QA and full release/updater failures remain binding. Missing counterpart support keeps existing gates; labels are not activation or authority.
+
+A policy/queue/projection, mode, stored flag or capability grants no write authority. Actual local task approval covers only its declared metadata and maintenance target roots. One CAS writer checks current permission/privacy again. Dynamic E06 edits require exact owner scope and revision comparison; mandatory floors stay enabled.

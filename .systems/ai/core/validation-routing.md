@@ -97,3 +97,10 @@ A skipped inapplicable AI System script is not a skipped product check.
 ## Intent brief supporting verification
 
 check-intent-to-execution-brief runs standalone synthetic profile/corpus regressions in standard/full. With --workflow-root and explicit --expected-head it purely inspects accepted installed source capability; no writes, install, native proof or owner consent. Full source gates include smoke. Native25-case paired original-input review is separate required implementation evidence; green scripts are supporting-only. Existing execution-mode fixed14 contract1/readiness2/QA2/Capture2 unchanged.
+
+
+## Goal-Focused Maintenance Integration
+
+Use goal-focused-maintenance.md only after explicit scoped activation and verified local support. One nearest-owner private maintenance/queue.json records proven independent incidental debt; project coordination references the Workflow-owned queue rather than duplicating it. E01–E05 and actual current-goal blockers are immediate. Five distinct active project causes or the third actual affected parent task schedule one consolidated milestone summary; scans/resumes do not count or repeat receipts. One stable approved parent shares TOTAL 600 seconds incidental diagnosis/edit/review/test/record work across both adapters. No background executor, scheduler or automatic TaskNotes. Required current QA and full release/updater failures remain binding. Missing counterpart support keeps existing gates; labels are not activation or authority.
+
+Explicit current-goal selection is not full validation. It derives actual current dependency closure from canonical proof and preserves exhaustive errors internally. Default full/source/release/updater gates execute fresh and keep FAIL; independent historical errors never create current PASS. Semantic QA remains first.

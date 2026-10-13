@@ -73,3 +73,10 @@ Supported opt-out wording includes `bez deadlinu`, `bez deadline'u`, `bez planow
 Quality closure records the agreed constraint, delivered scope, deferred scope, deadline status, quality floor, skipped checks, overrun decisions, and residual risk.
 
 Weekly planning may provide a task-level deadline, time estimate, must-have outcome, and quality floor for work scheduled in the target week. The `.systems/ai/core/weekly-planning.md` contract is the route for that Saturday plan. When a task starts, reuse those fields and apply mode-aware handling of missing delivery constraints. A weekly plan does not authorize implementation outside its explicit TaskNote and owner scope.
+
+
+## Goal-Focused Maintenance Integration
+
+Use goal-focused-maintenance.md only after explicit scoped activation and verified local support. One nearest-owner private maintenance/queue.json records proven independent incidental debt; project coordination references the Workflow-owned queue rather than duplicating it. E01–E05 and actual current-goal blockers are immediate. Five distinct active project causes or the third actual affected parent task schedule one consolidated milestone summary; scans/resumes do not count or repeat receipts. One stable approved parent shares TOTAL 600 seconds incidental diagnosis/edit/review/test/record work across both adapters. No background executor, scheduler or automatic TaskNotes. Required current QA and full release/updater failures remain binding. Missing counterpart support keeps existing gates; labels are not activation or authority.
+
+The 600-second future incidental limit is not a deadline for primary product development. Persist intervals before diagnosis, reserve verification/recovery, bound tool timeout, start no new incidental operation at exhaustion. Unknown recovered elapsed cannot reset to zero; safe exact own-change recovery overrun is recorded honestly.
