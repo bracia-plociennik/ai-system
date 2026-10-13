@@ -12,7 +12,10 @@ Workspace home: `<WORKSPACE_HOME>`.
 - `dump/` - incoming unclassified files.
 - `clients/` - client workspaces.
 - `owned-assets/` - owner-controlled companies, brands, and commercial assets when they are not the primary entity of this workspace.
-- `projects/` - standalone project repositories or source materials.
+- `projects/` - canonical owner project repositories.
+- `.worktrees/<repository-id>/<work-id>/` - optional auxiliary Git worktrees.
+- `.tmp/<work-id>/` - optional disposable task files; durable QA stays in its owning evidence namespace.
+- Directory placement follows `.systems/ai/core/workspace-directory-layout.md`; existing materials require explicit relocation approval.
 - `project-state/` - AI System status, memory, checkpoints, distillations, decisions, and source links for projects.
 - `capture-state/` - workspace-level Distillation State records and unresolved capture routing.
 - `micro-projects/` - small standalone work.

@@ -1,6 +1,11 @@
 # Projects Template
 
-Standalone project repositories, source folders, exported materials, and other project-owned files may live here when they are not nested under a client.
+Only canonical owner project repositories belong here when they are not nested
+under a client. Auxiliary worktrees use the selected collection root
+`.worktrees/<repository-id>/<work-id>/`; disposable task files use `.tmp/<work-id>/`.
+See `.systems/ai/core/workspace-directory-layout.md`. Source imports and materials
+follow their existing dump/context/document routes. Preserve existing materials
+and historical QA; no automatic migration or deletion.
 
 AI System runtime state does not belong here by default. Store project status, memory, checkpoints, distillations, decisions, and source links in:
 

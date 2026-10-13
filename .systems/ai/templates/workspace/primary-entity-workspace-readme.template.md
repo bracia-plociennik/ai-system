@@ -17,6 +17,11 @@ Workspace home: `<WORKSPACE_HOME>`.
 
 ## Boundaries
 
+Use `.systems/ai/core/workspace-directory-layout.md`: canonical repositories
+belong in `projects/`, auxiliary Git worktrees in `.worktrees/<repository-id>/<work-id>/`,
+and disposable task files in `.tmp/<work-id>/`. Preserve durable QA in its owning
+namespace; this guidance grants no migration, cleanup or publication authority.
+
 - Primary entity materials belong directly in this workspace.
 - External client materials belong in `clients/`.
 - Private owner context belongs in `humans/` or `memory/` unless it has a separate private workspace.
@@ -35,7 +40,9 @@ Workspace home: `<WORKSPACE_HOME>`.
 - `checkpoints/` - state snapshots.
 - `distillations/` - compressed lessons and summaries.
 - `contacts/` - contact notes and relationship context.
-- `projects/` - primary entity project repositories or source materials.
+- `projects/` - canonical primary entity project repositories.
+- `.worktrees/<repository-id>/<work-id>/` - optional auxiliary Git worktrees.
+- `.tmp/<work-id>/` - optional disposable task files; durable evidence stays in its owning namespace.
 - `project-state/` - AI System runtime state for primary entity projects.
 - `capture-state/` - workspace-level Distillation State records; narrower work uses nearest client, asset, or project state.
 - `documents/` - owner-approved primary entity documents.

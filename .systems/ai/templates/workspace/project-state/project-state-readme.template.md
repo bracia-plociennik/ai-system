@@ -11,7 +11,7 @@ Use this namespace for projects whose source lives under `projects/`, client rep
 
 ## Rules
 
-- Keep real repositories and source folders in `projects/` or the owner-approved source path.
+- Keep canonical repositories in `projects/`; auxiliary worktrees use `.worktrees/` and disposable task files use `.tmp/` under `workspace-directory-layout.md`. Source folders use their owner-approved context/document path; preserve existing locations until an approved relocation.
 - Store AI System project status, memory, checkpoints, distillations, Distillation State, decisions, and links here.
 - Use `<project>/capture-state/` for per-work implementation capture disposition; do not add `is_distilled` to project source files.
 - If a project source path is a git worktree, ask before colocating runtime files there.
