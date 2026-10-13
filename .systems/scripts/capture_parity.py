@@ -155,6 +155,90 @@ def collection(workspace, owner):
     return {"records": result, "errors": errors, "supporting_only": True}
 
 
+def goal_collection(workspace, owner, required_work_ids):
+    """Explicit current-goal selection; original exhaustive API is unchanged."""
+    from maintenance_policy import select_goal
+    from orchestration_compatibility import digest
+    workspace = Path(workspace).absolute()
+    physical_owner = contained(workspace, owner).parent
+    full = collection(workspace, owner)
+    claims = []
+    inventory = {'records': [], 'invalid': [{'path': p, 'reason': e} for p, e in full['errors'].items()]}
+    for path in population(workspace, owner):
+        claim = {'path': path.name, 'owner_ref': str(physical_owner), 'work_ids': [],
+                 'source_refs': [], 'distillation_refs': [], 'aliases': [], 'complete': False}
+        try:
+            row = fields(path)
+            work = row['Work ID']
+            require(bool(re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.:/-]*', work)), 'unknown work identity')
+            claim['work_ids'] = [work]
+            require(not any('alias' in k.lower() or 'claim' in k.lower() for k in row), 'unresolved alias claims')
+            require(row.get('Capture schema') in {'2', '3'}, 'historical dependency closure unknown')
+            p = proof(path)
+            require(p['work_id'] == work, 'foreign proof work identity')
+            source = Path(p['source_root'])
+            require(source.is_absolute() and source.resolve() == source and source.is_dir(), 'unknown source scope')
+            evidence = contained(workspace, p['evidence_root'])
+            require(evidence.is_relative_to(physical_owner), 'foreign evidence owner')
+            for item in p['qa_refs']:
+                qpath = contained(evidence, item['path'])
+                require(fingerprint(qpath) == item['sha256'], 'unknown changed QA claims')
+                claim['source_refs'].append(str(qpath))
+                text = current_qa(qpath.read_text())
+                identity = re.findall(r'^- Project/task identity: (.*)$', text, re.M)
+                require(len(identity) == 1 and identity[0].startswith(p['project'] + ':'), 'foreign QA identity')
+                require(identity[0].split(':', 1)[1] in p['task_ids'], 'foreign QA task coverage')
+                if row['Capture schema'] == '2' or '### Input Artifacts\n' in text:
+                    table = text.split('### Input Artifacts\n', 1)
+                    require(len(table) == 2, 'missing dependency claims')
+                    roots = {'approved-target-source': source, 'workflow-source': source / 'ai-workflow',
+                             'owning-project-evidence': evidence}
+                    seen = set()
+                    for line in table[1].split('\n### ', 1)[0].splitlines():
+                        if not line.startswith('|'): continue
+                        cells = [c.strip().strip('`') for c in line.strip('|').split('|')]
+                        if cells[0] == 'Root kind' or all(re.fullmatch(r'[-: ]+', c) for c in cells): continue
+                        require(len(cells) == 3 and cells[0] in roots and re.fullmatch(r'[0-9a-f]{64}', cells[2]), 'unknown dependency row')
+                        require(tuple(cells[:2]) not in seen, 'duplicate dependency row'); seen.add(tuple(cells[:2]))
+                        claim['source_refs'].append(str(contained(roots[cells[0]], cells[1])))
+                    require(seen, 'missing dependency closure')
+                if row['Capture schema'] == '3':
+                    snap = contained(evidence, item['snapshot_path'])
+                    require(fingerprint(snap) == item['snapshot_sha256'], 'changed snapshot claims')
+                    snapshot = json.loads(snap.read_text())
+                    body = snapshot['body']
+                    require(snapshot.get('sha256') == digest(body), 'unknown snapshot integrity')
+                    require(body.get('binding') in {'product-scope-v1', 'runtime-scope-v1'}, 'unknown binding closure')
+                    require(body.get('repository') == str(source) and body.get('project') == p['project']
+                            and body.get('task') in p['task_ids'], 'foreign snapshot identity')
+                    if body['binding'] == 'product-scope-v1':
+                        claim['source_refs'] += [str(source / '.systems'), str(source / '.github')]
+                        claim['source_refs'] += [str(source / f) for f in ('README.md', 'HUMANS.md', '.gitignore')]
+                        dependencies = body['dependencies']
+                        claim['source_refs'] += [d['path'] for d in dependencies['directories'] + dependencies['files']]
+                    else:
+                        claim['source_refs'].append(str(contained(source, body['runtime_root'])))
+                        claim['source_refs'] += [d['path'] for d in body['dependencies']]
+            if row.get('Distillation artifact', 'none') != 'none':
+                claim['distillation_refs'].append(str(contained(workspace, row['Distillation artifact'])))
+            claim['source_refs'] = sorted(set(claim['source_refs']))
+            claim['complete'] = True
+        except (Blocked, ValueError, KeyError, OSError, TypeError):
+            pass
+        claims.append(claim)
+        if path.name not in full['errors']:
+            record = next(r for r in full['records'] if r['path'] == path.name)
+            inventory['records'].append(dict(record, work_id=claim['work_ids'][0] if claim['work_ids'] else 'unknown'))
+    selected = select_goal(inventory, claims, str(physical_owner), required_work_ids)
+    current = {r['work_id']: r for r in selected['records']}
+    for work in required_work_ids:
+        row = current.get(work)
+        if row is None or not row.get('current_quality') or row['state'] not in {'ready', 'completed'}:
+            selected['invalid'].append({'path': work, 'reason': 'required current Capture incomplete'})
+    selected['gate_result'] = 'FAIL' if selected['invalid'] else 'PASS'
+    return selected
+
+
 def parent_completion(ledger, workspace, owner, work_id, plan_path, plan_sha256):
     """Recheck actual integrated outputs and the whole owning capture collection."""
     require(not Path(plan_path).is_symlink() and fingerprint(plan_path) == plan_sha256, "parent plan drift")
