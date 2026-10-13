@@ -57,7 +57,7 @@
     },
     ".systems/ai/core/commands.md": {
       "mode": "100644",
-      "sha256": "f8f55699f211b2446996594d5c7da4d5f7cb72ffab0f6c33faf48ad07ef7e120"
+      "sha256": "ff00f78135af958c3553239c0d2f402d1a1ac9b052b0b1fe7a4f4faad647a482"
     },
     ".systems/ai/core/contract-compliance.md": {
       "mode": "100644",
@@ -89,7 +89,7 @@
     },
     ".systems/ai/core/development-worktree-policy.md": {
       "mode": "100644",
-      "sha256": "5f4cae77538deb9f9b4ba30df47e6dfe4c4436e2255ae039c19a1a6d6f07eb5b"
+      "sha256": "648ae604c784247a9ee84ab1be9fd84aed1ab12f2fd26703f96c9669d5ccf2b5"
     },
     ".systems/ai/core/distillation-state.md": {
       "mode": "100644",
@@ -153,7 +153,7 @@
     },
     ".systems/ai/core/operating-model.md": {
       "mode": "100644",
-      "sha256": "709706ddbba99642a9be4c55d872bd9fdb4cb9a6fb681d752985e3027a5b7d25"
+      "sha256": "abf70bac6582d869df593020bc5f3605f8bf94860fa1b6c1ae63a0f3a1de35e0"
     },
     ".systems/ai/core/owner-decision-checkpoints.md": {
       "mode": "100644",
@@ -271,13 +271,17 @@
       "mode": "100644",
       "sha256": "f823f5d7d2ea3bef5aabb53491096bb46c2e7ca74597a2fd8946c3ced1b03e19"
     },
+    ".systems/ai/core/workspace-directory-layout.md": {
+      "mode": "100644",
+      "sha256": "45f1d9727baa782f1682a534043d63e17be29ee30bfcd89fc4514a0072e2f087"
+    },
     ".systems/ai/core/workspace-freshness.md": {
       "mode": "100644",
       "sha256": "f85dd908634d1c6e496cbdfec7eab0b28b5cafb71e85a8153e2b0f2205356c36"
     },
     ".systems/ai/core/worktree-bootstrap.md": {
       "mode": "100644",
-      "sha256": "40c406ca357c8f3ef758cd29289dcd60de9c71414337d79cab5c0894d5c0932e"
+      "sha256": "3df1f6cc4af4c91398d117f836eba2c5ab09ccfafb98e90f4184e5ba3beb5c0f"
     },
     ".systems/ai/examples/README.md": {
       "mode": "100644",
@@ -1469,7 +1473,7 @@
     },
     ".systems/ai/templates/workspace/projects/README.md": {
       "mode": "100644",
-      "sha256": "28062ead164d7f8488023f21de3c46fd5de7cd1efdeb9bd75c9d9db89eb4786e"
+      "sha256": "27fe403eb747cefafecd62ae595a6cd5d44ada582102a073bac9bb0ef14156e9"
     },
     ".systems/ai/templates/workspace/repo/README.md": {
       "mode": "100644",
@@ -1497,7 +1501,7 @@
     },
     ".systems/ai/templates/workspace/workspace-readme.template.md": {
       "mode": "100644",
-      "sha256": "06f927411b2b9a495c0b1cf7bb32d959cd684384eaebb22fc01f7dd060b39fb2"
+      "sha256": "2dac399facb52d5c6f00b2b43d0f95a4cd0445774d26a9e2d5d9d25d41e2be9f"
     },
     ".systems/ai/templates/worktree/worktree-bootstrap-shim.template.md": {
       "mode": "100644",
@@ -1833,7 +1837,7 @@
     },
     ".systems/scripts/lib/maintenance-tests.py": {
       "mode": "100644",
-      "sha256": "7f6c6c8e2c3818db1f62c03c07e46699c34052e4cfdb19e8ab56c251de9ad5b0"
+      "sha256": "045bfb0ed8c8080dc044ffd1af932a3da49725350c695eee30722045892fb1d6"
     },
     ".systems/scripts/lib/parallel-compatibility.py": {
       "mode": "100644",
@@ -2025,11 +2029,11 @@
     },
     "HUMANS.md": {
       "mode": "100644",
-      "sha256": "454c68198e1e3be136b1356d9b40987bf60cea78be6a458ce504118626a23759"
+      "sha256": "d7b2a20ccd84fa9e4db713faf2d436266c9b9bcb9bff884433a21a2c1cf1a833"
     },
     "README.md": {
       "mode": "100644",
-      "sha256": "27729ede95ff1b77c0a303ae994fed33d0ddae74cc5a05eb3ca5cf758fcb1cb1"
+      "sha256": "e1db26e22550ed4ceb88644922fbb7c2e48b5a08983c955633253a924e36c99b"
     }
   },
   "wire_schema": 1

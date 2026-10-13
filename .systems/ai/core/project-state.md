@@ -47,7 +47,12 @@ For an approved work unit in a repository with AI Workflow, `orchestration/<work
 
 ## Projects Directory Boundary
 
-`projects/` may contain product repositories, client repositories, cloned repos, source folders, exported materials, or other project-owned files.
+`projects/` contains only canonical owner project repositories. Auxiliary
+worktrees belong in `.worktrees/<repository-id>/<work-id>/`; disposable task
+files belong in `.tmp/<work-id>/`. Apply `workspace-directory-layout.md`.
+Source folders and exports use the existing dump/intake and accepted project
+context/document routes. Preserve previously placed materials until an exact
+owner-approved relocation; no automatic migration or cleanup.
 
 Do not assume `projects/<project-slug>/` is safe for AI System runtime files.
 

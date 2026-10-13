@@ -268,7 +268,11 @@ Use:
 <workspace>/projects/<project-slug>/
 ```
 
-for the real repository, source folder, exported materials, or other project-owned files.
+for the canonical owner repository. Auxiliary worktrees use
+`<workspace>/.worktrees/<repository-id>/<work-id>/`; disposable task files use
+`<workspace>/.tmp/<work-id>/`. Follow `.systems/ai/core/workspace-directory-layout.md`;
+keep durable QA in its owning namespace and preserve existing sources/history
+until an exact owner-approved relocation.
 
 If a project path is inside a git worktree, do not write AI System `status.md`, `memory.md`, `checkpoints/`, `distillations/`, or `decisions/` there automatically. Ask whether to use `project-state/` or colocated local-only state with exact `owner-approved` scope and local `.git/info/exclude` handling.
 
