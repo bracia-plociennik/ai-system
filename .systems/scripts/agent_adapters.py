@@ -271,13 +271,19 @@ def apply_plan(plan, *, approved=False):
         atomic_write(receipt,encoded(transaction))
         # Global entry checks both enabled and this receipt's applied state.
         # Thus an interrupted enable/receipt write never publishes partial policy.
+        if (strict_json(reg) if reg.exists() else None) != current_reg:
+            raise ContextError('registration changed before write',4)
         atomic_write(reg,encoded(pending))
         if owned_fragment(current_agents) != plan['fragment']:
             old = plan['old_fragment']
             target = current_agents.replace(old,plan['fragment'],1) if old else current_agents+plan['separator']+plan['fragment']
             if digest(target.encode()) != plan['after_agents_sha256']:
                 raise ContextError('global merge base changed',4)
+            if (safe_bytes(agents).decode() if agents.exists() else '') != current_agents:
+                raise ContextError('global instructions changed before write; registration remains disabled',4)
             atomic_write(agents,target.encode(),plan['before']['agents']['mode'] or 0o600)
+        if strict_json(reg) != pending or source_digest(system) != plan['source_digest']:
+            raise ContextError('configuration/source changed before activation',4)
         atomic_write(reg,encoded(plan['registration']))
         transaction.update(status='applied',steps=['pending-receipt','disabled-registration','owned-fragment','enabled-registration','applied-receipt'])
         atomic_write(receipt,encoded(transaction))
@@ -357,10 +363,14 @@ def restore_receipt(path, *, approved=False, user_home=None):
                          restore_agents_sha256=digest(restored.encode()))
             atomic_write(Path(plan['receipt']), encoded(value))
             atomic_write(reg, encoded(pending))
+            if digest((safe_bytes(agents).decode() if agents.exists() else '').encode()) != current_hash:
+                raise ContextError('instructions changed before restore write; registration remains disabled',4)
             if not restored and plan['before']['agents']['sha256'] is None:
                 if agents.exists(): agents.unlink()
             else:
                 atomic_write(agents, restored.encode(), plan['before']['agents']['mode'] or 0o600)
+        if (strict_json(reg) if reg.exists() else None) not in (pending, plan['registration_before']):
+            raise ContextError('registration changed before restore completion',4)
         if plan['registration_before'] is None:
             if reg.exists(): reg.unlink()
         else:

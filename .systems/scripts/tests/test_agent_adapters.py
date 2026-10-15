@@ -114,6 +114,33 @@ class Adapters(fixtures.AgentContext):
             self.assertEqual(out['native_verification'], 'unverified')
             self.assertFalse(out['activation_supported'])
 
+    def test_editor_during_apply_is_preserved_and_activation_stays_incomplete(self):
+        self.put(self.agents, '# Original')
+        plan = self.plan(); original = adapter.atomic_write
+        def editor(path, data, *args, **kwargs):
+            result = original(path, data, *args, **kwargs)
+            if Path(path) == self.registration and json.loads(data)['enabled'] is False:
+                self.agents.write_text('# Concurrent user edit')
+            return result
+        with mock.patch.object(adapter, 'atomic_write', side_effect=editor):
+            with self.assertRaises(adapter.ContextError): adapter.apply_plan(plan, approved=True)
+        self.assertEqual(self.agents.read_text(), '# Concurrent user edit')
+        self.assertFalse(json.loads(self.registration.read_text())['enabled'])
+
+    def test_editor_during_restore_is_preserved(self):
+        self.put(self.agents, '# Original')
+        plan = self.plan(); adapter.apply_plan(plan, approved=True)
+        original = adapter.atomic_write
+        def editor(path, data, *args, **kwargs):
+            result = original(path, data, *args, **kwargs)
+            if Path(path) == self.registration and json.loads(data)['enabled'] is False:
+                self.agents.write_text(self.agents.read_text() + '\nConcurrent edit\n')
+            return result
+        with mock.patch.object(adapter, 'atomic_write', side_effect=editor):
+            with self.assertRaises(adapter.ContextError): adapter.restore_receipt(Path(plan['receipt']), approved=True)
+        self.assertIn('Concurrent edit', self.agents.read_text())
+        self.assertFalse(json.loads(self.registration.read_text())['enabled'])
+
     def test_concurrent_lock_and_no_secret_backup(self):
         self.put(self.home / '.codex/auth.json', 'SYNTHETIC_SECRET_NEVER_READ')
         self.put(self.agents, 'SYNTHETIC_PRIVATE_RULE')
