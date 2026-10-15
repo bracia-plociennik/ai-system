@@ -141,5 +141,37 @@ class AgentContext(unittest.TestCase):
             context.concrete(str(self.home / '..' / 'foreign'))
 
 
-if __name__ == '__main__':
-    unittest.main()
+
+class StartupObservations(AgentContext):
+    def test_shadow_and_budget_are_observed_without_mutation(self):
+        self.put(self.app / 'AGENTS.md', '# Normal')
+        self.put(self.app / 'AGENTS.override.md', '# Override')
+        out = self.resolve()
+        self.assertEqual(out['binding_status'], 'unavailable')
+        self.assertEqual(out['instruction_chain']['files'][0]['path'], str(self.app / 'AGENTS.override.md'))
+        (self.app / 'AGENTS.override.md').unlink()
+        self.put(self.app / 'AGENTS.md', 'x' * 16385)
+        self.assertEqual(self.resolve()['binding_status'], 'unavailable')
+        self.assertEqual((self.app / 'AGENTS.md').stat().st_size, 16385)
+
+    def test_source_fingerprint_ignores_head_and_detects_relevant_bytes(self):
+        path = self.system / '.systems/ai/capabilities/agent-startup-v1.json'
+        import hashlib
+        rel = context.POLICY[0]
+        for name in context.CAPABILITY_FILES['agent-startup-v1']:
+            self.put(self.system / name, (ROOT / name).read_text())
+        self.put(path, json.dumps(dict(schema_version=1, contract='agent-startup-v1',
+            source_files={name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in context.CAPABILITY_FILES['agent-startup-v1']},
+            native_verification='requires-installation-specific-proof')))
+        self.assertEqual(self.resolve()['capabilities']['system_source'], 'verified-source')
+        subprocess.run(['git', '-C', str(self.system), '-c', 'user.name=Synthetic', '-c',
+                        'user.email=synthetic@example.invalid', 'commit', '--allow-empty', '-qm', 'unrelated'], check=True)
+        self.assertEqual(self.resolve()['capabilities']['system_source'], 'verified-source')
+        with (self.system / rel).open('a') as out: out.write('\nChanged\n')
+        self.assertEqual(self.resolve()['capabilities']['system_source'], 'mismatch')
+
+# Avoid running the base cases twice through inheritance.
+for _name in list(AgentContext.__dict__):
+    if _name.startswith('test_'): setattr(StartupObservations, _name, None)
+
+if __name__ == '__main__': unittest.main()

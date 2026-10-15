@@ -15,6 +15,14 @@ REGISTRATION_KEYS = {'schema_version', 'system_id', 'system_home', 'enabled', 'a
                      'owner_workspace_id', 'owner_asset_id'}
 SLUG = re.compile(r'[a-z0-9]+(?:-[a-z0-9]+)*')
 POLICY = ('.systems/ai/core/agent-startup.md', '.systems/ai/core/system-workflow-authority.md')
+CAPABILITY_FILES = {
+    'agent-startup-v1': (*POLICY, '.systems/ai/core/agent-adapters.md',
+        '.systems/scripts/agent_context.py', '.systems/scripts/agent_adapters.py',
+        '.systems/scripts/local_paths.py', '.systems/scripts/resolve-agent-context',
+        '.systems/scripts/manage-agent-adapter'),
+    'work-lead-v1': ('AGENTS.md', '.systems/ai/core/work-lead.md',
+        '.systems/ai/core/permissions.md', '.systems/ai/core/risk-model.md',
+        '.systems/ai/core/runtime-integrity.md', '.systems/scripts/lib/coordinator-status.py')}
 
 
 class ContextError(ValueError):
@@ -178,6 +186,62 @@ def workflow_context(repo):
     return home, repo / 'ai-workflow-workspace', mode
 
 
+def instruction_chain(current, repo, env, tool):
+    """Observe Codex's native chain; no config mutation or implicit authority."""
+    if tool != 'codex':
+        return {'status': 'design-only', 'native_verification': 'unverified', 'files': [], 'bytes': 0}
+    codex = concrete(env.get('CODEX_HOME', str(Path(env['HOME']) / '.codex')), environment=env)
+    directories = [codex]
+    if repo:
+        directories.append(repo)
+        cursor = repo
+        for part in current.relative_to(repo).parts:
+            cursor = cursor / part
+            directories.append(cursor)
+    files, shadows, total = [], [], 0
+    seen = set()
+    for directory in directories:
+        normal, override = directory / 'AGENTS.md', directory / 'AGENTS.override.md'
+        chosen = None
+        for path in (override, normal):
+            if path.exists() and safe_bytes(path).strip():
+                chosen = path
+                break
+        if chosen is None: continue
+        if chosen in seen: raise ContextError('duplicate instruction path', 4)
+        seen.add(chosen)
+        raw = safe_bytes(chosen)
+        total += len(raw)
+        files.append({'path': str(chosen), 'bytes': len(raw), 'sha256': hashlib.sha256(raw).hexdigest()})
+        if chosen == override: shadows.append(str(override))
+    issues = (['instruction override requires deliberate review'] if shadows else [])
+    if total > 16384: issues.append('combined automatic guidance exceeds 16 KiB')
+    return {'status': 'review-required' if issues else 'within-budget', 'native_verification': 'unverified',
+            'files': files, 'bytes': total, 'shadowing': shadows, 'issues': issues}
+
+
+def source_consistency(root, capability, contract):
+    """Capabilities are content claims, never executable consent or native proof."""
+    path = root / '.systems/ai/capabilities' / capability
+    if not path.exists(): return 'unavailable'
+    value = strict_json(path)
+    required = {'schema_version', 'contract', 'source_files', 'native_verification'}
+    if (not isinstance(value, dict) or set(value) != required or type(value['schema_version']) is not int
+            or value['schema_version'] != 1 or value['contract'] != contract
+            or not isinstance(value['source_files'], dict)
+            or set(value['source_files']) != set(CAPABILITY_FILES.get(contract, ()))
+            or value['native_verification'] != 'requires-installation-specific-proof'):
+        return 'unsupported'
+    for rel, expected in value['source_files'].items():
+        if (not isinstance(rel, str) or not isinstance(expected, str) or not re.fullmatch('[0-9a-f]{64}', expected)
+                or Path(rel).is_absolute() or '..' in Path(rel).parts
+                or not (rel.startswith('.systems/') or rel in {'AGENTS.md','README.md','HUMANS.md'})
+                or rel == str(path.relative_to(root))):
+            return 'unsupported'
+        if hashlib.sha256(safe_bytes(root / rel)).hexdigest() != expected: return 'mismatch'
+    return 'verified-source'
+
+
 def resolve_context(cwd, tool='codex', workspace=None, *, environment=None, system_home=None):
     if tool not in {'codex', 'claude-code', 'generic'}:
         raise ContextError('unsupported executor')
@@ -224,13 +288,19 @@ def resolve_context(cwd, tool='codex', workspace=None, *, environment=None, syst
     elif selected:
         read_roots += [str(selected / 'status.md')]
     unresolved = [] if record['enabled'] else ['installation disabled']
+    chain = instruction_chain(current, repo, env, tool)
+    unresolved += chain.get('issues', [])
+    system_source = source_consistency(installed, 'agent-startup-v1.json', 'agent-startup-v1')
+    workflow_source = source_consistency(wf, 'work-lead-v1.json', 'work-lead-v1') if wf else 'absent'
     return dict(schema_version=1, system_id=record['system_id'], system_home=str(installed),
                 checkout_role=checkout, context_kind=kind, repository_root=str(repo) if repo else None,
                 workspace_root=str(selected) if selected else None, project_id=project_id,
                 workflow_home=str(wf) if wf else None, workflow_workspace=str(wf_workspace) if wf_workspace else None,
-                workflow_mode=mode, binding_status='resolved' if record['enabled'] else 'unavailable',
+                workflow_mode=mode, binding_status='resolved' if not unresolved else 'unavailable',
                 contract_version=1, source_digest=digest, capabilities={'context': 'descriptive',
-                'workflow': mode, 'executor_native_verification': 'unverified', 'memory_control': 'not-assessed'},
+                'workflow': mode, 'system_source': system_source, 'workflow_source': workflow_source,
+                'executor_native_verification': 'unverified', 'memory_control': 'not-assessed'},
+                instruction_chain=chain,
                 read_roots=read_roots, requested_write_roots=[], unresolved=unresolved, authorization_assessed=False)
 
 
