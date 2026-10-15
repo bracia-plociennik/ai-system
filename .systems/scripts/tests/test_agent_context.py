@@ -71,6 +71,45 @@ class AgentContext(unittest.TestCase):
         self.assertEqual(out['requested_write_roots'], [])
         self.assertNotIn(str(self.personal), out['read_roots'])
 
+    def test_nonrepository_source_links_do_not_block_registered_or_unknown_repositories(self):
+        doc = self.company / 'clients/example/project-state/documents/links.md'
+        self.put(doc, 'source-path: ${AI_SYSTEM_WORKSPACE_HOME}/dump/materials\n')
+        before = doc.read_bytes()
+        out = self.resolve()
+        self.assertEqual(out['project_id'], 'application')
+        self.assertEqual(out['workspace_root'], str(self.company))
+        unknown = self.home / 'unknown'; self.repo(unknown)
+        out = self.resolve(unknown)
+        self.assertEqual(out['context_kind'], 'unregistered-repository')
+        self.assertIsNone(out['workspace_root'])
+        self.assertIsNone(out['project_id'])
+        self.assertEqual(doc.read_bytes(), before)
+
+    def test_empty_or_duplicate_declared_repository_links_remain_conflicts(self):
+        malformed = self.company / 'project-state/invalid/links.md'
+        for value in ('repo-path:   \nsource-path: unused\n',
+                      'repo-path: first\nrepo-path: second\n'):
+            with self.subTest(value=value):
+                self.put(malformed, value)
+                with self.assertRaises(context.ContextError):
+                    self.resolve()
+
+    def test_pending_directory_does_not_inherit_owning_workspace_git_identity(self):
+        self.repo(self.company)
+        pending = self.company / 'projects/pending'; pending.mkdir(parents=True)
+        self.put(self.company / 'project-state/pending/links.md',
+                 'repo-path: ${AI_SYSTEM_WORKSPACE_HOME}/projects/pending\nsource-availability: pending\n')
+        before = sorted(pending.iterdir())
+        self.assertEqual(self.resolve()['project_id'], 'application')
+        unknown = self.home / 'unknown'; self.repo(unknown)
+        self.assertEqual(self.resolve(unknown)['context_kind'], 'unregistered-repository')
+        self.assertEqual(self.resolve(pending)['context_kind'], 'unregistered-repository')
+        self.assertEqual(sorted(pending.iterdir()), before)
+        # An actual broken Git marker remains a conflict, never silently accepted.
+        (pending / '.git').mkdir()
+        with self.assertRaises(context.ContextError):
+            self.resolve()
+
     def test_management_and_personal_have_no_workflow_self_clone(self):
         out = self.resolve(self.system)
         self.assertEqual(out['context_kind'], 'management')

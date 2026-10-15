@@ -152,8 +152,10 @@ def project_associations(rows, repo, common, env):
         for pattern in patterns:
             for link in sorted(workspace.glob(pattern)):
                 raw = safe_bytes(link)
-                values = re.findall(r'^repo-path:\s*(.+?)\s*$', raw.decode('utf-8'), re.M)
-                if len(values) != 1:
+                values = re.findall(r'^repo-path:[ \t]*(.*?)[ \t]*$', raw.decode('utf-8'), re.M)
+                if not values:
+                    continue  # Non-repository source projects have no Git association.
+                if len(values) != 1 or not values[0]:
                     raise ContextError('ambiguous project repository association', 4)
                 local_env = dict(env, AI_SYSTEM_WORKSPACE_HOME=str(workspace))
                 target = concrete(values[0].strip('`'), base=workspace, environment=local_env)
@@ -161,6 +163,8 @@ def project_associations(rows, repo, common, env):
                     continue  # pending repositories stay pending, never enrolled or cloned
                 target_root, target_common = common_git(target)
                 if target_root != target:
+                    if not (target / '.git').exists():
+                        continue  # Existing pending directory must not inherit its workspace Git root.
                     raise ContextError('project link does not identify a repository root', 4)
                 if repo == target or common == target_common:
                     matches.append((workspace, link.parent.name, target, link.parent))
