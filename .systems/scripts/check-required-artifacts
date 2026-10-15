@@ -17,6 +17,15 @@ if git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 fi
 
 required=(
+  ".systems/scripts/check-agent-startup"
+  ".systems/scripts/resolve-agent-context"
+  ".systems/scripts/manage-agent-adapter"
+  ".systems/scripts/agent_context.py"
+  ".systems/scripts/agent_adapters.py"
+  ".systems/ai/core/agent-startup.md"
+  ".systems/ai/core/system-workflow-authority.md"
+  ".systems/ai/core/agent-adapters.md"
+  ".systems/ai/capabilities/agent-startup-v1.json"
   ".systems/ai/core/goal-focused-maintenance.md"
   ".systems/ai/capabilities/workflow-goal-focused-maintenance-v1.json"
   ".systems/scripts/maintenance_policy.py"

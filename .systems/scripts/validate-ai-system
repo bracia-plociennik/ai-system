@@ -8,6 +8,7 @@ profile="standard"
 # AI_SYSTEM_SKIP_SMOKE_TESTS always produces supporting-only non-final evidence.
 standard_checks=(
   check-product-publication
+  check-agent-startup
   check-execution-modes
   check-goal-focused-maintenance
   check-intent-to-execution-brief

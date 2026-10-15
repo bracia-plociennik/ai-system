@@ -222,6 +222,8 @@ def instruction_chain(current, repo, env, tool):
 
 def source_consistency(root, capability, contract):
     """Capabilities are content claims, never executable consent or native proof."""
+    if contract not in CAPABILITY_FILES:
+        return 'unsupported'
     path = root / '.systems/ai/capabilities' / capability
     if not path.exists(): return 'unavailable'
     value = strict_json(path)
@@ -292,6 +294,10 @@ def resolve_context(cwd, tool='codex', workspace=None, *, environment=None, syst
     unresolved += chain.get('issues', [])
     system_source = source_consistency(installed, 'agent-startup-v1.json', 'agent-startup-v1')
     workflow_source = source_consistency(wf, 'work-lead-v1.json', 'work-lead-v1') if wf else 'absent'
+    if system_source != 'verified-source':
+        unresolved.append('System startup source is not verified')
+    if wf and workflow_source != 'verified-source':
+        unresolved.append('bound Workflow consumer source is not verified')
     return dict(schema_version=1, system_id=record['system_id'], system_home=str(installed),
                 checkout_role=checkout, context_kind=kind, repository_root=str(repo) if repo else None,
                 workspace_root=str(selected) if selected else None, project_id=project_id,

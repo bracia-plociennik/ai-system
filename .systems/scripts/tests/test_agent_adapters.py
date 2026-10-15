@@ -88,7 +88,8 @@ class Adapters(fixtures.AgentContext):
         with self.assertRaises(adapter.ContextError): adapter.apply_plan(plan, approved=True)
         self.assertEqual(self.agents.read_text(), '# Changed')
         plan = self.plan(); adapter.apply_plan(plan, approved=True)
-        changed = self.agents.read_text().replace('System leads', 'User changed System leads')
+        changed = self.agents.read_text().replace('AI System startup marker:', 'User changed startup marker:')
+        self.assertNotEqual(changed, self.agents.read_text())
         self.agents.write_text(changed)
         with self.assertRaises(adapter.ContextError): adapter.restore_receipt(Path(plan['receipt']), approved=True)
         self.assertEqual(self.agents.read_text(), changed)
@@ -140,6 +141,44 @@ class Adapters(fixtures.AgentContext):
             with self.assertRaises(adapter.ContextError): adapter.restore_receipt(Path(plan['receipt']), approved=True)
         self.assertIn('Concurrent edit', self.agents.read_text())
         self.assertFalse(json.loads(self.registration.read_text())['enabled'])
+
+    def pending_plan(self):
+        plan = self.plan(); original = adapter.atomic_write
+        def interrupt(path, *args, **kwargs):
+            if Path(path) == self.agents: raise OSError('synthetic interruption')
+            return original(path, *args, **kwargs)
+        with mock.patch.object(adapter, 'atomic_write', side_effect=interrupt):
+            with self.assertRaises(OSError): adapter.apply_plan(plan, approved=True)
+        return plan
+
+    def test_resume_rechecks_management_role(self):
+        plan = self.pending_plan()
+        self.put(self.system / 'ai-system.local.json', json.dumps(dict(schema_version=1, role='development')))
+        with self.assertRaises(adapter.ContextError): adapter.apply_plan(plan, approved=True)
+        self.assertFalse(json.loads(self.registration.read_text())['enabled'])
+
+    def test_resume_rechecks_source_capability(self):
+        plan = self.pending_plan()
+        (self.system / '.systems/ai/capabilities/agent-startup-v1.json').unlink()
+        with self.assertRaises(adapter.ContextError): adapter.apply_plan(plan, approved=True)
+        self.assertFalse(json.loads(self.registration.read_text())['enabled'])
+
+    def test_restore_and_refresh_allow_known_previous_fragment_text(self):
+        plan = self.plan(); adapter.apply_plan(plan, approved=True)
+        original = adapter.fragment
+        def next_template(*args):
+            return original(*args).replace('One human/', 'One verified human/')
+        with mock.patch.object(adapter, 'fragment', side_effect=next_template):
+            fresh = self.plan()
+            self.assertEqual(fresh['old_fragment'], plan['fragment'])
+            adapter.restore_receipt(Path(plan['receipt']), approved=True)
+        self.assertFalse(self.agents.exists())
+
+    def test_boolean_receipt_version_is_rejected(self):
+        plan = self.plan(); adapter.apply_plan(plan, approved=True)
+        receipt = Path(plan['receipt']);value = json.loads(receipt.read_text());value['schema_version'] = True
+        receipt.write_text(json.dumps(value))
+        with self.assertRaises(adapter.ContextError): self.inspect()
 
     def test_concurrent_lock_and_no_secret_backup(self):
         self.put(self.home / '.codex/auth.json', 'SYNTHETIC_SECRET_NEVER_READ')

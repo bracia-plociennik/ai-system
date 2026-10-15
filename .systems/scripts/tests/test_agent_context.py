@@ -30,6 +30,14 @@ class AgentContext(unittest.TestCase):
         self.repo(self.system)
         for rel in context.POLICY:
             self.put(self.system / rel, (ROOT / rel).read_text())
+        import hashlib
+        for rel in context.CAPABILITY_FILES['agent-startup-v1']:
+            self.put(self.system / rel, (ROOT / rel).read_text())
+        self.put(self.system / '.systems/ai/capabilities/agent-startup-v1.json', json.dumps(dict(
+            schema_version=1, contract='agent-startup-v1',
+            source_files={rel: hashlib.sha256((ROOT / rel).read_bytes()).hexdigest()
+                          for rel in context.CAPABILITY_FILES['agent-startup-v1']},
+            native_verification='requires-installation-specific-proof')))
         self.put(self.system / 'ai-system.local.json', json.dumps(dict(schema_version=1, role='management')))
         self.put(self.system / 'ai-system-workspaces.md', '| workspace-id | path | default | status | scope | notes |\n| --- | --- | --- | --- | --- | --- |\n| personal | personal | yes | active | private | synthetic |\n| company | company | no | active | company | synthetic |\n')
         self.record = dict(schema_version=1, system_id='synthetic-system', system_home='${HOME}/system',
@@ -143,6 +151,22 @@ class AgentContext(unittest.TestCase):
 
 
 class StartupObservations(AgentContext):
+    def test_registered_development_role_is_local_not_management(self):
+        self.put(self.app / 'ai-system.local.json', json.dumps(dict(schema_version=1,role='development')))
+        out = self.resolve()
+        self.assertEqual(out['checkout_role'], 'development')
+        self.assertEqual(out['binding_status'], 'resolved')
+        self.assertEqual(out['requested_write_roots'], [])
+
+    def test_missing_consumer_and_unknown_capability_are_inspect_only(self):
+        for rel in ('.systems/scripts/resolve-workflow-env','.systems/ai/core/repository-modes.md','AGENTS.md'):
+            self.put(self.app / rel, '# Synthetic')
+        out = self.resolve()
+        self.assertEqual(out['workflow_mode'], 'official')
+        self.assertEqual(out['binding_status'], 'unavailable')
+        self.assertIn('bound Workflow consumer source is not verified', out['unresolved'])
+        self.assertEqual(context.source_consistency(self.system, 'unknown.json', 'unknown-v9'), 'unsupported')
+
     def test_shadow_and_budget_are_observed_without_mutation(self):
         self.put(self.app / 'AGENTS.md', '# Normal')
         self.put(self.app / 'AGENTS.override.md', '# Override')

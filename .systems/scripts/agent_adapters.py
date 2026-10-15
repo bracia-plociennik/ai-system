@@ -14,12 +14,16 @@ import sys
 import tempfile
 import uuid
 from agent_context import (ContextError, concrete, registration, safe_bytes, strict_json,
-                           workspace_registry, POLICY)
+                           workspace_registry, POLICY, source_consistency)
 
 START = '<!-- ai-system:codex:v1:start -->'
 END = '<!-- ai-system:codex:v1:end -->'
 SOURCE_FILES = (*POLICY, '.systems/scripts/agent_context.py', '.systems/scripts/local_paths.py',
                 '.systems/scripts/agent_adapters.py', '.systems/scripts/resolve-agent-context')
+PLAN_FIELDS = {'schema_version','tool','user_home','codex_home','system_home','owner_workspace_id',
+               'owner_asset_id','transaction_id','receipt','registration_path','agents_path',
+               'registration','registration_before','source_digest','fragment','old_fragment','separator',
+               'before','after_agents_sha256','execution_authorized','memory_control','plan_id'}
 
 
 def digest(data):
@@ -124,15 +128,14 @@ def fragment(system_home, receipt, transaction_id):
     return f'''{START}
 AI System startup marker: asys-codex-{transaction_id[:16]}
 Receipt: {receipt}
-Before task actions, inspect adapter state with {inspect} inspect --tool codex.
-The receipt must be applied, its relevant source unchanged and user registration enabled; otherwise inspect only.
-Resolve the actual absolute working directory with {command} --cwd <ABS-CWD> --tool codex.
-Read {system_home}/.systems/ai/core/agent-startup.md and system-workflow-authority.md; then only matching task/project policy.
-System leads covered configurable Workflow decisions through ONE human/delegated work-lead role and ONE procedure. Verify actual owner provenance, current revocation/scope and local phase/QA/tool gates before writes; metadata never grants consent.
-Management role applies only to its installation. Registered repo/worktree ownership wins over personal default; unknown repos are not enrolled and receive no unrelated private memory. No full-home permission, automatic TaskNotes, canonical memory writes or extra agent process. Reserved owner decisions/final-owner-yes and factual QA remain binding.
-Refresh on resume/compaction/CWD or policy change. Keep automatic instructions <=16KiB. Provider-native auto-memory control is not managed by this v1 adapter; never claim that control is enforced. Existing CLI memories setting must be observed separately before memory-policy claims.
+Before task actions run {inspect} inspect --tool codex; require active, otherwise inspect only.
+Run {command} --cwd <actual-absolute-cwd> --tool codex. Unknown/conflicting or incompatible source binding permits inspection only.
+Read {system_home}/.systems/ai/core/agent-startup.md and {system_home}/.systems/ai/core/system-workflow-authority.md, then matching local AGENTS/Workflow and task policy.
+One human/delegated System lead, one procedure. Verify actual owner provenance, current scope/revocation, phase/QA/tool gates before writes. Metadata is not consent. Owner reservations/final-owner-yes and factual QA remain binding.
+Management role stays local; verified repo ownership precedes personal default. No automatic enrollment, private-memory import, TaskNotes, canonical memory writes or extra agent process. Request only exact missing access. Refresh after resume/compaction/CWD or policy change; preserve parent and limits. Combined automatic instructions <=16KiB. Native auto-memory control is unsupported by this adapter, never claim it enforced.
 {END}
 '''
+
 
 
 def build_plan(system_home, owner_workspace_id, owner_asset_id, *, user_home=None,
@@ -148,6 +151,8 @@ def build_plan(system_home, owner_workspace_id, owner_asset_id, *, user_home=Non
     role = strict_json(system / 'ai-system.local.json')
     if not isinstance(role, dict) or role != {'schema_version': 1, 'role': 'management'} or type(role.get('schema_version')) is not int:
         raise ContextError('adapter requires explicit management installation', 3)
+    if source_consistency(system, 'agent-startup-v1.json', 'agent-startup-v1') != 'verified-source':
+        raise ContextError('startup source capability unavailable or mismatched', 3)
     codex = concrete(codex_home or os.environ.get('CODEX_HOME', str(home / '.codex')), environment=env)
     if not codex.is_relative_to(home):
         raise ContextError('v1 adapter requires a Codex home within the selected user home', 3)
@@ -178,8 +183,9 @@ def build_plan(system_home, owner_workspace_id, owner_asset_id, *, user_home=Non
     after_agents = before_agents.replace(old, new, 1) if old else before_agents + separator + new
     if len(after_agents.encode()) > 16384:
         raise ContextError('global guidance exceeds startup budget', 3)
+    portable_system = '${HOME}/'+str(system.relative_to(home)) if system.is_relative_to(home) else str(system)
     record = dict(schema_version=1, system_id=before_reg['system_id'] if before_reg else 'primary-system',
-                  system_home=before_reg['system_home'] if before_reg else str(system), enabled=True,
+                  system_home=before_reg['system_home'] if before_reg else portable_system, enabled=True,
                   adapter_ids=sorted(set((before_reg['adapter_ids'] if before_reg else []) + ['codex'])),
                   owner_workspace_id=owner_workspace_id, owner_asset_id=owner_asset_id)
     value = dict(schema_version=1, tool='codex', user_home=str(home), codex_home=str(codex),
@@ -202,18 +208,25 @@ def receipt_from_fragment(block, root):
     if not path.is_relative_to(root) or path.name != 'transaction.json':
         raise ContextError('foreign managed receipt', 4)
     result = strict_json(path)
-    if result.get('schema_version') != 1 or result.get('fragment') != block:
+    extras = {'status','steps','restore_before_sha256','restore_agents_sha256'}
+    if (not isinstance(result,dict) or type(result.get('schema_version')) is not int
+            or result.get('schema_version') != 1 or result.get('fragment') != block
+            or set(result)-extras != PLAN_FIELDS or result.get('status') not in {'pending','applied','restoring','restored'}):
         raise ContextError('unknown or changed receipt', 4)
+    plan = {key:result[key] for key in PLAN_FIELDS}
+    unsigned = {key:value for key,value in plan.items() if key != 'plan_id'}
+    tx = plan['transaction_id']
+    if (not isinstance(tx,str) or not re.fullmatch('[0-9a-f]{32}',tx)
+            or path != root/tx/'transaction.json' or plan['receipt'] != str(path)
+            or plan['plan_id'] != digest(encoded(unsigned)) or plan['execution_authorized'] is not False):
+        raise ContextError('receipt identity/integrity invalid; integrity is not permission',4)
     return result
 
 
 def validate_plan(plan, *, require_current_source=True):
     if not isinstance(plan, dict) or plan.get('tool') != 'codex':
         raise ContextError('activation is supported only for Codex')
-    required = {'schema_version','tool','user_home','codex_home','system_home','owner_workspace_id',
-                'owner_asset_id','transaction_id','receipt','registration_path','agents_path',
-                'registration','registration_before','source_digest','fragment','old_fragment','separator',
-                'before','after_agents_sha256','execution_authorized','memory_control','plan_id'}
+    required = PLAN_FIELDS
     if set(plan) != required or type(plan['schema_version']) is not int or plan['schema_version'] != 1:
         raise ContextError('unsupported adapter plan')
     unsigned = {key:value for key,value in plan.items() if key != 'plan_id'}
@@ -230,8 +243,16 @@ def validate_plan(plan, *, require_current_source=True):
     if (concrete(plan['receipt']) != root/tx/'transaction.json'
             or concrete(plan['registration_path']) != home/'.config/ai-system/installation.json'
             or concrete(plan['agents_path']) != codex/'AGENTS.md'
-            or plan['fragment'] != fragment(system, root/tx/'transaction.json', tx)):
+            or not isinstance(plan['fragment'],str) or owned_fragment(plan['fragment']) != plan['fragment']
+            or re.findall(r'^Receipt: (.+)$',plan['fragment'],re.M) != [str(root/tx/'transaction.json')]
+            or (require_current_source and plan['fragment'] != fragment(system, root/tx/'transaction.json', tx))):
         raise ContextError('plan target/fragment identity mismatch')
+    if require_current_source:
+        role = strict_json(system/'ai-system.local.json')
+        if (not isinstance(role,dict) or type(role.get('schema_version')) is not int
+                or role != {'schema_version':1,'role':'management'}
+                or source_consistency(system,'agent-startup-v1.json','agent-startup-v1') != 'verified-source'):
+            raise ContextError('current management role/source capability unavailable',3)
     if require_current_source and source_digest(system) != plan['source_digest']:
         raise ContextError('relevant installation source changed',4)
     return home, system
@@ -305,7 +326,9 @@ def inspect_adapter(*, user_home=None, codex_home=None, tool='codex'):
     agents=codex/'AGENTS.md'
     block=owned_fragment(safe_bytes(agents).decode()) if agents.exists() else None
     receipt=receipt_from_fragment(block,root) if block else None
-    active=bool(record['enabled'] and receipt and receipt['status']=='applied' and receipt['source_digest']==source_digest(system))
+    active=bool(record['enabled'] and 'codex' in record['adapter_ids'] and receipt and receipt['status']=='applied'
+                and receipt['source_digest']==source_digest(system)
+                and source_consistency(system,'agent-startup-v1.json','agent-startup-v1')=='verified-source')
     return dict(schema_version=1,tool='codex',status='active' if active else 'disabled-or-incomplete',
                 active=active,system_home=str(system),receipt_state=receipt['status'] if receipt else None,
                 native_verification='unverified',memory_control='unsupported-by-v1-adapter',execution_authorized=False)
