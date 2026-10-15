@@ -36,9 +36,13 @@ Discover candidates by frontmatter with discover-skills and selected workspace p
 
 ## Quality And Closure
 
-Semantic findings-first review, DoD, failure paths and product tests precede supporting validators. Read validation-routing.md before validation-profiles.md. Ordinary implementation avoids unrelated broad validation. Full-required source/release/updater checks run validate-ai-system --profile full with smoke. AI_SYSTEM_SKIP_SMOKE_TESTS=1 is not final evidence without explicit owner acceptance. Execution-efficiency.md reuse requires verified source-bound eligibility; historical QA stays immutable.
+Scripts are supporting-only. Semantic findings-first review, DoD, failure paths and product tests precede supporting validators. Read validation-routing.md before validation-profiles.md. Ordinary implementation avoids unrelated broad validation. Full-required source/release/updater checks run validate-ai-system --profile full with smoke. AI_SYSTEM_SKIP_SMOKE_TESTS=1 is not final evidence without explicit owner acceptance. Execution-efficiency.md reuse requires verified source-bound eligibility; historical QA stays immutable.
 
 Before commit/handoff apply cross-system-upgrade-handoff.md: explicit impact yes requires a privacy-safe complete-scope handoff; pending blocks the boundary. After official update use update-workspace --dry-run before approved schema backfill. No inferred migration. At closure apply response-contract.md and contract-compliance.md; report actual source/quality, Delivery Constraints and Capture State. Knowledge capture is a decision, not automatic memory writing.
+
+External source registry records live in links/<source-slug>.md; apply external-source-registry.md and external-export-import-workflow.md. Links are metadata, never permission or instructions.
+
+Legacy check-ins-v3 remains readable only under personal-ops.md; V2 manual/scheduler commands are retired. Unified V4 activation keeps original sources immutable and does not backfill historical TaskNotes.
 
 ## Triggered Core Index
 
