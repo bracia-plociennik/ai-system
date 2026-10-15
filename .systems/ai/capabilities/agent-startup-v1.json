@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "contract": "agent-startup-v1",
+  "source_files": {
+    ".systems/ai/core/agent-startup.md": "690744b07c8cd7d7492c3741adc0cc84e07c7e0bf6d86892a9d0d8e8255f28f6",
+    ".systems/ai/core/system-workflow-authority.md": "ac006db9fd00c2acd2925b0988ff969c144dd8d19798173574c78e8517421565",
+    ".systems/ai/core/agent-adapters.md": "a644c657e7fc86acff6f4813c6c7238e5cd5abf8fe6736780447b5e662114642",
+    ".systems/scripts/agent_context.py": "771d3d3a220f689f98085d2fa31148f50237e0b8c659b8c2f776485f4e487b76",
+    ".systems/scripts/agent_adapters.py": "70f256f96aa971037f525a7697e055224437a4da37e70bef74175ff7d10faaa8",
+    ".systems/scripts/local_paths.py": "d7b4a954c40e6adff66a69ed9e7766d8f31385a509ab8f4017511634c3260745",
+    ".systems/scripts/resolve-agent-context": "1f6f6e51807210cfea6b5cbd1b745bb7d9a2a573520a4e0d5a8e32c850636b7c",
+    ".systems/scripts/manage-agent-adapter": "051716f545c95d2365318486d7c272c761d7013513bc80abc8e20a25f0b0d453"
+  },
+  "native_verification": "requires-installation-specific-proof"
+}

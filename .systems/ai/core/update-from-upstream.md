@@ -67,3 +67,7 @@ No existing workspace files were overwritten.
 ```
 
 Do not create `prompting/` by default. Prompting artifacts require exact owner-approved scope.
+
+## Startup adapter refresh
+
+An upstream update never writes user-level Codex/Claude configuration or silently reactivates a stale startup fragment. After the official update and its required validation, inspect the adapter. Relevant source changes require a new reviewed adapter plan and scoped apply; unrelated HEAD changes do not invalidate source-bound historical evidence. Preserve prior receipts and user instructions. Other provider adapters remain design-only until their own acceptance.

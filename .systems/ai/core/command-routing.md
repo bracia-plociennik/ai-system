@@ -1,5 +1,7 @@
 # Command Routing
 
+For registered project sessions use agent-startup.md and system-workflow-authority.md: one work lead, one execution procedure. Verified scoped System directions govern configurable Workflow policy; actual owner-reserved actions, factual QA and platform constraints remain binding. A lead envelope is schema evidence, never authenticated consent.
+
 ## Intent brief and private style context
 
 Use intent-to-execution-brief.md during existing intake: minimal inline/embedded fields with provenance and disposition; preserve original request/accepted decisions as independent QA anchors. Batch triage and current action/phase ceilings remain first. This adds no phase or approval. Use style-profile.md for optional explicitly enabled local style; recording needs actual exact-target consent and minimal provenance/privacy, observations stay tentative and current instruction overrides profile. Invalid/disabled profile supplies no preferences. Auto chooses only covered reversible options and queues protected owner decisions; Human groups material questions, settled answers not repeated and noninteractive routes stay so.

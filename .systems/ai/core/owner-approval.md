@@ -1,5 +1,7 @@
 # Owner Approval
 
+For registered project sessions use agent-startup.md and system-workflow-authority.md: one work lead, one execution procedure. Verified scoped System directions govern configurable Workflow policy; actual owner-reserved actions, factual QA and platform constraints remain binding. A lead envelope is schema evidence, never authenticated consent.
+
 ## Purpose
 
 Execution behavior uses `execution-modes.md`. Auto/Human selection never grants

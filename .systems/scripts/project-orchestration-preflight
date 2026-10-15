@@ -128,7 +128,9 @@ def main():
 
         if (repo / "AGENTS.md").is_symlink() or not (repo / "AGENTS.md").is_file():
             blockers.append("target root AGENTS.md is missing")
-        workflow = repo / "ai-workflow"
+        official = (repo / ".systems/scripts/resolve-workflow-env").is_file() and (repo / ".systems/ai/core/repository-modes.md").is_file()
+        workflow = repo if official else repo / "ai-workflow"
+        result["workflow_mode"] = "official" if official else "target"
         if workflow.is_symlink() or not workflow.is_dir() or (workflow / "AGENTS.md").is_symlink() or not (workflow / "AGENTS.md").is_file():
             blockers.append("nested AI Workflow AGENTS.md is missing")
         elif git(workflow, "rev-parse", "--show-toplevel") != str(workflow.resolve()):
@@ -216,7 +218,7 @@ def main():
                     if args.compatibility_plan.is_symlink():
                         raise Blocked("linked compatibility plan")
                     result["parallel_execution"]["proposal"] = inspect_plan(json.loads(args.compatibility_plan.read_text()))
-                    result["parallel_execution"]["protocol"] = negotiate(repo / "ai-workflow")
+                    result["parallel_execution"]["protocol"] = negotiate(workflow)
                     result["parallel_execution"]["fallback"] = "serial-native-backend-unverified"
                 except (Blocked, ValueError, OSError, KeyError, TypeError) as error:
                     blockers.append("compatibility preflight failed: " + str(error))

@@ -1,5 +1,7 @@
 # Operating Model
 
+For registered project sessions use agent-startup.md and system-workflow-authority.md: one work lead, one execution procedure. Verified scoped System directions govern configurable Workflow policy; actual owner-reserved actions, factual QA and platform constraints remain binding. A lead envelope is schema evidence, never authenticated consent.
+
 Product development and filtered publication follow `product-publication.md`:
 implementation worktrees start from current dev; a separate main-based worktree
 publishes only the complete committed product projection after scoped QA/approval.
