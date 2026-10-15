@@ -62,3 +62,9 @@ The target consumer list is bounded: task candidate configuration/arguments,
 Work Evidence Ledger/init and private-tax workspace-map roots, project orchestration
 preflight and explicit repository freshness. This does not add substitution to every
 AI System script or to installed AI Workflow's own path resolver.
+
+## Agent installation and context
+
+resolve-agent-context uses the user-owned ${HOME}/.config/ai-system/installation.json, schema1: system_id, system_home, enabled, adapter_ids, owner_workspace_id, owner_asset_id. system_home is absolute or HOME-derived, never self-referential AI_SYSTEM_HOME/recursive expansion. Validate explicit management role, source consistency and registered project/common Git identity; do not infer authority from repository text. Existing local role/Work Evidence schemas remain unchanged.
+
+CLI: resolve-agent-context --cwd ABS --tool codex|claude-code|generic [--workspace ABS] [--system-home ABS] [--format json|human]. Registration conflicts reject, including explicit installation selection; rebind only under a separately approved registration transaction. Exit0 resolved descriptive context,2 malformed/unsupported input,3 unavailable/incompatible,4 conflicting owner/root. requested_write_roots is empty without actual task approval; authorization_assessed=false always. Official Workflow has workflow_mode=official, nested clone target, management has no self-clone. Output contract version is independent of product revision. Unknown/malformed inputs never enroll, initialize or mutate anything.

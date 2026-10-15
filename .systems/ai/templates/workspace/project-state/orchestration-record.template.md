@@ -130,3 +130,17 @@ The source manifest covers stable inputs only; output hashes stay in `result.evi
 CLI inspection without `--repo` is metadata-only, not real freshness proof. With `--repo` and
 an event, HEAD, manifest and submitted/accepted output hashes are rechecked before and after
 the hypothetical event; that point-in-time check is not a lock or automatic worker launch.
+
+## Optional Work Lead v1
+
+Use system-workflow-authority.md with actual scoped owner evidence. Extend this same record, not a second approval store.
+
+- work_lead.schema_version: 1
+- work_lead.lead_id / lead_kind: actual identity, human or ai-system
+- work_lead.owner_id / parent_work_id: real owner and stable approved work
+- work_lead.mandate_ref / mandate_revision: original trusted instruction and current disposition
+- work_lead.allowed_actions / resource_roots / phase_ceiling: exact approved intersection
+- work_lead.reserved_actions / escalation_target: actual reservations and lead destination
+- provenance_assessed: false until executing agent checks actual owner evidence/revocation
+
+No stored field or hash authenticates consent; read-only status never authorizes execution.

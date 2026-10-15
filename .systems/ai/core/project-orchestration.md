@@ -1,5 +1,7 @@
 # Project Orchestration
 
+Use agent-startup.md and system-workflow-authority.md for registered startup and work-lead authority. System is the superior coordinator within actual owner mandate. Local Workflow owns technical execution/evidence and follows covered configurable lead decisions through the same human/System procedure. This does not infer approval from metadata or bypass protected gates.
+
 Repository/workspace roots and project-state repo-path expressions follow
 `local-paths.md`. Links use the selected workspace as their relative base; explicit
 repo arguments retain the caller's explicit CWD base. Missing source directories
@@ -33,7 +35,7 @@ AI System is the owner's entry point for work in a selected workspace's project.
 ## Discover The Target
 
 1. Select exactly one AI System workspace and nearest project owner namespace. Resolve `repo-path` from its `project-state/<project>/links.md`, or an explicit owner-provided repository path. A project name alone is not a filesystem path or an AI Workflow project ID. Stop when multiple matches remain.
-2. Read the target repository's root `AGENTS.md`, its `ai-workflow/AGENTS.md`, relevant local contracts, `ai-workflow-workspace/repo/core/status.md`, and the selected `ai-workflow-workspace/projects/<workflow-project>/status.md`. Confirm a valid Git root, installed nested workflow, initialized runtime, applicable repo intake, and the nested workflow version. Do not infer installation from the presence of a directory alone.
+2. Read the target repository's root `AGENTS.md`, its `ai-workflow/AGENTS.md`, relevant local contracts, `ai-workflow-workspace/repo/core/status.md`, and the selected `ai-workflow-workspace/projects/<workflow-project>/status.md`. Confirm a valid Git root, installed Workflow (nested target mode or official repository mode), initialized runtime, applicable repo intake and actual Workflow version. Official mode uses the repository itself as AI_WORKFLOW_HOME and never requires a self-clone. Do not infer installation from the presence of a directory alone.
 3. Resolve the Workflow project ID from an explicit owner reference or a single unambiguous local status match. Do not equate the AI System project slug, repository basename, and Workflow project ID by default. If local instructions conflict, installation or intake is incomplete, the project is ambiguous, or write ownership is unknown, stop and report the exact missing fact. Do not install, initialize, upgrade, or repair the target implicitly.
 4. Re-read Git baseline, dirty files in the intended write set, active project status, blockers, accepted artifacts, and other known writers immediately before implementation and after interruption. A prior orchestration summary is not a resume authority.
 

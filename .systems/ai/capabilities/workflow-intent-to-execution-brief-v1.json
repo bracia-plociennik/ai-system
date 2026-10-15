@@ -1,7 +1,7 @@
 {
   "contract": "intent-to-execution-brief-v1",
   "semantic_version": 1,
-  "tested_commit": "f9b6553d458def1ef5f419f96938e143d567dd0c",
+  "tested_commit": "6211c397dc20965bc30e86b62561d904bd982074",
   "mode_mapping": {
     "auto": "auto",
     "human": "human-coop"
@@ -11,7 +11,7 @@
   },
   "sources": {
     ".systems/ai/core/command-routing.md": {
-      "sha256": "9a7b57202686c5d36105f1d0023d21239dee28b07fbe36c28fa7cae60cf3af84",
+      "sha256": "af361a8ad6fc45dded2eea8eb896cb69831bf8424270026a8b7ab0b76ef16e6f",
       "mode": "100644"
     },
     ".systems/ai/core/delivery-constraints.md": {
@@ -19,7 +19,7 @@
       "mode": "100644"
     },
     ".systems/ai/core/execution-modes.md": {
-      "sha256": "63c9fbb55b19ba78f9ae4050300606ce66a7f2a16722634da9e8c0883e05fefe",
+      "sha256": "377ec67c4d1d52b162f4ae12ccb2499bd2f02b2c853091ec25c279aed2096e8e",
       "mode": "100644"
     },
     ".systems/ai/core/full-qa-verification.md": {
@@ -31,11 +31,11 @@
       "mode": "100644"
     },
     ".systems/ai/core/owner-decision-checkpoints.md": {
-      "sha256": "705b8c700fd2ff4ffc36906645ff412bdad9ad6f763c14c8a9bf169130933c76",
+      "sha256": "76e24f6602235e1472791823af1f577334efbea8463b6d886c4992b52115f58a",
       "mode": "100644"
     },
     ".systems/ai/core/permissions.md": {
-      "sha256": "1c76b3bcbff6a377125cf0361a342c727d7dc7304650f59c28b2f6ae45b7920c",
+      "sha256": "c6c6811cfd5041329373e01e421a11697ebaa53fc5b041fac84e17d6c0ddbdfe",
       "mode": "100644"
     },
     ".systems/ai/core/phase-commit-policy.md": {
@@ -51,7 +51,7 @@
       "mode": "100644"
     },
     ".systems/ai/core/risk-model.md": {
-      "sha256": "24acc42aa62d71d52622343ddc89d6167e335d1cd8c651fe05e70fb85184a5d1",
+      "sha256": "86c8510af6043d90aa86efa175c933a4d054ba4fc1b8f601a4bbe25d816ab902",
       "mode": "100644"
     },
     ".systems/ai/core/style-profile.md": {
@@ -71,7 +71,7 @@
       "mode": "100755"
     },
     "AGENTS.md": {
-      "sha256": "f54346160c7009b198baf0d6572c72c24e5d462610b9225e514eaa7ddb77745f",
+      "sha256": "a3f428f4c3bb888df8a5f071abe7473f4e4cabbc3265c57beef30935482a2280",
       "mode": "100644"
     }
   }

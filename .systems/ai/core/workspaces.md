@@ -35,9 +35,12 @@ The registry should contain only routing metadata: workspace id, path, default f
 Select the target workspace in this order:
 
 1. Explicit workspace id or workspace path in the owner prompt.
-2. `AI_SYSTEM_WORKSPACE_HOME` when set.
-3. Registry row with `default=yes`.
-4. Legacy `ai-system-workspace/` only when no registry/default exists and there is no ambiguity.
+2. Verified repository/worktree association through registered project links for project sessions (agent-startup.md / resolve-agent-context).
+3. `AI_SYSTEM_WORKSPACE_HOME` when consistent with that association.
+4. Registry row with `default=yes` for non-project work.
+5. Legacy `ai-system-workspace/` only when no registry/default exists and there is no ambiguity.
+
+An explicit or environment choice conflicting with known repository ownership blocks dependent writes; never silently redirect. Unknown repositories receive minimal guidance only, no enrollment/private default reads. Registered personal library ownership stays unchanged by project selection. Context resolution is read-only and never permission.
 
 If more than one plausible workspace matches the request, stop and ask the owner to choose the target workspace.
 
