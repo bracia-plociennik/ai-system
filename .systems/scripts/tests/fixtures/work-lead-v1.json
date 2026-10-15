@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "contract": "work-lead-v1",
+  "evidence_role": "synthetic protocol fixtures; never owner consent",
+  "cases": [
+    {
+      "name": "human-equivalent",
+      "lead": {
+        "schema_version": 1,
+        "lead_id": "synthetic-lead",
+        "owner_id": "synthetic-owner",
+        "parent_work_id": "synthetic-parent",
+        "mandate_ref": "owner-record/current",
+        "mandate_revision": 1,
+        "allowed_actions": [
+          "inspect",
+          "implementation",
+          "quality-assessment"
+        ],
+        "resource_roots": [
+          "/synthetic/project"
+        ],
+        "phase_ceiling": "phase-5-quality",
+        "reserved_actions": [
+          "final-owner-yes"
+        ],
+        "escalation_target": "synthetic-owner",
+        "lead_kind": "human"
+      },
+      "request": "implementation",
+      "target": "/synthetic/project/src/a.py",
+      "shape": "valid",
+      "actual_consent": "must-be-independently-checked"
+    },
+    {
+      "name": "system-equivalent",
+      "lead": {
+        "schema_version": 1,
+        "lead_id": "synthetic-lead",
+        "owner_id": "synthetic-owner",
+        "parent_work_id": "synthetic-parent",
+        "mandate_ref": "owner-record/current",
+        "mandate_revision": 1,
+        "allowed_actions": [
+          "inspect",
+          "implementation",
+          "quality-assessment"
+        ],
+        "resource_roots": [
+          "/synthetic/project"
+        ],
+        "phase_ceiling": "phase-5-quality",
+        "reserved_actions": [
+          "final-owner-yes"
+        ],
+        "escalation_target": "synthetic-owner",
+        "lead_kind": "ai-system"
+      },
+      "request": "implementation",
+      "target": "/synthetic/project/src/a.py",
+      "shape": "valid",
+      "actual_consent": "must-be-independently-checked"
+    },
+    {
+      "name": "out-of-scope-publish",
+      "lead": {
+        "schema_version": 1,
+        "lead_id": "synthetic-lead",
+        "owner_id": "synthetic-owner",
+        "parent_work_id": "synthetic-parent",
+        "mandate_ref": "owner-record/current",
+        "mandate_revision": 1,
+        "allowed_actions": [
+          "inspect",
+          "implementation",
+          "quality-assessment"
+        ],
+        "resource_roots": [
+          "/synthetic/project"
+        ],
+        "phase_ceiling": "phase-5-quality",
+        "reserved_actions": [
+          "final-owner-yes"
+        ],
+        "escalation_target": "synthetic-owner",
+        "lead_kind": "ai-system"
+      },
+      "request": "publish",
+      "target": "/synthetic/project",
+      "shape": "valid",
+      "actual_consent": "out-of-scope"
+    },
+    {
+      "name": "fabricated-field",
+      "lead": {
+        "schema_version": 1,
+        "lead_id": "synthetic-lead",
+        "owner_id": "synthetic-owner",
+        "parent_work_id": "synthetic-parent",
+        "mandate_ref": "owner-record/current",
+        "mandate_revision": 1,
+        "allowed_actions": [
+          "inspect",
+          "implementation",
+          "quality-assessment"
+        ],
+        "resource_roots": [
+          "/synthetic/project"
+        ],
+        "phase_ceiling": "phase-5-quality",
+        "reserved_actions": [
+          "final-owner-yes"
+        ],
+        "escalation_target": "synthetic-owner",
+        "lead_kind": "ai-system",
+        "approved": true
+      },
+      "request": "implementation",
+      "target": "/synthetic/project",
+      "shape": "invalid",
+      "actual_consent": "not-assessed"
+    },
+    {
+      "name": "unknown-version",
+      "lead": {
+        "schema_version": 99,
+        "lead_id": "synthetic-lead",
+        "owner_id": "synthetic-owner",
+        "parent_work_id": "synthetic-parent",
+        "mandate_ref": "owner-record/current",
+        "mandate_revision": 1,
+        "allowed_actions": [
+          "inspect",
+          "implementation",
+          "quality-assessment"
+        ],
+        "resource_roots": [
+          "/synthetic/project"
+        ],
+        "phase_ceiling": "phase-5-quality",
+        "reserved_actions": [
+          "final-owner-yes"
+        ],
+        "escalation_target": "synthetic-owner",
+        "lead_kind": "ai-system"
+      },
+      "request": "implementation",
+      "target": "/synthetic/project",
+      "shape": "invalid",
+      "actual_consent": "not-assessed"
+    }
+  ]
+}

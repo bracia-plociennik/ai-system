@@ -1,5 +1,7 @@
 # Project Orchestration
 
+Use agent-startup.md and system-workflow-authority.md for registered startup and work-lead authority. System is the superior coordinator within actual owner mandate. Local Workflow owns technical execution/evidence and follows covered configurable lead decisions through the same human/System procedure. This does not infer approval from metadata or bypass protected gates.
+
 Repository/workspace roots and project-state repo-path expressions follow
 `local-paths.md`. Links use the selected workspace as their relative base; explicit
 repo arguments retain the caller's explicit CWD base. Missing source directories
