@@ -1,5 +1,34 @@
 # Dreaming Mode
 
+## Universal v2 (explicit opt-in)
+
+`dreaming-cycle` is a separate version-2 advisory pipeline. The remaining legacy report,
+source-guard and provider-v1 rules below keep their original behavior. V2 never weakens a
+v1 scope or changes an old completion. Its contract/runbook is
+`.systems/ai/templates/dreaming/universal/v2/README.md`.
+
+V2 requires an explicit manifest, owner/subject identities, pinned analyzer and recipient
+policy. It may read multiple owner scopes with recorded sharing authority while writing
+only the selected private report owner's `dreams/runs/**`. Generic findings/synthesis are
+independent of WEP. WEP remains an adapter with native case/project guards and no inferred
+time. New consumers cannot broaden another consumer's source permissions.
+
+A separately owner-approved PERSONAL profile may read canonical raw check-in Markdown,
+reflections and private goals in exact registered scopes. This is not the legacy trends
+profile or permission to read raw exports/OCR/attachments. Credentials remain excluded;
+personal field names are not credential markers. Personal sources and ANY context derived
+from them are restricted to the private report owner. Technical reuse requires a separately
+reviewed sanitized source. Cross-workspace private summaries require explicit source-owner
+sharing to the report owner, with no implicit public/other-recipient sharing.
+
+The analysis itself never schedules or implements its recommendations. A separately deployed,
+owner-approved outer executor may invoke v2 at Thursday/Saturday 02:00 Europe/Warsaw, with a
+7200-second bound and no daytime replay. It cannot modify its own policy, approvals, timer,
+sources, memory, TaskNotes, WEP records, status, code or commits. Namespace preflight precedes
+private reads; host read-only access alone does not prove read isolation. Installation and
+activation retain their own publication/update/approval gates.
+
+
 ## Recommendation Lifecycle
 
 New reports declare `Recommendation contract: 1` and contain `## Recommendation Lifecycle`
@@ -214,3 +243,10 @@ task, Capture, status, source or scheduler. A saved report is not notification
 delivery, permission or actual repair. Ordinary chat remains silent below the
 five-distinct-cause/third-actual-task threshold unless an immediate/current-goal
 risk or explicit request applies. See goal-focused-maintenance.md.
+## Opt-in multi-root evidence and WEP candidates
+
+Provider interface v1 is independent of legacy Dream Reports. `dreaming_contracts.py` validates provider bytes against a locally recomputed, reviewed capability binding. Native states never imply WEP confirmation. Candidates retain exactly one owner, stable identity and revisions, cited facts/inferences/unknowns, and independent readiness for ledger, documentation, report, tax-evidence and editorial. Readiness means review only. No activation or schema migration is automatic.
+
+### Source registry v1
+
+`dreaming-sources inspect --request <private-registry.json>` performs bounded metadata inventory only. The new registry requires explicit owner/project prefix bindings, local authority reference, profile, limits and sharing policy. `work-materials` is opt-in; absent trusted classification is excluded. Existing Scope contract 1 stays narrow-only and byte-compatible. No registry initialization or activation follows from a template. Linked/aliased/overlapping roots and ambiguous bindings are rejected. Classified secrets, raw Personal Ops, incoming dumps/exports and private financial/health paths remain forbidden across workspace and repository origins. UTF-8 work text is supported; PDF/images/OCR/XLSX/archives are visible gaps.
