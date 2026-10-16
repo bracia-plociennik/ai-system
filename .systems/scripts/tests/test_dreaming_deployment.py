@@ -12,7 +12,7 @@ class Deployment(unittest.TestCase):
     def test_render_schedule_and_bounds_without_activating(self):
         files=render('/opt/owner-system','/opt/private-owner/config.json')
         timer=files['dreaming-universal.timer'];service=files['dreaming-universal.service']
-        self.assertIn('Thu,Sat *-*-* 02:00:00 Europe/Warsaw',timer)
+        self.assertIn('Wed,Sat *-*-* 02:00:00 Europe/Warsaw',timer)
         self.assertIn('Persistent=false',timer)
         self.assertIn('TimeoutStartSec=7200',service)
         self.assertIn('KillMode=control-group',service)

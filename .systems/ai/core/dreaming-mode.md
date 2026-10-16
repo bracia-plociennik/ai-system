@@ -22,7 +22,7 @@ reviewed sanitized source. Cross-workspace private summaries require explicit so
 sharing to the report owner, with no implicit public/other-recipient sharing.
 
 The analysis itself never schedules or implements its recommendations. A separately deployed,
-owner-approved outer executor may invoke v2 at Thursday/Saturday 02:00 Europe/Warsaw, with a
+owner-approved outer executor may invoke v2 at Wednesday/Saturday 02:00 Europe/Warsaw, with a
 7200-second bound and no daytime replay. It cannot modify its own policy, approvals, timer,
 sources, memory, TaskNotes, WEP records, status, code or commits. Namespace preflight precedes
 private reads; host read-only access alone does not prove read isolation. Installation and

@@ -42,7 +42,7 @@ def implementation_digest():
 
 def slot(stamp):
     local = stamp.astimezone(ZONE)
-    if local.weekday() not in (3, 5) or local.hour != 2 or local.minute >= 5:
+    if local.weekday() not in (2, 5) or local.hour != 2 or local.minute >= 5:
         return None
     return 'universal-' + local.date().isoformat()
 
