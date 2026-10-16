@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "owner_workspace_id": "workspace-a",
+  "authority_ref": "synthetic-owner-session",
+  "profile": "work-materials",
+  "roots": [
+    {
+      "source_root_id": "root-a",
+      "locator": "/replace/with/approved/root",
+      "kind": "workspace",
+      "bindings": [
+        {
+          "prefix": "",
+          "project_id": "project-a",
+          "owner_workspace_id": "workspace-a",
+          "source_class": "work"
+        }
+      ]
+    }
+  ],
+  "limits": {
+    "files": 1000,
+    "file_bytes": 1048576,
+    "total_bytes": 67108864,
+    "entries": 10000,
+    "chunk_bytes": 16384
+  },
+  "sharing": {
+    "recipient": null,
+    "mode": "none",
+    "authority_ref": null
+  }
+}

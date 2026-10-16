@@ -105,7 +105,7 @@
     },
     ".systems/ai/core/dreaming-mode.md": {
       "mode": "100644",
-      "sha256": "61ca39637e8b5ab6671e754098b49e3fde18724124b759acad124466693ac949"
+      "sha256": "47af4251b80d92cdc821b924792f16a0105ea920683ba2550e49c534eee9883b"
     },
     ".systems/ai/core/end-of-task-capture.md": {
       "mode": "100644",
@@ -1067,6 +1067,22 @@
       "mode": "100644",
       "sha256": "7d4aee78657b108bd75859112468d103345728988e7c5f23effec87551f3832a"
     },
+    ".systems/ai/templates/dreaming/evidence/v1/README.md": {
+      "mode": "100644",
+      "sha256": "18e9c64acdf75537e13288fe2a234615042f1e044037f1a73448440deae8d30b"
+    },
+    ".systems/ai/templates/dreaming/evidence/v1/integration.md": {
+      "mode": "100644",
+      "sha256": "ecaa5fad9b00901fff3e393073fb32c2fc9ed9ea2da56ec8957263e6930f19b8"
+    },
+    ".systems/ai/templates/dreaming/evidence/v1/pilot-runbook.md": {
+      "mode": "100644",
+      "sha256": "4f99d39239affa8581de96a7b674f0ff4430947f4b1d601891751609a23390b0"
+    },
+    ".systems/ai/templates/dreaming/evidence/v1/provider-fixture.json": {
+      "mode": "100644",
+      "sha256": "f8b6d479a6d24e44f2c18f3a1f59079eb315a65ee33ff722c07c99fc4d3b9de5"
+    },
     ".systems/ai/templates/efficiency/bounded-defect.template.json": {
       "mode": "100644",
       "sha256": "d124f97d159349f504d8fae4a299a2ecdd86436e0e705eb7532500723e321270"
@@ -1737,7 +1753,7 @@
     },
     ".systems/scripts/check-qa-evidence": {
       "mode": "100755",
-      "sha256": "65de210ce656a70082ffb98e3eeba5c977bb70892351a3530ecb6842809c5048"
+      "sha256": "1b6021227a3166a069767bc750f5114c8bcc2991be2ed377719676a3d284f88a"
     },
     ".systems/scripts/check-request-batch-triage": {
       "mode": "100755",
@@ -1810,6 +1826,30 @@
     ".systems/scripts/check-worktree-bootstrap": {
       "mode": "100755",
       "sha256": "41110ee35a91790ae9757e10a5e106759d3b1a897923de1a9a490f154c03f347"
+    },
+    ".systems/scripts/dreaming-evidence": {
+      "mode": "100755",
+      "sha256": "d604bf84fc95abf6a8cb65e84cae339db462ed9597144ec6ad2491d62ad581b5"
+    },
+    ".systems/scripts/dreaming_evidence.py": {
+      "mode": "100644",
+      "sha256": "fc193b9647e99ec23e9b719889c2f245e0105766b7b2dce9fce6c176405a3a10"
+    },
+    ".systems/scripts/dreaming_evidence_reader.py": {
+      "mode": "100644",
+      "sha256": "a26baf744bb3f8e74d7d3ebc3216ff00230bb1dcab201335d15bf583b49a8e83"
+    },
+    ".systems/scripts/dreaming_guard.py": {
+      "mode": "100644",
+      "sha256": "26e31575ca74f399955a5a08b8bafc2caab29dcd51cc38f8441bc1ff8420cd7a"
+    },
+    ".systems/scripts/dreaming_native.py": {
+      "mode": "100644",
+      "sha256": "59e6f265df80d90d64387cbfa2e600af2a493d131fd3be14cabbe5d3217f0bb4"
+    },
+    ".systems/scripts/dreaming_universal_evidence.py": {
+      "mode": "100644",
+      "sha256": "8fa5dc791a84dbb2f45ef5c12677febc41380c79738a85d69ceb461c25f7df76"
     },
     ".systems/scripts/init-workspace": {
       "mode": "100755",
@@ -2021,11 +2061,35 @@
     },
     ".systems/scripts/tests/runtime-integrity.py": {
       "mode": "100644",
-      "sha256": "1db84b4db098815f54e07dc0b66b70539488d39330d6388df00ae9c6b0e7f09d"
+      "sha256": "c9ad0451e5d8db744878dbdccc342e10ef44e69792dddc1641ae7c1cbefdb6ad"
     },
     ".systems/scripts/tests/style-profile.py": {
       "mode": "100644",
       "sha256": "8234164d6defdd393ef45668a45a02a217710d6b5ea480a7fd1b511fb8ae97ab"
+    },
+    ".systems/scripts/tests/test_dreaming_evidence_contract.py": {
+      "mode": "100644",
+      "sha256": "c7fae38621ba02bca124ac5612d606fe8ff9a467ca8a1292a8e7e0548b9f639b"
+    },
+    ".systems/scripts/tests/test_dreaming_evidence_reader.py": {
+      "mode": "100644",
+      "sha256": "a7591ca334fd3dd204635267029b1620d38d1427fd5985d9757690c637708f04"
+    },
+    ".systems/scripts/tests/test_dreaming_evidence_reader_guard.py": {
+      "mode": "100644",
+      "sha256": "29b751f502d904d12e89cb306393e967fe7f9b10853db47c4b511062a9af0d36"
+    },
+    ".systems/scripts/tests/test_dreaming_native_compatibility.py": {
+      "mode": "100644",
+      "sha256": "6ffbefb6d2d057b8b6319828ee1344154d06b97206dda396e9055559ebe86a13"
+    },
+    ".systems/scripts/tests/test_dreaming_native_reader.py": {
+      "mode": "100644",
+      "sha256": "e7fd5aeca971c19b724c97ebc0ea575d3f952e147782242cdcc6b82d767b4621"
+    },
+    ".systems/scripts/tests/test_dreaming_universal_evidence.py": {
+      "mode": "100644",
+      "sha256": "82c1ee4ee07e8f490a15e5d3c205b08e764157ad5f5e6b614c3ed929f629a1cb"
     },
     ".systems/scripts/tests/work-lead.py": {
       "mode": "100644",
