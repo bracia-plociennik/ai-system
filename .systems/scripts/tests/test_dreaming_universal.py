@@ -45,7 +45,7 @@ class Universal(unittest.TestCase):
             'recipients': {'owner': {'lenses': ['person', 'brand', 'company', 'systems'], 'adapter': 'owner-report'},
                 'system': {'lenses': ['systems'], 'adapter': 'proposal'}, 'wep': {'lenses': ['systems'], 'adapter': 'wep'}},
             'decisions': []}
-        self.stamp = datetime(2026, 10, 15, 2, 0, tzinfo=ZoneInfo('Europe/Warsaw'))
+        self.stamp = datetime(2026, 10, 14, 2, 0, tzinfo=ZoneInfo('Europe/Warsaw'))
     def source(self, name, cls, audiences):
         return {'id': name, 'root': str(self.root), 'prefix': name, 'owner': 'owner',
                 'subject_type': 'person' if cls == 'personal' else 'project', 'subject_id': name,
@@ -167,7 +167,7 @@ class Universal(unittest.TestCase):
         c = self.run_cycle(stamp=datetime(2026, 10, 17, 2, 0, tzinfo=self.stamp.tzinfo)); packets = self.artifacts(c)['packets']
         self.assertFalse(packets['system']['findings']); self.assertTrue(packets['wep']['findings'])
         self.cfg['decisions'] = []
-        c = self.run_cycle(stamp=datetime(2026, 10, 22, 2, 0, tzinfo=self.stamp.tzinfo)); packets = self.artifacts(c)['packets']
+        c = self.run_cycle(stamp=datetime(2026, 10, 21, 2, 0, tzinfo=self.stamp.tzinfo)); packets = self.artifacts(c)['packets']
         self.assertFalse(packets['system']['findings'])
     def test_preflight_failure_before_private_read(self):
         a = Analyzer(); a.preflight = lambda: (_ for _ in ()).throw(ValueError('isolation-unavailable'))
@@ -192,11 +192,15 @@ class Universal(unittest.TestCase):
         self.assertEqual(c['result'], 'complete')
     def test_slots_timezone_dst_and_no_daytime_catchup(self):
         z = ZoneInfo('Europe/Warsaw')
-        for stamp in (datetime(2026, 7, 2, 2, tzinfo=z), datetime(2026, 12, 3, 2, tzinfo=z)):
+        for stamp in (datetime(2026, 7, 1, 2, tzinfo=z), datetime(2026, 12, 2, 2, tzinfo=z)):
             self.assertIsNotNone(cycle.slot(stamp)); self.assertIsNotNone(cycle.slot(stamp.astimezone(ZoneInfo('UTC'))))
-        self.assertIsNone(cycle.slot(datetime(2026, 10, 15, 4, tzinfo=z)))
+        self.assertIsNone(cycle.slot(datetime(2026, 10, 14, 4, tzinfo=z)))
+        self.assertIsNone(cycle.slot(datetime(2026, 10, 15, 2, tzinfo=z))) # Thursday is retired
         self.assertIsNone(cycle.slot(datetime(2026, 10, 16, 2, tzinfo=z)))
-        self.assertEqual(cycle.run(self.cfg, Analyzer(), datetime(2026, 10, 15, 9, tzinfo=z))['result'], 'skipped')
+        self.assertEqual(cycle.run(self.cfg, Analyzer(), datetime(2026, 10, 14, 9, tzinfo=z))['result'], 'skipped')
+        a = Analyzer()
+        self.assertEqual(cycle.run(self.cfg, a, datetime(2026, 10, 15, 2, tzinfo=z))['result'], 'skipped')
+        self.assertEqual(a.calls, [])
     def test_namespace_does_not_mount_workspace_home_or_host_config(self):
         args = namespace_args()
         self.assertNotIn(str(Path.home()), args); self.assertNotIn(str(self.workspace), args)
@@ -219,7 +223,7 @@ class Universal(unittest.TestCase):
         for i in range(18):
             (self.root/'product'/f'page-{i:02d}.md').write_text('x'*20000)
         seen = set(); histories = []
-        for date in (15,17,22,24,29,31):
+        for date in (14,17,21,24,28,31):
             tick = [0]
             def cb(batch, context, timeout):
                 tick[0] += 1500
@@ -376,7 +380,7 @@ class Universal(unittest.TestCase):
         c=self.run_cycle(stamp=datetime(2026,10,17,2,tzinfo=self.stamp.tzinfo))
         self.assertEqual(c['result'],'complete')
         decision['quality_evidence']['sha256']='0'*64
-        c=self.run_cycle(stamp=datetime(2026,10,22,2,tzinfo=self.stamp.tzinfo))
+        c=self.run_cycle(stamp=datetime(2026,10,21,2,tzinfo=self.stamp.tzinfo))
         self.assertEqual(c['result'],'blocked')
 
 if __name__ == '__main__': unittest.main()
