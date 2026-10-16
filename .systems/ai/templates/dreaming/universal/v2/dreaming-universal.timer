@@ -1,8 +1,8 @@
 [Unit]
-Description=Universal Dreaming — Thursday and Saturday nights
+Description=Universal Dreaming — Wednesday and Saturday nights
 
 [Timer]
-OnCalendar=Thu,Sat *-*-* 02:00:00 Europe/Warsaw
+OnCalendar=Wed,Sat *-*-* 02:00:00 Europe/Warsaw
 Unit=dreaming-universal.service
 Persistent=false
 AccuracySec=1s
