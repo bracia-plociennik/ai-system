@@ -1,0 +1,19 @@
+[Unit]
+Description=Universal Dreaming — private advisory reports
+
+[Service]
+Type=oneshot
+WorkingDirectory=@SYSTEM_HOME@
+ExecStart=@SYSTEM_HOME@/.systems/scripts/dreaming-cycle run --config @CONFIG_PATH@ --owner-approved
+Environment=TZ=Europe/Warsaw
+Environment=PYTHONDONTWRITEBYTECODE=1
+UMask=0077
+NoNewPrivileges=true
+TimeoutStartSec=7200
+TimeoutStopSec=5
+KillMode=control-group
+Restart=no
+StandardOutput=journal
+StandardError=journal
+# Render the two installation paths from the selected local configuration.
+# Do not use ProtectHome/RestrictNamespaces: the analyzer creates its own minimal namespace.

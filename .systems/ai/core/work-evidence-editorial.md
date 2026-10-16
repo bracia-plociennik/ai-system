@@ -102,3 +102,9 @@ independent-programmer replay; that replay is expected after real documentation
 exists and is not a prerequisite to the initial owner-directed production test.
 Neither approval nor this contract authorizes public publishing, external sends,
 tax filing, or unsupported IP Box qualification.
+
+## Explicit Dreaming candidate handoff
+
+`dreaming-wep preview/apply` is an optional local adapter. It rechecks the selected candidate owner, current source bytes/class/policy and native schema, then binds exact candidate/request/action/destination versions. Current scoped owner permission is required by apply; metadata and readiness cannot authorize it. Native ledger prepare/apply/recovery remain authoritative. Unknown/estimated time is held for actual ledger entry creation. Native documentation kits remain documented until independent replay; reports remain local drafts; tax is evidence-only, never qualification/calculation; editorial private review, anonymization, each artifact/language and publication remain separate. Tax proofs stay in the private TaxRegister, outside Dreaming's corpus; its exact bundle/packet is separately reviewed through the native protocol.
+
+A native receipt returns a proposed successor candidate revision; it is not automatically persisted as source or memory. Interrupted native transactions require native recovery/readback before retry. No generic recovery deletion, external sending or publication is provided.

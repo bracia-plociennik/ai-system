@@ -1,0 +1,3 @@
+#!/bin/sh
+# Outer wall-clock bound also covers manual runs and finalization.
+exec /usr/bin/timeout --signal=TERM --kill-after=5s 7200s python3 -B "$(dirname "$0")/dreaming_cycle.py" "$@"

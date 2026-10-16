@@ -1,0 +1,3 @@
+#!/usr/bin/env python3
+from dreaming_wep import main
+raise SystemExit(main())
