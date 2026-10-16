@@ -1,0 +1,120 @@
+{
+  "interface_version": 1,
+  "owner_workspace_id": "workspace-a",
+  "capability": {
+    "interface_version": 1,
+    "producer_version": "dreaming-evidence-v1",
+    "supported_source_kinds": [
+      "workflow",
+      "repository",
+      "workspace"
+    ],
+    "supported_classes": [
+      "work",
+      "source",
+      "personal-trends"
+    ],
+    "source_fingerprints": {
+      ".systems/scripts/dreaming_evidence.py": "fc193b9647e99ec23e9b719889c2f245e0105766b7b2dce9fce6c176405a3a10",
+      ".systems/scripts/resolve-workflow-env": "5de38586d9ec66575f2500361e2131dfdce92abedd3f728f0d9bfed4000c73ff",
+      ".systems/scripts/dreaming_evidence_reader.py": "a26baf744bb3f8e74d7d3ebc3216ff00230bb1dcab201335d15bf583b49a8e83",
+      ".systems/scripts/dreaming_guard.py": "26e31575ca74f399955a5a08b8bafc2caab29dcd51cc38f8441bc1ff8420cd7a",
+      ".systems/scripts/dreaming_native.py": "59e6f265df80d90d64387cbfa2e600af2a493d131fd3be14cabbe5d3217f0bb4",
+      ".systems/scripts/lib/qa-evidence.py": "28e3cc6f30df7fef9b3b0ea9395537300a387e08f110d1ed4f486b5fde0ad4d2",
+      ".systems/scripts/lib/capture-record.py": "2ff01fa74aafdf656a634b7c263acff97c5103175ff11deaff7919a243e5d5f8"
+    }
+  },
+  "policy_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "inventory": [
+    {
+      "source_root_id": "repo-a",
+      "relative_path": "notes.md",
+      "project_id": "project-a",
+      "disposition": "reviewed",
+      "reason_code": "agent-reviewed",
+      "source_ref": {
+        "source_root_id": "repo-a",
+        "relative_path": "notes.md",
+        "project_id": "project-a",
+        "owner_workspace_id": "workspace-a",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "byte_count": 5,
+        "observed_at": "2026-10-12T12:00:00+00:00",
+        "fact_date": "unknown",
+        "evidence_level": "plan",
+        "source_class": "work"
+      },
+      "read_receipt": {
+        "source_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "byte_count": 5,
+        "policy_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "coverage": "complete",
+        "receipt_id": "2f5f7506473d816b75b891af8897cddd48a9b9b9fd2abf646a7c99cdd066eac0",
+        "capability_digest": "fad1aed97f61ee6b54942b0600e09c52739d17dcae32a0173793e5df3d711aac",
+        "chunk_map": [
+          {
+            "start": 0,
+            "end": 5,
+            "sha256": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+            "chunk_id": "024b2675d7db1d1a2ebd33732e18fbf56b414b5e0c02453f312d920534dcd6a1"
+          }
+        ]
+      },
+      "analysis_receipt": {
+        "analyzer": {
+          "id": "synthetic-reviewer",
+          "version": "v1",
+          "policy_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        },
+        "policy_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "read_receipt_ids": [
+          "2f5f7506473d816b75b891af8897cddd48a9b9b9fd2abf646a7c99cdd066eac0"
+        ],
+        "covered_chunks": [
+          "024b2675d7db1d1a2ebd33732e18fbf56b414b5e0c02453f312d920534dcd6a1"
+        ],
+        "findings": [],
+        "coverage": "complete",
+        "unresolved_conflicts": [],
+        "receipt_id": "4e18b80ac8d0f2df3e2d33a34a45ab45d53d2e97ff3324aa0a358ea7d2343c3a"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "evidence-a",
+      "source_ref": {
+        "source_root_id": "repo-a",
+        "relative_path": "notes.md",
+        "project_id": "project-a",
+        "owner_workspace_id": "workspace-a",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "byte_count": 5,
+        "observed_at": "2026-10-12T12:00:00+00:00",
+        "fact_date": "unknown",
+        "evidence_level": "plan",
+        "source_class": "work"
+      },
+      "native_kind": "note",
+      "native_state": "promoted",
+      "native_quality": "unknown",
+      "semantic_summary": "A plan is evidence of intent only.",
+      "limitations": [
+        "Time and execution unknown."
+      ]
+    }
+  ],
+  "result": "complete",
+  "coverage": {
+    "enumeration_complete": true,
+    "counts": {
+      "missing": 0,
+      "excluded": 0,
+      "unsupported": 0,
+      "reused-unchanged": 0,
+      "reviewed": 1,
+      "pending": 0,
+      "blocked": 0
+    }
+  }
+}

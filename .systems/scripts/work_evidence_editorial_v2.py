@@ -97,6 +97,10 @@ def texts(values, field):
         safe_text(value, field)
 
 
+from dreaming_privacy import clean_text as guarded_shareable_text
+from dreaming_provider_v1 import ProtocolError as ProjectionError
+
+
 def clean(value, terms=()):
     """Scan all agent prose/metadata; known identifiers never hide in a title."""
     if isinstance(value, str):
@@ -105,6 +109,10 @@ def clean(value, terms=()):
         require(not LOCAL_TEXT.search(value), "private-editorial-path", "text")
         for url in re.findall(r"https?://[^\s<>]+", value):
             public_url(url.rstrip(".,;!?)"))
+        try:
+            guarded_shareable_text(value)
+        except ProjectionError:
+            require(False, "private-editorial-path", "text")
         require(not any(term.casefold() in value.casefold() for term in terms),
                 "editorial-needs-anonymization", "text")
     elif isinstance(value, dict):

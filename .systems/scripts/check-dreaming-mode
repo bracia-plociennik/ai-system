@@ -399,7 +399,11 @@ if [[ -n "$workspace_arg" ]]; then
       fi
     elif [[ -d "$workspace_arg/dreams/runs" ]]; then
       while IFS= read -r -d '' file; do
-        if is_registered_legacy_report "$file"; then
+        if [[ "$(basename "$(dirname "$file")")" == universal-* ]]; then
+          if ! python3 -B "$repo_root/.systems/scripts/dreaming_verify.py" --workspace "$workspace_arg" --run-id "$(basename "$(dirname "$file")")"; then
+            fail=1
+          fi
+        elif is_registered_legacy_report "$file"; then
           check_legacy_dream_report "$file"
         else
           check_dream_report "$file"

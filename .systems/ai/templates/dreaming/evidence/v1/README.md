@@ -1,0 +1,15 @@
+# Dreaming sidecars v1
+
+Opt-in registry and provider interface v1 never change legacy Dream Report v1/v2. A run has private `state.json`, `inventory.json`, `candidates.json`, `report.json`, and immutable `completion.json` written last. Interrupted staging has no completion. Complete/partial/blocked are corpus-review coverage, not WEP approval or verified deployment. Report JSON findings are advisory proposals; reconciled candidate packets use a separate schema.
+
+`dreaming-run plan --workspace <explicit-root> --run-id <id> --request <private-request> --owner-approved` requires policy, producer locator, accepted actual fingerprints and analyzer binding. `read --chunk-id`, `submit-analysis --request`, `finalize` additionally require `--policy <current-registry>`; a revoked/changed registry stops old runs. These flags represent current owner authority verified by the invoking agent; data fields cannot create it. All mutations stay under the selected synthetic/approved workspace dreams/runs. No background, API or scheduler exists.
+
+Agent analysis must cite delivered chunks, current receipts, labeled facts/inferences/unknowns and native states. Complete source review needs every chunk. Reuse requires the prior immutable completion and equal owner, content, classification, policy, analyzer and actual producer fingerprints. No Git HEAD shortcut. Artifact conflicts or live lock stop retries; after a process death preserve staging and inspect/recover ownership explicitly before clearing a lock. No blind deletion or native WEP recovery shortcut.
+
+Finding IDs are unique within the run. An identical resubmission is idempotent; conflicting content or source/project provenance under an existing ID is rejected before state changes. All complete responses contribute findings, even when a later response covers the same source. Report sidecars retain those actual analysis receipts.
+
+Each finding cites exactly one project. Split cross-project observations into separately cited findings. Identical bytes in different projects require separate project-scoped read-receipt lists; a content hash alone does not identify its owner/project. The transport keeps its existing seven finding fields.
+
+Canonical Work Entry JSON in the cited source set supplies advisory work/entry identity when its native UUIDs and owner/project match. Include that source when linking notes to an existing case. Different findings about the same explicit work ID become one candidate, preserving each claim's original citations. Prose, bare ID keys, invalid or foreign records do not establish identity; conflicting records hold the candidate for owner review. This source-derived link does not verify a committed destination entry or copy time, replay, tax or editorial approvals. Native WEP preview checks the actual ledger and exact declared work/entry IDs.
+
+Reuse requires the entire analysis receipt/source closure to remain current. If any cited source changes or disappears, review that analysis again. Old complete runs stay historical after broker source changes; do not rewrite them to upgrade their proof.

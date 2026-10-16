@@ -1,0 +1,7 @@
+# Recipient-authorized overview
+
+Each owner-local producer exports only a current completed-run projection. The default is `counts-only`, requiring explicit recipient/sharing authority. Optional `reviewed-text` proposes sanitized title/reason first, then requires current exact projection hash review. Lexical checks are supporting; a human must review identities, quasi-identifiers, contracts and copyright. Metadata authority references are not authentication: the invoking agent verifies the real owner instruction and current recipient policy.
+
+The common aggregator consumes only projection/completion/current sharing-policy objects. It never dereferences corpus locators, private source paths or raw inventories. Missing/revoked/stale scopes appear unavailable. Partial/blocked runs retain their coverage/result; they cannot appear complete. Counts and held candidates are shared only by authorized policy. Opaque scope/run identifiers replace source names. A changed/revoked policy invalidates current eligibility; immutable old views remain audit history and are stale, never current fallback.
+
+`dreaming-overview export --request <private-owner-request>` prepares an export. `preview` accepts explicit projection/completion/current-policy inputs and recipient. `write --destination <explicit-private-overview-dir> --owner-approved` writes an immutable digest-named revision. No global default or scheduler is changed. Treat unreviewed draft packets as private review material; validation rejects them in the common view.
