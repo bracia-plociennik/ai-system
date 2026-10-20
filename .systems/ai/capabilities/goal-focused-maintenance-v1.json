@@ -97,7 +97,7 @@
     },
     ".systems/ai/core/dreaming-chat.md": {
       "mode": "100644",
-      "sha256": "ba1e97a5f3e89668f002094c8c7697166dbb25e1e4e9d7c0250a0d480157fdb3"
+      "sha256": "aa9016c29a2ee7195c3f858ae7c68c7df52d6aa2f2c340e805acfd0ae3b62d8e"
     },
     ".systems/ai/core/dreaming-mode.md": {
       "mode": "100644",
@@ -1409,11 +1409,11 @@
     },
     ".systems/scripts/dreaming_chat.py": {
       "mode": "100644",
-      "sha256": "144cacd9c82f2de9e93903a2951a27df85bb5171fc8fdcc74c3aaf4b3190f69a"
+      "sha256": "b77ed803eb5bf715a43fc54869e61906248b9395bc4ff2d62b99f65d62dc5e58"
     },
     ".systems/scripts/dreaming_chat_dispatch.py": {
       "mode": "100644",
-      "sha256": "e9fe4187525c9e39df200eccf534363a9c6080316e13e399a0845b268e0fdeaf"
+      "sha256": "ef3648b8924e8264b5e74e5be7f0bd8c81c1bc01c58ae4d6375c031532a08186"
     },
     ".systems/scripts/dreaming_config_draft.py": {
       "mode": "100644",
@@ -1541,7 +1541,7 @@
     },
     ".systems/scripts/naming_check.py": {
       "mode": "100644",
-      "sha256": "8ceb7062917f3d032fc722bcfe84b291ed3fef27794d91842536c9fc70ee3486"
+      "sha256": "c35ccdef3f2df1e97c44954380aad84b862543f4ae37f87657e705eba3077b41"
     },
     ".systems/scripts/orchestration_compatibility.py": {
       "mode": "100644",
@@ -1705,7 +1705,7 @@
     },
     ".systems/scripts/test_dreaming_chat.py": {
       "mode": "100644",
-      "sha256": "a1b16e058b6a2a8b0a30fa0de37ffcb441dc1a399d77a2a0991476570746a7ec"
+      "sha256": "c0aae51dd4fef41c7c32d2c317a644b440b647afa3ffd6a35bb33898cef441a4"
     },
     ".systems/scripts/test_dreaming_chat_dispatch.py": {
       "mode": "100644",
@@ -1825,7 +1825,7 @@
     },
     ".systems/scripts/tests/test_naming.py": {
       "mode": "100644",
-      "sha256": "636a61450fdead744c5fd908d48f0b72cbf59dbb662bf15b7c79d9909ec08c73"
+      "sha256": "cab08ae9344ddf0bcf9d909fa88d3407f05da2dd6cbd63c39df8b70df89ac480"
     },
     ".systems/scripts/tests/test_orchestration_compatibility.py": {
       "mode": "100644",
