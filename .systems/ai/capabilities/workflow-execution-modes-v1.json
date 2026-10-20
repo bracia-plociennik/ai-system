@@ -1,6 +1,6 @@
 {
   "contract": 1,
-  "tested_commit": "6eb871a59e01a4d716b72f2f5f1ee9a66b8f9cb7",
+  "tested_commit": "239229ea366cc232c0c03649f19ab549881ac97c",
   "mode_mapping": {
     "auto": "auto",
     "human": "human-coop"

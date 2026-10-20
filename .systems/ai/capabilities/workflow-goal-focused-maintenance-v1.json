@@ -25,7 +25,7 @@
     },
     ".systems/ai/capabilities/intent-to-execution-brief-v1.json": {
       "mode": "100644",
-      "sha256": "c8e784158fc1b9a4e3ae38fd0baa30ffa317e8b72406f9732ca890bc7b702add"
+      "sha256": "5c64e3fd2db9b5c432d05d76a868ca2bc57852085dc5877401e99311c9e01dcf"
     },
     ".systems/ai/capabilities/parallel-task-orchestration-v1.json": {
       "mode": "100644",
@@ -45,7 +45,7 @@
     },
     ".systems/ai/capabilities/work-lead-v1.json": {
       "mode": "100644",
-      "sha256": "7f20a69f27c0cd2b41a1520c03e8896ff4c380a38fa69e9e237e5b331e8c1d1a"
+      "sha256": "13e748d1f5fc5fdd656609af380bf4bab79c4d274baf53d94fa466ecb7418fc2"
     },
     ".systems/ai/core/agent-contract-details.md": {
       "mode": "100644",
@@ -2189,7 +2189,7 @@
     },
     "AGENTS.md": {
       "mode": "100644",
-      "sha256": "7d0dc1b1ea79854856af5e79464c7d6638cac2261624791826643d8bd39974a1"
+      "sha256": "2c57bbb7cc0bf1d0e5671a5e64f6ca0bca4a6b406f93a500cfbe458be8cfbc31"
     },
     "HUMANS.md": {
       "mode": "100644",
