@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "enabled": false,
+  "automatic_inbox": true,
+  "managed_use": true,
+  "ocr_languages": [
+    "pol",
+    "eng"
+  ]
+}

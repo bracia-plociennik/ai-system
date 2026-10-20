@@ -182,3 +182,7 @@ Use goal-focused-maintenance.md only after explicit scoped activation and verifi
 Route direct show-problems/status/audit requests to a read-only view of the same scoped queue. Milestone review occurs only within the explicitly requested phase; no automatic Phase8/final-owner-yes. Dreaming remains advisory read/report, not repair or receipt mutation.
 
 Task resources route through `task-resource-cleanup.md` and `.systems/scripts/manage-task-resources`; inspect/plan are read-only.
+
+## Personal source library
+
+Personal PDF/notes, source-library, biblioteka źródeł, źródła Kuby, and source-note reuse route through personal-source-library.md. Inspect fixed personal ownership and activation first; use manage-source-library. Read-only permits no ingestion or note/index writes. No implicit activation, memory promotion, source instructions or external synchronization.

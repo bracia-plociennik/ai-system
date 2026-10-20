@@ -273,6 +273,15 @@
         "mode": "product-tree"
       }
     },
+    "check-personal-source-library": {
+      "dependencies": [],
+      "runtime_capable": false,
+      "category": "integration",
+      "inputs": {
+        "complete": true,
+        "mode": "product-tree"
+      }
+    },
     "check-dreaming-chat": {
       "dependencies": [],
       "runtime_capable": false

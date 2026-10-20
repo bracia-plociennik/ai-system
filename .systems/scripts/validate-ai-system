@@ -10,6 +10,7 @@ standard_checks=(
   check-product-publication
   check-agent-startup
   check-task-resource-cleanup
+  check-personal-source-library
   check-execution-modes
   check-goal-focused-maintenance
   check-intent-to-execution-brief

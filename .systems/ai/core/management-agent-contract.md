@@ -244,3 +244,7 @@ After a successful upstream update, use `.systems/scripts/update-workspace --dry
 Do not mark PASS without explicit evidence.
 
 For new registered task resources apply `task-resource-cleanup.md`: durable QA/Capture stays outside temporary execution; release and eligible cleanup follow actual task closure, with one installed Workflow executor and seven-day whole-worktree retention.
+
+## Personal library routing
+
+For substantive managed work with an explicitly activated personal source library, use personal-source-library.md: current relevant notes first, then source fragments, with provenance and separate inference. Status/discovery never activates it. Preserve fixed personal ownership and client boundaries; read-only never ingests or writes notes/indexes.
