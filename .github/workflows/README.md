@@ -6,8 +6,10 @@ Current workflow:
 
 - `ai-system-validate.yml` - runs local AI System validators and whitespace checks.
 
-The Ubuntu runner installs ripgrep (`rg`) before validation rather than relying
-on the runner image to provide it. Bash, Git and Python 3 are also required;
+The Ubuntu runner installs ripgrep (`rg`), Poppler utilities (`pdfinfo`,
+`pdftotext`, `pdftoppm`) and Tesseract with English/Polish language data before
+validation rather than relying on the runner image to provide them. The PDF/OCR
+source-library tests use synthetic documents and exercise these real local tools. Bash, Git and Python 3 are also required;
 the validator preflight reports missing tools before executing contract checks.
 The full profile and its smoke coverage remain mandatory. Script results are
 supporting evidence, not semantic acceptance.

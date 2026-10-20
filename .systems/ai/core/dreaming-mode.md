@@ -1,9 +1,13 @@
 # Dreaming Mode
 
-The optional chat-led execution profile is defined in `dreaming-chat.md`.
+The optional chat-led execution mode is defined in `dreaming-chat.md`.
 Its explicitly approved controller may keep private session/checkpoint metadata,
 screened inputs and report drafts. This does not expand the legacy advisory mode
 or permit memory, TaskNotes, source or operational recommendation execution.
+It preserves the owner's default Approve for me settings and never creates or
+selects its own permission profiles. Source Guard, screened inputs and manifest-only
+analysis instructions constrain this mode; it does not provide OS isolation of
+manifest reads. The batch executor's namespace controls below remain separate.
 
 ## Universal v2 (explicit opt-in)
 
@@ -30,7 +34,7 @@ The analysis itself never schedules or implements its recommendations. A separat
 owner-approved outer executor may invoke v2 at Wednesday/Saturday 02:00 Europe/Warsaw, with a
 7200-second bound and no daytime replay. It cannot modify its own policy, approvals, timer,
 sources, memory, TaskNotes, WEP records, status, code or commits. Namespace preflight precedes
-private reads; host read-only access alone does not prove read isolation. Installation and
+private batch reads; host read-only access alone does not prove read isolation. Installation and
 activation retain their own publication/update/approval gates.
 
 
