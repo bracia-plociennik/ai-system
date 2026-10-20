@@ -19,7 +19,7 @@ jobs:
       - name: Install validation dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends ripgrep
+          sudo apt-get install --yes --no-install-recommends ripgrep poppler-utils tesseract-ocr tesseract-ocr-eng tesseract-ocr-pol
 
       - name: Ensure scripts are executable
         run: chmod +x .systems/scripts/*
