@@ -523,3 +523,7 @@ Use .systems/scripts/resolve-agent-context for read-only context and manage-agen
 Current MVP targets native Codex. Claude Code and other adapters expose design-only/unverified interfaces and cannot activate or run native tests. No extra coordinator/background agent, full-home permission, automatic TaskNotes or history migration. check-agent-startup is an offline standard/full conformance gate; it does not invoke a model or touch real user configuration.
 
 Task resource lifecycle and durable QA/Capture: `.systems/ai/core/task-resource-cleanup.md`.
+
+## Chat-led Dreaming
+
+An owner-approved chat execution profile uses the existing scheduler transport to queue actual analysis in a selected private chat. It preserves screened source access, native restricted filesystem permissions, cumulative checkpoints and private reports. See `.systems/ai/core/dreaming-chat.md`; activation requires current QA and an actual manual pilot. Batch execution remains available for historical compatibility and is not used by the chat profile.
