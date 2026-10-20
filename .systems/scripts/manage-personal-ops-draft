@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+"""Inspect, prepare or update a noncanonical private SPOR draft; never sync."""
+import argparse
+from datetime import date
+import json
+from pathlib import Path
+import sys
+
+sys.dont_write_bytecode = True
+import personal_ops_drafts as draft
+
+
+def main():
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("action", choices=["describe", "read", "emit", "create", "update", "mark-approved"])
+    p.add_argument("--workspace", required=True, type=Path)
+    p.add_argument("--date", required=True, type=date.fromisoformat)
+    p.add_argument("--expected-sha256")
+    p.add_argument("--owner-reference")
+    p.add_argument("--canonical")
+    p.add_argument("--source-sha256")
+    p.add_argument("--nonce")
+    p.add_argument("--owner-approved", action="store_true", help="Caller attests actual scoped authority; flag grants none")
+    args = p.parse_args()
+    args.workspace = args.workspace.absolute()
+    info = draft.identity(args.workspace, args.date)
+    if args.action == "describe":
+        result = {"contract": draft.CONTRACT, **info, "path": draft.relative_path(info), "fields": draft.form(info["mode"])}
+    elif args.action == "read":
+        result = draft.read(args.workspace, args.date)
+    elif args.action == "emit":
+        # A pure stdout rendezvous; the read-only model cannot invoke writer I/O.
+        if not args.nonce or len(args.nonce) != 64:
+            raise ValueError("Dispatcher nonce required")
+        payload = json.loads(sys.stdin.read(draft.MAX_BYTES + 1))
+        result = {"nonce": args.nonce, "payload": payload}
+        print("SPOR_DRAFT_REQUEST_V1 " + json.dumps(result, ensure_ascii=False, separators=(",", ":")))
+        return
+    else:
+        if not args.owner_approved:
+            raise ValueError("Caller must verify actual scoped owner approval")
+        if args.action == "create":
+            result = draft.create(args.workspace, args.date, json.loads(sys.stdin.read(draft.MAX_BYTES + 1)))
+        elif args.action == "update":
+            result = draft.update(args.workspace, args.date, json.loads(sys.stdin.read(draft.MAX_BYTES + 1)), args.expected_sha256 or "", args.owner_reference)
+        else:
+            result = draft.mark_approved(args.workspace, args.date, args.expected_sha256 or "", args.canonical, args.source_sha256, args.owner_reference)
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        # No field/body/private error text goes to a service log.
+        print(json.dumps({"status": "draft-error", "error_type": type(exc).__name__}), file=sys.stderr)
+        raise SystemExit(1)

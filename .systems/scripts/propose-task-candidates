@@ -1198,9 +1198,10 @@ def main() -> int:
                 except json.JSONDecodeError:
                     pass
             if (
-                advisory_frontmatter.get("type") == "spor-proposal"
-                or isinstance(advisory_json, dict) and advisory_json.get("contract") == "spor-read-only-proposal-v1"
-                or re.match(r"^# (?:DAILY|WEEKLY) CHECK-IN \(SPOR\).*propozycja read-only", advisory_text)
+                advisory_frontmatter.get("type") in {"spor-proposal", "spor-check-in-draft-v1"}
+                or "check-in-drafts" in advisory_source.parts
+                or isinstance(advisory_json, dict) and advisory_json.get("contract") in {"spor-read-only-proposal-v1", "spor-check-in-draft-v1"}
+                or re.match(r"^# (?:DAILY|WEEKLY) CHECK-IN \(SPOR\).*(?:propozycja read-only|szkic do uzupełnienia)", advisory_text)
             ):
                 raise SystemExit("Read-only SPOR proposals are not canonical TaskNote sources")
     if args.check_in:
