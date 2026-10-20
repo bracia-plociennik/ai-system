@@ -2097,7 +2097,7 @@
     },
     ".systems/scripts/tests/task-resource-cleanup.py": {
       "mode": "100644",
-      "sha256": "aded176ae2fb76f75313df86ef54cad3db024597a1bf97c98c314b3d12bc21d0"
+      "sha256": "1d11e78f1884b01668ef2b6008f9a463992223c44bebef61aa6977702901ffc9"
     },
     ".systems/scripts/tests/test_dreaming_evidence_contract.py": {
       "mode": "100644",
@@ -2137,7 +2137,7 @@
     },
     ".systems/scripts/validate-workflow": {
       "mode": "100755",
-      "sha256": "7126122ef1aa39ec15bfe57309fe0792f0abcccbb14a19c058fa77a1288fb6d5"
+      "sha256": "2dbebacc355875bf083063fdae1be86ed95b36c5f69e3556dc6b71428f006255"
     },
     ".systems/scripts/verify-qa-commit-binding": {
       "mode": "100755",
