@@ -1,5 +1,10 @@
 # Dreaming Mode
 
+The optional chat-led execution profile is defined in `dreaming-chat.md`.
+Its explicitly approved controller may keep private session/checkpoint metadata,
+screened inputs and report drafts. This does not expand the legacy advisory mode
+or permit memory, TaskNotes, source or operational recommendation execution.
+
 ## Universal v2 (explicit opt-in)
 
 `dreaming-cycle` is a separate version-2 advisory pipeline. The remaining legacy report,

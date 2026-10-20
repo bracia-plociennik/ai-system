@@ -1,0 +1,7 @@
+[Unit]
+Description=Stop further Dreaming terms after a failed session
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/systemctl --user disable --now dreaming-universal.timer
+UMask=0077

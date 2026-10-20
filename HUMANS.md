@@ -721,6 +721,10 @@ Current MVP targets native Codex. Claude Code and other adapters expose design-o
 
 Task resource lifecycle and durable QA/Capture: `.systems/ai/core/task-resource-cleanup.md`.
 
+## Chat-led Dreaming
+
+An owner-approved chat execution profile uses the existing scheduler transport to queue actual analysis in a selected private chat. It preserves screened source access, native restricted filesystem permissions, cumulative checkpoints and private reports. See `.systems/ai/core/dreaming-chat.md`; activation requires current QA and an actual manual pilot. Batch execution remains available for historical compatibility and is not used by the chat profile.
+
 ## Personal source library
 
 Use [personal-source-library](.systems/ai/core/personal-source-library.md). After explicitly approved activation, drop PDF/MD/TXT files into the library inbox or ask the agent to add a selected file. Subsequent substantive work prepares pending inputs within the foreground budget and uses relevant notes first. Ask “przygotuj bibliotekę” for a longer foreground batch, or “znajdź w moich źródłach …”. Source disable removes it and its notes from default retrieval without deletion. Scans need local `tesseract-ocr`, `tesseract-ocr-pol`, `tesseract-ocr-eng` and Poppler (`pdftotext`, `pdfinfo`, `pdftoppm`); text-only use remains available without OCR. Claude/native provider claims require separate verification.

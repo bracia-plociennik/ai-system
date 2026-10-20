@@ -281,6 +281,10 @@
         "complete": true,
         "mode": "product-tree"
       }
+    },
+    "check-dreaming-chat": {
+      "dependencies": [],
+      "runtime_capable": false
     }
   }
 }

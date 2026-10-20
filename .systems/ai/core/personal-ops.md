@@ -1,5 +1,17 @@
 # Personal Ops
 
+## Existing scheduler drafts
+
+When an owner-approved `spor-check-in-draft-v1` deployment exists, first inspect
+the current date's draft under `spor-drafts.md`. Owner replies update its answered
+fields under the verified standing draft scope; preserve other manual edits and
+UNKNOWN values. A draft is not canonical evidence or TaskNote/calendar input.
+Current owner approval is still required for canonical capture; after that
+capture's actual QA/sync/render/calendar steps record its path/hash on the draft.
+Morning retrospective replies are the normal review path; do not require an
+evening closure. If there is no installed/approved draft route, use the existing
+Personal Ops procedure without creating drafts implicitly.
+
 Read-only Daily/Weekly proposal requests and the separately owner-approved desktop heartbeat use `spor-proposals.md` and `prepare-personal-ops-spor-proposal`. They never save canonical check-ins or generate TaskNotes; the canonical manual routes below remain unchanged.
 
 ## Purpose
