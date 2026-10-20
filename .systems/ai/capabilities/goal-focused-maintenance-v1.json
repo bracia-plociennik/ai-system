@@ -1461,7 +1461,7 @@
     },
     ".systems/scripts/dreaming_universal_sources.py": {
       "mode": "100644",
-      "sha256": "8eb77a5eca3793d52023e6d6989b5dd1b5c2cee0dbd63ff860d032caad907ff1"
+      "sha256": "442d8e3e874a7d7a493e872e4e644351b18795148fa3aae019f6177220923e0d"
     },
     ".systems/scripts/dreaming_verify.py": {
       "mode": "100644",
@@ -1705,7 +1705,7 @@
     },
     ".systems/scripts/test_dreaming_chat.py": {
       "mode": "100644",
-      "sha256": "9dad42295191a9e2a35d5449dd9391a8cb8ab165132d960fb622953cb9a15b6c"
+      "sha256": "a1b16e058b6a2a8b0a30fa0de37ffcb441dc1a399d77a2a0991476570746a7ec"
     },
     ".systems/scripts/test_dreaming_chat_dispatch.py": {
       "mode": "100644",
