@@ -94,6 +94,52 @@ class Sessions(unittest.TestCase):
         (self.root/'sources/note.md').write_text('password = synthetic-secret-canary-123')
         _,s,_=self.begin();self.assertEqual(s['input_hashes'],{});self.assertEqual(s['coverage'][0]['state'],'blocked')
 
+    def test_custom_token_assignments_never_reach_prepared_inputs(self):
+        opaque = 'fixture-' + 'a1B2c3D4' * 3
+        cases = [
+            'https://example.invalid/audit?' + 'audittoken=' + opaque,
+            'httpsmalformed.invalid/audittoken=' + opaque,
+            json.dumps({'audit_token': opaque}),
+            json.dumps({'password': opaque}),
+            'AUDIT-TOKEN = "' + opaque + '"',
+            'audittoken%3D%22' + opaque + '%22',
+            'audittoken=' + ''.join('%%%02x' % ord(c) for c in opaque),
+            json.dumps({'note': json.dumps({'audit_token': opaque})}),
+        ]
+        for index, text in enumerate(cases):
+            with self.subTest(case=index):
+                (self.root/'sources/note.md').write_text(text)
+                # Distinct manual identities; never reuse a prepared snapshot.
+                _, s = chat.begin(self.config, self.stamp, manual=True)
+                p = chat.paths(self.cfg, s['cycle_id'])
+                self.assertEqual(s['input_hashes'], {})
+                self.assertEqual(s['coverage'][0]['state'], 'blocked')
+                self.assertEqual(list(p['inputs'].glob('*.json')), [p['inputs']/'brief.json'])
+
+    def test_custom_token_in_model_output_rejected(self):
+        opaque = 'fixture-' + 'a1B2c3D4' * 3
+        for index, text in enumerate(('audit_token=' + opaque,
+                                      json.dumps({'audit_token': opaque}))):
+            with self.subTest(case=index):
+                _, s = chat.begin(self.config, self.stamp, manual=True)
+                p = chat.paths(self.cfg, s['cycle_id'])
+                self.submit(s, p)
+                draft = chat.load(p['drafts']/'checkpoint.json')
+                draft['findings'][0]['summary'] = text
+                chat.atomic(p['drafts']/'checkpoint.json', draft)
+                with self.assertRaisesRegex(ValueError, 'credential-in-output'):
+                    chat.accept(self.config, s['cycle_id'], self.stamp, final=True)
+                self.assertFalse((p['report']/'dream-report.md').exists())
+
+    def test_token_prose_and_personal_fields_remain_readable(self):
+        (self.root/'sources/note.md').write_text(
+            'Token purchase usability is unknown. Token count: 150.\n'
+            'Mental clarity: 4. Reflections and goals remain personal.\n'
+            'No access token was provided. Tokenization is a topic, not a credential.\n')
+        _, s, _ = self.begin()
+        self.assertTrue(s['input_hashes'])
+        self.assertEqual(s['coverage'][0]['state'], 'pending')
+
     def test_chunk_limit_does_not_permanently_truncate_file(self):
         (self.root/'sources/note.md').write_text('word '*10000)
         with patch.object(chat,'MAX_CHUNKS',1):

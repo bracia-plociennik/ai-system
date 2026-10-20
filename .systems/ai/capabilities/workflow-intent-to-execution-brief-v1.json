@@ -1,7 +1,7 @@
 {
   "contract": "intent-to-execution-brief-v1",
   "semantic_version": 1,
-  "tested_commit": "6eb871a59e01a4d716b72f2f5f1ee9a66b8f9cb7",
+  "tested_commit": "239229ea366cc232c0c03649f19ab549881ac97c",
   "mode_mapping": {
     "auto": "auto",
     "human": "human-coop"
@@ -71,7 +71,7 @@
       "mode": "100755"
     },
     "AGENTS.md": {
-      "sha256": "7d0dc1b1ea79854856af5e79464c7d6638cac2261624791826643d8bd39974a1",
+      "sha256": "2c57bbb7cc0bf1d0e5671a5e64f6ca0bca4a6b406f93a500cfbe458be8cfbc31",
       "mode": "100644"
     }
   }

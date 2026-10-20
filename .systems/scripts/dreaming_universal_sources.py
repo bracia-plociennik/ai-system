@@ -11,7 +11,15 @@ DENY = {'.git', 'node_modules', '.venv', 'vendor', '__pycache__', '.cache', '.ob
         'humans', 'scheduler', 'logs', 'archive', 'backups'}
 TEXT = {'.md', '.txt', '.json', '.jsonl', '.py', '.js', '.ts', '.tsx', '.jsx', '.php',
         '.css', '.html', '.sh', '.yaml', '.yml', '.toml'}
-CREDENTIAL = re.compile(rb'(?i)(?:-----BEGIN [A-Z ]*PRIVATE KEY|\b(?:sk-[a-z0-9_-]{16,}|gh[pousr]_[a-z0-9]{16,})|\b(?:api[_-]?key|password|access[_-]?token|client[_-]?secret)\s*[:=]\s*[\x22\x27]?[a-z0-9_+/.-]{8,})')
+# Screen whole source bodies before chunking, including nonstandard token names
+# in pasted/malformed links and quoted JSON fields. Ordinary prose about tokens
+# is not a credential marker. This heuristic does not establish credential validity.
+CREDENTIAL = re.compile(
+    rb'(?i)(?:-----BEGIN [A-Z ]*PRIVATE KEY|'
+    rb'\b(?:sk-[a-z0-9_-]{16,}|gh[pousr]_[a-z0-9]{16,})|'
+    rb'\b(?:api[_-]?key|password|[a-z0-9_-]{0,64}token|client[_-]?secret)\b'
+    rb'(?:\\[\x22\x27]|[\x22\x27]|%22|%27)?\s*(?:[:=]|%3d)\s*'
+    rb'(?:\\[\x22\x27]|[\x22\x27]|%22|%27)?[a-z0-9_%+/.-]{8,})')
 CHUNK_BYTES = 16384
 MAX_FILE = 1048576
 
