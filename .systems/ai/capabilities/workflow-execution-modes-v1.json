@@ -19,7 +19,7 @@
       "mode": "100644"
     },
     ".systems/ai/core/execution-modes.md": {
-      "sha256": "377ec67c4d1d52b162f4ae12ccb2499bd2f02b2c853091ec25c279aed2096e8e",
+      "sha256": "a07bc9ba22aab4ce156d6e0a9d312f578a3cbeedcc2fcd7c488477d6a659ceed",
       "mode": "100644"
     },
     ".systems/ai/core/owner-decision-checkpoints.md": {
@@ -35,7 +35,7 @@
       "mode": "100644"
     },
     ".systems/ai/core/quality-review.md": {
-      "sha256": "493c1664c8155141d1dab29aff1c4d5d83c122597ef40ab982ec09ce32cff536",
+      "sha256": "7adabbd71c379353849b24b8891c9f6bf8d39b68b63a3248419cadbdfb71b583",
       "mode": "100644"
     },
     ".systems/ai/core/risk-model.md": {

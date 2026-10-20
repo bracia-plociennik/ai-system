@@ -249,6 +249,10 @@ For new registered task resources apply `task-resource-cleanup.md`: durable QA/C
 
 For substantive managed work with an explicitly activated personal source library, use personal-source-library.md: current relevant notes first, then source fragments, with provenance and separate inference. Status/discovery never activates it. Preserve fixed personal ownership and client boundaries; read-only never ingests or writes notes/indexes.
 
+## Sprint iteration
+
+For actual task-local Sprint selection use `sprint-iteration.md` and the compatible installed Workflow. Keep preview/feedback implementation open until genuine final current-effect acceptance or explicit verification request. Deferred quality is not completed/PASS or resource release. Preserve normal behavior without explicit activation.
+
 ## Independent judgment
 
 Use `.systems/ai/core/critical-judgment.md` for proportional, evidence-based assessment of the goal, proposed mechanism and the agent's own advice. State material objections directly with basis, consequence and a feasible recommendation; acknowledge sound ideas and uncertainty. Preserve existing authority and phase gates, short routine answers, informed permitted tradeoffs and applicable quiet handling of independent minor debt.

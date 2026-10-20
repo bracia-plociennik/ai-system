@@ -294,6 +294,10 @@ Before shared activation, verify the reviewed committed Workflow profile/source 
 
 For new registered task resources apply `task-resource-cleanup.md`: durable QA/Capture stays outside temporary execution; release and eligible cleanup follow actual task closure, with one installed Workflow executor and seven-day whole-worktree retention.
 
+## Sprint iteration
+
+For actual task-local Sprint selection use `sprint-iteration.md` and the compatible installed Workflow. Keep preview/feedback implementation open until genuine final current-effect acceptance or explicit verification request. Deferred quality is not completed/PASS or resource release. Preserve normal behavior without explicit activation.
+
 ## Independent judgment
 
 Use `.systems/ai/core/critical-judgment.md` for proportional, evidence-based assessment of the goal, proposed mechanism and the agent's own advice. State material objections directly with basis, consequence and a feasible recommendation; acknowledge sound ideas and uncertainty. Preserve existing authority and phase gates, short routine answers, informed permitted tradeoffs and applicable quiet handling of independent minor debt.

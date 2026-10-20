@@ -77,6 +77,10 @@ def valid_name(relative, workspace=False):
 
 def preserved_directory(parts):
     """Only declared source/history slots; never whole owner or project-state roots."""
+    # Owner execution slots contain source/check fixtures, not managed evidence.
+    # The walker still rejects a linked slot itself before this boundary applies.
+    if parts in {('.tmp',), ('.worktrees',)}:
+        return True
     if parts[0] in SOURCE_DIRS:
         return True
     if len(parts) >= 2 and parts[:2] == ("dump", "incoming"):
