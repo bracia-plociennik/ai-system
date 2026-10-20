@@ -720,3 +720,7 @@ Use .systems/scripts/resolve-agent-context for read-only context and manage-agen
 Current MVP targets native Codex. Claude Code and other adapters expose design-only/unverified interfaces and cannot activate or run native tests. No extra coordinator/background agent, full-home permission, automatic TaskNotes or history migration. check-agent-startup is an offline standard/full conformance gate; it does not invoke a model or touch real user configuration.
 
 Task resource lifecycle and durable QA/Capture: `.systems/ai/core/task-resource-cleanup.md`.
+
+## Personal source library
+
+Use [personal-source-library](.systems/ai/core/personal-source-library.md). After explicitly approved activation, drop PDF/MD/TXT files into the library inbox or ask the agent to add a selected file. Subsequent substantive work prepares pending inputs within the foreground budget and uses relevant notes first. Ask “przygotuj bibliotekę” for a longer foreground batch, or “znajdź w moich źródłach …”. Source disable removes it and its notes from default retrieval without deletion. Scans need local `tesseract-ocr`, `tesseract-ocr-pol`, `tesseract-ocr-eng` and Poppler (`pdftotext`, `pdfinfo`, `pdftoppm`); text-only use remains available without OCR. Claude/native provider claims require separate verification.

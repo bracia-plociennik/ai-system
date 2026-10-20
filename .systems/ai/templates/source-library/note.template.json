@@ -1,0 +1,14 @@
+{
+  "source": "replace-with-source-id",
+  "version": "replace-with-current-sha256",
+  "pages": [
+    1
+  ],
+  "kind": "paraphrase",
+  "excerpt": "Literal source anchor",
+  "content": "Faithful paraphrase",
+  "context": "Source assumptions and limits",
+  "applies_to": "General problem/topic",
+  "inference": "Separate agent inference, or empty",
+  "scope": "general"
+}

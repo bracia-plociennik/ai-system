@@ -523,3 +523,7 @@ Use .systems/scripts/resolve-agent-context for read-only context and manage-agen
 Current MVP targets native Codex. Claude Code and other adapters expose design-only/unverified interfaces and cannot activate or run native tests. No extra coordinator/background agent, full-home permission, automatic TaskNotes or history migration. check-agent-startup is an offline standard/full conformance gate; it does not invoke a model or touch real user configuration.
 
 Task resource lifecycle and durable QA/Capture: `.systems/ai/core/task-resource-cleanup.md`.
+
+## Personal source library
+
+[Personal source library](.systems/ai/core/personal-source-library.md) provides local PDF/Markdown/text import, optional Polish/English OCR, versioned originals, source-grounded reusable notes and SQLite FTS5 retrieval. Libraries stay private under their registered personal owner. Inspect with `.systems/scripts/manage-source-library status --cwd /absolute/managed/project`; initialization and activation are explicit, and read-only searches do not write. Relevant notes are preferred while current project facts and source applicability remain independently checked.

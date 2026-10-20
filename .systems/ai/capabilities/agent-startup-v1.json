@@ -2,7 +2,7 @@
   "schema_version": 1,
   "contract": "agent-startup-v1",
   "source_files": {
-    ".systems/ai/core/agent-startup.md": "690744b07c8cd7d7492c3741adc0cc84e07c7e0bf6d86892a9d0d8e8255f28f6",
+    ".systems/ai/core/agent-startup.md": "075f3693370a83cc3d3fec532a2500c8c85d262d5ad1492b328fea6e46b5a47c",
     ".systems/ai/core/system-workflow-authority.md": "ac006db9fd00c2acd2925b0988ff969c144dd8d19798173574c78e8517421565",
     ".systems/ai/core/agent-adapters.md": "a644c657e7fc86acff6f4813c6c7238e5cd5abf8fe6736780447b5e662114642",
     ".systems/scripts/agent_context.py": "92d0ef9677b4362dc56bb5012bd86312041b77c08af4e1fbba738d1b2d1f0ce5",
