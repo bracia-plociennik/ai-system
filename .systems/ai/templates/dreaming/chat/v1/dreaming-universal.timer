@@ -1,0 +1,12 @@
+[Unit]
+Description=Chat Dreaming — Wednesday and Saturday nights
+
+[Timer]
+OnCalendar=Wed,Sat *-*-* 02:00:00 Europe/Warsaw
+Unit=dreaming-universal.service
+Persistent=false
+AccuracySec=1s
+RandomizedDelaySec=0
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,19 @@
+[Unit]
+Description=Dreaming in the owner's existing chat
+OnFailure=dreaming-chat-failure.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=@SYSTEM_HOME@
+ExecStart=/usr/bin/python3 -B @SYSTEM_HOME@/.systems/scripts/dreaming_chat_dispatch.py --config @CONTROLLER_CONFIG@ --resume
+ExecStopPost=/usr/bin/python3 -B @SYSTEM_HOME@/.systems/scripts/dreaming_chat_dispatch.py --config @CONTROLLER_CONFIG@ --cancel
+Environment=TZ=Europe/Warsaw
+Environment=PYTHONDONTWRITEBYTECODE=1
+UMask=0077
+NoNewPrivileges=true
+TimeoutStartSec=10900
+TimeoutStopSec=60
+KillMode=control-group
+Restart=no
+StandardOutput=journal
+StandardError=journal

@@ -43,6 +43,7 @@ standard_checks=(
   check-personal-ops
   check-task-management
   check-dreaming-mode
+  check-dreaming-chat
   check-system-insights
   check-prompt-composition
   check-validation-profiles
