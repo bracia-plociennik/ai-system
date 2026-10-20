@@ -89,6 +89,31 @@ class NamingTests(unittest.TestCase):
         self.put(self.workspace, 'Unknown input.md')
         self.assertTrue(self.check())
 
+    def test_silverbullet_task_titles_keep_native_names(self):
+        relative = 'tasks/silverbullet/tasks/example-client/demo-project/Zapłacić fakturę.md'
+        page = self.put(self.workspace, relative)
+        original = page.read_bytes()
+        self.assertEqual(self.check(), [])
+        self.assertEqual(page.read_bytes(), original)
+        page.unlink()
+        page.symlink_to(self.put(self.root, 'outside/title.md'))
+        with self.assertRaisesRegex(ValueError, 'Linked naming input'):
+            self.check()
+
+    def test_silverbullet_title_exception_is_exact_and_workspace_only(self):
+        for relative in (
+            'tasks/silverbullet/views/Bad View.md',
+            'tasks/silverbullet/tasks/client/Bad Task.md',
+            'tasks/silverbullet/tasks/client/project/nested/Bad Task.md',
+            'project-state/example/tasks/silverbullet/tasks/client/project/Bad Task.md',
+        ):
+            with self.subTest(relative=relative):
+                page = self.put(self.workspace, relative)
+                self.assertTrue(self.check())
+                page.unlink()
+        self.put(self.repo, 'tasks/silverbullet/tasks/client/project/Bad Task.md')
+        self.assertTrue(self.check())
+
     def test_disposable_execution_roots_are_not_managed_artifacts(self):
         outside = self.put(self.root, 'outside/Original_Input.md')
         before = outside.read_bytes()
