@@ -531,3 +531,7 @@ An owner-approved chat execution profile uses the existing scheduler transport t
 ## Personal source library
 
 [Personal source library](.systems/ai/core/personal-source-library.md) provides local PDF/Markdown/text import, optional Polish/English OCR, versioned originals, source-grounded reusable notes and SQLite FTS5 retrieval. Libraries stay private under their registered personal owner. Inspect with `.systems/scripts/manage-source-library status --cwd /absolute/managed/project`; initialization and activation are explicit, and read-only searches do not write. Relevant notes are preferred while current project facts and source applicability remain independently checked.
+
+## Independent judgment
+
+`critical-judgment.md` defines proportional evidence-based assessment: challenge material premises, offer feasible simpler options, correct the agent’s own recommendations, respect informed permitted tradeoffs and keep routine work brief. Workflow uses existing phases and meaningful What-if/acceptance evidence; this adds no counterphase, historical QA migration or new permission. Actual Codex evaluations are required for this delivery; structural checks alone do not establish behavior.
