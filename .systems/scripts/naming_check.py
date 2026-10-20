@@ -61,6 +61,8 @@ def valid_name(relative, workspace=False):
             return True
         if len(parts) == 4 and parts[:3] == ("tasks", "TaskNotes", "Tasks"):
             return True  # task-management.md: Use Title as Filename, on.
+        if len(parts) == 6 and parts[:3] == ("tasks", "silverbullet", "tasks"):
+            return True  # Default SilverBullet Space: client/project/native title.md.
         if len(parts) == 4 and parts[:2] in {("tasks", "weekly-plans"), ("personal-ops", "weekly-check-ins-v4")}:
             match = re.fullmatch(r"([0-9]{4})-W([0-9]{2})\.md", base)
             if match and parts[2] == match[1]:
