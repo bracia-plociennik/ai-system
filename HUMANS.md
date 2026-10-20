@@ -723,7 +723,7 @@ Task resource lifecycle and durable QA/Capture: `.systems/ai/core/task-resource-
 
 ## Chat-led Dreaming
 
-An owner-approved chat execution profile uses the existing scheduler transport to queue actual analysis in a selected private chat. It preserves screened source access, native restricted filesystem permissions, cumulative checkpoints and private reports. See `.systems/ai/core/dreaming-chat.md`; activation requires current QA and an actual manual pilot. Batch execution remains available for historical compatibility and is not used by the chat profile.
+Owner-approved chat Dreaming uses the existing scheduler transport to queue analysis in a selected private chat. It preserves the owner's default Approve for me settings, screened manifest inputs, cumulative checkpoints and private reports; it creates no permission profiles and claims no OS isolation of manifest reads. See `.systems/ai/core/dreaming-chat.md`; activation requires current QA and an actual manual pilot. The chat controller does not use the batch model executor.
 
 ## Personal source library
 
