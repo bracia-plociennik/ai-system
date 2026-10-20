@@ -161,6 +161,9 @@ Po znaczącej partii atomowo zapisz {p['drafts'] / 'checkpoint.json'} według sc
 findings to lista rzeczywistych ustaleń, może być pusta. evidence_ids zawierają wyłącznie chunk_id faktycznie
 przeczytanych wejść. reviewed_chunk_ids to kumulatywna lista rzeczywiście przeanalizowanych fragmentów.
 Kolejne rewizje zwiększaj o1; zachowaj poprzednie ustalenia. Nie zapisuj surowych check-inów w raporcie.
+W cyklu używaj jednego ustalenia dla każdej pary topic/lens i zachowuj jej klucz.
+Wcześniejsze facts i evidence_ids zachowuj dosłownie; możesz je rozszerzać. Podsumowanie, interpretacje,
+niewiadome i propozycje możesz doprecyzować na podstawie nowych dowodów bez usuwania wcześniejszych faktów.
 Krótkie podsumowania obszarów mają umożliwić syntezę bez kopiowania wszystkich dowodów.
 Zakończ analizę do epoch {s['analysis_deadline']}; cały budżet kończy się {s['deadline']}.
 Zapisz końcowy checkpoint z synthesis_complete=true tylko po rzeczywistej syntezie przeczytanego zakresu.

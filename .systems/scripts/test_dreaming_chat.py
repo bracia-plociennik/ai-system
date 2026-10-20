@@ -52,6 +52,75 @@ class Sessions(unittest.TestCase):
         _,nexts=chat.begin(self.config,self.stamp+timedelta(days=3))
         self.assertEqual(nexts['input_hashes'],{});self.assertEqual(len(nexts['previous_findings']),1)
 
+    def enrichment(self):
+        (self.root/'other').mkdir()
+        # Copies with different provenance are not independent confirmation.
+        (self.root/'other/note.md').write_text('A documented result.\n')
+        self.cfg['sources'].append({'id':'work','root':str(self.root),'prefix':'other',
+            'owner':'company','subject_type':'project','subject_id':'project',
+            'source_class':'work','audiences':['owner','tech'],'sharing_authority':'fixture'})
+        chat.atomic(self.config,self.cfg)
+        _,s,p=self.begin();ids=list(s['input_hashes'])
+        personal=next(cid for cid in ids if chat.load(p['inputs']/(cid+'.json'))['ref']['source_class']=='personal')
+        self.submit(s,p,reviewed_chunk_ids=[personal],synthesis_complete=False)
+        draft=chat.load(p['drafts']/'checkpoint.json')
+        draft['findings'][0]['evidence_ids']=[personal]
+        chat.atomic(p['drafts']/'checkpoint.json',draft)
+        accepted=chat.accept(self.config,s['cycle_id'],self.stamp)
+        draft['revision']=2;draft['reviewed_chunk_ids']=ids
+        draft['findings'][0]['evidence_ids']=ids
+        return s,p,accepted,draft
+
+    def test_cumulative_enrichment_across_subjects_preserves_knowledge(self):
+        s,p,accepted,draft=self.enrichment()
+        f=draft['findings'][0];f['facts'].append('Another source records the same result.')
+        f['summary']='The recorded result has additional provenance.'
+        f['unknowns']=['Independent success remains unverified.']
+        draft['synthesis_complete']=True
+        chat.atomic(p['drafts']/'checkpoint.json',draft)
+        done=chat.accept(self.config,s['cycle_id'],self.stamp,final=True)
+        f=done['findings'][0]
+        self.assertEqual(done['status'],'completed')
+        self.assertEqual(done['coverage_counts']['reviewed'],2)
+        self.assertEqual(set(f['owners']),{'owner','company'})
+        self.assertNotEqual(f['finding_id'],accepted['findings'][0]['finding_id'])
+        self.assertEqual(f['audiences'],['owner'])
+        self.assertEqual(f['distinct_source_contents'],1)
+        self.assertEqual(len(f['evidence_ids']),2)
+        self.assertIn('The source reports a result.',f['facts'])
+        self.assertIn('additional provenance',(p['report']/'dream-report.md').read_text())
+
+    def test_checkpoint_rejects_lost_finding_after_subject_enrichment(self):
+        s,p,_,draft=self.enrichment();draft['findings']=[]
+        chat.atomic(p['drafts']/'checkpoint.json',draft)
+        with self.assertRaisesRegex(ValueError,'checkpoint-lost-findings'):
+            chat.accept(self.config,s['cycle_id'],self.stamp)
+        self.assertEqual(chat.load(p['state'])['checkpoint_revision'],1)
+
+    def test_checkpoint_rejects_lost_facts_or_evidence(self):
+        s,p,_,draft=self.enrichment()
+        for field in ('facts','evidence_ids'):
+            with self.subTest(field=field):
+                changed=json.loads(json.dumps(draft))
+                if field=='facts':changed['findings'][0][field]=['A replacement claim.']
+                else:
+                    original=chat.load(p['state'])['findings'][0]['evidence_ids'][0]
+                    changed['findings'][0][field]=[cid for cid in draft['reviewed_chunk_ids'] if cid!=original]
+                chat.atomic(p['drafts']/'checkpoint.json',changed)
+                with self.assertRaisesRegex(ValueError,'checkpoint-lost-claims'):
+                    chat.accept(self.config,s['cycle_id'],self.stamp)
+                self.assertEqual(chat.load(p['state'])['checkpoint_revision'],1)
+
+    def test_checkpoint_rejects_ambiguous_topic_lens(self):
+        s,p,_,draft=self.enrichment()
+        duplicate=json.loads(json.dumps(draft['findings'][0]))
+        duplicate['evidence_ids']=draft['reviewed_chunk_ids'][:1]
+        draft['findings'].append(duplicate)
+        chat.atomic(p['drafts']/'checkpoint.json',draft)
+        with self.assertRaisesRegex(ValueError,'checkpoint-ambiguous-findings'):
+            chat.accept(self.config,s['cycle_id'],self.stamp)
+        self.assertEqual(chat.load(p['state'])['checkpoint_revision'],1)
+
     def test_changed_sources_lose_claims(self):
         _,s,p=self.begin();self.submit(s,p)
         (self.root/'sources/note.md').write_text('Changed after analysis')
