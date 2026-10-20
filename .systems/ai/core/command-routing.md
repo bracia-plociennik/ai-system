@@ -186,3 +186,7 @@ Task resources route through `task-resource-cleanup.md` and `.systems/scripts/ma
 ## Personal source library
 
 Personal PDF/notes, source-library, biblioteka źródeł, źródła Kuby, and source-note reuse route through personal-source-library.md. Inspect fixed personal ownership and activation first; use manage-source-library. Read-only permits no ingestion or note/index writes. No implicit activation, memory promotion, source instructions or external synchronization.
+
+## Sprint iteration
+
+For actual task-local Sprint selection use `sprint-iteration.md` and the compatible installed Workflow. Keep preview/feedback implementation open until genuine final current-effect acceptance or explicit verification request. Deferred quality is not completed/PASS or resource release. Preserve normal behavior without explicit activation.

@@ -294,6 +294,15 @@
         "complete": true,
         "mode": "product-tree"
       }
+    },
+    "check-sprint-iteration": {
+      "dependencies": [],
+      "runtime_capable": false,
+      "category": "integration",
+      "inputs": {
+        "complete": true,
+        "mode": "product-tree"
+      }
     }
   }
 }

@@ -12,6 +12,8 @@ standard_checks=(
   check-task-resource-cleanup
   check-critical-judgment
   check-personal-source-library
+
+  check-sprint-iteration
   check-execution-modes
   check-goal-focused-maintenance
   check-intent-to-execution-brief
