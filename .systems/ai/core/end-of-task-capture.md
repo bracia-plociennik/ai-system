@@ -155,3 +155,5 @@ The trace should mention:
 - source scope reviewed;
 - durable writes performed or explicitly skipped;
 - residual risk.
+
+For new registered task resources apply `task-resource-cleanup.md`: durable QA/Capture stays outside temporary execution; release and eligible cleanup follow actual task closure, with one installed Workflow executor and seven-day whole-worktree retention.

@@ -80,3 +80,5 @@ Open only the matching contract and section selected by command-routing.md and m
 - `.systems/ai/core/weekly-planning.md`
 - `.systems/ai/core/workspace-directory-layout.md`
 - `.systems/ai/core/workspaces.md`
+
+For new registered task resources use `.systems/ai/core/task-resource-cleanup.md`: keep QA/Capture outside temporary execution and run eligible cleanup after safe closure.
