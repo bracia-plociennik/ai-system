@@ -263,6 +263,15 @@
         "complete": true,
         "mode": "product-tree"
       }
+    },
+    "check-task-resource-cleanup": {
+      "dependencies": [],
+      "runtime_capable": false,
+      "category": "integration",
+      "inputs": {
+        "complete": true,
+        "mode": "product-tree"
+      }
     }
   }
 }

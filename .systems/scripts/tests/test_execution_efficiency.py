@@ -23,7 +23,7 @@ class EfficiencyTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix="execution-efficiency-")
         self.root = Path(self.temp.name).resolve()
-        for name in ("fixture", "validation_runner.py", "validation_support.py", "execution_efficiency.py", "validation-dependencies.json"):
+        for name in ("fixture", "validation_runner.py", "validation_support.py", "durable_runtime.py", "execution_efficiency.py", "validation-dependencies.json"):
             self.put(".systems/scripts/" + name, "synthetic " + name)
         self.put("input.md", "source")
         self.put("result.md", "observed evidence")
@@ -246,7 +246,7 @@ class EfficiencyTests(unittest.TestCase):
     def test_actual_runner_reuse_and_fresh_full_boundary(self):
         product = self.root / "product"
         product.mkdir()
-        names = ["validation_runner.py", "validation_support.py", "execution_efficiency.py", "smoke_coverage.py",
+        names = ["validation_runner.py", "validation_support.py", "durable_runtime.py", "execution_efficiency.py", "smoke_coverage.py",
                  "validation-dependencies.json", "check-readmes", "check-privacy-boundary"]
         for name in names:
             target = product / ".systems/scripts" / name
