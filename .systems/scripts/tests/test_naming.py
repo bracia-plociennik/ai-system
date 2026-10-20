@@ -89,6 +89,30 @@ class NamingTests(unittest.TestCase):
         self.put(self.workspace, 'Unknown input.md')
         self.assertTrue(self.check())
 
+    def test_disposable_execution_roots_are_not_managed_artifacts(self):
+        outside = self.put(self.root, 'outside/Original_Input.md')
+        before = outside.read_bytes()
+        for slot in ('.tmp', '.worktrees'):
+            for owner in ('', 'clients/example/', 'owned-assets/example/'):
+                self.put(self.workspace, owner + slot + '/task/Original_Input.md')
+                link = self.workspace / owner / slot / 'task/auth.json'
+                link.symlink_to(outside)
+        self.assertEqual(self.check(), [])
+        self.assertEqual(outside.read_bytes(), before)
+        self.put(self.workspace, 'project-state/example/.tmp/Bad_QA.md')
+        self.assertTrue(self.check())
+
+    def test_disposable_root_itself_cannot_redirect_owner_boundary(self):
+        outside = self.root / 'outside'
+        outside.mkdir()
+        for slot in ('.tmp', '.worktrees'):
+            with self.subTest(slot=slot):
+                link = self.workspace / slot
+                link.symlink_to(outside, target_is_directory=True)
+                with self.assertRaisesRegex(ValueError, 'Linked naming input'):
+                    self.check()
+                link.unlink()
+
     def test_exact_historical_input_is_visible_and_immutable(self):
         entry = self.historical()
         self.register([entry])
