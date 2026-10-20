@@ -454,7 +454,7 @@ def source_candidate(ref, config, *, role, fact_date):
     """Selected TaskNote/checkpoint facts are review hints, never performed work."""
     from work_evidence import validate_source
     import re
-    require(role in {"tasknote", "checkpoint"}, "invalid-source-role", "role")
+    require(role in {"task", "tasknote", "checkpoint"}, "invalid-source-role", "role")
     iso_date(fact_date, "fact_date")
     path = validate_source(ref, config)
     require(path.suffix.lower() == ".md", "unsupported-source-type", "source")

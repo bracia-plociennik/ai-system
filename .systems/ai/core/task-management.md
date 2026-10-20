@@ -1,5 +1,57 @@
 # Task Management
 
+## Selected store profile
+
+Always inspect the selected workspace's `tasks/task-store.local.md` first. An enabled
+schema_version: 1 configuration with profile: silverbullet-v1 selects the SilverBullet
+Markdown store for ALL task routes: direct tasks, daily/weekly check-ins, weekly plans,
+SPOR context, Dreaming and Work Evidence source selection. Resolve vault_path through
+local-paths.md; operations receive absolute paths. SilverBullet is optional UI: read/write
+local Markdown through the shared adapter, without browser credentials or a running server.
+An invalid/disabled explicit profile blocks task writes and never falls back to TaskNotes.
+Absent neutral configuration retains the historical taskforge-vault.local.md route.
+
+The TaskNotes/6D-tag-specific sections below describe the legacy tasknotes-v1 profile.
+For silverbullet-v1 the following app-facing schema/path rules override those legacy
+format rules; owner authority, privacy, source/read-only and lifecycle gates remain binding.
+
+- One existing Space is the configured vault; tasks live in tasks/<client>/<project>/<title>.md.
+- Required new metadata: type: task, title, status, priority, client, project, category, scheduled.
+- category is one of daily/do/defer/delegate/delete/dump/done. No classification tags, AI tag,
+  due, contexts or projects arrays are generated. Unknown routing stays blank in metadata,
+  with bez-klienta/bez-projektu path segments; never assign a company or personal client by default.
+- UI-compatible status/priority: daily/do=open/high; defer=planned/normal;
+  delegate=waiting/normal; delete=cancelled/none; dump=open/none; done=done/normal.
+- scheduled is the only task date, YYYY-MM-DD or empty. Preserve explicit planned date,
+  otherwise use an explicit source deadline's date. Preserve any original deadline timestamp
+  separately as source_deadline provenance; never invent a missing date. DAILY requires a date.
+- Body: title; Category, DoD, Deadline (from scheduled); Checkpoint OSNR; TODO checklist;
+  Evidence; Working dump. Preserve source DoD and source IDs. DONE/DELETE never deletes files.
+- Generated tasks deduplicate by their original check-in/week item identity, or stable Dream
+  candidate identity. Repeat generation skips existing tasks, preserving user edits. No fuzzy
+  subtask append and no hidden weekly lifecycle rewrite in this profile. Report changed source
+  facts as a proposal; update only with exact owner-approved lifecycle scope after re-reading.
+- Path collision, symlink escape and unavailable selected store fail closed. Create is atomic
+  and cannot overwrite an unrelated UI task. Never move a file merely to change category.
+
+Use `.systems/scripts/task-store inspect --workspace <workspace>` and `list` for reads.
+For a directly approved task, `create --workspace <workspace> --input <candidate-json>
+--owner-approved` writes via the same adapter. Data/flags never establish actual permission.
+For check-ins, weekly plans and Dream Reports retain propose-task-candidates: it discovers
+this profile and emits the selected schema in dry-run and write mode. Existing same-check-in
+and same-weekly-plan approvals cover the same initial-task scope, not a migration or a new
+permission. Dreaming remains advisory-only; it never creates tasks or WEP entries by itself.
+
+WEP selects sources through a new explicit root alias for SilverBullet while preserving
+historical tasknotes alias/references and transaction manifests. Generic source role task
+and legacy tasknote are both accepted. Task/OSNR hints are not proof of performed work or
+elapsed time; native owner bindings, source hashes and confirmation remain required.
+Working dump and raw sections are excluded from WEP hints.
+
+Setup uses tasks/task-store.local.template.md and tasks/silverbullet-task.template.md.
+Activate only after local owner approval; never copy populated paths into product source,
+rewrite historical task files, automatically migrate aliases or initialize a missing vault.
+
 Local root expressions follow `local-paths.md`. Markdown TaskNotes are the task
 store; TaskForge is optional UI. The historical taskforge-vault.local.md filename
 and enabled flag select an available local store, not a running UI requirement.

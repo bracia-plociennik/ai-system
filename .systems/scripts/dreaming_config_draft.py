@@ -3,6 +3,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+from task_store import TaskStore, config_path as task_config_path
 from dreaming_guard import read_file, hash_bytes
 from dreaming_universal_sources import frontmatter, CREDENTIAL, config
 from dreaming_universal_evidence import slug, need, LENSES
@@ -66,8 +67,16 @@ def draft(home, owner, company, system_source, workflow_source, model, cli, cli_
         except (OSError, ValueError, TypeError, KeyError, UnicodeError): native_gaps += 1
     # Mixed task store: metadata + an existing unique owner namespace decides ownership.
     # No owner guessed from filename, directory proximity or project-like prose.
+    selected = None
+    if task_config_path(owner_path).exists(): selected = TaskStore.load(owner_path)
+    if selected and selected.profile == 'silverbullet-v1':
+        # The configured vault is the personal owner's store, including company tasks.
+        # One explicit owner-only source includes future tasks without guessing business ownership.
+        need(selected.task_dir.is_relative_to(owner_path), 'task-store-outside-owner-workspace')
+        add(owner_path, selected.task_dir.relative_to(owner_path).as_posix(), owner_id,
+            'person', owner_id, 'personal', [owner_id], {'type': 'task'})
     tasks = owner_path/'tasks/TaskNotes/Tasks'
-    for path in sorted(tasks.glob('*.md')):
+    for path in ([] if selected and selected.profile == 'silverbullet-v1' else sorted(tasks.glob('*.md'))):
         identifier = hash_bytes(path.name.encode())[:20]
         try:
             data = read_file(str(owner_path), path.relative_to(owner_path).as_posix(), 1048576, prescreen=False)

@@ -11,6 +11,7 @@ import sys
 import unicodedata
 from pathlib import Path
 from local_paths import resolve_path
+from task_store import TaskStore, config_path as selected_task_config
 
 from personal_ops_properties_v3 import (
     CURRENT_TASK_GENERATION_POLICY,
@@ -240,7 +241,7 @@ def projects_from_frontmatter(text: str) -> list[str]:
     return sorted(set(projects))
 
 
-def discover_labels(workspace: Path, task_vault: Path | None) -> dict[str, list[tuple[str, str]]]:
+def discover_labels(workspace: Path, task_vault: Path | None, store=None) -> dict[str, list[tuple[str, str]]]:
     labels: dict[str, list[tuple[str, str]]] = {"client": [], "owned_asset": [], "project_state": [], "taskforge_project": []}
     for key, rel in [("client", "clients"), ("owned_asset", "owned-assets"), ("project_state", "project-state")]:
         root = workspace / rel
@@ -249,10 +250,14 @@ def discover_labels(workspace: Path, task_vault: Path | None) -> dict[str, list[
                 if child.is_dir() and not child.name.startswith("."):
                     labels[key].append((child.name, child.name))
     if task_vault:
-        for path in task_vault.rglob("*.md"):
+        for path in ([path for path, _ in store.tasks()] if store else task_vault.rglob("*.md")):
             if ".git" in path.parts:
                 continue
             text = read_text(path)
+            fields = parse_frontmatter(text)
+            if fields.get("type") == "task" and fields.get("category"):
+                if fields.get("client"): labels["client"].append((fields["client"], fields["client"]))
+                if fields.get("project"): labels["taskforge_project"].append((fields["project"], fields["project"]))
             for project in projects_from_frontmatter(text):
                 labels["taskforge_project"].append((project, project))
     return labels
@@ -1173,7 +1178,7 @@ def main() -> int:
     args.workspace = workspace
     config_path = (resolve_path(args.task_vault_config, workspace=workspace,
                                 base=workspace, allow_relative=True)
-                   if args.task_vault_config else workspace / "tasks" / "taskforge-vault.local.md")
+                   if args.task_vault_config else selected_task_config(workspace))
     task_vault = (resolve_path(args.task_vault, workspace=workspace,
                               base=workspace, allow_relative=True) if args.task_vault else None)
     if args.write and not args.owner_approved:
@@ -1236,7 +1241,16 @@ def main() -> int:
             print(f"Task generation skipped: {task_generation_gate}")
             return 0
         print(f"Task generation unavailable: {task_generation_gate}", file=sys.stderr)
-    if args.write:
+    # An explicit neutral profile never falls back to the historical store.
+    selected_store = None
+    if config_path.name == "task-store.local.md" or config_path.is_file() and "profile" in parse_frontmatter(read_text(config_path)):
+        try:
+            selected_store = TaskStore.load(workspace, config_path, args.task_vault)
+        except ValueError as exc:
+            raise SystemExit("Configured task store unavailable: " + str(exc)) from exc
+    if selected_store:
+        task_vault = selected_store.root
+    elif args.write:
         task_vault, preflight_reason = task_preflight(args, config_path)
         if preflight_reason:
             if args.check_in and is_v3_check_in:
@@ -1244,12 +1258,12 @@ def main() -> int:
                 print(f"Task generation skipped: {preflight_reason}")
                 return 0
             raise SystemExit(preflight_reason)
-    else:
+    elif selected_store is None:
         task_vault, discovery_warning = task_vault_for_discovery(args, config_path)
         if discovery_warning:
             print(discovery_warning, file=sys.stderr)
 
-    labels = discover_labels(workspace, task_vault)
+    labels = discover_labels(workspace, task_vault, selected_store)
     if args.check_in:
         if is_v4_check_in:
             candidates = candidates_from_v4_daily(args.check_in.resolve(), workspace, labels)
@@ -1264,9 +1278,13 @@ def main() -> int:
         else:
             candidates = candidates_from_weekly_plan(args.weekly_plan.resolve(), workspace, labels)
 
+    if selected_store and selected_store.profile == "silverbullet-v1":
+        candidates = [selected_store.candidate(candidate) for candidate in candidates]
     if args.write:
         try:
-            written, skipped, extended, updated = write_candidates(candidates, task_vault)
+            written, skipped, extended, updated = (selected_store.write_candidates(candidates)
+                if selected_store and selected_store.profile == "silverbullet-v1"
+                else write_candidates(candidates, task_vault))
         except ValueError as exc:
             if args.check_in and is_v3_check_in:
                 update_v3_task_generation_status(args.check_in.resolve(), "skipped", str(exc), [], task_vault)
@@ -1287,11 +1305,11 @@ def main() -> int:
             update_v3_task_generation_status(
                 args.check_in.resolve(),
                 status,
-                "TaskForge preflight passed; task generation completed.",
+                "Configured local task store preflight passed; task generation completed.",
                 [*written, *extended],
                 task_vault,
             )
-        print("Written TaskNotes:")
+        print("Written SilverBullet tasks:" if selected_store and selected_store.profile == "silverbullet-v1" else "Written TaskNotes:")
         for path in written:
             print(path)
         print(f"Skipped existing TaskNotes: {skipped}")
@@ -1306,7 +1324,7 @@ def main() -> int:
     if args.json:
         print(json.dumps(candidates, indent=2, ensure_ascii=False))
     else:
-        print("# TaskNote Candidates")
+        print("# SilverBullet Task Candidates" if selected_store and selected_store.profile == "silverbullet-v1" else "# TaskNote Candidates")
         print()
         print("Mode: dry-run")
         print("Writes performed: no")
@@ -1318,11 +1336,16 @@ def main() -> int:
             print()
             print(f"- status: `{candidate['status']}`")
             print(f"- priority: `{candidate['priority']}`")
-            print(f"- tags: `{', '.join(candidate.get('tags', []))}`")
+            print(f"- category: `{candidate['category']}`" if "category" in candidate else f"- tags: `{', '.join(candidate.get('tags', []))}`")
             print(f"- task method: `{candidate.get('task_method', 'none')}`")
             print(f"- execution bucket: `{candidate.get('execution_bucket', 'unclassified')}`")
-            print(f"- contexts: `{', '.join(candidate.get('contexts', []))}`")
-            print(f"- due: `{candidate.get('due', '')}`")
+            if "category" in candidate:
+                print(f"- client: `{candidate.get('client', '')}`")
+                print(f"- project: `{candidate.get('project', '')}`")
+                print(f"- scheduled: `{candidate.get('scheduled', '')}`")
+            else:
+                print(f"- contexts: `{', '.join(candidate.get('contexts', []))}`")
+                print(f"- due: `{candidate.get('due', '')}`")
             print(f"- source: `{candidate.get('source_type', '')}` / `{candidate.get('source_path', '')}`")
             if candidate.get("source_week_id"):
                 print(f"- weekly source: `{candidate['source_week_id']} / {candidate['source_week_item_id']}`")

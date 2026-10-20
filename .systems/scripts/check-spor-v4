@@ -667,4 +667,27 @@ subprocess.run(
 assert len(json.loads(candidate_output.read_text(encoding="utf-8"))) == 4
 PY
 
+# The same canonical source fixtures must work through an explicitly selected SilverBullet store.
+python3 - "$repo_root" "$workspace" "$tmp_root" <<'SILVERBULLET_TEST'
+import json,sys,subprocess
+from pathlib import Path
+root,w,tmp=map(Path,sys.argv[1:]);sys.path.insert(0,str(root/'.systems/scripts'))
+from task_store import TaskStore,frontmatter
+vault=tmp/'silverbullet-vault';(vault/'tasks').mkdir(parents=True);(w/'tasks').mkdir(exist_ok=True)
+(w/'tasks/task-store.local.md').write_text(f'---\nschema_version: 1\nenabled: true\nprofile: silverbullet-v1\nvault_path: {vault}\n---\n')
+command=[sys.executable,str(root/'.systems/scripts/propose-task-candidates'),'--workspace',str(w)]
+daily=w/'personal-ops/check-ins-v4/2026/2026-08-19.md'
+weekly=tmp/'silverbullet-weekly.md';weekly.write_text((w/'personal-ops/weekly-check-ins-v4/2026/2026-W34.md').read_text().replace('Partner Dashboard','Weekly unique output'))
+for source,flag,expected in [(daily,'--check-in',4),(weekly,'--weekly-plan',1)]:
+ dry=subprocess.run(command+[flag,str(source),'--json'],capture_output=True,text=True,check=True);rows=json.loads(dry.stdout);assert len(rows)==expected
+ assert all('category' in row and 'scheduled' in row and not {'tags','due','projects','contexts'}&row.keys() for row in rows)
+ subprocess.run(command+[flag,str(source),'--write','--owner-approved'],capture_output=True,text=True,check=True)
+ before={str(path):path.read_bytes() for path,_ in TaskStore.load(w).tasks()}
+ subprocess.run(command+[flag,str(source),'--write','--owner-approved'],capture_output=True,text=True,check=True)
+ assert before=={str(path):path.read_bytes() for path,_ in TaskStore.load(w).tasks()}
+assert len(list(TaskStore.load(w).tasks()))==5
+assert not (vault/'TaskNotes').exists()
+print('SilverBullet V4 daily/weekly write + repeat/dedup: OK')
+SILVERBULLET_TEST
+
 echo "SPOR V4 smoke tests: OK"

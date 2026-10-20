@@ -116,6 +116,8 @@ def hard_forbidden_workspace_path(path: str) -> str | None:
         return "Personal Ops allows only the sanitized V3/V4 trends projection"
     if lower_path.startswith("dump/incoming/"):
         return "raw dump intake is forbidden"
+    if lower_path.startswith("tasks/silverbullet/"):
+        return "SilverBullet bodies require an explicitly approved universal source; not legacy Dreaming"
     if lower_path.startswith("tasks/tasknotes/"):
         return "TaskNote bodies are forbidden"
     if lower_path.startswith("tasks/weekly-plans/"):

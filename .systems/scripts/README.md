@@ -164,3 +164,12 @@ SPOR V4 daily artifacts use `sync-personal-ops-check-ins-v4` and the V4-aware da
 `style-profile inspect|project|prepare|apply` manages a private schema1 advisory profile using explicit selected absolute workspace, canonical owner path, scope and revision guard. Coordinator must verify real exact-target consent and semantic privacy; metadata cannot authenticate it. `style_profile.py` is standalone; TaskForge and nested Workflow are optional. Profile/key disable and history/provenance are preserved.
 
 `check-intent-to-execution-brief` runs offline synthetic state/corpus tests. `--workflow-root <absolute-install> --expected-head <accepted-sha>` checks AI System-owned Workflow brief16 pins against real tested tree/current tree/index/live bytes/modes. `intent_brief.py` is a pure independent consumer. Mode14 reader now also verifies real tested-tree integrity; `verify_execution_modes_counterpart.py` uses disposable fixtures with only local accepted tested objects. These checks are supporting-only; native behavior and authority are independently reviewed.
+
+## Selected local task store
+
+`task-store inspect|list --workspace <workspace>` reads the selected profile;
+`create --input <json> --owner-approved` is the guarded direct SilverBullet writer.
+`task_store.py` shares config/reader/template/atomic-create/dedup behavior with
+propose-task-candidates, SPOR and Dreaming configuration. Explicit neutral config
+takes precedence; tasknotes-v1 remains legacy-compatible. No task migration or
+server credentials. Tests: tests/test_silverbullet_task_store.py.

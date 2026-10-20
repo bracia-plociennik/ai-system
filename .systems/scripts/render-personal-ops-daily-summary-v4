@@ -78,7 +78,7 @@ def alignment_section(properties: dict, workspace: Path) -> list[str]:
         f"- Ostatnie 14 odpowiedzi: `{daily['no_count']}/{daily['answer_count']}` NIE; kartka: `{card14}`",
         f"- Ostatnie 30 odpowiedzi: `{daily['no_30']}/{daily['count_30']}` NIE; kartka: `{card30}`",
         f"- Stan rozwiązania: `{json.dumps(resolution, ensure_ascii=False) if resolution else 'brak'}`",
-        f"- Gate TaskNotes: `{summary['tasknote_gate']}`",
+        f"- Gate Zadania: `{summary['tasknote_gate']}`",
     ]
 
 
@@ -463,7 +463,7 @@ def render(properties: dict, rows: list[dict], budget_report: dict, workspace: P
     if deferred:
         lines.extend(["", "### Odroczone", *[f"- {prefixed_title(item.get('title', ''), item.get('stream', ''))}" for item in deferred]])
     if properties.get("task_generation_status"):
-        lines.extend(["", "### TaskNotes", f"- Status: {properties.get('task_generation_status')}"])
+        lines.extend(["", "### Zadania", f"- Status: {properties.get('task_generation_status')}"])
     warnings = []
     for label, report in (("wydatków", monthly), ("kalorii", weekly)):
         coverage = report.get("coverage")
