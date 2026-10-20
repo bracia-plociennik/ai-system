@@ -86,3 +86,7 @@ For new registered task resources use `.systems/ai/core/task-resource-cleanup.md
 For substantive tasks, personal-source-library.md defines use of an explicitly activated owner library. Inspect status without creating anything; prefer relevant current source notes and cite original fragments. Preserve client privacy and read-only, with no automatic activation or canonical memory promotion.
 
 Explicit task-local Sprint follows .systems/ai/core/sprint-iteration.md and a source-verified local Workflow. Preview rounds defer Quality; acceptance starts verification, never supplies PASS. Keep pending resources/durable evidence and owner safety boundaries.
+
+## Independent judgment
+
+Use `.systems/ai/core/critical-judgment.md` for proportional, evidence-based assessment of the goal, proposed mechanism and the agent's own advice. State material objections directly with basis, consequence and a feasible recommendation; acknowledge sound ideas and uncertainty. Preserve existing authority and phase gates, short routine answers, informed permitted tradeoffs and applicable quiet handling of independent minor debt.

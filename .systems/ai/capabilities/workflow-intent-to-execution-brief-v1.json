@@ -1,7 +1,7 @@
 {
   "contract": "intent-to-execution-brief-v1",
   "semantic_version": 1,
-  "tested_commit": "6211c397dc20965bc30e86b62561d904bd982074",
+  "tested_commit": "6eb871a59e01a4d716b72f2f5f1ee9a66b8f9cb7",
   "mode_mapping": {
     "auto": "auto",
     "human": "human-coop"
@@ -27,7 +27,7 @@
       "mode": "100644"
     },
     ".systems/ai/core/intent-to-execution-brief.md": {
-      "sha256": "48cf18e3e6bd1fee00afb0389ac91c7ff2dd7b9dcaca7ad289d6e79bef393e51",
+      "sha256": "08242bc3529a96fad2e8a36dc798b6ea17f521f53943fc846801e9d85553a641",
       "mode": "100644"
     },
     ".systems/ai/core/owner-decision-checkpoints.md": {
@@ -47,7 +47,7 @@
       "mode": "100644"
     },
     ".systems/ai/core/quality-review.md": {
-      "sha256": "d33dd4a6dc0bfbe798c3761d91ec3650638918c52b588a09590db712ce19f265",
+      "sha256": "7adabbd71c379353849b24b8891c9f6bf8d39b68b63a3248419cadbdfb71b583",
       "mode": "100644"
     },
     ".systems/ai/core/risk-model.md": {
@@ -59,7 +59,7 @@
       "mode": "100644"
     },
     ".systems/ai/core/task-intake.md": {
-      "sha256": "73a2a6263b030e89a69b2e2da69905967c1b67ac152559400d3e13f04b17ce0d",
+      "sha256": "4b0ae6d65a6b0d6f8e34975e90430979008d6270d189623779cce312369b1fe7",
       "mode": "100644"
     },
     ".systems/scripts/lib/style-profile.py": {
@@ -71,7 +71,7 @@
       "mode": "100755"
     },
     "AGENTS.md": {
-      "sha256": "351fd38de814d7d5500ea6e02c4324e155ff2f368890b58ea66bacdd19eedf1b",
+      "sha256": "7d0dc1b1ea79854856af5e79464c7d6638cac2261624791826643d8bd39974a1",
       "mode": "100644"
     }
   }

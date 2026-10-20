@@ -1,6 +1,6 @@
 {
   "contract": 1,
-  "tested_commit": "6211c397dc20965bc30e86b62561d904bd982074",
+  "tested_commit": "6eb871a59e01a4d716b72f2f5f1ee9a66b8f9cb7",
   "mode_mapping": {
     "auto": "auto",
     "human": "human-coop"
@@ -35,7 +35,7 @@
       "mode": "100644"
     },
     ".systems/ai/core/quality-review.md": {
-      "sha256": "d33dd4a6dc0bfbe798c3761d91ec3650638918c52b588a09590db712ce19f265",
+      "sha256": "7adabbd71c379353849b24b8891c9f6bf8d39b68b63a3248419cadbdfb71b583",
       "mode": "100644"
     },
     ".systems/ai/core/risk-model.md": {

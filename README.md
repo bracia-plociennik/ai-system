@@ -535,3 +535,7 @@ An owner-approved chat execution profile uses the existing scheduler transport t
 ## Sprint
 
 “Włącz sprint dla tego zadania” enables fast dev/test preview rounds with deferred tests and QA. “Podoba mi się, to finalna wersja”, “Działa, tak zostawiamy” or “Testuj teraz” starts current verification. “Ładnie, ale jeszcze…” keeps iterating. “Pauza”/“Wznów sprint” preserves the same unfinished task and environment. Production needs separate exact owner permission. Workflow owns one durable record and final QA; no automatic per-round Capture or background test run. See `.systems/ai/core/sprint-iteration.md`; System `manage-sprint --workflow-root <installed-workflow> --check-support` verifies compatibility.
+
+## Independent judgment
+
+`critical-judgment.md` defines proportional evidence-based assessment: challenge material premises, offer feasible simpler options, correct the agent’s own recommendations, respect informed permitted tradeoffs and keep routine work brief. Workflow uses existing phases and meaningful What-if/acceptance evidence; this adds no counterphase, historical QA migration or new permission. Actual Codex evaluations are required for this delivery; structural checks alone do not establish behavior.

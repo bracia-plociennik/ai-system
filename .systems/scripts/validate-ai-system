@@ -10,6 +10,7 @@ standard_checks=(
   check-product-publication
   check-agent-startup
   check-task-resource-cleanup
+  check-critical-judgment
   check-personal-source-library
 
   check-sprint-iteration
