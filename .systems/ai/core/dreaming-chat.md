@@ -12,6 +12,11 @@ a unique cycle; the scheduled cycle uses Wednesday/Saturday02:00 Europe/Warsaw.
 A restart retains its cycle and original deadline. New slots inherit pending
 history without copying old run directories. Preparing data is not reviewing it:
 coverage advances only from validated model review declarations, not byte counts.
+Trusted state stores shared context references/sets once and verifies their hashes
+when loading; model checkpoint JSON cannot inject that internal representation.
+The initial pass prioritizes the last seven days without excluding older material.
+Later passes distinguish new/changed files from known backlog using a saved
+inventory, and select chunks across registered roots to avoid source starvation.
 
 `dreaming_chat_dispatch.py --config <private-controller.json>` reuses an explicitly
 hash-pinned SPOR transport; it does not modify SPOR. `--manual` requests a pilot;

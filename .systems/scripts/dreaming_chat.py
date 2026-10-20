@@ -15,6 +15,7 @@ from pathlib import Path
 import re
 import stat
 import uuid
+from collections import defaultdict, deque
 from zoneinfo import ZoneInfo
 
 from dreaming_universal_evidence import digest, findings, need, route
@@ -68,15 +69,59 @@ def load(path):
         for k, v in pairs:
             need(k not in d, 'duplicate-json-key'); d[k] = v
         return d
-    return json.loads(read_bytes(path), object_pairs_hook=unique,
-                      parse_constant=lambda _: need(False, 'invalid-json-number'))
+    value=json.loads(read_bytes(path), object_pairs_hook=unique,
+                     parse_constant=lambda _: need(False, 'invalid-json-number'))
+    # Model drafts are always the strict, unextended checkpoint protocol.
+    return value if Path(path).name=='checkpoint.json' else unpack_contexts(value)
+
+
+def pack_contexts(value):
+    """Store shared references/sets once, rather than once per finding/cycle."""
+    if not isinstance(value,dict):return value
+    result=dict(value);refs={};sets={}
+    for field in ('findings','previous_findings'):
+        if field not in value:continue
+        rows=[]
+        for f in value[field]:
+            if 'context_refs' not in f:rows.append(f);continue
+            ids=[]
+            for ref in f['context_refs']:
+                rid=digest(ref);refs[rid]=ref;ids.append(rid)
+            ids=sorted(set(ids));sid=digest(ids);sets[sid]=ids
+            rows.append({**{k:v for k,v in f.items() if k!='context_refs'},'_context_set':sid})
+        result[field]=rows
+    if sets:result['_context_registry']={'refs':refs,'sets':sets}
+    return result
+
+
+def unpack_contexts(value):
+    if not isinstance(value,dict) or '_context_registry' not in value:return value
+    result={k:v for k,v in value.items() if k!='_context_registry'};table=value['_context_registry']
+    need(isinstance(table,dict) and set(table)=={'refs','sets'},'invalid-context-registry')
+    refs=table['refs'];sets=table['sets']
+    need(isinstance(refs,dict) and isinstance(sets,dict) and len(refs)<=200000,'invalid-context-registry')
+    for rid,ref in refs.items():need(digest(ref)==rid,'context-reference-drift')
+    for sid,ids in sets.items():
+        need(isinstance(ids,list) and all(isinstance(x,str) and x in refs for x in ids) and
+             ids==sorted(set(ids)) and digest(ids)==sid,'context-set-drift')
+    expanded=0
+    for field in ('findings','previous_findings'):
+        if field not in result:continue
+        rows=[]
+        for f in result[field]:
+            if '_context_set' not in f:rows.append(f);continue
+            sid=f['_context_set'];need(sid in sets,'missing-context-set')
+            expanded+=len(sets[sid]);need(expanded<=2000000,'context-expansion-limit')
+            rows.append({**{k:v for k,v in f.items() if k!='_context_set'},'context_refs':[refs[x] for x in sets[sid]]})
+        result[field]=rows
+    return result
 
 
 def atomic(path, value):
     path = Path(path); directory = mkdir(path.parent)
     if path.exists() or path.is_symlink():
         read_bytes(path)
-    raw = (json.dumps(value, ensure_ascii=False, allow_nan=False, indent=2) + '\n').encode()
+    raw = (json.dumps(pack_contexts(value), ensure_ascii=False, allow_nan=False, indent=2) + '\n').encode()
     need(len(raw) <= MAX_JSON, 'oversized-state')
     temp = directory / ('.atomic-' + uuid.uuid4().hex)
     fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
@@ -153,7 +198,8 @@ def begin(config_path, stamp=None, manual=False, cycle=None):
         reviewed = previous['reviewed'] if same_scope else {}
         sources = {s['id']: s for s in cfg['sources']}
         chunks = []; eligible = []; coverage = []; by_file = {}
-        total = 0
+        total = 0; known_inventory=previous.get('inventory',{}) if same_scope else {}
+        baseline=bool(previous.get('cycle_id')) and same_scope
         # Source contents are read once here; finalization performs one fresh check.
         for row in current:
             if row['state'] != 'pending':
@@ -168,21 +214,30 @@ def begin(config_path, stamp=None, manual=False, cycle=None):
                           'chunk_ids': [c['chunk_id'] for c in material]}
             if reviewed.get(key) == fingerprint:
                 coverage.append({**descriptor, 'state': 'reviewed'}); continue
-            eligible.append((key not in reviewed, descriptor, material))
-        # Changed known files, then previously unseen history; stable oldest-first rotation
-        # is achieved by removing successfully reviewed entries, not a per-run file cap.
-        eligible.sort(key=lambda x: (x[0], x[1].get('mtime_ns', 0), x[1]['key']))
-        for _, row, material in eligible:
+            changed=key in reviewed and reviewed[key]!=fingerprint
+            new=baseline and key not in known_inventory
+            recent=not baseline and row.get('mtime_ns',0)>=int((stamp.timestamp()-7*86400)*1e9)
+            priority=0 if changed or new or recent else 1
+            eligible.append((priority, descriptor, material))
+        eligible.sort(key=lambda x:(x[0],-x[1].get('mtime_ns',0) if x[0]==0 else x[1].get('mtime_ns',0),x[1]['key']))
+        queues={0:defaultdict(deque),1:defaultdict(deque)}
+        for priority, row, material in eligible:
             already = set(previous.get('partial', {}).get(row['key'], [])) if same_scope else set()
+            already &= {c['chunk_id'] for c in material}
             remaining = [c for c in material if c['chunk_id'] not in already]
-            selected = []
-            for c in remaining:
-                size = len(c['text'].encode())
-                if len(chunks) < MAX_CHUNKS and total + size <= MAX_INPUT_BYTES:
-                    chunks.append(c); selected.append(c['chunk_id']); total += size
             by_file[row['key']] = {**row, 'all_chunk_ids': row['chunk_ids'], 'prior_chunk_ids': sorted(already),
-                                  'selected_chunk_ids': selected}
+                                  'selected_chunk_ids': []}
+            queues[priority][row['source_id']].extend((row['key'],c) for c in remaining)
             coverage.append({**row, 'state': 'pending'})
+        # Round robin across source roots prevents a large repository starving the
+        # other approved perspectives. Priority material always precedes backlog.
+        for priority in (0,1):
+            active=deque(queues[priority])
+            while active and len(chunks)<MAX_CHUNKS:
+                sid=active.popleft();key,c=queues[priority][sid].popleft();size=len(c['text'].encode())
+                if total+size<=MAX_INPUT_BYTES:
+                    chunks.append(c);total+=size;by_file[key]['selected_chunk_ids'].append(c['chunk_id'])
+                if queues[priority][sid]:active.append(sid)
         mkdir(p['inputs']); mkdir(p['drafts'])
         for c in chunks:
             atomic(p['inputs'] / (c['chunk_id'] + '.json'), c)
@@ -200,6 +255,7 @@ def begin(config_path, stamp=None, manual=False, cycle=None):
                       'previous_findings': [{'finding_id': f['finding_id'], 'topic': f['topic'], 'lens': f['lens'],
                                              'summary': f['summary']} for f in state['previous_findings']][-100:],
                       'decisions': cfg['decisions'], 'source_count': len(cfg['sources']),
+                      'selection_policy':'new/changed first; bootstrap last7 days; source round-robin; older backlog remains queued',
                       'checkpoint_contract': {'revision': 'consecutive integer from 1', 'cycle_id': cycle,
                                                'reviewed_chunk_ids': 'cumulative list actually reviewed',
                                                'findings': 'cumulative v2 findings; cite evidence_ids',
@@ -238,9 +294,10 @@ def accept(config_path, cycle, stamp=None, final=False):
         items = findings({'findings': draft['findings']}, inputs, cfg['report_owner']) if inputs else []
         need({f['finding_id'] for f in s['findings']} <= {f['finding_id'] for f in items}, 'checkpoint-lost-findings')
         # Earlier findings shown in the brief are part of the model's context too.
-        inherited = [r for f in s['previous_findings'] for r in f['context_refs']]
+        inherited = {digest(r):r for f in s['previous_findings'] for r in f['context_refs']}
         for item in items:
-            item['context_refs'] += [r for r in inherited if r not in item['context_refs']]
+            context={digest(r):r for r in item['context_refs']}
+            item['context_refs']=list({**inherited,**context}.values())
             item['audiences'] = [cfg['report_owner']]
             item['privacy'] = 'owner-private'
         encoded = json.dumps(draft, ensure_ascii=False).encode()
@@ -310,6 +367,7 @@ def finalize(cfg, s, p):
         fd = os.open(target, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
         with os.fdopen(fd, 'w') as stream: stream.write(report); stream.flush(); os.fsync(stream.fileno())
     atomic(old_index, {'scope_key':session_key(cfg),'reviewed':reviewed,'partial':partial,
+                       'inventory':{digest([r['source_id'],r['path']]):r.get('sha256') for r in s['coverage']},
                        'findings':s['findings'],'cycle_id':s['cycle_id']})
     atomic(p['state'], s)
     return s

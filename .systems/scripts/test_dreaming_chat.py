@@ -3,6 +3,7 @@ import json
 from datetime import datetime, timedelta
 from pathlib import Path
 import tempfile
+import os
 import unittest
 from unittest.mock import patch
 
@@ -117,6 +118,61 @@ class Sessions(unittest.TestCase):
         self.cfg['analyzer']['version']='chat-v2';chat.atomic(self.config,self.cfg)
         _,new=chat.begin(self.config,self.stamp+timedelta(days=3))
         self.assertTrue(new['input_hashes']);self.assertEqual(new['previous_findings'],[])
+
+    def test_new_imported_file_precedes_known_history_even_with_old_mtime(self):
+        for i in range(3):
+            f=self.root/'sources'/f'history-{i}.md';f.write_text(f'History {i}');os.utime(f,(i+1,i+1))
+        os.utime(self.root/'sources/note.md',(1,1))
+        with patch.object(chat,'MAX_CHUNKS',1):
+            _,s,p=self.begin();self.submit(s,p);chat.accept(self.config,s['cycle_id'],self.stamp,final=True)
+            f=self.root/'sources/new-import.md';f.write_text('Newly imported evidence');os.utime(f,(1,1))
+            cfg,nexts=chat.begin(self.config,self.stamp+timedelta(days=3))
+            np=chat.paths(cfg,nexts['cycle_id']);cid=next(iter(nexts['input_hashes']))
+            self.assertEqual(chat.load(np['inputs']/(cid+'.json'))['ref']['path'],'sources/new-import.md')
+
+    def test_large_source_does_not_starve_other_owner_perspective(self):
+        (self.root/'sources/note.md').write_text('large '*10000)
+        (self.root/'company').mkdir();(self.root/'company/brief.md').write_text('Company result')
+        self.cfg['sources'].append({'id':'company','root':str(self.root),'prefix':'company','owner':'owner',
+            'subject_type':'company','subject_id':'company','source_class':'work','audiences':['owner'],'sharing_authority':'owner'})
+        chat.atomic(self.config,self.cfg)
+        with patch.object(chat,'MAX_CHUNKS',2):
+            _,s,p=self.begin()
+            owners={chat.load(p['inputs']/(cid+'.json'))['ref']['source_id'] for cid in s['input_hashes']}
+            self.assertEqual(owners,{'personal','company'})
+
+    def test_shared_context_is_small_and_round_trips(self):
+        refs=[{'source_id':'synthetic','path':f'source-{i}.md','sha256':'a'*64,'owner':'owner'} for i in range(50)]
+        value={'findings':[{'finding_id':str(i),'context_refs':refs,'summary':'A finding'} for i in range(50)],
+               'previous_findings':[{'finding_id':str(i),'context_refs':refs,'summary':'A finding'} for i in range(50)]}
+        target=self.root/'state.json';chat.atomic(target,value)
+        self.assertLess(target.stat().st_size,80000)
+        restored=chat.load(target)
+        self.assertEqual(len(restored['findings']),50)
+        self.assertEqual({chat.digest(r) for r in restored['findings'][0]['context_refs']},{chat.digest(r) for r in refs})
+        raw=json.loads(target.read_text());first=next(iter(raw['_context_registry']['refs']))
+        raw['_context_registry']['refs'][first]['path']='tampered'
+        target.write_text(json.dumps(raw))
+        with self.assertRaisesRegex(ValueError,'context-reference-drift'):chat.load(target)
+
+    def test_model_cannot_inject_trusted_context_registry(self):
+        _,s,p=self.begin();self.submit(s,p)
+        draft=json.loads((p['drafts']/'checkpoint.json').read_text());draft['_context_registry']={'refs':{},'sets':{}}
+        (p['drafts']/'checkpoint.json').write_text(json.dumps(draft))
+        with self.assertRaisesRegex(ValueError,'invalid-checkpoint'):chat.accept(self.config,s['cycle_id'],self.stamp)
+
+    def test_three_cycles_keep_one_copy_of_each_context_reference(self):
+        for number,offset in enumerate((0,3,7)):
+            if number:(self.root/'sources'/f'new-{number}.md').write_text(f'New evidence {number}')
+            stamp=self.stamp+timedelta(days=offset);cfg,s=chat.begin(self.config,stamp);p=chat.paths(cfg,s['cycle_id'])
+            self.submit(s,p);draft=json.loads((p['drafts']/'checkpoint.json').read_text());base=draft['findings'][0]
+            draft['findings']=[{**base,'topic':f'topic-{number}-{i}'} for i in range(20)]
+            chat.atomic(p['drafts']/'checkpoint.json',draft)
+            result=chat.accept(self.config,s['cycle_id'],stamp,final=True)
+            newest=[f for f in result['findings'] if f['topic'].startswith(f'topic-{number}-')]
+            self.assertEqual(len(newest),20)
+            for finding in newest:self.assertEqual(len(finding['context_refs']),number+1)
+            self.assertLess((p['control']/'index.json').stat().st_size,200000)
 
 
 if __name__=='__main__':unittest.main()
