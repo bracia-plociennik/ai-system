@@ -5,7 +5,7 @@
   "source_population": {
     ".github/workflows/README.md": {
       "mode": "100644",
-      "sha256": "03d4d5b5b46c0a55eb22af93cd74ed3a1641ff1cb1f9ee9a3d42fb6314677374"
+      "sha256": "705cd103d5129d5f2d6e65ed4db5a531e4b06d59341100873b08df09b2fd2e33"
     },
     ".github/workflows/ai-system-validate.yml": {
       "mode": "100644",
@@ -29,15 +29,15 @@
     },
     ".systems/ai/capabilities/workflow-execution-modes-v1.json": {
       "mode": "100644",
-      "sha256": "b8155c82a37bae7da01d4d94fc7b01b2de8e37149b116aa0bd2512bd53990a35"
+      "sha256": "f3cd2577585119948019b1c2a474fd2f832994e4bc9d46f8e67517c78edf1466"
     },
     ".systems/ai/capabilities/workflow-goal-focused-maintenance-v1.json": {
       "mode": "100644",
-      "sha256": "955755e9961d042042a3324c23b2f60af469916eba066485c628d38baad23032"
+      "sha256": "d600e22628f6263072b1a2b3cec379cbc0e5ca19a985c3369d20e7dcce555471"
     },
     ".systems/ai/capabilities/workflow-intent-to-execution-brief-v1.json": {
       "mode": "100644",
-      "sha256": "c8e784158fc1b9a4e3ae38fd0baa30ffa317e8b72406f9732ca890bc7b702add"
+      "sha256": "a960081d7cb19f99a15dc7d32aff92faa9b5945a3c7c98594811d6509f05ac99"
     },
     ".systems/ai/core/README.md": {
       "mode": "100644",
@@ -97,11 +97,11 @@
     },
     ".systems/ai/core/dreaming-chat.md": {
       "mode": "100644",
-      "sha256": "c916f1c628df8d7830701d264389bb853761ef65c3190f4f7d8e1a5ec4ec7c0d"
+      "sha256": "ba1e97a5f3e89668f002094c8c7697166dbb25e1e4e9d7c0250a0d480157fdb3"
     },
     ".systems/ai/core/dreaming-mode.md": {
       "mode": "100644",
-      "sha256": "50841908e11b9cb9cb5803ad4e33a5ba49dbe5cc1a44c7cb4df50caf6d67179b"
+      "sha256": "9699281b4cf056a561d050031cad497a004729702c7236eb2bf4db3fd1bbeac5"
     },
     ".systems/ai/core/dump-triage.md": {
       "mode": "100644",
@@ -1413,7 +1413,7 @@
     },
     ".systems/scripts/dreaming_chat_dispatch.py": {
       "mode": "100644",
-      "sha256": "2cbf7e2a8ad3d654471bd953e2e189172a91e8e1f63143b5cfc8958403b31049"
+      "sha256": "e9fe4187525c9e39df200eccf534363a9c6080316e13e399a0845b268e0fdeaf"
     },
     ".systems/scripts/dreaming_config_draft.py": {
       "mode": "100644",
@@ -1709,7 +1709,7 @@
     },
     ".systems/scripts/test_dreaming_chat_dispatch.py": {
       "mode": "100644",
-      "sha256": "10bf78e3128e099fc526be68419106f462382b6b80c2b2b7478c018e125bd278"
+      "sha256": "ee3195fbd5ef1b718b394d7744bfaa1481ce231f64849e8f642c01d7f55789e6"
     },
     ".systems/scripts/test_personal_ops_drafts.py": {
       "mode": "100644",
@@ -2049,11 +2049,11 @@
     },
     "HUMANS.md": {
       "mode": "100644",
-      "sha256": "87ab25f5dce20b891181cccef6486d53ebafff4af4ee32541bb14c7c22617bf2"
+      "sha256": "c213f9bb1b5d11a50bbb12d258a6cd96460ffa4e68b1e2a66530b747f8158c23"
     },
     "README.md": {
       "mode": "100644",
-      "sha256": "5f25e00d3dd0200a39c8eb0ca0e112a5dc4a89d802fdc057b01a48f8133c928b"
+      "sha256": "0e3550c60d340125f7d8b47577d7c2b3615163f2f62ee60036535dc79515a569"
     }
   },
   "wire_schema": 1

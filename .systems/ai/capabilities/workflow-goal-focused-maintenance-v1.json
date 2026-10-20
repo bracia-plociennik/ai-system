@@ -25,7 +25,7 @@
     },
     ".systems/ai/capabilities/intent-to-execution-brief-v1.json": {
       "mode": "100644",
-      "sha256": "c8e784158fc1b9a4e3ae38fd0baa30ffa317e8b72406f9732ca890bc7b702add"
+      "sha256": "a960081d7cb19f99a15dc7d32aff92faa9b5945a3c7c98594811d6509f05ac99"
     },
     ".systems/ai/capabilities/parallel-task-orchestration-v1.json": {
       "mode": "100644",
