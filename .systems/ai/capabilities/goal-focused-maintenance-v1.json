@@ -97,7 +97,7 @@
     },
     ".systems/ai/core/dreaming-chat.md": {
       "mode": "100644",
-      "sha256": "ba1e97a5f3e89668f002094c8c7697166dbb25e1e4e9d7c0250a0d480157fdb3"
+      "sha256": "aa9016c29a2ee7195c3f858ae7c68c7df52d6aa2f2c340e805acfd0ae3b62d8e"
     },
     ".systems/ai/core/dreaming-mode.md": {
       "mode": "100644",
@@ -1409,11 +1409,11 @@
     },
     ".systems/scripts/dreaming_chat.py": {
       "mode": "100644",
-      "sha256": "144cacd9c82f2de9e93903a2951a27df85bb5171fc8fdcc74c3aaf4b3190f69a"
+      "sha256": "b77ed803eb5bf715a43fc54869e61906248b9395bc4ff2d62b99f65d62dc5e58"
     },
     ".systems/scripts/dreaming_chat_dispatch.py": {
       "mode": "100644",
-      "sha256": "e9fe4187525c9e39df200eccf534363a9c6080316e13e399a0845b268e0fdeaf"
+      "sha256": "ef3648b8924e8264b5e74e5be7f0bd8c81c1bc01c58ae4d6375c031532a08186"
     },
     ".systems/scripts/dreaming_config_draft.py": {
       "mode": "100644",
@@ -1705,7 +1705,7 @@
     },
     ".systems/scripts/test_dreaming_chat.py": {
       "mode": "100644",
-      "sha256": "a1b16e058b6a2a8b0a30fa0de37ffcb441dc1a399d77a2a0991476570746a7ec"
+      "sha256": "c0aae51dd4fef41c7c32d2c317a644b440b647afa3ffd6a35bb33898cef441a4"
     },
     ".systems/scripts/test_dreaming_chat_dispatch.py": {
       "mode": "100644",

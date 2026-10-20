@@ -265,6 +265,19 @@ def begin(config_path, stamp=None, manual=False, cycle=None):
     return cfg, state
 
 
+def retain_findings(previous, current):
+    # Global IDs include evidence subjects/owners, which may grow during synthesis.
+    # Continuity within this owner-private cycle uses an unambiguous logical key;
+    # valid provenance is still recomputed by findings(), never copied as approval.
+    old = {(f['topic'], f['lens']): f for f in previous}
+    new = {(f['topic'], f['lens']): f for f in current}
+    need(len(old) == len(previous) and len(new) == len(current), 'checkpoint-ambiguous-findings')
+    need(set(old) <= set(new), 'checkpoint-lost-findings')
+    for key, prior in old.items():
+        need(all(set(prior[field]) <= set(new[key][field]) for field in ('facts', 'evidence_ids')),
+             'checkpoint-lost-claims')
+
+
 def accept(config_path, cycle, stamp=None, final=False):
     cfg = config(load(config_path)); p = paths(cfg, cycle); stamp = stamp or clock()
     with lock(p['control']):
@@ -292,7 +305,7 @@ def accept(config_path, cycle, stamp=None, final=False):
         # This validates schema/evidence. It is not a claim that semantic QA can be automated.
         need(len(ids) > 0 or not draft['findings'], 'uncited-finding')
         items = findings({'findings': draft['findings']}, inputs, cfg['report_owner']) if inputs else []
-        need({f['finding_id'] for f in s['findings']} <= {f['finding_id'] for f in items}, 'checkpoint-lost-findings')
+        retain_findings(s['findings'], items)
         # Earlier findings shown in the brief are part of the model's context too.
         inherited = {digest(r):r for f in s['previous_findings'] for r in f['context_refs']}
         for item in items:

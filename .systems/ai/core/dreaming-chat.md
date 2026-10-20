@@ -12,6 +12,11 @@ a unique cycle; the scheduled cycle uses Wednesday/Saturday02:00 Europe/Warsaw.
 A restart retains its cycle and original deadline. New slots inherit pending
 history without copying old run directories. Preparing data is not reviewing it:
 coverage advances only from validated model review declarations, not byte counts.
+Within one cycle, cumulative findings have unique stable topic/lens keys and retain
+earlier facts and evidence IDs verbatim. Valid evidence may expand owners/subjects
+and therefore recompute global protocol IDs without losing the logical finding.
+Summaries, interpretations, unknowns and proposals may be refined; provenance and
+owner-only privacy are validated afresh, with no transfer of recipient approvals.
 Trusted state stores shared context references/sets once and verifies their hashes
 when loading; model checkpoint JSON cannot inject that internal representation.
 The initial pass prioritizes the last seven days without excluding older material.
