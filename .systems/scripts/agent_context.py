@@ -19,7 +19,7 @@ CAPABILITY_FILES = {
     'agent-startup-v1': (*POLICY, '.systems/ai/core/agent-adapters.md',
         '.systems/scripts/agent_context.py', '.systems/scripts/agent_adapters.py',
         '.systems/scripts/local_paths.py', '.systems/scripts/resolve-agent-context',
-        '.systems/scripts/manage-agent-adapter'),
+        '.systems/scripts/manage-agent-adapter', '.systems/scripts/durable_runtime.py'),
     'work-lead-v1': ('AGENTS.md', '.systems/ai/core/work-lead.md',
         '.systems/ai/core/permissions.md', '.systems/ai/core/risk-model.md',
         '.systems/ai/core/runtime-integrity.md', '.systems/scripts/lib/coordinator-status.py')}
@@ -174,20 +174,32 @@ def project_associations(rows, repo, common, env):
     return matches, fingerprints
 
 
-def workflow_context(repo):
+def workflow_context(repo, environment=None):
     if repo is None:
         return None, None, None
+    import durable_runtime
+    try:
+        binding = durable_runtime.load(repo)
+    except ValueError as exc:
+        raise ContextError(str(exc), 4) from exc
+    canonical = Path(binding['canonical']['root']) if binding else repo
     if (repo / '.systems/scripts/resolve-workflow-env').is_file() and (repo / '.systems/ai/core/repository-modes.md').is_file():
         home, mode = repo, 'official'
     elif (repo / 'ai-workflow/.systems/scripts/resolve-workflow-env').is_file():
         home, mode = repo / 'ai-workflow', 'target'
+    elif binding and (canonical / 'ai-workflow/.systems/scripts/resolve-workflow-env').is_file():
+        home, mode = canonical / 'ai-workflow', 'target'
     else:
         return None, None, None
     concrete(str(home))
     if (not (home / 'AGENTS.md').is_file() or (home / 'AGENTS.md').is_symlink()
             or git(home, 'rev-parse', '--show-toplevel') != str(home) or not git(home, 'rev-parse', 'HEAD')):
         raise ContextError('Workflow installation unavailable', 3)
-    return home, repo / 'ai-workflow-workspace', mode
+    try:
+        workspace = durable_runtime.resolve(repo, (os.environ if environment is None else environment).get('AI_WORKFLOW_WORKSPACE_HOME'))
+    except ValueError as exc:
+        raise ContextError(str(exc), 4) from exc
+    return home, workspace or repo / 'ai-workflow-workspace', mode
 
 
 def instruction_chain(current, repo, env, tool):
@@ -283,7 +295,7 @@ def resolve_context(cwd, tool='codex', workspace=None, *, environment=None, syst
                 or role['role'] not in {'management', 'development'}):
             raise ContextError('invalid checkout role')
         checkout = role['role']
-    wf, wf_workspace, mode = workflow_context(repo) if owner else (None, None, None)
+    wf, wf_workspace, mode = workflow_context(repo, env) if owner else (None, None, None)
     hashes = [(str(path), hashlib.sha256(safe_bytes(path)).hexdigest()) for path in
               (regpath, registry, installed / 'ai-system.local.json', *(installed / x for x in POLICY))]
     hashes += association_hashes

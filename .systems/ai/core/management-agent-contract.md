@@ -242,3 +242,5 @@ For substantive AI System or AI Workflow upgrades, use `.systems/ai/core/cross-s
 After a successful upstream update, use `.systems/scripts/update-workspace --dry-run` before any owner-approved workspace schema backfill.
 
 Do not mark PASS without explicit evidence.
+
+For new registered task resources apply `task-resource-cleanup.md`: durable QA/Capture stays outside temporary execution; release and eligible cleanup follow actual task closure, with one installed Workflow executor and seven-day whole-worktree retention.
