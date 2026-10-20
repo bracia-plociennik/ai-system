@@ -13,3 +13,7 @@ Keep combined automatic startup guidance within 16 KiB; detailed rules load on t
 This is cooperative instruction coordination, not OS enforcement against a malicious process with the same user account. Platform permissions and factual QA remain independently binding. Versioned registration/lead metadata never grants authority. Activate new adapters only after approved compatible consumer/producer installation and current acceptance evidence.
 
 After context resolution, substantive tasks may inspect personal-source-library.md and manage-source-library status --cwd <actual-absolute-cwd>. Only an actually activated owner library participates in source/note retrieval. Missing/disabled libraries add no setup or writes. Preserve read-only and nearest-owner privacy; this route never imports other personal memory or changes provider configuration.
+
+## Independent judgment
+
+Use `.systems/ai/core/critical-judgment.md` for proportional, evidence-based assessment of the goal, proposed mechanism and the agent's own advice. State material objections directly with basis, consequence and a feasible recommendation; acknowledge sound ideas and uncertainty. Preserve existing authority and phase gates, short routine answers, informed permitted tradeoffs and applicable quiet handling of independent minor debt.

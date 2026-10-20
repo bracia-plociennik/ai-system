@@ -728,3 +728,7 @@ An owner-approved chat execution profile uses the existing scheduler transport t
 ## Personal source library
 
 Use [personal-source-library](.systems/ai/core/personal-source-library.md). After explicitly approved activation, drop PDF/MD/TXT files into the library inbox or ask the agent to add a selected file. Subsequent substantive work prepares pending inputs within the foreground budget and uses relevant notes first. Ask “przygotuj bibliotekę” for a longer foreground batch, or “znajdź w moich źródłach …”. Source disable removes it and its notes from default retrieval without deletion. Scans need local `tesseract-ocr`, `tesseract-ocr-pol`, `tesseract-ocr-eng` and Poppler (`pdftotext`, `pdfinfo`, `pdftoppm`); text-only use remains available without OCR. Claude/native provider claims require separate verification.
+
+## Independent judgment
+
+`critical-judgment.md` defines proportional evidence-based assessment: challenge material premises, offer feasible simpler options, correct the agent’s own recommendations, respect informed permitted tradeoffs and keep routine work brief. Workflow uses existing phases and meaningful What-if/acceptance evidence; this adds no counterphase, historical QA migration or new permission. Actual Codex evaluations are required for this delivery; structural checks alone do not establish behavior.

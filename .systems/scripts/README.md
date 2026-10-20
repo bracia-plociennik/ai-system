@@ -173,3 +173,7 @@ SPOR V4 daily artifacts use `sync-personal-ops-check-ins-v4` and the V4-aware da
 propose-task-candidates, SPOR and Dreaming configuration. Explicit neutral config
 takes precedence; tasknotes-v1 remains legacy-compatible. No task migration or
 server credentials. Tests: tests/test_silverbullet_task_store.py.
+
+## Critical judgment source integration
+
+`check-critical-judgment` checks source routing and phase/template/QA field mapping only. Actual fixed Codex outputs and semantic review supply behavior evidence.

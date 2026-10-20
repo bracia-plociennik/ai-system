@@ -293,3 +293,7 @@ Use goal-focused-maintenance.md only after explicit scoped activation and verifi
 Before shared activation, verify the reviewed committed Workflow profile/source HEAD with maintenance_policy.workflow_projection. The standalone System evaluator is identical portable core plus the owner adapter. The installed nested Workflow retains its existing local gates until separately updated; coordination does not overwrite it. One parent identity and owner queue are shared, not 600+600 seconds.
 
 For new registered task resources apply `task-resource-cleanup.md`: durable QA/Capture stays outside temporary execution; release and eligible cleanup follow actual task closure, with one installed Workflow executor and seven-day whole-worktree retention.
+
+## Independent judgment
+
+Use `.systems/ai/core/critical-judgment.md` for proportional, evidence-based assessment of the goal, proposed mechanism and the agent's own advice. State material objections directly with basis, consequence and a feasible recommendation; acknowledge sound ideas and uncertainty. Preserve existing authority and phase gates, short routine answers, informed permitted tradeoffs and applicable quiet handling of independent minor debt.

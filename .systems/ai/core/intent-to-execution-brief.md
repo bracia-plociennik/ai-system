@@ -35,3 +35,7 @@ Structural validation and source profiles are supporting-only. Native B01–B25 
 ## AI System adapter
 
 Use owner-approval.md and project-orchestration.md; local tasks are Markdown-first with no TaskForge requirement. Workflow handoff maps human→human-coop and auto-unconstrained→auto-unbounded; retains source/scope, supplied limits and actual authorization independently. Check accepted installed Workflow capability before claiming extended brief/style support. Without a valid nested capability use ordinary local intake and report consumer unavailable, never invent permissions or stop local task planning. Owner-selected HOME/AI_SYSTEM_HOME path context remains governed by its existing contract, no historical Work Evidence manifest rewrite.
+
+## Independent judgment
+
+Use `.systems/ai/core/critical-judgment.md` for proportional, evidence-based assessment of the goal, proposed mechanism and the agent's own advice. State material objections directly with basis, consequence and a feasible recommendation; acknowledge sound ideas and uncertainty. Preserve existing authority and phase gates, short routine answers, informed permitted tradeoffs and applicable quiet handling of independent minor debt.
