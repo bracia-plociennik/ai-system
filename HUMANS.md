@@ -718,3 +718,5 @@ System leads supported configurable Workflow decisions through one scoped work-l
 Use .systems/scripts/resolve-agent-context for read-only context and manage-agent-adapter inspect/plan for a reviewable user-level setup. Apply/disable/restore require actual scoped approval and explicit flags. Preserve existing instructions and receipts, reject conflicts/shadows, and keep the combined automatic chain within16KiB. Source consistency is separate from native acceptance; each installation needs actual evidence. The official updater does not silently activate or rewrite provider profiles. Canonical memory writes remain scoped; native memory controls are unsupported by this adapter.
 
 Current MVP targets native Codex. Claude Code and other adapters expose design-only/unverified interfaces and cannot activate or run native tests. No extra coordinator/background agent, full-home permission, automatic TaskNotes or history migration. check-agent-startup is an offline standard/full conformance gate; it does not invoke a model or touch real user configuration.
+
+Task resource lifecycle and durable QA/Capture: `.systems/ai/core/task-resource-cleanup.md`.

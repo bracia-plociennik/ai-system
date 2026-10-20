@@ -76,6 +76,16 @@ def safe_destination(value, product_root):
         if candidate.is_symlink() and str(candidate) not in {"/tmp", "/var"}:
             raise InvalidEvidence("Evidence parent may not be a symlink")
     resolved = parent / path.name
+    import durable_runtime
+    bound = durable_runtime.load(product_root)
+    if bound:
+        durable_runtime.guard_output(resolved, target=product_root)
+        canonical = Path(bound['canonical']['root'])
+        if git_output(canonical, "ls-files", "--", str(resolved)):
+            raise InvalidEvidence("Tracked bound evidence destination is protected")
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", path.name):
+            raise InvalidEvidence("Unsafe evidence filename")
+        return resolved
     containing_repo = git_output(parent, "rev-parse", "--show-toplevel")
     if containing_repo:
         containing_repo = Path(containing_repo).resolve()

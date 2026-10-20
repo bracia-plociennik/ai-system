@@ -45,9 +45,11 @@ does not require changing operating-system settings. When temporary Gitless
 fixtures live under a Git-managed workspace, set `GIT_CEILING_DIRECTORIES` to
 the task scratch root for the test process, so Git does not discover the
 workspace ancestor as a foreign fixture repository. Explicit fixture repositories
-with their own `.git` remain discoverable. Durable QA, Capture,
-checkpoints, accepted source and unfinished work remain in their owning evidence
-or worktree namespace and must not be treated as disposable scratch.
+with their own `.git` remain discoverable. Durable QA, Capture and checkpoints belong from the beginning in the owning
+persistent runtime outside auxiliary worktrees and scratch. Accepted code must
+have a preserved canonical Git ref before an environment becomes disposable;
+unfinished work is retained. Apply task-resource-cleanup.md for new registered
+task resources; no automatic adoption/migration of old environments.
 
 Creation and reuse still require the existing scoped write authority. Do not
 follow linked storage roots, overwrite another work unit, edit ignore rules,
