@@ -17,6 +17,9 @@ if git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 fi
 
 required=(
+  ".systems/ai/core/critical-judgment.md"
+  ".systems/scripts/check-critical-judgment"
+  ".systems/scripts/critical_judgment.py"
   ".systems/scripts/check-agent-startup"
   ".systems/scripts/resolve-agent-context"
   ".systems/scripts/manage-agent-adapter"
