@@ -62,3 +62,13 @@ history. See phase-specific product tests and scoped project evidence.
 `dreaming-wep preview/apply` is an optional local adapter. It rechecks the selected candidate owner, current source bytes/class/policy and native schema, then binds exact candidate/request/action/destination versions. Current scoped owner permission is required by apply; metadata and readiness cannot authorize it. Native ledger prepare/apply/recovery remain authoritative. Unknown/estimated time is held for actual ledger entry creation. Native documentation kits remain documented until independent replay; reports remain local drafts; tax is evidence-only, never qualification/calculation; editorial private review, anonymization, each artifact/language and publication remain separate. Tax proofs stay in the private TaxRegister, outside Dreaming's corpus; its exact bundle/packet is separately reviewed through the native protocol.
 
 A native receipt returns a proposed successor candidate revision; it is not automatically persisted as source or memory. Interrupted native transactions require native recovery/readback before retry. No generic recovery deletion, external sending or publication is provided.
+
+## SilverBullet sources
+
+A configured SilverBullet vault can be an explicit additional source_roots alias.
+Keep historical tasknotes alias unchanged: never repoint it to new files or rewrite
+old transaction manifests. Generic source role task accepts the same guarded source
+reference as legacy tasknote and excludes Working dump from OSNR hints. Task paths
+are canonical relative Markdown paths under the selected alias; explicit registry
+task/workspace binding remains required before ledger application. An open task,
+scheduled date or checked TODO is not evidence of performed work or measured time.

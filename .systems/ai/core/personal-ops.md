@@ -246,3 +246,14 @@ For the broader routes, run:
 ```
 
 For a workspace migration, also run the V3 migration dry run, the V3 sync dry run, and the standard repository validation chain. No check-in content may be promoted to memory, checkpoints, System Insights, External Memory, skills, or TaskNotes outside the exact approved route.
+
+## Configured task-store output
+
+For a workspace selecting silverbullet-v1 under task-management.md, daily and weekly
+check-in initial-task generation writes SilverBullet tasks, not new TaskNotes. The
+same canonical planned-item validation, source identity, authorization and alignment
+gates apply. Use the configured profile and absolute resolved vault; no historical
+check-in/task migration. Persisted task_generation fields and tasknote_gate compatibility
+keys remain readable and are not rewritten solely for terminology. New presentation calls
+them tasks. Revisions skip existing generated tasks; propose updates rather than silently
+changing the owner's lifecycle or notes.

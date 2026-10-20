@@ -250,3 +250,16 @@ Provider interface v1 is independent of legacy Dream Reports. `dreaming_contract
 ### Source registry v1
 
 `dreaming-sources inspect --request <private-registry.json>` performs bounded metadata inventory only. The new registry requires explicit owner/project prefix bindings, local authority reference, profile, limits and sharing policy. `work-materials` is opt-in; absent trusted classification is excluded. Existing Scope contract 1 stays narrow-only and byte-compatible. No registry initialization or activation follows from a template. Linked/aliased/overlapping roots and ambiguous bindings are rejected. Classified secrets, raw Personal Ops, incoming dumps/exports and private financial/health paths remain forbidden across workspace and repository origins. UTF-8 work text is supported; PDF/images/OCR/XLSX/archives are visible gaps.
+
+## Selected task-store integration
+
+For silverbullet-v1, task context and later approved Dream Report task proposals use
+the configured shared Markdown store. Never search old TaskNotes as an automatic
+fallback. Legacy Dreaming permits only its sanitized projections; raw SilverBullet
+bodies require the separately authorized universal explicit source registry. Its
+personal-owner task subtree uses type:task ownership guards and owner-only audience,
+covering future tasks without inferring corporate ownership from client labels.
+Keep private task bodies and Working dump out of counterpart/product audiences.
+Dreaming does not create/complete/reschedule tasks, update check-ins, record performed
+work in WEP or change memory. Task findings are proposals; owner approvals and native
+WEP source/hash/actual-time gates remain binding.

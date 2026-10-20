@@ -16,6 +16,7 @@ from zoneinfo import ZoneInfo
 
 from personal_ops_properties_v3 import parse_frontmatter_and_properties
 from personal_ops_v4 import normalize_budget_facts, schedule_interval_minutes
+from task_store import TaskStore
 
 CONTRACT = "spor-read-only-proposal-v1"
 ROOT = Path(__file__).resolve().parents[2]
@@ -444,20 +445,28 @@ def supporting_sources(workspace: Path, plan: dict | None, daily: list[dict], wa
                             "excerpt": text[:3000], "truncated": len(text) > 3000,
                             "precedence": "newer explicit decisions override memory; conflicts require owner review"})
     # Task metadata is enough for status; OSNR snippets are never copied from secret-bearing bodies.
-    for path in sorted((workspace / "tasks/TaskNotes/Tasks").glob("*.md")):
-        safe_path(workspace, path)
+    try:
+        task_records = list(TaskStore.load(workspace).tasks())
+    except ValueError:
+        # Only an absent configuration uses the old unconfigured local read route.
+        if (workspace / "tasks/task-store.local.md").exists() or (workspace / "tasks/taskforge-vault.local.md").exists():
+            warnings.append("Configured task store unavailable; no fallback to historical TaskNotes")
+            task_records = []
+        else:
+            task_records = [(path, None) for path in sorted((workspace / "tasks/TaskNotes/Tasks").glob("*.md"))]
+    for path, store_metadata in task_records:
         try:
-            top, _ = read_frontmatter(path, task=True)
+            top = store_metadata if store_metadata is not None else read_frontmatter(path, task=True)[0]
         except ValueError:
             warnings.append(f"Task metadata unavailable: {path}; no execution inferred")
             continue
-        if str(top.get("status", "")).lower() in {"done", "cancelled", "canceled", "archived"}:
+        if str(top.get("category", "")).lower() in {"done", "delete"} or str(top.get("status", "")).lower() in {"done", "cancelled", "canceled", "archived"}:
             continue
         relevant = any((m.get("client") and m["client"] == top.get("client")) or (m.get("project") and str(m["project"]) == str(top.get("project"))) for m in mappings)
         if not relevant and not (plan and str(top.get("source_week_id")) == str(plan["properties"].get("week_id"))):
             continue
         sources.append({"source": str(path), "kind": "open-task", "authority": "data-only",
-                        "metadata": sanitize({k: top[k] for k in ("title", "status", "due", "scheduled", "client", "projects", "source_check_in_date", "source_plan_item_id") if k in top}),
+                        "metadata": sanitize({k: top[k] for k in ("title", "status", "category", "due", "scheduled", "client", "project", "projects", "source_check_in_date", "source_plan_item_id") if k in top}),
                         "warning": "Task open/due is not proof of execution; inspect only safe OSNR if needed"})
         if len([s for s in sources if s["kind"] == "open-task"]) >= 30:
             warnings.append("Task context bounded at 30 matching open tasks")

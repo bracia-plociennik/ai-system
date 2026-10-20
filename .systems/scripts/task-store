@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+"""Inspect/read a configured Markdown store; create only on actual owner-scoped calls."""
+import argparse,json,sys
+from pathlib import Path
+from task_store import TaskStore
+p=argparse.ArgumentParser();p.add_argument('action',choices=['inspect','list','create']);p.add_argument('--workspace',type=Path,required=True);p.add_argument('--input',type=Path);p.add_argument('--owner-approved',action='store_true');args=p.parse_args()
+try:
+ store=TaskStore.load(args.workspace)
+ if args.action=='inspect':result={'profile':store.profile,'vault':str(store.root),'task_directory':str(store.task_dir),'writes':False}
+ elif args.action=='list':result=[{'path':str(path),'metadata':metadata} for path,metadata in store.tasks()]
+ else:
+  if not args.owner_approved or args.input is None:raise ValueError('create-requires-owner-approval-and-input')
+  value=json.loads(args.input.read_text(encoding='utf-8'));written,skipped,_,_=store.write_candidates([value]);result={'written':[str(path) for path in written],'skipped':skipped}
+ print(json.dumps(result,ensure_ascii=False,indent=2))
+except (ValueError,OSError) as exc:print('Task store: '+str(exc),file=sys.stderr);raise SystemExit(1)

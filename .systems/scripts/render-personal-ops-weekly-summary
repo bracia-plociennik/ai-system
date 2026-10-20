@@ -89,7 +89,7 @@ def render(properties: dict, workspace: Path) -> str:
         f"- Odpowiedź: `{answer.upper()}`",
         f"- Ostatnie 4 odpowiedzi: `{weekly['no_count']}/{weekly['answer_count']}` NIE; kartka: `{card}`",
         f"- Stan rozwiązania: `{json.dumps(resolution, ensure_ascii=False) if resolution else 'brak'}`",
-        f"- Gate TaskNotes: `{summary['tasknote_gate']}`",
+        f"- Gate zadań: `{summary['tasknote_gate']}`",
         "",
     ]
     item_map = {str(item.get("id")): item for item in items if isinstance(item, dict)}
@@ -108,7 +108,7 @@ def render(properties: dict, workspace: Path) -> str:
             lines.append(f"| {source_date} | {candidate_type} | {observation.replace('|', '\\|')} | owner-approved required |")
     else:
         lines.append("- Brak niepustych Working Dump w retrospektywnym zakresie poniedziałek–piątek.")
-    lines.extend(["", f"TaskNotes: {properties.get('task_generation_status', 'unknown')}", "Plan jest read-only; nie wykonuje wdrożeń, komunikacji ani innych działań zewnętrznych."])
+    lines.extend(["", f"Zadania: {properties.get('task_generation_status', 'unknown')}", "Plan jest read-only; nie wykonuje wdrożeń, komunikacji ani innych działań zewnętrznych."])
     return "\n".join(lines) + "\n"
 
 

@@ -172,3 +172,13 @@ The `Kandydaci z Working Dump` projection labels each observation with its sourc
 ## Validation
 
 Use `.systems/scripts/check-weekly-planning` and the full AI System validation chain. A weekly plan is ready only when the contract, template, item schema, block compatibility, capacity result, WIG, source IDs, and TaskForge preflight evidence are coherent.
+
+## Selected task-store profile
+
+TaskNotes wording above is the legacy profile. With an explicitly configured
+silverbullet-v1 profile, the same approved future planned items generate local
+SilverBullet tasks through propose-task-candidates. The shared task-management.md
+contract controls scalar category, scheduled-only task date, template/path and dedup.
+Existing weekly sources and historical TaskNotes remain immutable. Repeated generation
+skips existing tasks; any desired allocation/lifecycle revision is a separately
+reviewed update, not a hidden overwrite.
