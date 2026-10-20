@@ -728,3 +728,7 @@ An owner-approved chat execution profile uses the existing scheduler transport t
 ## Personal source library
 
 Use [personal-source-library](.systems/ai/core/personal-source-library.md). After explicitly approved activation, drop PDF/MD/TXT files into the library inbox or ask the agent to add a selected file. Subsequent substantive work prepares pending inputs within the foreground budget and uses relevant notes first. Ask “przygotuj bibliotekę” for a longer foreground batch, or “znajdź w moich źródłach …”. Source disable removes it and its notes from default retrieval without deletion. Scans need local `tesseract-ocr`, `tesseract-ocr-pol`, `tesseract-ocr-eng` and Poppler (`pdftotext`, `pdfinfo`, `pdftoppm`); text-only use remains available without OCR. Claude/native provider claims require separate verification.
+
+## Sprint
+
+“Włącz sprint dla tego zadania” enables fast dev/test preview rounds with deferred tests and QA. “Podoba mi się, to finalna wersja”, “Działa, tak zostawiamy” or “Testuj teraz” starts current verification. “Ładnie, ale jeszcze…” keeps iterating. “Pauza”/“Wznów sprint” preserves the same unfinished task and environment. Production needs separate exact owner permission. Workflow owns one durable record and final QA; no automatic per-round Capture or background test run. See `.systems/ai/core/sprint-iteration.md`; System `manage-sprint --workflow-root <installed-workflow> --check-support` verifies compatibility.

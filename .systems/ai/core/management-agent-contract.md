@@ -248,3 +248,7 @@ For new registered task resources apply `task-resource-cleanup.md`: durable QA/C
 ## Personal library routing
 
 For substantive managed work with an explicitly activated personal source library, use personal-source-library.md: current relevant notes first, then source fragments, with provenance and separate inference. Status/discovery never activates it. Preserve fixed personal ownership and client boundaries; read-only never ingests or writes notes/indexes.
+
+## Sprint iteration
+
+For actual task-local Sprint selection use `sprint-iteration.md` and the compatible installed Workflow. Keep preview/feedback implementation open until genuine final current-effect acceptance or explicit verification request. Deferred quality is not completed/PASS or resource release. Preserve normal behavior without explicit activation.

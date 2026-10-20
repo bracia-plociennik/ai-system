@@ -531,3 +531,7 @@ An owner-approved chat execution profile uses the existing scheduler transport t
 ## Personal source library
 
 [Personal source library](.systems/ai/core/personal-source-library.md) provides local PDF/Markdown/text import, optional Polish/English OCR, versioned originals, source-grounded reusable notes and SQLite FTS5 retrieval. Libraries stay private under their registered personal owner. Inspect with `.systems/scripts/manage-source-library status --cwd /absolute/managed/project`; initialization and activation are explicit, and read-only searches do not write. Relevant notes are preferred while current project facts and source applicability remain independently checked.
+
+## Sprint
+
+“Włącz sprint dla tego zadania” enables fast dev/test preview rounds with deferred tests and QA. “Podoba mi się, to finalna wersja”, “Działa, tak zostawiamy” or “Testuj teraz” starts current verification. “Ładnie, ale jeszcze…” keeps iterating. “Pauza”/“Wznów sprint” preserves the same unfinished task and environment. Production needs separate exact owner permission. Workflow owns one durable record and final QA; no automatic per-round Capture or background test run. See `.systems/ai/core/sprint-iteration.md`; System `manage-sprint --workflow-root <installed-workflow> --check-support` verifies compatibility.

@@ -84,3 +84,5 @@ Open only the matching contract and section selected by command-routing.md and m
 For new registered task resources use `.systems/ai/core/task-resource-cleanup.md`: keep QA/Capture outside temporary execution and run eligible cleanup after safe closure.
 
 For substantive tasks, personal-source-library.md defines use of an explicitly activated owner library. Inspect status without creating anything; prefer relevant current source notes and cite original fragments. Preserve client privacy and read-only, with no automatic activation or canonical memory promotion.
+
+Explicit task-local Sprint follows .systems/ai/core/sprint-iteration.md and a source-verified local Workflow. Preview rounds defer Quality; acceptance starts verification, never supplies PASS. Keep pending resources/durable evidence and owner safety boundaries.

@@ -11,7 +11,7 @@
   },
   "sources": {
     ".systems/ai/core/command-routing.md": {
-      "sha256": "af361a8ad6fc45dded2eea8eb896cb69831bf8424270026a8b7ab0b76ef16e6f",
+      "sha256": "fb6b4967235ec7e309c07b56842fb49e43fdacb584cf74cfdc255b5b142f98c9",
       "mode": "100644"
     },
     ".systems/ai/core/delivery-constraints.md": {
@@ -19,7 +19,7 @@
       "mode": "100644"
     },
     ".systems/ai/core/execution-modes.md": {
-      "sha256": "377ec67c4d1d52b162f4ae12ccb2499bd2f02b2c853091ec25c279aed2096e8e",
+      "sha256": "a07bc9ba22aab4ce156d6e0a9d312f578a3cbeedcc2fcd7c488477d6a659ceed",
       "mode": "100644"
     },
     ".systems/ai/core/full-qa-verification.md": {
@@ -47,7 +47,7 @@
       "mode": "100644"
     },
     ".systems/ai/core/quality-review.md": {
-      "sha256": "a0fa65a677e340341f95010982fa09717093e8d8ae3c29709fa2046d4163f6c5",
+      "sha256": "d33dd4a6dc0bfbe798c3761d91ec3650638918c52b588a09590db712ce19f265",
       "mode": "100644"
     },
     ".systems/ai/core/risk-model.md": {
@@ -71,7 +71,7 @@
       "mode": "100755"
     },
     "AGENTS.md": {
-      "sha256": "a3f428f4c3bb888df8a5f071abe7473f4e4cabbc3265c57beef30935482a2280",
+      "sha256": "351fd38de814d7d5500ea6e02c4324e155ff2f368890b58ea66bacdd19eedf1b",
       "mode": "100644"
     }
   }
