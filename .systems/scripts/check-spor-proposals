@@ -265,5 +265,10 @@ class ProposalTests(unittest.TestCase):
         self.assertIn("2026-09-28", report["coverage"]["calories"]["missing_dates"])
 
 
+# Draft persistence is a separate producer, exercised in the same source gate.
+# Imported TestCase classes are included by unittest's module loader.
+from test_personal_ops_drafts import DraftTests
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

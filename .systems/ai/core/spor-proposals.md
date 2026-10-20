@@ -1,4 +1,13 @@
-# SPOR Read-Only Proposals
+# SPOR Proposals And Optional Draft Capture
+
+## Explicit Draft Deployment
+
+The default contract below remains read-only. An owner-approved installed
+`spor-check-in-draft-v1` deployment may persist a separate noncanonical draft
+through the narrowly scoped dispatcher writer in `spor-drafts.md`. This is an
+explicit alternative output mode, not inherited approval for canonical writes.
+Source collection, privacy, complete forms and owner-only answers remain the
+same. Never enable workspace-wide model writes to save a draft.
 
 ## Contract
 
@@ -43,7 +52,7 @@ Use `DAILY CHECK-IN (SPOR) - propozycja read-only` or `WEEKLY CHECK-IN (SPOR) - 
 
 ## Heartbeat Delivery
 
-Owner-approved deployment uses exactly one desktop heartbeat in the current chat, Monday-Saturday 06:00 `Europe/Warsaw`, default notifications. Use the automation tool, not system cron or manually written scheduler files. Verify no duplicate and the saved timezone/next local execution before activation; unresolved timezone or failed management update blocks activation. App/computer availability is required, and 06:00 is start time, not a delivery guarantee; no system wake configuration.
+Default desktop deployment uses exactly one desktop heartbeat in the current chat, Monday-Saturday 06:00 `Europe/Warsaw`, default notifications. An explicitly approved native VPS dispatcher may instead use one existing user-systemd timer after the other host's scheduler is disabled; it must verify current sources, timezone, chat identity, deduplication, queue identity and read-only sandbox before activation. Do not introduce a second scheduler. 06:00 is start time, not a delivery guarantee; availability and real chat delivery require actual evidence.
 
 Every scheduled run establishes current local date, checks this chat for its `spor-proposal:<workspace>:<date>:<mode>` ID, and passes known IDs with `--seen-id`. Sunday and repeated runs publish nothing. Never backfill missed days. Explicit regeneration may use `--regenerate`. Missing chat history cannot prove deduplication; report that uncertainty and avoid claiming guaranteed once-only delivery. After first real scheduled run report actual start/delivery timestamp and evidence in chat; do not simulate this acceptance criterion.
 
