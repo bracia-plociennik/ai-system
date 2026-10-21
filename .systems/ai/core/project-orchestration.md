@@ -1,3 +1,5 @@
+> Compatible new implementation tasks use `default-sprint.md` V2: bounded targeted QA after acceptance and incremental phases5–7; explicit full verification/Phase8 remains separate. This scoped rule takes precedence over ordinary implementation/checkpoint chaining below. V1 and unsupported tasks retain installed rules. `Phase X` / `-all` follows `phase-x-maintenance.md`; manual only, never autopilot/Dreaming.
+
 # Project Orchestration
 
 Use agent-startup.md and system-workflow-authority.md for registered startup and work-lead authority. System is the superior coordinator within actual owner mandate. Local Workflow owns technical execution/evidence and follows covered configurable lead decisions through the same human/System procedure. This does not infer approval from metadata or bypass protected gates.

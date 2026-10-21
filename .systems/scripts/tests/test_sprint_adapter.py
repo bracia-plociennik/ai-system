@@ -60,6 +60,22 @@ class Adapter(unittest.TestCase):
         rel='.systems/scripts/sprint_iteration.py';value['files'][rel]=hashlib.sha256((self.root/rel).read_bytes()).hexdigest();cap.write_text(json.dumps(value))
         self.assertTrue(cleanup.support(self.root,require_sprint=True)['supported'])
 
+    def test_v2_checks_complete_source_and_default_capability(self):
+        files=sprint_adapter.FILES | {'.systems/scripts/sprint_v2.py', '.systems/ai/core/default-sprint.md'}
+        for rel in files:
+            path=self.root/rel;path.parent.mkdir(parents=True,exist_ok=True)
+            if not path.exists():path.write_text('synthetic v2 '+rel)
+        value={'schema':1,'capability':'sprint-iteration-v2','contract_version':2,'authority':'none',
+               'files':{rel:hashlib.sha256((self.root/rel).read_bytes()).hexdigest() for rel in files}}
+        (self.root/'.systems/ai/capabilities/sprint-iteration-v2.json').write_text(json.dumps(value))
+        self.assertTrue(sprint_adapter.support(self.root,require_default=True)['default_sprint'])
+        (self.root/'.systems/scripts/sprint_v2.py').write_text('tampered')
+        with self.assertRaises(ValueError):sprint_adapter.support(self.root,require_default=True)
+
+    def test_old_counterpart_cannot_claim_default_v2(self):
+        with self.assertRaises(ValueError):sprint_adapter.support(self.root,require_default=True)
+
+
     def test_no_local_state_engine(self):self.assertFalse((SCRIPTS/'sprint_iteration.py').exists())
     def test_unavailable_has_no_effect(self):
         before=sorted(str(p) for p in self.root.rglob('*'))
