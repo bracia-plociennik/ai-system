@@ -108,3 +108,8 @@ Explicit current-goal selection is not full validation. It derives actual curren
 ## Sprint iteration
 
 For actual task-local Sprint selection use `sprint-iteration.md` and the compatible installed Workflow. Keep preview/feedback implementation open until genuine final current-effect acceptance or explicit verification request. Deferred quality is not completed/PASS or resource release. Preserve normal behavior without explicit activation.
+
+
+## Concurrent validation inputs
+
+Follow `validation-concurrency.md`: automatic product-v1 stability guards run even without timing. Select actual runtime inputs with the owning project/scope manifest or repeatable `--validation-input-root`. Unrelated runtime writes are not product drift; changed assessed inputs never grant successful evidence. No automatic retry or historical QA rewrite.
