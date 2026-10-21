@@ -1,0 +1,16 @@
+# Validation concurrency protection
+
+Automatic product-v1 guards run on every validate invocation, including untimed fast/standard/scoped/full. They inventory the complete live product namespace (.systems, .github, README.md, HUMANS.md, .gitignore and tracked root AGENTS.md), including uncommitted additions/deletions and executable modes. Private runtime and unrelated repository files never participate in this product source identity. Head is provenance, not a surrogate for actual bytes.
+
+Two matching preflight observations and a final observation bind actual content and file identity/mtime/ctime. Ordinary write-and-restore, source replacement, missing/read-failing input and links invalidate success. Inputs may not be links or special files; do not follow them. This is cooperative change detection, not a filesystem transaction or OS protection against a hostile same-account writer. A write after the last check is outside the assessed interval; later use still needs current applicability checks.
+
+Workflow --project additionally guards the selected complete owning project namespace. Valid scope manifests automatically guard their declared owning namespace. Both products accept repeatable --validation-input-root /absolute/owning/namespace for other actual read scopes. Global undeclared runtime remains live and subject to existing validators; no atomic global-runtime claim follows from a product-only PASS. Select the correct owning project/root when current QA depends on runtime. Do not guess ownership or exclude another required input to get a stable run.
+
+Runtime guard excludes only Python bytecode, exact declared new output files and the actual regular stdout/stderr sinks, not evidence directories. Root replacement is detected. Product paths cannot be output-exempt. Generated fixture directories without surviving files are not evidence inputs. Current runtime inputs may not depend on an output still being produced by the same run. Scripts never write or restamp existing QA/Capture.
+
+A changed input emits VALIDATION_INPUT_GUARD state=input-changed and prevents successful completion and source receipts. An otherwise successful run returns 75; an existing failed check, timeout or interruption retains its original nonzero outcome. Do not retry automatically, report source races as product defects, suspend other chats, delete environments or discard failed evidence. Repeat only after source/scope stability is established through the ordinary task route; use registered source isolation when appropriate.
+
+Full/smoke, semantic QA, permission and owner gates are unchanged. Product-v1 stability is supporting evidence only. Historical QA/manifests retain exact bytes and do not become current PASS. No background watcher, writer lock, extra agent, migration or automatic worktree lifecycle is added.
+
+## Verification
+check-validation-concurrency executes synthetic adversarial tests of actual public runner invocations and concurrent processes: unrelated writes and own output remain valid, changes to product/selected inputs fail, modes/links/missing roots and original failed exits stay safe. Full source validation includes this check in both products. Consumers absent in older installations require normal approved updates.

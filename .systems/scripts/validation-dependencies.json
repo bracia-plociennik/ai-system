@@ -303,6 +303,19 @@
         "complete": true,
         "mode": "product-tree"
       }
+    },
+    "check-validation-concurrency": {
+      "dependencies": [],
+      "runtime_capable": false,
+      "category": "product",
+      "inputs": {
+        "complete": true,
+        "mode": "product-tree",
+        "helpers": [
+          ".systems/scripts/validation_input_guard.py",
+          ".systems/scripts/tests/test_validation_input_guard.py"
+        ]
+      }
     }
   }
 }
