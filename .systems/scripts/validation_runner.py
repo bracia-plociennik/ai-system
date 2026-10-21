@@ -18,6 +18,7 @@ from pathlib import Path
 sys.dont_write_bytecode = True
 from validation_support import InvalidEvidence, atomic_create, contained_file, fingerprint, git_output, product_identity, safe_destination
 from smoke_coverage import population
+from validation_input_guard import Guard, InputChanged
 from execution_efficiency import check_identity, environment_identity, read_record, reuse_key, reusable_checks, reuse_decision, seal_record
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -146,6 +147,7 @@ def main():
     parser.add_argument("--checks", default="")
     parser.add_argument("--evidence-file")
     parser.add_argument("--scope-manifest")
+    parser.add_argument("--validation-input-root", action="append", default=[], help="additional complete owned read-input namespace; no writer lock")
     parser.add_argument("--reuse-evidence", help="explicit authenticated successful local source run")
     parser.add_argument("--reuse-key-file", help="owner-only local key; never serialized")
     parser.add_argument("--extra-product-file", action="append", default=[], help="approved new product files for smoke fixtures")
@@ -167,6 +169,7 @@ def main():
     key = None
     reuse_source = None
     previous_checks = {}
+    input_guard = None
     rc = 2
     print(f"AI_SYSTEM_VALIDATE_START run_id={run_id} supporting_only=true", flush=True)
     def interrupt(signum, frame):
@@ -221,6 +224,12 @@ def main():
         environment = environment_identity()
         record["environment_digest"] = fingerprint(environment)
         record["coverage"] = scope_coverage(args.scope_manifest, registry, names) if profile == "scoped" else {"eligibility": "full-required" if profile == "full" else "iteration-only"}
+        guarded_roots = list(args.validation_input_root)
+        if args.scope_manifest:
+            manifest = json.loads(Path(args.scope_manifest).read_text())
+            guarded_roots.append(Path(manifest['workspace']) / manifest['owned_root'])
+        input_guard = Guard(ROOT, guarded_roots, [args.evidence_file] if args.evidence_file else [])
+        record['input_guard'] = {'contract': 'product-v1', 'state': 'started', 'runtime_scopes': len(guarded_roots)}
         skip_smoke = profile == "full" and os.environ.get("AI_SYSTEM_SKIP_SMOKE_TESTS") == "1"
         if profile == "full" and not skip_smoke:
             names.append(args.full_smoke_check)
@@ -279,7 +288,7 @@ def main():
                 rc = code if code > 0 else 128 - code
                 raise RuntimeError(f"Validator failed: {check['id']} (exit {rc})")
         if product_identity(ROOT)["source_digest"] != record["source"]["source_digest"]:
-            raise InvalidEvidence("Source changed during validation")
+            raise InputChanged("Source changed during validation")
         if args.scope_manifest and scope_coverage(args.scope_manifest, registry, names) != record["coverage"]:
             raise InvalidEvidence("Runtime scope changed during validation")
         for check in record["checks"]:
@@ -301,11 +310,25 @@ def main():
     except InterruptedError as exc:
         record["status"] = "interrupted"
         rc = 128 + int(exc.args[0])
+    except InputChanged as exc:
+        record["error"] = str(exc)
+        rc = 75
+        print(str(exc), file=sys.stderr, flush=True)
     except (InvalidEvidence, ValueError, OSError, RuntimeError, KeyError) as exc:
         record["error"] = str(exc)
         print(str(exc), file=sys.stderr, flush=True)
     finally:
         stop_process(process)
+        if input_guard is not None:
+            try:
+                record['input_guard'] = input_guard.finish()
+            except (InputChanged, OSError, subprocess.SubprocessError) as exc:
+                record['input_guard'] = {'contract': 'product-v1', 'state': 'input-changed', 'reason': str(exc)}
+                record['status'] = 'failed'
+                if rc == 0:
+                    rc = 75
+                print('VALIDATION_INPUT_GUARD state=input-changed reason=' + str(exc), file=sys.stderr, flush=True)
+
         for check in record["checks"]:
             if check["state"] == "started":
                 check["state"] = record["status"]
