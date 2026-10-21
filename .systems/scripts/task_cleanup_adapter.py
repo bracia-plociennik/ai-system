@@ -24,7 +24,7 @@ def support(root, require_sprint=False):
     if (set(manifest) != {'schema','capability','contract_version','files','authority'}
             or type(manifest['schema']) is not int or manifest['schema'] != 1 or type(manifest['contract_version']) is not int or manifest['contract_version'] != 1
             or manifest['capability'] != 'task-resource-cleanup-v1' or manifest['authority'] != 'none'
-            or not isinstance(manifest['files'],dict) or set(manifest['files']) not in (FILES, FILES | {'.systems/scripts/sprint_iteration.py'})):
+            or not isinstance(manifest['files'],dict) or set(manifest['files']) not in (FILES, FILES | {'.systems/scripts/sprint_iteration.py'}, FILES | {'.systems/scripts/sprint_iteration.py', '.systems/scripts/sprint_v2.py', '.systems/ai/core/default-sprint.md'})):
         raise ValueError('unsupported installed Workflow cleanup capability')
     for relative, expected in manifest['files'].items():
         path = runtime.unlinked(root / relative)
@@ -33,6 +33,9 @@ def support(root, require_sprint=False):
     has_sprint = '.systems/scripts/sprint_iteration.py' in manifest['files']
     if (require_sprint or b'import sprint_iteration' in (root/'.systems/scripts/task_resource_cleanup.py').read_bytes()) and not has_sprint:
         raise ValueError('Sprint-aware cleanup requires the complete Sprint guard dependency')
+    if '.systems/scripts/sprint_v2.py' in manifest['files']:
+        import sprint_adapter
+        sprint_adapter.support(root, require_default=True)
     return {'supported':True, 'contract_version':1, 'authority':'none'}
 
 

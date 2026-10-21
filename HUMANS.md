@@ -736,3 +736,7 @@ Use [personal-source-library](.systems/ai/core/personal-source-library.md). Afte
 ## Independent judgment
 
 `critical-judgment.md` defines proportional evidence-based assessment: challenge material premises, offer feasible simpler options, correct the agent’s own recommendations, respect informed permitted tradeoffs and keep routine work brief. Workflow uses existing phases and meaningful What-if/acceptance evidence; this adds no counterphase, historical QA migration or new permission. Actual Codex evaluations are required for this delivery; structural checks alone do not establish behavior.
+
+## Default Sprint and Phase X
+
+New compatible implementation tasks follow `.systems/ai/core/default-sprint.md`: preview first, 300-second targeted QA after acceptance, full project verification only on explicit request. `Phase X --workspace <path>` or `Phase X -all` selects manual maintenance under `.systems/ai/core/phase-x-maintenance.md`. No automatic final check or Dreaming execution. Existing Sprint V1 remains compatible.

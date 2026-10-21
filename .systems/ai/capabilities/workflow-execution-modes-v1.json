@@ -1,6 +1,6 @@
 {
   "contract": 1,
-  "tested_commit": "239229ea366cc232c0c03649f19ab549881ac97c",
+  "tested_commit": "d820fccfa86188ad84c04e3446b1cabc7eccb88a",
   "mode_mapping": {
     "auto": "auto",
     "human": "human-coop"
@@ -11,7 +11,7 @@
   "inspector": ".systems/scripts/lib/execution-modes.py",
   "sources": {
     ".systems/ai/core/autopilot.md": {
-      "sha256": "19f5986592e71d25827618172a5302c35696c913ce460fa162b8539c4e04b947",
+      "sha256": "fc9b6d81b319590d3f7d34273ccdbc74624fc7c31632e2797dd825abfe12f5a1",
       "mode": "100644"
     },
     ".systems/ai/core/delivery-constraints.md": {
@@ -19,7 +19,7 @@
       "mode": "100644"
     },
     ".systems/ai/core/execution-modes.md": {
-      "sha256": "a07bc9ba22aab4ce156d6e0a9d312f578a3cbeedcc2fcd7c488477d6a659ceed",
+      "sha256": "92883e093f1f2e293dff494a918582fc956477ff0f52715734c0bf5b53203dcd",
       "mode": "100644"
     },
     ".systems/ai/core/owner-decision-checkpoints.md": {
@@ -31,7 +31,7 @@
       "mode": "100644"
     },
     ".systems/ai/core/phase-commit-policy.md": {
-      "sha256": "3b4e51dc119e7d686ff0c81f190c92c2dff62d4467abbe7a5006d4f1bdf99b93",
+      "sha256": "3f31ff7ea467548d5fe0149176620c780b200836186171431c999832a2c8ec55",
       "mode": "100644"
     },
     ".systems/ai/core/quality-review.md": {
