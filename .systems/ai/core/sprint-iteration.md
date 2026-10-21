@@ -1,3 +1,5 @@
+> New compatible implementation tasks follow `default-sprint.md` V2. The V1 rules below apply only to existing/explicit schema1 records.
+
 # Sprint Iteration V1 — System coordination
 
 An explicitly owner-enabled Sprint keeps one approved task open across fast preview/feedback rounds. It is independent of Auto/Human. Verify the actual local Workflow source using manage-sprint --workflow-root <installed-root> --check-support; then follow its authoritative .systems/ai/core/sprint-iteration.md. System delegates transitions to that engine, never duplicates technical state, QA or a tracker. Missing/malformed/stale/unknown counterpart support means unavailable, never a pretend activation or an instruction to ignore installed gates.
