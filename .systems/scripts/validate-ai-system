@@ -12,6 +12,7 @@ standard_checks=(
   check-agent-startup
   check-task-resource-cleanup
   check-critical-judgment
+  check-luna-first
   check-personal-source-library
 
   check-sprint-iteration

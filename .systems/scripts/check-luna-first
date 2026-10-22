@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+script_dir="$(cd "$(dirname "$0")" && pwd -P)"
+python3 -B "$script_dir/tests/test_luna_first.py"

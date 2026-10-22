@@ -316,6 +316,10 @@
           ".systems/scripts/tests/test_validation_input_guard.py"
         ]
       }
+    },
+    "check-luna-first": {
+      "dependencies": [],
+      "runtime_capable": false
     }
   }
 }

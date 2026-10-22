@@ -34,3 +34,7 @@ Model selection is advisory-only:
 - `Blocking: no` is mandatory;
 - model choice does not change source-of-truth order, scope, risk, privacy, permissions, Definition of Done, evidence, QA, approvals, or stop conditions;
 - a model recommendation cannot guarantee correctness or `PASS`.
+
+## Explicit Luna-first profile
+
+Only an actually owner-activated source-verified luna-first-v1 component adds automatic native task selection and one-way takeover under core/luna-first.md. Outside that activation, guidance stays advisory. Preserve current owner choice, native support, risk, source, permissions and Sprint/QA/Phase8 gates. No claim that this switches a desktop root-chat model.
