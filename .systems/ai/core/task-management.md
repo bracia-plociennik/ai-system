@@ -25,7 +25,7 @@ format rules; owner authority, privacy, source/read-only and lifecycle gates rem
   status is independent and retained, including done with a real category. DONE is a
   status, not a category; a done-only category/bucket request fails rather than guessing
   its original category. Existing legacy daily/done task files remain readable and unchanged.
-- scheduled is the only task date, YYYY-MM-DD or empty. Preserve explicit planned date,
+- scheduled is the planning date, YYYY-MM-DD or empty. Preserve explicit planned date,
   otherwise use an explicit source deadline's date. Preserve any original deadline timestamp
   separately as source_deadline provenance; never invent a missing date. DAILY is a computed
   active scheduled-on-or-before-today view. A legacy daily creation request requires an explicit
@@ -38,6 +38,13 @@ format rules; owner authority, privacy, source/read-only and lifecycle gates rem
   facts as a proposal; update only with exact owner-approved lifecycle scope after re-reading.
 - Path collision, symlink escape and unavailable selected store fail closed. Create is atomic
   and cannot overwrite an unrelated UI task. Never move a file merely to change category.
+
+New SilverBullet task writes receive a UUID task_id and actual UTC created_at only at
+successful creation, after deduplication. Existing tasks are never bulk-backfilled;
+the tracker lazily adds missing identity without inventing historical dates.
+Controlled DONE/reopen actions record lifecycle timestamps/events and preserve
+unknown metadata, notes and checkbox state. Manual YAML edits do not infer events.
+See silverbullet-tracker.md for the separately approved timer/WEP runtime.
 
 Use `.systems/scripts/task-store inspect --workspace <workspace>` and `list` for reads.
 For a directly approved task, `create --workspace <workspace> --input <candidate-json>

@@ -1,6 +1,6 @@
 # SilverBullet task example
 
-New-task shape; do not scan this template as a task. Use the configured writer.
+New-task shape; do not scan this template as a task. Use the configured writer. It supplies task_id (UUID) and created_at (UTC) at actual creation. Never hardcode identity in a reusable template.
 
 ```markdown
 ---

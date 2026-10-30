@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import re
 from local_paths import resolve_path
+from task_identity import new_identity
 
 PROFILES = {'tasknotes-v1', 'silverbullet-v1'}
 CATEGORIES = {'do': ('open','high'), 'defer': ('planned','normal'),
@@ -148,7 +149,8 @@ class TaskStore:
         provenance=['workspace','owner_scope','owned_asset','project_state','source_system','source_type',
                     'source_check_in_date','source_check_in_field','source_session_date','source_plan_item_id',
                     'source_week_id','source_week_item_id','source_week_plan','estimated_minutes','weekly_allocations_json',
-                    'source_dream_report','candidate_key','source_candidate_id','source_deadline']
+                    'source_dream_report','candidate_key','source_candidate_id','source_deadline',
+                    'task_id','created_at','completed_at','reopened_at']
         lines=['---']+[key+': '+json.dumps(value.get(key,''),ensure_ascii=False) for key in primary]
         lines += [key+': '+json.dumps(value[key],ensure_ascii=False) for key in provenance if key in value]
         dod=str(value.get('definition_of_done') or '').replace('\r','').replace('\n','\n  ')
@@ -180,7 +182,7 @@ class TaskStore:
                 if target.exists():raise ValueError('task-title-path-collision')
                 directory.mkdir(parents=True,exist_ok=True);safe_path(self.task_dir,directory)
                 # O_EXCL prevents overwriting a task created by the UI concurrently.
-                data=self.render(value)
+                data=self.render({**value, **new_identity()})
                 temporary = None
                 try:
                     with tempfile.NamedTemporaryFile(dir=directory,prefix='.ai-system-create-',delete=False) as output:

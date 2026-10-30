@@ -30,6 +30,12 @@ class StoreTests(unittest.TestCase):
  def test_new_task_matches_ui(self):
   s=TaskStore.load(self.w);files,*_=s.write_candidates([self.candidate(due='2026-10-22T15:00',definition_of_done='Tests pass',tags=['6d/do','AI'],contexts=['x'],projects=['x'])]);p=files[0];text=p.read_text();data=frontmatter(text)
   self.assertEqual(p,self.root/'tasks/Customer/Product/Prepare fix.md');self.assertEqual(data['category'],'do');self.assertEqual(data['scheduled'],'2026-10-22');self.assertEqual(data['source_deadline'],'2026-10-22T15:00');self.assertFalse({'due','tags','contexts','projects'}&data.keys());self.assertIn('# Prepare fix\n- Category: do\n- DoD: Tests pass\n- Deadline: 2026-10-22',text);self.assertIn('## TODO\n- [ ] Prepare fix',text);self.assertIn('## Evidence\n\n## Working dump',text)
+ def test_ids_are_created_only_for_real_new_tasks(self):
+  import uuid
+  s=TaskStore.load(self.w);value=self.candidate(source_session_date='2026-10-30',source_plan_item_id='stable')
+  self.assertNotIn('task_id:',s.render(value));files,*_=s.write_candidates([value]);data=frontmatter(files[0].read_text())
+  self.assertEqual(str(uuid.UUID(data['task_id'])),data['task_id']);self.assertIn('created_at',data)
+  original=files[0].read_bytes();self.assertEqual(s.write_candidates([value])[1],1);self.assertEqual(files[0].read_bytes(),original)
  def test_five_assignable_categories_match_ui(self):
   s=TaskStore.load(self.w)
   for category in ['do','defer','delegate','delete','dump']:

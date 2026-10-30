@@ -426,4 +426,6 @@ fi
 
 python3 -B -m unittest discover -s "$repo_root/.systems/scripts/tests" -p 'test_silverbullet_task_store.py' || fail=1
 
+python3 -B -m unittest discover -s "$repo_root/.systems/scripts/tests" -p 'test_silverbullet_tracker*.py' || fail=1
+
 exit "$fail"
