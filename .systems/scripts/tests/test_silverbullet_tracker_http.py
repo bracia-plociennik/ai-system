@@ -45,6 +45,19 @@ class HttpTests(TrackerFixture, unittest.TestCase):
             with patch.object(self.app.opener,'open',return_value=response), self.assertRaisesRegex(TrackerError,'owner-access'):
                 self.app.authenticate(self.headers)
 
+    def test_profile_auth_uses_fixed_https_proxy_context(self):
+        class Response:
+            status=200;headers={'Content-Type':'application/json'}
+            def __enter__(self):return self
+            def __exit__(self,*args):pass
+            def read(self,*args):return b'{"username":"owner","admin":true}'
+        with patch.object(self.app.opener,'open',return_value=Response()) as opened:
+            principal,_=self.app.authenticate({**self.headers,'Host':'attacker.invalid','X-Forwarded-Proto':'http','X-Forwarded-Host':'attacker.invalid'})
+        request=opened.call_args.args[0];headers={k.lower():v for k,v in request.header_items()}
+        self.assertEqual(principal,'owner');self.assertEqual(headers['x-forwarded-proto'],'https')
+        self.assertEqual(headers['host'],'example.test');self.assertEqual(headers['x-forwarded-host'],'example.test')
+        self.assertEqual(request.full_url,'http://127.0.0.1:3000/.dashboard/api/profile')
+
     def test_create_keeps_template_notes_and_injects_real_identity(self):
         text='---\ntype: task\ntitle: New\nstatus: open\ncategory: do\n---\nCustom template note\n'
         headers={**self.headers,'If-None-Match':'*','X-Sync-Mode':'true'}

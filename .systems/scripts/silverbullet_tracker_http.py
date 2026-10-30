@@ -48,7 +48,11 @@ class Application:
         cookie = headers.get('Cookie', '')
         require(bool(cookie) and len(cookie) <= 16384, 'authentication-required', 401)
         req = Request(self.config['native_url'] + '/.dashboard/api/profile', headers={
-            'Cookie': cookie, 'Host': urlsplit(self.config['origin']).netloc, 'Accept': 'application/json'})
+            'Cookie': cookie, 'Host': urlsplit(self.config['origin']).netloc, 'Accept': 'application/json',
+            # Native central sessions bind their origin to the reverse-proxy scheme.
+            # Use fixed reviewed config, never request-supplied forwarding headers.
+            'X-Forwarded-Proto': urlsplit(self.config['origin']).scheme,
+            'X-Forwarded-Host': urlsplit(self.config['origin']).netloc})
         try:
             with self.opener.open(req, timeout=5) as response:
                 require(response.status == 200 and 'application/json' in response.headers.get('Content-Type', ''),
