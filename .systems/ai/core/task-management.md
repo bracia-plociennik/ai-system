@@ -17,14 +17,19 @@ format rules; owner authority, privacy, source/read-only and lifecycle gates rem
 
 - One existing Space is the configured vault; tasks live in tasks/<client>/<project>/<title>.md.
 - Required new metadata: type: task, title, status, priority, client, project, category, scheduled.
-- category is one of daily/do/defer/delegate/delete/dump/done. No classification tags, AI tag,
+- category is one of do/defer/delegate/delete/dump. No classification tags, AI tag,
   due, contexts or projects arrays are generated. Unknown routing stays blank in metadata,
   with bez-klienta/bez-projektu path segments; never assign a company or personal client by default.
-- UI-compatible status/priority: daily/do=open/high; defer=planned/normal;
-  delegate=waiting/normal; delete=cancelled/none; dump=open/none; done=done/normal.
+- Initial UI-compatible status/priority: do=open/high; defer=planned/normal;
+  delegate=waiting/normal; delete=cancelled/none; dump=open/none. Explicit safe scalar
+  status is independent and retained, including done with a real category. DONE is a
+  status, not a category; a done-only category/bucket request fails rather than guessing
+  its original category. Existing legacy daily/done task files remain readable and unchanged.
 - scheduled is the only task date, YYYY-MM-DD or empty. Preserve explicit planned date,
   otherwise use an explicit source deadline's date. Preserve any original deadline timestamp
-  separately as source_deadline provenance; never invent a missing date. DAILY requires a date.
+  separately as source_deadline provenance; never invent a missing date. DAILY is a computed
+  active scheduled-on-or-before-today view. A legacy daily creation request requires an explicit
+  date and writes category do with that scheduled date; it never writes category daily.
 - Body: title; Category, DoD, Deadline (from scheduled); Checkpoint OSNR; TODO checklist;
   Evidence; Working dump. Preserve source DoD and source IDs. DONE/DELETE never deletes files.
 - Generated tasks deduplicate by their original check-in/week item identity, or stable Dream

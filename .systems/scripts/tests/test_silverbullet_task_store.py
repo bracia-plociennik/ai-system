@@ -30,11 +30,33 @@ class StoreTests(unittest.TestCase):
  def test_new_task_matches_ui(self):
   s=TaskStore.load(self.w);files,*_=s.write_candidates([self.candidate(due='2026-10-22T15:00',definition_of_done='Tests pass',tags=['6d/do','AI'],contexts=['x'],projects=['x'])]);p=files[0];text=p.read_text();data=frontmatter(text)
   self.assertEqual(p,self.root/'tasks/Customer/Product/Prepare fix.md');self.assertEqual(data['category'],'do');self.assertEqual(data['scheduled'],'2026-10-22');self.assertEqual(data['source_deadline'],'2026-10-22T15:00');self.assertFalse({'due','tags','contexts','projects'}&data.keys());self.assertIn('# Prepare fix\n- Category: do\n- DoD: Tests pass\n- Deadline: 2026-10-22',text);self.assertIn('## TODO\n- [ ] Prepare fix',text);self.assertIn('## Evidence\n\n## Working dump',text)
- def test_all_seven_categories_and_daily_gate(self):
+ def test_five_assignable_categories_match_ui(self):
   s=TaskStore.load(self.w)
-  for category in ['daily','do','defer','delegate','delete','dump','done']:
+  for category in ['do','defer','delegate','delete','dump']:
    value=s.candidate(self.candidate(category=category,scheduled='2026-10-20'));self.assertEqual(value['category'],category)
+ def test_daily_input_is_computed_view_not_new_category(self):
+  s=TaskStore.load(self.w)
+  files,*_=s.write_candidates([self.candidate(category='daily',scheduled='2026-10-20')]);data=frontmatter(files[0].read_text())
+  self.assertEqual(data['category'],'do');self.assertEqual(data['scheduled'],'2026-10-20');self.assertEqual(data['status'],'open')
   with self.assertRaises(ValueError):s.candidate(self.candidate(category='daily'))
+ def test_done_requires_real_category_and_explicit_status(self):
+  s=TaskStore.load(self.w)
+  for field in ['category','execution_bucket']:
+   value=self.candidate();value[field]='done'
+   with self.assertRaisesRegex(ValueError,'done-is-status'):s.write_candidates([value])
+  self.assertEqual(list(s.tasks()),[])
+  files,*_=s.write_candidates([self.candidate(category='defer',status='done')]);data=frontmatter(files[0].read_text());self.assertEqual(data['category'],'defer');self.assertEqual(data['status'],'done')
+ def test_explicit_status_is_independent_from_category(self):
+  s=TaskStore.load(self.w)
+  for status in ['waiting','archived','blocked','OPEN']:
+   data=frontmatter(s.render(self.candidate(category='do',status=status)));self.assertEqual(data['status'],status.lower());self.assertEqual(data['category'],'do')
+  for status in ['open\ncategory: done','status: done',{'value':'open'}]:
+   with self.assertRaisesRegex(ValueError,'invalid-task-status'):s.candidate(self.candidate(status=status))
+ def test_legacy_daily_done_files_remain_unchanged_and_readable(self):
+  s=TaskStore.load(self.w)
+  for category in ['daily','done']:
+   p=s.task_dir/(category+'.md');p.write_text('---\ntype: task\ntitle: Legacy\ncategory: '+category+'\ncustom: untouched\n---\nPrivate note\n');before=p.read_bytes()
+   self.assertTrue(any(path==p and meta['category']==category for path,meta in s.tasks()));self.assertEqual(p.read_bytes(),before)
  def test_real_date_validation(self):
   s=TaskStore.load(self.w)
   for value in ['2026-02-31','tomorrow','2026-10-22T99:10']:

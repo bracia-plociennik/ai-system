@@ -11,9 +11,9 @@ import re
 from local_paths import resolve_path
 
 PROFILES = {'tasknotes-v1', 'silverbullet-v1'}
-CATEGORIES = {'daily': ('open','high'), 'do': ('open','high'), 'defer': ('planned','normal'),
+CATEGORIES = {'do': ('open','high'), 'defer': ('planned','normal'),
               'delegate': ('waiting','normal'), 'delete': ('cancelled','none'),
-              'dump': ('open','none'), 'done': ('done','normal')}
+              'dump': ('open','none')}
 MAX_TASK = 1024 * 1024
 
 
@@ -110,7 +110,8 @@ class TaskStore:
         result=dict(value)
         if self.profile!='silverbullet-v1':return result
         bucket=str(result.get('category') or result.get('execution_bucket') or 'do').lower()
-        if bucket not in CATEGORIES:raise ValueError('unsupported-task-category')
+        if bucket=='done':raise ValueError('done-is-status-requires-real-category')
+        if bucket not in CATEGORIES and bucket!='daily':raise ValueError('unsupported-task-category')
         title=str(result.get('title') or '').strip()
         if not title or len(title)>180 or '\n' in title or '\r' in title:raise ValueError('invalid-task-title')
         source_deadline=str(result.get('due') or result.get('source_deadline') or '')
@@ -122,10 +123,14 @@ class TaskStore:
                 else:dt.date.fromisoformat(date)
             except ValueError:raise ValueError('invalid-task-scheduled') from None
             date=date[:10]
-        if bucket=='daily' and not date:raise ValueError('daily-task-requires-scheduled')
+        if bucket=='daily':
+            if not date:raise ValueError('daily-task-requires-scheduled')
+            bucket='do' # Daily is derived from the explicit date, never stored as a new category.
+        status=result.get('status') or CATEGORIES[bucket][0]
+        if not isinstance(status,str) or not re.fullmatch(r'[A-Za-z_-]+',status):raise ValueError('invalid-task-status')
         for field in ('tags','contexts','projects','due','task_method'):result.pop(field,None)
         result.update(type='task',title=title,category=bucket,scheduled=date,client=str(result.get('client') or ''),
-                      project=str(result.get('project') or ''),status=CATEGORIES[bucket][0],priority=CATEGORIES[bucket][1])
+                      project=str(result.get('project') or ''),status=status.lower(),priority=CATEGORIES[bucket][1])
         if source_deadline:
             try:
                 if len(source_deadline)>10: dt.datetime.fromisoformat(source_deadline.replace('Z','+00:00'))
