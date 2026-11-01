@@ -276,6 +276,28 @@ def wait_idle(client,c,manual):
     return False
 
 
+def summary_prompt(cfg, s, p):
+    packet = session.route(s['findings'], cfg['recipients'], cfg['report_owner'], cfg['decisions'])
+    active = len(packet[cfg['report_owner']]['findings'])
+    invalidated = s.get('finalization', {}).get('invalidated_findings')
+    disposition = ('nieznana w historycznym stanie' if invalidated is None else str(invalidated))
+    return ('Zakończ prezentację istniejącej sesji Dreamingu w tym chacie. '
+            'Kontroler sprawdził integralność raportu, co nie oznacza semantycznego QA PASS. '
+            'To nie jest nowe polecenie analizy ani wykonania rekomendacji. '
+            'Przeczytaj wyłącznie wskazany zapisany raport; nie czytaj źródeł ani roboczego checkpointu. '
+            'Przedstaw krótko tylko aktualne wnioski z tego raportu, rzeczywiste pokrycie i braki. '
+            'Nie powtarzaj roboczych wniosków z wcześniejszych odpowiedzi jako zatwierdzonych. '
+            'Aktualne ustalenia po routingu właściciela: '+str(active)+
+            '; wycofane po kontroli aktualności: '+disposition+'. '
+            'Gdy aktualnych ustaleń jest zero, powiedz to wprost i wyjaśnij przyczynę z raportu; '
+            'nie przedstawiaj wycofanych obserwacji jako aktualnych propozycji. '
+            'Ustalenia pozostają prywatnymi propozycjami. Stan sesji: '+s['status']+
+            '. Pokrycie: '+json.dumps(s['coverage_counts'])+
+            '. Link do raportu: ['+s['cycle_id']+']('+str(p['report']/'dream-report.md')+'). '
+            'Sesja ręczna nie zastępuje naturalnego terminu. '
+            'Nie deklaruj aktywnego harmonogramu bez jego sprawdzenia.')
+
+
 def monitor(client,module,c,cfg,s,p,d):
     finalized=False
     finalization_requested=False
@@ -298,13 +320,7 @@ def monitor(client,module,c,cfg,s,p,d):
                 finalized=True
             elif turn['status']=='completed' and s['checkpoint_revision']:
                 s=session.accept(c['source_config'],s['cycle_id'],final=True)
-                prompt=('Zakończ prezentację istniejącej sesji Dreamingu w tym chacie. '
-                        'Kontroler zatwierdził integralność raportu; nie jest to nowe polecenie analizy ani wykonania rekomendacji. '
-                        'Przedstaw krótko najważniejsze wnioski własnymi słowami, rzeczywiste pokrycie i braki. '
-                        'Ustalenia pozostają prywatnymi propozycjami. Stan sesji: '+s['status']+
-                        '. Pokrycie: '+json.dumps(s['coverage_counts'])+
-                        '. Link do raportu: ['+s['cycle_id']+']('+str(p['report']/'dream-report.md')+'). '
-                        'Sesja ręczna nie zastępuje naturalnego terminu. Nie deklaruj aktywnego harmonogramu bez jego sprawdzenia.')
+                prompt=summary_prompt(cfg,s,p)
                 queue(client,module,c,s,p,d,prompt,phase='summary')
                 continue
             else:

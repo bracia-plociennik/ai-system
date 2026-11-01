@@ -201,6 +201,29 @@ class Controller(Sessions):
         self.assertTrue((p['report']/'dream-report.md').exists())
         self.assertFalse(any(m.startswith(('config/','thread/settings/')) for m in events))
 
+    def test_summary_uses_final_report_counts_without_draft_claims(self):
+        _,s,p=self.begin();self.submit(s,p)
+        (self.root/'sources/note.md').write_text('Changed after actual review.')
+        done=session.accept(self.config,s['cycle_id'],self.stamp,final=True)
+        prompt=dispatch.summary_prompt(self.cfg,done,p)
+        self.assertIn('po routingu właściciela: 0',prompt)
+        self.assertIn('kontroli aktualności: 1',prompt)
+        self.assertIn('Przeczytaj wyłącznie wskazany zapisany raport',prompt)
+        self.assertIn('nie czytaj źródeł ani roboczego checkpointu',prompt)
+        self.assertNotIn('Observed report',prompt)
+        self.assertNotIn('Keep recording outcomes',prompt)
+
+    def test_summary_counts_recipient_decisions_and_legacy_unknown_separately(self):
+        _,s,p=self.begin();self.submit(s,p)
+        done=session.accept(self.config,s['cycle_id'],self.stamp,final=True)
+        self.assertIn('po routingu właściciela: 1',dispatch.summary_prompt(self.cfg,done,p))
+        cfg={**self.cfg,'decisions':[{'finding_id':done['findings'][0]['finding_id'],
+             'recipient':'owner','state':'deferred','authority_ref':'synthetic-owner-decision'}]}
+        done.pop('finalization')
+        prompt=dispatch.summary_prompt(cfg,done,p)
+        self.assertIn('po routingu właściciela: 0',prompt)
+        self.assertIn('nieznana w historycznym stanie',prompt)
+
     def test_controller_change_cancels_before_accepting_checkpoint(self):
         _,s,p=self.begin();self.submit(s,p)
         with patch.object(dispatch,'controller_config',return_value=({**self.c,'thread_id':'changed'},self.cfg)),\

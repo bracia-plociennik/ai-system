@@ -351,6 +351,13 @@ def finalize(cfg, s, p):
     cached = [f for f in s['previous_findings'] if not any((r['source_id'],r['path']) in changed for r in f['context_refs'])]
     # New observations replace a prior topic; recipient decisions stay in the registry.
     merged = {f['finding_id']: f for f in cached + valid}
+    finalization = {
+        'draft_findings': len(s['findings']),
+        'previous_findings': len(s['previous_findings']),
+        'invalidated_findings': len(s['findings']) - len(valid) + len(s['previous_findings']) - len(cached),
+        'verified_findings': len(merged),
+        'changed_sources': len(changed),
+    }
     for key, row in s['files'].items():
         if (row['source_id'],row['path']) in changed:
             reviewed.pop(key, None); partial.pop(key, None); continue
@@ -366,6 +373,7 @@ def finalize(cfg, s, p):
     for row in s['coverage']: count[row['state']] = count.get(row['state'], 0) + 1
     s.update({'status': 'completed' if s.get('synthesis_complete') and not changed else 'partial',
               'findings': list(merged.values()), 'coverage_counts': count, 'changed_count': len(changed),
+              'finalization': finalization,
               'finished_at': clock().isoformat()})
     mkdir(p['report'])
     atomic(p['report'] / 'findings.json', {'authority':'advisory-only','audience':cfg['report_owner'],
@@ -393,6 +401,17 @@ def render_report(cfg, s):
              'Przygotowanie pliku nie oznacza jego przeanalizowania. Pokrycie analizy pochodzi z walidowanych deklaracji chatu.',
              'Ustalenia i działania są propozycjami; nie wykonano rekomendacji.',
              'Wynik pozostaje prywatny dla właściciela; brak automatycznych pakietów dla innych odbiorców.', '']
+    disposition = s.get('finalization', {})
+    if disposition:
+        lines += ['## Kontrola aktualności ustaleń', '',
+                  f"Ustalenia robocze tego cyklu: {disposition['draft_findings']}; "
+                  f"wycofane po kontroli aktualności (łącznie z wcześniejszymi): {disposition['invalidated_findings']}; "
+                  f"aktualne w pakiecie po kontroli: {disposition['verified_findings']}.", '']
+        if disposition['invalidated_findings']:
+            lines += ['Zmiana lub niedostępność źródła w przeczytanym kontekście unieważnia zależne ustalenia. '
+                      'Wycofane ustalenia nie są aktualnymi wnioskami ani nowymi propozycjami działań. '
+                      'Nie oznacza to, że podczas analizy nie powstały obserwacje.',
+                      'Roboczy checkpoint tego cyklu pozostaje zachowany; nie zastępuje zweryfikowanego raportu.', '']
     if 'maintenance' in s:
         lines += ['## Utrzymanie środowiska', '', 'Wynik etapu: ' + s['maintenance']['status'],
                   'Etap wykonuje wyłącznie oddzielnie zatwierdzone operacje utrzymania; ustalenia analizy pozostają propozycjami.', '']
@@ -420,7 +439,10 @@ def render_report(cfg, s):
     for lens in LENSES:
         lines += ['## ' + {'person':'Osoba właściciela','brand':'Marka osobista','company':'Firma','systems':'Systemy i projekty'}[lens], '']
         fs = [f for f in active if f['lens'] == lens]
-        if not fs: lines += ['Brak ustaleń w zweryfikowanym dotąd materiale.', '']
+        if not fs:
+            lines += [('Brak aktualnych ustaleń dla tej perspektywy po kontroli zmian źródeł.'
+                       if disposition.get('invalidated_findings') else
+                       'Brak ustaleń w zweryfikowanym dotąd materiale.'), '']
         for f in fs:
             lines += ['### ' + f['summary'], '', 'Rodzaj: ' + f['kind'] + '; decyzja: ' + decisions.get(f['finding_id'],'proposed')]
             for key, label in [('facts','Fakty'),('inferences','Interpretacje'),('unknowns','Niewiadome'),('actions','Propozycje')]:

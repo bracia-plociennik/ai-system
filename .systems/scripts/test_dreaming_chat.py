@@ -123,9 +123,37 @@ class Sessions(unittest.TestCase):
 
     def test_changed_sources_lose_claims(self):
         _,s,p=self.begin();self.submit(s,p)
+        checkpoint=(p['drafts']/'checkpoint.json').read_bytes()
         (self.root/'sources/note.md').write_text('Changed after analysis')
         done=chat.accept(self.config,s['cycle_id'],self.stamp,final=True)
         self.assertEqual(done['findings'],[]);self.assertEqual(done['changed_count'],1)
+        self.assertEqual(done['finalization'],{'draft_findings':1,'previous_findings':0,
+            'invalidated_findings':1,'verified_findings':0,'changed_sources':1})
+        self.assertEqual((p['drafts']/'checkpoint.json').read_bytes(),checkpoint)
+        report=(p['report']/'dream-report.md').read_text()
+        self.assertIn('wycofane po kontroli aktualności',report)
+        self.assertIn('nie są aktualnymi wnioskami',report)
+        self.assertNotIn('Observed report',report)
+
+    def test_changed_uncited_context_still_invalidates_claim(self):
+        (self.root/'sources/context.md').write_text('Other read context.')
+        _,s,p=self.begin();self.submit(s,p)
+        draft=chat.load(p['drafts']/'checkpoint.json')
+        cited=draft['findings'][0]['evidence_ids'][0]
+        other=next(cid for cid in s['input_hashes'] if cid!=cited)
+        changed=chat.load(p['inputs']/(other+'.json'))['ref']['path']
+        (self.root/changed).write_text('Changed uncited context.')
+        done=chat.accept(self.config,s['cycle_id'],self.stamp,final=True)
+        self.assertEqual(done['findings'],[])
+        self.assertEqual(done['coverage_counts']['reviewed'],1)
+        self.assertEqual(done['finalization']['invalidated_findings'],1)
+
+    def test_empty_analysis_is_distinct_from_invalidated_analysis(self):
+        _,s,p=self.begin();self.submit(s,p,findings=[])
+        done=chat.accept(self.config,s['cycle_id'],self.stamp,final=True)
+        self.assertEqual(done['status'],'completed')
+        self.assertEqual(done['finalization']['invalidated_findings'],0)
+        self.assertNotIn('unieważnia zależne ustalenia',(p['report']/'dream-report.md').read_text())
 
     def test_revoked_configuration(self):
         _,s,p=self.begin();self.submit(s,p)
