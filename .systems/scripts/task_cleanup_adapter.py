@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -16,9 +17,23 @@ FILES = {
  '.systems/scripts/lib/execution-efficiency.py', '.systems/scripts/lib/validation-timing.py',
  '.systems/scripts/init-workspace',
 }
+CACHE_PROFILE = 'next-webpack-cache-v1'
+CACHE_FILES = {'.systems/scripts/task_resource_cleanup.py', '.systems/scripts/durable_runtime.py',
+               '.systems/scripts/manage-task-resources', '.systems/scripts/lib/task-resource-activity.py',
+               '.systems/scripts/tests/task-resource-cleanup.py', '.systems/ai/core/task-resource-cleanup.md'}
 
 
-def support(root, require_sprint=False):
+def select_workflow(canonical):
+    canonical = runtime.unlinked(canonical)
+    official = (canonical / '.systems/ai/core/repository-modes.md').is_file()
+    if official and os.environ.get('AI_WORKFLOW_MODE') == 'official':
+        return canonical
+    system = runtime.registered_system()
+    shared = runtime.shared_installation(system, canonical) if system is not None else None
+    return shared if shared is not None else canonical if official else canonical / 'ai-workflow'
+
+
+def support(root, require_sprint=False, require_cache=False):
     root = runtime.unlinked(root)
     manifest = runtime.read_json(root / '.systems/ai/capabilities/task-resource-cleanup-v1.json')
     if (set(manifest) != {'schema','capability','contract_version','files','authority'}
@@ -36,7 +51,20 @@ def support(root, require_sprint=False):
     if '.systems/scripts/sprint_v2.py' in manifest['files']:
         import sprint_adapter
         sprint_adapter.support(root, require_default=True)
-    return {'supported':True, 'contract_version':1, 'authority':'none'}
+    result = {'supported':True, 'contract_version':1, 'authority':'none'}
+    if require_cache:
+        cache = runtime.read_json(root / '.systems/ai/capabilities/next-webpack-cache-v1.json')
+        if (set(cache) != {'schema', 'capability', 'contract_version', 'files', 'authority'}
+                or type(cache['schema']) is not int or cache['schema'] != 1
+                or type(cache['contract_version']) is not int or cache['contract_version'] != 1
+                or cache['capability'] != CACHE_PROFILE or cache['authority'] != 'none'
+                or not isinstance(cache['files'], dict) or set(cache['files']) != CACHE_FILES):
+            raise ValueError('unsupported installed webpack cache capability')
+        for relative, expected in cache['files'].items():
+            if hashlib.sha256(runtime.unlinked(root / relative).read_bytes()).hexdigest() != expected:
+                raise ValueError('installed webpack cache source differs: ' + relative)
+        result['cache_profile'] = CACHE_PROFILE
+    return result
 
 
 def main():
@@ -54,12 +82,20 @@ def main():
                 canonical=Path(record['task_resource_cleanup']['canonical']['root'])
             else:
                 raise ValueError('select installed --workflow-root, canonical repository or owning --record')
-            root=canonical if (canonical/'.systems/ai/core/repository-modes.md').is_file() else canonical/'ai-workflow'
+            root=select_workflow(canonical)
         require_sprint = False
+        require_cache = False
+        if '--profile' in rest:
+            if rest[rest.index('--profile')+1] != CACHE_PROFILE:
+                raise ValueError('unsupported cache profile request')
+            require_cache = True
         if '--record' in rest:
             value = runtime.read_json(rest[rest.index('--record')+1])
+            if not isinstance(value, dict) or not isinstance(value.get('task_resource_cleanup', {}), dict):
+                raise ValueError('invalid owning resource policy')
             require_sprint = 'sprint_iteration' in value
-        result=support(root, require_sprint=require_sprint)
+            require_cache = require_cache or value.get('task_resource_cleanup', {}).get('schema') == 2
+        result=support(root, require_sprint=require_sprint, require_cache=require_cache)
         if args.check_support:
             print(json.dumps(result,sort_keys=True));return 0
         return subprocess.run([str(root/'.systems/scripts/manage-task-resources'),*rest],check=False).returncode

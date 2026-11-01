@@ -34,3 +34,28 @@ Disable also writes one repo-wide Git-administrative stop marker, checked by eve
 Closure dependencies may explicitly use role=archive for immutable historical reports/test-run data retained in durable runtime. Their hashes stay required, but a recorded old execution location does not imply a live-source dependency. Current reports cannot use that role; complete independently reviewed source_roots still pin every required live source. A role label never supplies current QA, consent or permission to drop a real dependency. Unknown roles/fields reject.
 
 At the next task use `manage-task-resources list --canonical <verified-repo> --workspace <selected-durable-runtime>` to discover only already registered record pointers in that Git repository. It is read-only, creates nothing and excludes foreign runtime pointers before reading their target. Review actual current owner scope/revocation for each record, then plan and apply only eligible authorized resources; read-only work never applies. No filesystem-wide scan or legacy adoption. System infers the installed executor from the explicit canonical target for list/init as well as existing records.
+
+## Opt-in webpack cache consumer
+
+The explicit `next-webpack-cache-v1` Workflow profile uses a new schema2 resource
+policy and separate `reviewed-cache-eviction-v1` proof. System's portable runtime
+reader recognizes explicit schema1/schema2 only, with exact integer typing; no
+conversion or automatic enrollment. Old schema1 records remain unchanged.
+
+The System wrapper resolves the owner-enabled shared Workflow for the actual
+canonical target using registered shared routing. Explicit `--workflow-root`,
+official product source and standalone nested modes retain their deliberate
+selection. Invalid registration/shared configuration fails closed, never a silent
+fallback. A profile request or schema2 record requires the complete verified
+`next-webpack-cache-v1` source capability, alongside existing lifecycle/Sprint
+guards. Missing, changed, linked, partial or unknown source support retains.
+
+Workflow remains the only executor. System forwards `review-cache` read-only;
+it never manufactures cache proof, releases a parent worktree, withdraws keep or
+duplicates removal. Exact source/.next/cache/webpack, source/index/dependency/task
+closure, whole-environment observation, resume invalidation and descriptor-safe
+approved-entry removal follow the Workflow contract. Reconstructibility is a
+reviewed fact, not a Quality PASS, filename or boolean. Unknown dependency or
+unsupported source inventory retains. Real existing cache enrollment/eviction
+needs exact separate owner scope. Capability installation alone never authorizes
+either operation, changes old QA or supplies final-owner-yes.

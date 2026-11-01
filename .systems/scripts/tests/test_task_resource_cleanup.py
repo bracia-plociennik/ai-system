@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 HERE=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(HERE))
@@ -24,6 +25,42 @@ class Consumer(unittest.TestCase):
         self.path.write_text(json.dumps(self.manifest))
     def tearDown(self):self.temp.cleanup()
     def test_complete_consumer_source(self):self.assertTrue(task_cleanup_adapter.support(self.root)['supported'])
+    def cache_capability(self):
+        import hashlib
+        files = task_cleanup_adapter.CACHE_FILES
+        for name in files:
+            p=self.root/name;p.parent.mkdir(parents=True,exist_ok=True)
+            if not p.exists(): p.write_text('synthetic '+name)
+        p=self.root/'.systems/ai/capabilities/next-webpack-cache-v1.json'
+        value={'schema':1,'capability':'next-webpack-cache-v1','contract_version':1,'authority':'none',
+               'files':{name:hashlib.sha256((self.root/name).read_bytes()).hexdigest() for name in files}}
+        p.write_text(json.dumps(value));return p,value
+    def test_explicit_cache_profile_support_and_missing_stale_rejection(self):
+        with self.assertRaises(ValueError):task_cleanup_adapter.support(self.root,require_cache=True)
+        p,v=self.cache_capability()
+        self.assertEqual(task_cleanup_adapter.support(self.root,require_cache=True)['cache_profile'],'next-webpack-cache-v1')
+        (self.root/'.systems/scripts/tests/task-resource-cleanup.py').write_text('changed')
+        with self.assertRaises(ValueError):task_cleanup_adapter.support(self.root,require_cache=True)
+    def test_cache_profile_unknown_shape_and_versions_refused(self):
+        p,v=self.cache_capability()
+        for update in ({'schema':True},{'schema':2},{'contract_version':2},{'unknown':True},{'files':{}}):
+            p.write_text(json.dumps(dict(v,**update)))
+            with self.assertRaises(ValueError):task_cleanup_adapter.support(self.root,require_cache=True)
+    def test_shared_consumer_selection_preserves_official_and_standalone(self):
+        target=self.root/'target';target.mkdir();shared=self.root/'shared';shared.mkdir()
+        with patch.object(durable_runtime,'registered_system',return_value=self.root),patch.object(durable_runtime,'shared_installation',return_value=shared):
+            self.assertEqual(task_cleanup_adapter.select_workflow(target),shared)
+            marker=target/'.systems/ai/core/repository-modes.md';marker.parent.mkdir(parents=True);marker.write_text('official source')
+            self.assertEqual(task_cleanup_adapter.select_workflow(target),shared)
+            import os
+            with patch.dict(os.environ,{'AI_WORKFLOW_MODE':'official'}):
+                self.assertEqual(task_cleanup_adapter.select_workflow(target),target)
+        marker.unlink()
+        with patch.object(durable_runtime,'registered_system',return_value=None):
+            self.assertEqual(task_cleanup_adapter.select_workflow(target),target/'ai-workflow')
+    def test_shared_configuration_error_never_falls_back(self):
+        with patch.object(durable_runtime,'registered_system',side_effect=ValueError('invalid registration')):
+            with self.assertRaises(ValueError):task_cleanup_adapter.select_workflow(self.root)
     def test_missing_consumer_rejected(self):
         self.path.unlink()
         with self.assertRaises(ValueError):task_cleanup_adapter.support(self.root)
@@ -78,6 +115,13 @@ class Consumer(unittest.TestCase):
             self.assertEqual(actual,(workflow,runtime,'target'))
             with self.assertRaises(agent_context.ContextError):
                 agent_context.workflow_context(work,environment={'HOME':str(root),'AI_WORKFLOW_WORKSPACE_HOME':str(repo)})
+            value=json.loads(record.read_text())
+            value['task_resource_cleanup']['schema']=2;record.write_text(json.dumps(value))
+            self.assertEqual(durable_runtime.load(work)['workspace'],str(runtime))
+            for unsupported in (True,3,'2'):
+                value['task_resource_cleanup']['schema']=unsupported;record.write_text(json.dumps(value))
+                with self.assertRaises(ValueError):durable_runtime.load(work)
+            value['task_resource_cleanup']['schema']=2;record.write_text(json.dumps(value))
         if storage_created:
             try:
                 storage.rmdir()

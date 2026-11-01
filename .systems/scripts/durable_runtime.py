@@ -88,7 +88,7 @@ def load(target):
     workspace = durable(value['workspace'])
     record = read_json(value['work_record'])
     policy = record.get('task_resource_cleanup', {})
-    if (policy.get('schema') != 1 or policy.get('canonical') != value['canonical']
+    if (type(policy.get('schema')) is not int or policy.get('schema') not in {1, 2} or policy.get('canonical') != value['canonical']
             or policy.get('workspace') != str(workspace)):
         raise ValueError('runtime work record does not match binding')
     if not Path(value['work_record']).is_relative_to(workspace):
@@ -115,7 +115,7 @@ def bind(target, canonical, workspace, work_record, *, dry_run=False):
     target, canonical, workspace = unlinked(target), unlinked(canonical), durable(workspace)
     record = read_json(work_record)
     policy = record.get('task_resource_cleanup', {})
-    if (policy.get('schema') != 1 or policy.get('canonical') != identity(canonical)
+    if (type(policy.get('schema')) is not int or policy.get('schema') not in {1, 2} or policy.get('canonical') != identity(canonical)
             or policy.get('workspace') != str(workspace)):
         raise ValueError('initialize the existing owning work record before binding')
     if not unlinked(work_record).is_relative_to(workspace):

@@ -31,6 +31,10 @@
       "mode": "100644",
       "sha256": "e14c6ac0b87231494f41f3c4ace44a9655ef380ad4b05bde5f7daaf6d7ecb796"
     },
+    ".systems/ai/capabilities/next-webpack-cache-v1.json": {
+      "mode": "100644",
+      "sha256": "21abde83d56a5e11c8b188de0107ff033ab95d8d1e6ad01753929d4bac62bb3f"
+    },
     ".systems/ai/capabilities/parallel-task-orchestration-v1.json": {
       "mode": "100644",
       "sha256": "3cb1deb5d60cf498b888e7c9e30f84ab476e50ca4d57c24e1fe39837962e5737"
@@ -41,23 +45,23 @@
     },
     ".systems/ai/capabilities/shared-installation-v1.json": {
       "mode": "100644",
-      "sha256": "fcaf5494037fede40197fbdd3096f4574fd662035ee3da3c1e9192994de26e4e"
+      "sha256": "f3c5ccea6ec0ece364ad249531d0fff15fab1cab2c7100b4be19da2519a00a94"
     },
     ".systems/ai/capabilities/sprint-iteration-v1.json": {
       "mode": "100644",
-      "sha256": "e5e82bf948684f98ae573e4f45636941700a242c504164c9fb3b22dfdb4920fa"
+      "sha256": "1f392ee7015360ead55ea88693e1c71ad5b7c0339f96fa9deb34b2d6690a3bc7"
     },
     ".systems/ai/capabilities/sprint-iteration-v2.json": {
       "mode": "100644",
-      "sha256": "19a7f294930dd85cc968dde8beddc1faeb5cad47988c8a3e9323f3cd4bdf4863"
+      "sha256": "9aa68a6e25ad4dc5b997bceea5a671ba9d4f4b066bb5247a14551fc8bcb12f42"
     },
     ".systems/ai/capabilities/task-efficiency-v1.json": {
       "mode": "100644",
-      "sha256": "49013a071ba2f0bbb1c016eb79d410092a6c1fb691ed1cca35f3fe87c5828cfd"
+      "sha256": "5dadad30765d19cfbf3035242585e8d11527ff7dcd8deb747e7abcc35e752b43"
     },
     ".systems/ai/capabilities/task-resource-cleanup-v1.json": {
       "mode": "100644",
-      "sha256": "8b032dd3a5c239976db41e6c9a6e7f4b40bcc9470228d768d63d8e79631a951b"
+      "sha256": "2510c960dc6a426edf9dbd5288e9159d3a539c6d643d8609eb42e6b6a8af11de"
     },
     ".systems/ai/capabilities/work-lead-v1.json": {
       "mode": "100644",
@@ -317,7 +321,7 @@
     },
     ".systems/ai/core/task-resource-cleanup.md": {
       "mode": "100644",
-      "sha256": "3792002ca375a83326730d6ff2f56edadc1bf0f8530ecaf53045dea01b2d1ebe"
+      "sha256": "98fcda81f197756f4529e5da2f62f425f2484a602eddf186ee981481b6d61bcf"
     },
     ".systems/ai/core/update-from-upstream.md": {
       "mode": "100644",
@@ -1985,7 +1989,7 @@
     },
     ".systems/scripts/durable_runtime.py": {
       "mode": "100644",
-      "sha256": "c4129939a0fbc127008b9858507d5959bf28207f9f67ab19993c45df1bf1cfab"
+      "sha256": "32b3f2e2894b9edd367318157d45fc3da19d46a3c711ed1423967b2053ecfada"
     },
     ".systems/scripts/finalization_support.py": {
       "mode": "100644",
@@ -2209,7 +2213,7 @@
     },
     ".systems/scripts/task_resource_cleanup.py": {
       "mode": "100644",
-      "sha256": "d3b8be854ea244fd37fdd849916e97950cb96e2e0fa8ad58c5eae14d3641b215"
+      "sha256": "dd7f1e170ced7aee0366644d9d83943d1ec5e05c1f3e0a91544a2f16b5191a75"
     },
     ".systems/scripts/test-skill-eval-freshness": {
       "mode": "100644",
@@ -2277,7 +2281,7 @@
     },
     ".systems/scripts/tests/task-resource-cleanup.py": {
       "mode": "100644",
-      "sha256": "b5a4faee0fbdd10c0d60f0aa6a345f6931e160f26678cb918144decd2a8d7ac2"
+      "sha256": "d217fe628e57496612bf51418587993ee7b10308de21dbef63e15c58b4bf755b"
     },
     ".systems/scripts/tests/test_dreaming_evidence_contract.py": {
       "mode": "100644",
