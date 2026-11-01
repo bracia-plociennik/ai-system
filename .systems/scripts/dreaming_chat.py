@@ -165,7 +165,7 @@ def session_key(cfg):
     # Decisions can change between cycles without authorizing new source access.
     scripts=Path(__file__).parent
     implementation={name:hashlib.sha256((scripts/name).read_bytes()).hexdigest() for name in
-                    ('dreaming_chat.py','dreaming_chat_dispatch.py','dreaming_universal_sources.py','dreaming_universal_evidence.py','dreaming_guard.py')}
+                    ('dreaming_chat.py','dreaming_chat_dispatch.py','dreaming_universal_sources.py','dreaming_universal_evidence.py','dreaming_guard.py','dreaming_maintenance.py')}
     return digest({'configuration':{k:v for k,v in cfg.items() if k!='decisions'},
                    'implementation':implementation})
 
@@ -393,6 +393,13 @@ def render_report(cfg, s):
              'Przygotowanie pliku nie oznacza jego przeanalizowania. Pokrycie analizy pochodzi z walidowanych deklaracji chatu.',
              'Ustalenia i działania są propozycjami; nie wykonano rekomendacji.',
              'Wynik pozostaje prywatny dla właściciela; brak automatycznych pakietów dla innych odbiorców.', '']
+    if 'maintenance' in s:
+        lines += ['## Utrzymanie środowiska', '', 'Wynik etapu: ' + s['maintenance']['status'],
+                  'Etap wykonuje wyłącznie oddzielnie zatwierdzone operacje utrzymania; ustalenia analizy pozostają propozycjami.', '']
+        for operation, receipt in s['maintenance']['operations'].items():
+            lines.append('- ' + operation + ': ' + receipt['status'] +
+                         ('; ' + receipt['reason'] if 'reason' in receipt else ''))
+        lines += ['', 'Szczegółowy zapis: ' + s['maintenance']['state'], '']
     packets = route(s['findings'], cfg['recipients'], cfg['report_owner'], cfg['decisions'])
     decisions = {d['finding_id']:d['state'] for d in packets[cfg['report_owner']]['decisions']}
     active = packets[cfg['report_owner']]['findings']
