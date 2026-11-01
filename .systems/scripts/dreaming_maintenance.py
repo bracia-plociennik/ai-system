@@ -195,7 +195,13 @@ class Operator:
         return (text, process.returncode) if return_status else text
 
     def git(self, repo, *args, **kw):
-        return self.command(['git', '--literal-pathspecs', '-c', 'core.hooksPath=/dev/null', '-C', str(repo), *args], repo, **kw)
+        # Use the same existing account as the exact private-origin check. Reset
+        # ambient helpers and scope the fixed official helper to GitHub HTTPS;
+        # never persist configuration or return credentials to the chat.
+        return self.command(['git', '--literal-pathspecs', '-c', 'core.hooksPath=/dev/null',
+                             '-c', 'credential.helper=',
+                             '-c', 'credential.https://github.com.helper=!gh auth git-credential',
+                             '-C', str(repo), *args], repo, **kw)
 
     def checkpoint(self): chat.atomic(self.state_path, self.state)
 

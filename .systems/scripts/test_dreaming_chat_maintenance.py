@@ -153,6 +153,35 @@ class Maintenance(unittest.TestCase):
         self.assertIn('unrelated.md', run('-C', str(self.workspace), 'diff', '--name-only'))
         self.assertEqual(run('-C', str(self.workspace), 'diff', '--cached', '--name-only'), '')
 
+    def test_github_auth_uses_existing_gh_without_ambient_helper_or_other_host(self):
+        # Exercise Git's real credential protocol with a synthetic gh binary.
+        # No production account, secret, network, or configuration write.
+        bin_dir = self.root / 'bin'; bin_dir.mkdir()
+        gh = bin_dir / 'gh'
+        gh.write_text('#!/bin/sh\n'
+                      'test "$1 $2" = "auth git-credential" || exit 1\n'
+                      'cat >/dev/null\n'
+                      'printf "username=synthetic-user\\npassword=synthetic-fixture-only\\n"\n')
+        gh.chmod(0o700)
+        marker = self.root / 'ambient-helper-ran'
+        config = self.root / 'gitconfig'
+        config.write_text('[credential]\n\thelper = "!touch ' + str(marker) + '"\n')
+        operator = self.operator()
+        with patch.object(operator, 'command', side_effect=lambda argv, cwd, **kw: argv):
+            argv = operator.git(self.workspace, 'credential', 'fill')
+        env = {**os.environ, 'PATH': str(bin_dir) + os.pathsep + os.environ['PATH'],
+               'GIT_TERMINAL_PROMPT': '0', 'GIT_ASKPASS': '/bin/false'}
+        result = subprocess.run(argv, input='protocol=https\nhost=github.com\n\n',
+                                text=True, capture_output=True, env=env)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('password=synthetic-fixture-only', result.stdout)
+        other = subprocess.run(argv, input='protocol=https\nhost=other.invalid\n\n',
+                               text=True, capture_output=True, env=env)
+        self.assertNotEqual(other.returncode, 0)
+        self.assertNotIn('synthetic-fixture-only', other.stdout)
+        self.assertFalse(marker.exists())
+        self.assertEqual(config.read_text(), '[credential]\n\thelper = "!touch ' + str(marker) + '"\n')
+
     def test_git_staged_work_and_sensitive_content_prevent_push(self):
         run, operator, bare = self.git_fixture()
         before = run('--git-dir', str(bare), 'rev-parse', 'main')
