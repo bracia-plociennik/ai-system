@@ -1,3 +1,7 @@
+> Explicitly approved chat-led environment maintenance uses `dreaming-maintenance.md`.
+> It is a separate opt-in operation scope; ordinary advisory Dreaming, manual
+> Phase X, Sprint quality floors and historical evidence rules remain binding.
+
 # Phase X — Maintenance
 
 Phase X is an independent manually requested maintenance session, not a required step after Phase8. No automatic trigger from Auto/autopilot, idle time, task completion, thresholds or Dreaming. Future Dreaming execution requires separately approved design and activation. Existing Dreaming remains advisory.
