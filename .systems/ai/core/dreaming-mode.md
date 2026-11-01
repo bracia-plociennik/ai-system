@@ -1,3 +1,7 @@
+> Explicitly approved chat-led environment maintenance uses `dreaming-maintenance.md`.
+> It is a separate opt-in operation scope; ordinary advisory Dreaming, manual
+> Phase X, Sprint quality floors and historical evidence rules remain binding.
+
 # Dreaming Mode
 
 The optional chat-led execution mode is defined in `dreaming-chat.md`.
