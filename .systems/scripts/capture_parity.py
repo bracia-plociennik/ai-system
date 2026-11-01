@@ -39,6 +39,25 @@ def proof(path):
     return json.loads(matches[0])
 
 
+def workflow_source_root(source):
+    """Resolve policy evidence separately from the assessed product source."""
+    import os
+    import durable_runtime
+    official = ((source / '.systems/scripts/resolve-workflow-env').is_file()
+                and (source / '.systems/ai/core/repository-modes.md').is_file())
+    if official and os.environ.get('AI_WORKFLOW_MODE') == 'official':
+        durable_runtime.identity(source)
+        return source  # Preserve explicit product-source test mode.
+    system = durable_runtime.registered_system()
+    shared = durable_runtime.shared_installation(system, source) if system else None
+    if shared is not None:
+        return shared
+    if official:
+        durable_runtime.identity(source)
+        return source  # Explicit official Workflow source, not an inner clone.
+    return source / 'ai-workflow'  # Existing standalone proof format.
+
+
 def validate_formal(path, workspace):
     value = fields(path)
     require(value.get("Capture schema") in {"2", "3"}, "unsupported formal capture schema")
@@ -94,8 +113,9 @@ def validate_formal(path, workspace):
                 require(len(cells) == 3 and re.fullmatch(r"[0-9a-f]{64}", cells[2]), "malformed QA input row")
                 rows.append(cells)
             require(rows and any(kind == "approved-target-source" for kind, _, _ in rows), "QA lacks target-product proof")
-            roots = {"approved-target-source": source, "owning-project-evidence": evidence,
-                     "workflow-source": source / "ai-workflow"}
+            roots = {"approved-target-source": source, "owning-project-evidence": evidence}
+            if any(kind == "workflow-source" for kind, _, _ in rows):
+                roots["workflow-source"] = workflow_source_root(source)
             unique = set()
             for kind, name, sha in rows:
                 name = name.strip()
@@ -191,14 +211,15 @@ def goal_collection(workspace, owner, required_work_ids):
                 if row['Capture schema'] == '2' or '### Input Artifacts\n' in text:
                     table = text.split('### Input Artifacts\n', 1)
                     require(len(table) == 2, 'missing dependency claims')
-                    roots = {'approved-target-source': source, 'workflow-source': source / 'ai-workflow',
-                             'owning-project-evidence': evidence}
+                    roots = {'approved-target-source': source, 'owning-project-evidence': evidence}
                     seen = set()
                     for line in table[1].split('\n### ', 1)[0].splitlines():
                         if not line.startswith('|'): continue
                         cells = [c.strip().strip('`') for c in line.strip('|').split('|')]
                         if cells[0] == 'Root kind' or all(re.fullmatch(r'[-: ]+', c) for c in cells): continue
-                        require(len(cells) == 3 and cells[0] in roots and re.fullmatch(r'[0-9a-f]{64}', cells[2]), 'unknown dependency row')
+                        require(len(cells) == 3 and cells[0] in {'approved-target-source', 'workflow-source', 'owning-project-evidence'} and re.fullmatch(r'[0-9a-f]{64}', cells[2]), 'unknown dependency row')
+                        if cells[0] == 'workflow-source' and cells[0] not in roots:
+                            roots[cells[0]] = workflow_source_root(source)
                         require(tuple(cells[:2]) not in seen, 'duplicate dependency row'); seen.add(tuple(cells[:2]))
                         claim['source_refs'].append(str(contained(roots[cells[0]], cells[1])))
                     require(seen, 'missing dependency closure')

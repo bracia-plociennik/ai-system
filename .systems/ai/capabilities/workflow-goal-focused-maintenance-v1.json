@@ -27,6 +27,10 @@
       "mode": "100644",
       "sha256": "0234e22dcd8b1561f48f0bca9bed6084c0c742bdd9ff5fea7007ec3ad141c460"
     },
+    ".systems/ai/capabilities/luna-first-v1.json": {
+      "mode": "100644",
+      "sha256": "e14c6ac0b87231494f41f3c4ace44a9655ef380ad4b05bde5f7daaf6d7ecb796"
+    },
     ".systems/ai/capabilities/parallel-task-orchestration-v1.json": {
       "mode": "100644",
       "sha256": "3cb1deb5d60cf498b888e7c9e30f84ab476e50ca4d57c24e1fe39837962e5737"
@@ -35,17 +39,25 @@
       "mode": "100644",
       "sha256": "d4cdeba1589529fee1fb647f61c61b2f04cd8a39e49869b4d31858e6396c5e81"
     },
+    ".systems/ai/capabilities/shared-installation-v1.json": {
+      "mode": "100644",
+      "sha256": "fcaf5494037fede40197fbdd3096f4574fd662035ee3da3c1e9192994de26e4e"
+    },
     ".systems/ai/capabilities/sprint-iteration-v1.json": {
       "mode": "100644",
-      "sha256": "2b207ebf47c3e2bad5026ebff96c708736e3ab563d59291b9703b178a4cfe559"
+      "sha256": "e5e82bf948684f98ae573e4f45636941700a242c504164c9fb3b22dfdb4920fa"
     },
     ".systems/ai/capabilities/sprint-iteration-v2.json": {
       "mode": "100644",
-      "sha256": "f3ae02616c636e5bb6cff97c26154b2a247926f92e640effc91e1782af15b5ac"
+      "sha256": "19a7f294930dd85cc968dde8beddc1faeb5cad47988c8a3e9323f3cd4bdf4863"
+    },
+    ".systems/ai/capabilities/task-efficiency-v1.json": {
+      "mode": "100644",
+      "sha256": "49013a071ba2f0bbb1c016eb79d410092a6c1fb691ed1cca35f3fe87c5828cfd"
     },
     ".systems/ai/capabilities/task-resource-cleanup-v1.json": {
       "mode": "100644",
-      "sha256": "4c08a0a3ab71cc4f653abedad34b206c653057e5d78af6edd07f08d89d4a30df"
+      "sha256": "8b032dd3a5c239976db41e6c9a6e7f4b40bcc9470228d768d63d8e79631a951b"
     },
     ".systems/ai/capabilities/work-lead-v1.json": {
       "mode": "100644",
@@ -133,7 +145,7 @@
     },
     ".systems/ai/core/execution-efficiency.md": {
       "mode": "100644",
-      "sha256": "37e9965c3b0f3f4ada8677bc1f96fb9ae0b789a74bc616fa606a637ef6858a3d"
+      "sha256": "da164f72b09484e67a0316f5b788cec01f168fe51e287e717cdb64d3964fc566"
     },
     ".systems/ai/core/execution-modes.md": {
       "mode": "100644",
@@ -149,15 +161,15 @@
     },
     ".systems/ai/core/guide.md": {
       "mode": "100644",
-      "sha256": "5a3bd26b321d3e159af80cc0d1d6a229f7ee21d854cd84444246b3341db6a2a1"
+      "sha256": "46c979a7483de0c9f3aef071a25d75a3f0b64723cb85127f11ade48c14a6343c"
     },
     ".systems/ai/core/implementation-slicing.md": {
       "mode": "100644",
-      "sha256": "e19f1c68c931a50234a1afc11a7c7ab0b5e09582500e41324f77d84e654f39cc"
+      "sha256": "926d5ba5707685775bd464b7248b857a9887dbd1d67c87c7186e609b3ed4c03a"
     },
     ".systems/ai/core/installation.md": {
       "mode": "100644",
-      "sha256": "21e6eb0f02ff4a4f3710a6624436c887aef240d29e17b3a2cd87716ccc75663e"
+      "sha256": "25bfbf102e0953852febbe9ea2be0e705503b6b7e44f41cbf003ed879a967d50"
     },
     ".systems/ai/core/instruction-adherence-refresh.md": {
       "mode": "100644",
@@ -171,13 +183,17 @@
       "mode": "100644",
       "sha256": "7cc3cacb50f24dc564e3c832f1bfcc2877a2b7d785b05ec2f1ebe7cf9271019e"
     },
+    ".systems/ai/core/luna-first.md": {
+      "mode": "100644",
+      "sha256": "1f3a0cf6016b580bc600fd1513f44d8d280ca81a2f5fa65288029639d756e586"
+    },
     ".systems/ai/core/memory.md": {
       "mode": "100644",
       "sha256": "3c7d4e1cd02e12bcd11f3c6b7923dd2f2d3d9937807e51cf3e0382b48589d1af"
     },
     ".systems/ai/core/model-selection-guidance.md": {
       "mode": "100644",
-      "sha256": "9d7bf357492a4c53629ef975349cfef0319e76eebc9a80fe16b4da32b7c6eeaa"
+      "sha256": "fd95bfac17597dd2d2f96711eb9c3e1e7f7c8fd26b17ada4a02dc253490e0e90"
     },
     ".systems/ai/core/operating-model.md": {
       "mode": "100644",
@@ -237,7 +253,7 @@
     },
     ".systems/ai/core/repository-modes.md": {
       "mode": "100644",
-      "sha256": "90aa0e5bc791311f294d9ab807d9ad83ef4ba95fa110fccf7540469356796e96"
+      "sha256": "35cb7085d371da6333d0b8c0f3090726519c1eb49170d6912c338c510d780f01"
     },
     ".systems/ai/core/request-batch-triage.md": {
       "mode": "100644",
@@ -245,7 +261,7 @@
     },
     ".systems/ai/core/response-contract.md": {
       "mode": "100644",
-      "sha256": "0064055a5da30c8237d446652c7c8eb390aee0d5c22b2086eb5a3030ca7e89d8"
+      "sha256": "1d09eb6e97f79818d070c6e52b3836f108438f29fdfb768a68f41aa913d8bd40"
     },
     ".systems/ai/core/risk-model.md": {
       "mode": "100644",
@@ -258,6 +274,10 @@
     ".systems/ai/core/runtime-integrity.md": {
       "mode": "100644",
       "sha256": "924f24ff03511561d39e971715675f7432d297ae40404d7d6aa0a2d4a3fbac54"
+    },
+    ".systems/ai/core/shared-installation.md": {
+      "mode": "100644",
+      "sha256": "a630364257a8492d9ca363ac43612d6c6dc217820b5d2fbfd0514ee460ca03ff"
     },
     ".systems/ai/core/skill-behavioral-evaluation.md": {
       "mode": "100644",
@@ -278,6 +298,10 @@
     ".systems/ai/core/system-insights.md": {
       "mode": "100644",
       "sha256": "7a1e9fdc8fde43a7e64d2b17fe5812931e137c0f605435c3b8da2df2bdce3be0"
+    },
+    ".systems/ai/core/task-efficiency.md": {
+      "mode": "100644",
+      "sha256": "46e90c1cf87400e239692c21d0d7ed425be788f25a9f867c535fd84cba018b22"
     },
     ".systems/ai/core/task-intake.md": {
       "mode": "100644",
@@ -329,7 +353,7 @@
     },
     ".systems/ai/core/worktree-bootstrap.md": {
       "mode": "100644",
-      "sha256": "c34fea09450c3292662d5aa7a1c26d87c8c3a3af233feb9aab5c9c1f07dad145"
+      "sha256": "95acae4b00a6d6e2de74d5651c48f6940578fe8f999cf4eb633cd30bde822b14"
     },
     ".systems/ai/examples/README.md": {
       "mode": "100644",
@@ -951,6 +975,22 @@
       "mode": "100644",
       "sha256": "3af8ae62c40c73ab712207436a0d9a981e845f25c5a7040229eb189cc8e45bb1"
     },
+    ".systems/ai/skills/luna-first/README.md": {
+      "mode": "100644",
+      "sha256": "6b6d616a155389c9c8d5208bdef741018ba7b7cfe153445fc464b6a1f025f49b"
+    },
+    ".systems/ai/skills/luna-first/SKILL.md": {
+      "mode": "100644",
+      "sha256": "36218502997afb1801c25bece0225f99fcb46d53d01308a5c7a0931efa07083b"
+    },
+    ".systems/ai/skills/luna-first/agents/openai.yaml": {
+      "mode": "100644",
+      "sha256": "c019399babcc9890e0d41a56029f6d4e2d62d1f2fb02fefcb66654aa14adc2d5"
+    },
+    ".systems/ai/skills/luna-first/scripts/manage.py": {
+      "mode": "100644",
+      "sha256": "095b3cae13c61a82b2043f890933c0348bb834104ce1681f80f5300edbb9fd9f"
+    },
     ".systems/ai/skills/skill-creator/README.md": {
       "mode": "100644",
       "sha256": "3037428aa91c8babfe80a3ba42deb1ce8df7953535c676288bd87c4299e047b3"
@@ -1175,6 +1215,14 @@
       "mode": "100644",
       "sha256": "6ea38bbcff015ada99ccdde0483be7d659b396e113cd6c91204ac37bdf45754b"
     },
+    ".systems/ai/templates/luna-first/luna-first-luna.toml": {
+      "mode": "100644",
+      "sha256": "e13c8aca836274b053292962f069e4c18648e7f731cfaff4dec6cafa2aff2fa4"
+    },
+    ".systems/ai/templates/luna-first/luna-first-sol.toml": {
+      "mode": "100644",
+      "sha256": "3014c7ecfbd795f574531ceac10fe11455174f1681fea0ff4a96c8990523c874"
+    },
     ".systems/ai/templates/maintenance/README.md": {
       "mode": "100644",
       "sha256": "9abcb8a3c9968b27c38c477886be8661216e58e1d64b7c63aebee46156a138eb"
@@ -1391,9 +1439,13 @@
       "mode": "100644",
       "sha256": "6c34b9c6cb6a9657021b05193596a865569317e5b0af69e2aa278f9d27fae20d"
     },
+    ".systems/ai/templates/root-agents-shared.template.md": {
+      "mode": "100644",
+      "sha256": "c528c8a18ea513b42eb5f19a2ba84dfa4f8f47c944311cc3b7d87c2dc7f810e0"
+    },
     ".systems/ai/templates/root-agents.template.md": {
       "mode": "100644",
-      "sha256": "52b252602c923b210b7856c4266ed79eef428ec16b3d44ae13593421c243afb0"
+      "sha256": "97d4aac41417b1104495b666ad9927106726e4f26fce5934eda87c7d375b8bbf"
     },
     ".systems/ai/templates/system-insights/README.md": {
       "mode": "100644",
@@ -1573,7 +1625,7 @@
     },
     ".systems/ai/templates/worktree/worktree-bootstrap-shim.template.md": {
       "mode": "100644",
-      "sha256": "e19641da6eac11f92af94c2c75beba3040b351e9b9595d474a5be8bfef2b422a"
+      "sha256": "74a37506ab265a919e95311ef5af3819714c98869a4ed4281b3b0132ff5f67a0"
     },
     ".systems/ai/workflow/README.md": {
       "mode": "100644",
@@ -1669,7 +1721,7 @@
     },
     ".systems/scripts/bootstrap-target-worktree": {
       "mode": "100755",
-      "sha256": "9fb0306741327d757ee30a96a070f2de62004450d8e60f7e04d41574f5d9d5fb"
+      "sha256": "c842e1d065853f6f96a72c7f61efffde1479012268470f34a36e8730b7bfd96f"
     },
     ".systems/scripts/check-branch-policy": {
       "mode": "100755",
@@ -1721,7 +1773,7 @@
     },
     ".systems/scripts/check-execution-efficiency": {
       "mode": "100755",
-      "sha256": "9773a4f9c926b4b31adce19567a3da608ab49f85328cb962a981a8a4570a8fd9"
+      "sha256": "52f745e3c6318e07173cd81d4879eb3ba45acd649eaf86fbfc7355ce3df2ea9e"
     },
     ".systems/scripts/check-execution-modes": {
       "mode": "100755",
@@ -1762,6 +1814,10 @@
     ".systems/scripts/check-knowledge-capture-reminder": {
       "mode": "100755",
       "sha256": "522888fa66c7d7d4633ea1fd7cfc06e6cec747b18132a24d49eb120ab2ec2c4f"
+    },
+    ".systems/scripts/check-luna-first": {
+      "mode": "100755",
+      "sha256": "37674acc5ab012a8c5685ac9e60fdd8285c35f2102499ce11f5765da4e6fb681"
     },
     ".systems/scripts/check-model-selection-guidance": {
       "mode": "100755",
@@ -1805,7 +1861,7 @@
     },
     ".systems/scripts/check-required-artifacts": {
       "mode": "100755",
-      "sha256": "453bdc366f16f4583111a67315f7aeec564b021be5b812f0d0bb5f2e8fbf99ab"
+      "sha256": "355eac0f42214f97e0a4ccb8c1e1a4b486c0eaaafcf29114575c6e61a710934c"
     },
     ".systems/scripts/check-response-evidence-trace": {
       "mode": "100755",
@@ -1818,6 +1874,10 @@
     ".systems/scripts/check-runtime-integrity": {
       "mode": "100755",
       "sha256": "e20f507ebb37d9ace5c5293bdc50957cb34c8911b097f675b40c1ccd74c83ddc"
+    },
+    ".systems/scripts/check-shared-installation": {
+      "mode": "100755",
+      "sha256": "20f3f20253fe21339dd56d1a6d18753ad003495c5d1310cc124cb0fe259569b4"
     },
     ".systems/scripts/check-skill-evaluation-contract": {
       "mode": "100755",
@@ -1913,11 +1973,11 @@
     },
     ".systems/scripts/durable_runtime.py": {
       "mode": "100644",
-      "sha256": "8124dd5682860ccb7e362b8bd9aa8cc64994be9bb6b33b58065a7005c9969b31"
+      "sha256": "c4129939a0fbc127008b9858507d5959bf28207f9f67ab19993c45df1bf1cfab"
     },
     ".systems/scripts/init-workspace": {
       "mode": "100755",
-      "sha256": "6550da683b5d08ab429e062d272c968331b929135ad14f3c7e08614ae303f9a5"
+      "sha256": "bfc48ce16c0a05543fc68bf0e477efd72de5f5c9ee6a7bad25bea7a3e7da371e"
     },
     ".systems/scripts/inspect-parallel-compatibility": {
       "mode": "100755",
@@ -2001,7 +2061,7 @@
     },
     ".systems/scripts/lib/validation-checks.json": {
       "mode": "100644",
-      "sha256": "0338b2834147a8a3c8f4cd2027a63d45ad597a99364ea446e602481fd88b3106"
+      "sha256": "251ca5733c140419dead6076fb4ec530c02dfb6871a0f4e88a995ba6df4972fd"
     },
     ".systems/scripts/lib/validation-scope.py": {
       "mode": "100644",
@@ -2018,6 +2078,14 @@
     ".systems/scripts/lib/workspace-publication.py": {
       "mode": "100755",
       "sha256": "5f1de84563d5196dcb556ec192e8f2037f1b8147c54ab416fc0d8e0c87be8dbb"
+    },
+    ".systems/scripts/luna_first.py": {
+      "mode": "100644",
+      "sha256": "22ea969bc8422e691a1bb84cfbec7e37c20dd8d281d2fedd99f892b98b485f2d"
+    },
+    ".systems/scripts/manage-luna-first": {
+      "mode": "100755",
+      "sha256": "23c0cea2a0580b60fc6baa3548edd28b53412a2af1e5ce49dbdf5ace8ba55ec6"
     },
     ".systems/scripts/manage-maintenance": {
       "mode": "100755",
@@ -2065,7 +2133,7 @@
     },
     ".systems/scripts/resolve-workflow-env": {
       "mode": "100755",
-      "sha256": "d088396f1e7e3ae61ed915c2f5973fa62393ea2d4574f766b46b2e346b7c114b"
+      "sha256": "d5ebc1bf65170838649f07c9b013a42514d7ed27438175ba5537d5d2dfe73190"
     },
     ".systems/scripts/run-with-timeout": {
       "mode": "100755",
@@ -2077,11 +2145,11 @@
     },
     ".systems/scripts/smoke/core.sh": {
       "mode": "100644",
-      "sha256": "da751beb8dc23fac74778e1f7e8438c72a54790a29d4090e7ce1c290be5c58ba"
+      "sha256": "00807c0910a68f1e668fdb25b84e602bfab54d2eb826ee0dca67f94764e1de79"
     },
     ".systems/scripts/smoke/manifest.json": {
       "mode": "100644",
-      "sha256": "0e6cb92ad3183f02491eed1293ba2c213b5ca7d33dab0436bb8e99a969f465f1"
+      "sha256": "469d1e0c4ad3840b6a3f77d34652499c5e806e0bae450298d30127ff6d2fa403"
     },
     ".systems/scripts/smoke/policy.sh": {
       "mode": "100644",
@@ -2111,6 +2179,10 @@
       "mode": "100755",
       "sha256": "99960df4c10e4b0e5bc1e4a02b4047f7cda9dfa6576f8a3262f507cd5b6b8abe"
     },
+    ".systems/scripts/task_efficiency.py": {
+      "mode": "100644",
+      "sha256": "1bd798206e9ad66b2e729ae5b5f6925776d88f1eb3231c0f0a18ca975907718d"
+    },
     ".systems/scripts/task_resource_cleanup.py": {
       "mode": "100644",
       "sha256": "d3b8be854ea244fd37fdd849916e97950cb96e2e0fa8ad58c5eae14d3641b215"
@@ -2129,7 +2201,7 @@
     },
     ".systems/scripts/tests/execution-efficiency.py": {
       "mode": "100644",
-      "sha256": "160733947e20c89754917943a503dadaaf209028d6982d4faea3cecfb15275eb"
+      "sha256": "1cbc7ac782aea3fc329310d7d128075353b6f95ee2adc5429df2e645a303f531"
     },
     ".systems/scripts/tests/execution-modes.py": {
       "mode": "100644",
@@ -2181,7 +2253,7 @@
     },
     ".systems/scripts/tests/task-resource-cleanup.py": {
       "mode": "100644",
-      "sha256": "1d11e78f1884b01668ef2b6008f9a463992223c44bebef61aa6977702901ffc9"
+      "sha256": "b5a4faee0fbdd10c0d60f0aa6a345f6931e160f26678cb918144decd2a8d7ac2"
     },
     ".systems/scripts/tests/test_dreaming_evidence_contract.py": {
       "mode": "100644",
@@ -2207,9 +2279,21 @@
       "mode": "100644",
       "sha256": "82c1ee4ee07e8f490a15e5d3c205b08e764157ad5f5e6b614c3ed929f629a1cb"
     },
+    ".systems/scripts/tests/test_luna_first.py": {
+      "mode": "100644",
+      "sha256": "993f2f1498469150878e14d65efff74bf41e20255a1d045a8eb9772977e8240e"
+    },
+    ".systems/scripts/tests/test_shared_installation.py": {
+      "mode": "100644",
+      "sha256": "1bf2d48a9f9f7cda68ae17c94f48d09b7ddbc6c1c09be3c82a9d2074eff51b27"
+    },
+    ".systems/scripts/tests/test_task_efficiency.py": {
+      "mode": "100644",
+      "sha256": "90906995f9932b24f2939e7f72dcdd53d8691414253df970853a6be3c7df9ccd"
+    },
     ".systems/scripts/tests/test_update_validation_scope.py": {
       "mode": "100644",
-      "sha256": "5c4496acabe06d79da9ea530f058fd58b03db757b87ebb36acc321f1bc05c8b3"
+      "sha256": "fb82fafc48a19d8b034fe6d1462cdefb9350c3f4571718dea367e2f240100b6f"
     },
     ".systems/scripts/tests/test_validation_input_guard.py": {
       "mode": "100644",
@@ -2221,15 +2305,15 @@
     },
     ".systems/scripts/update-from-upstream": {
       "mode": "100755",
-      "sha256": "da1b24ff9a456cf60415aaba4b901d012fd5e334b3c5fa7f93f24789a0c49d9d"
+      "sha256": "5aad90ffcb8d288933f489ef766f3321d50f7a98075ac1aa89d37bab0c861780"
     },
     ".systems/scripts/update-workspace": {
       "mode": "100755",
-      "sha256": "7764bb5be08dd3d8c9f5c58c78052ba821455ecf56d25f3a883a7a165afb0d24"
+      "sha256": "b5c15c237d899cbc54a4929900c5c021e0adae5c5bfe46ccec81c304d10bba25"
     },
     ".systems/scripts/validate-workflow": {
       "mode": "100755",
-      "sha256": "b598fdbee6c36def45747595ab3c0edf9f2eb21b10e71fe8e1ec7922bde48e80"
+      "sha256": "9147625a7a039e55023054b4103d52194bca73f1f55bf7a0b29cdb6e0ba8ce66"
     },
     ".systems/scripts/validation_input_guard.py": {
       "mode": "100644",
@@ -2245,11 +2329,11 @@
     },
     "HUMANS.md": {
       "mode": "100644",
-      "sha256": "82b40ab6ba7af32cac4956507a635c14ef3527c5d573c34acb67905114bfdfae"
+      "sha256": "4c08d204fefa41f3138dce3bce124ed00a359742f34f7587f18e4230870e77ba"
     },
     "README.md": {
       "mode": "100644",
-      "sha256": "6f4a6bcebec26cd0ece30a784a75c0e5054425b8b41644dd699fe7b6e647ef14"
+      "sha256": "5c64ecf5ae362eb95795e729b10cff134dc3dcd863220f284d7c7d13d4c11df9"
     }
   },
   "wire_schema": 1

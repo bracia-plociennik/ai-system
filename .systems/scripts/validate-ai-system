@@ -10,6 +10,7 @@ standard_checks=(
   check-validation-concurrency
   check-product-publication
   check-agent-startup
+  check-shared-installation
   check-task-resource-cleanup
   check-critical-judgment
   check-luna-first

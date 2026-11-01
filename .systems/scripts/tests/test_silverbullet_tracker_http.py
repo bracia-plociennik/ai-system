@@ -68,6 +68,16 @@ class HttpTests(TrackerFixture, unittest.TestCase):
             with self.assertRaises(TrackerError) as error:self.app.handle('PUT','/.task-create/tasks/Client/Project/New.md',headers,text.encode())
             self.assertEqual(error.exception.status,412)
 
+    def test_manual_route_pins_creator_and_never_changes_existing_task(self):
+        text='---\ntype: task\nauthor: ai\ntitle: Human created\ncustom: keep\n---\nNotes\n'
+        headers={**self.headers,'If-None-Match':'*','X-Sync-Mode':'true'}
+        with patch.object(self.app,'authenticate',return_value=('owner','session=synthetic')):
+            status,_,_=self.app.handle('PUT','/.task-create/tasks/Client/Project/Manual.md',headers,text.encode())
+            path=self.vault/'tasks/Client/Project/Manual.md';before=path.read_bytes()
+            self.assertEqual(status,201);self.assertIn('author: human',before.decode());self.assertTrue(before.endswith(b'Notes\n'))
+            with self.assertRaises(TrackerError):self.app.handle('PUT','/.task-create/tasks/Client/Project/Manual.md',headers,text.encode())
+            self.assertEqual(path.read_bytes(),before)
+
     def test_traversal_and_generic_file_access_rejected(self):
         for path in ['/.task-create/tasks/%2e%2e/config.md','/.task-create/tasks/a/%2f..%2fconfig.md']:
             with self.assertRaises(TrackerError):self.app.create_task(path,b'---\ntype: task\n---\n',{'If-None-Match':'*','X-Sync-Mode':'true'})

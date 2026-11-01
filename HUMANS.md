@@ -1,5 +1,14 @@
 # HUMANS.md
 
+## Shared Workflow
+
+An owner-enabled registered shared default selects `${AI_SYSTEM_HOME}/ai-workflow`
+for in-scope project execution. Each target keeps its own `ai-workflow-workspace`
+or verified durable binding. See `.systems/ai/core/shared-workflow.md`. Actual owner
+association, project intake, permission and QA remain mandatory. Missing/invalid
+configured support blocks the affected action; do not create another nested clone.
+
+
 ## Auto And Human
 
 Use `execution-modes.md`. For example, `owner-approved: implement the accepted

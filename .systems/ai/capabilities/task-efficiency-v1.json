@@ -1,0 +1,11 @@
+{
+  "authority": "none",
+  "contract": "task-efficiency-v1",
+  "files": {
+    ".systems/ai/core/execution-efficiency.md": "f5686ba48b6fa0459c27b56a65fd2fe6c4e3a5a7fe5339d5afe7d29dbba2c81b",
+    ".systems/ai/core/response-contract.md": "606df6a00767509e28cb371bacd16e40fd763f3e0bcb70ca2f46028ef86b9afb",
+    ".systems/ai/core/task-efficiency.md": "46e90c1cf87400e239692c21d0d7ed425be788f25a9f867c535fd84cba018b22",
+    ".systems/scripts/task_efficiency.py": "1bd798206e9ad66b2e729ae5b5f6925776d88f1eb3231c0f0a18ca975907718d"
+  },
+  "schema_version": 1
+}

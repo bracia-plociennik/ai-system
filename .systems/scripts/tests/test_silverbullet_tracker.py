@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from silverbullet_tracker import TaskTracker, TrackerError, split_interval
-from task_identity import initialize_markdown
+from task_identity import initialize_markdown, assign_author
 from work_evidence import EvidenceError, canonical_bytes
 from work_evidence_ledger import Ledger
 
@@ -175,6 +175,21 @@ class TrackerTests(TrackerFixture, unittest.TestCase):
         wb=load_workbook(path);wb['Manual Inputs']['A2']='preserve-owner-input';wb.save(path)
         self.stopped();preview=self.preview();self.tracker.approve(preview['preview_id'],preview['preview_hash'],'owner')
         self.assertEqual(load_workbook(path)['Manual Inputs']['A2'].value,'preserve-owner-input')
+
+    def test_creator_backfill_preserves_body_identity_and_existing_author(self):
+        original='---\r\ntype: task\r\ntask_id: '+self.task_id+'\r\ncustom: keep\r\n---\r\n## Notes\r\n- [x] Keep checked\r\n'
+        result=assign_author(original,'ai');self.assertIn('author: ai\r\n',result)
+        self.assertEqual(result.replace('\r\nauthor: ai',''),original);self.assertNotIn('created_at',result)
+        self.assertEqual(assign_author(result,'human'),result)
+        self.assertEqual(initialize_markdown(result),result)
+        human=original.replace('custom: keep','author: "human" # creator\r\ncustom: keep')
+        self.assertEqual(assign_author(human,'ai'),human)
+        self.assertIn('author: human',initialize_markdown(result,created=True,at=self.time))
+
+    def test_invalid_or_duplicate_creator_is_rejected(self):
+        base='---\ntype: task\n%s\n---\nNotes remain\n'
+        for metadata in ['author: human\nauthor: ai','author: future','author: human\n"author": ai']:
+            with self.assertRaises(ValueError):assign_author(base%metadata,'human')
 
 
 if __name__=='__main__':unittest.main()

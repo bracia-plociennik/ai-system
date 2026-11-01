@@ -1,5 +1,14 @@
 # AI System
 
+## Shared Workflow
+
+An owner-enabled registered shared default selects `${AI_SYSTEM_HOME}/ai-workflow`
+for in-scope project execution. Each target keeps its own `ai-workflow-workspace`
+or verified durable binding. See `.systems/ai/core/shared-workflow.md`. Actual owner
+association, project intake, permission and QA remain mandatory. Missing/invalid
+configured support blocks the affected action; do not create another nested clone.
+
+
 New work defaults to Auto Mode under `.systems/ai/core/execution-modes.md`.
 After scoped approval, AI chooses technical solutions, runs QA and queues decisions
 that block only dependent work. `human mode` / `human coop` enables material questions.

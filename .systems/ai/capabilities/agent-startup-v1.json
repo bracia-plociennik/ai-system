@@ -3,12 +3,12 @@
   "native_verification": "requires-installation-specific-proof",
   "schema_version": 1,
   "source_files": {
-    ".systems/ai/core/agent-adapters.md": "a644c657e7fc86acff6f4813c6c7238e5cd5abf8fe6736780447b5e662114642",
-    ".systems/ai/core/agent-startup.md": "d5ad57ba973f0e2faafa3065735a8067bf9f5b0eb2dfdc3b593bd3aa0f5139d9",
+    ".systems/ai/core/agent-adapters.md": "f7e0a64f1a241275a06ff8f2991f905d67ad84b4b617ec63afab02edff92d8ea",
+    ".systems/ai/core/agent-startup.md": "dfc12bec63e757e1f344a6158b6d567cf4a1937c43d555b469c758aa50e96c72",
     ".systems/ai/core/system-workflow-authority.md": "ac006db9fd00c2acd2925b0988ff969c144dd8d19798173574c78e8517421565",
     ".systems/scripts/agent_adapters.py": "70f256f96aa971037f525a7697e055224437a4da37e70bef74175ff7d10faaa8",
-    ".systems/scripts/agent_context.py": "92d0ef9677b4362dc56bb5012bd86312041b77c08af4e1fbba738d1b2d1f0ce5",
-    ".systems/scripts/durable_runtime.py": "8124dd5682860ccb7e362b8bd9aa8cc64994be9bb6b33b58065a7005c9969b31",
+    ".systems/scripts/agent_context.py": "fc4b811bd9f06ac19a5dee147e87ce6f4b30e133388b547f825b7714cf192016",
+    ".systems/scripts/durable_runtime.py": "c4129939a0fbc127008b9858507d5959bf28207f9f67ab19993c45df1bf1cfab",
     ".systems/scripts/local_paths.py": "d7b4a954c40e6adff66a69ed9e7766d8f31385a509ab8f4017511634c3260745",
     ".systems/scripts/manage-agent-adapter": "051716f545c95d2365318486d7c272c761d7013513bc80abc8e20a25f0b0d453",
     ".systems/scripts/resolve-agent-context": "1f6f6e51807210cfea6b5cbd1b745bb7d9a2a573520a4e0d5a8e32c850636b7c"

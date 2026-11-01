@@ -5,6 +5,7 @@ New-task shape; do not scan this template as a task. Use the configured writer. 
 ```markdown
 ---
 type: task
+author: human
 title: "Example task"
 status: open
 priority: high
@@ -31,3 +32,5 @@ scheduled: ""
 
 ## Working dump
 ```
+
+This manual-copy example uses author human. The AI task-store writer assigns ai; later edits preserve the creator.

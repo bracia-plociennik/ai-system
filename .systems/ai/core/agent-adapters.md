@@ -19,3 +19,17 @@ Expose the same inspect/plan semantic interface with `--tool claude-code`: statu
 ## Other tools and web chats
 
 `--tool generic` exposes the same design-only status. A future adapter implements versioned inspect/plan/apply/disable/restore and the same scope, receipt, interruption and shadow semantics using its native instruction mechanism. A non-local chat can receive a minimal privacy-reviewed exported context bundle describing source version, task scope and unavailable capabilities. That bundle is advisory data, grants no filesystem/tool/owner authority and cannot impersonate live installed state. Do not export private memories or secrets by default.
+
+## Reviewed local shared entrypoints
+
+Shared routing may use a short local `AGENTS.override.md` when an existing source
+contract exceeds the native startup budget. Preserve the complete original
+`AGENTS.md`; the override must require its manual read before work. The existing
+shared-installation namespace's `shared-entrypoints.json` records schema_version 1
+and exact per-repository original/override SHA-256 pairs after actual scoped owner
+approval and deliberate review. This is source-routing evidence, not an approval
+database, current QA or execution permission. It never authenticates owner consent.
+The resolver exposes mandatory manual reads only for exact matching local files,
+enabled shared routing and in-scope repositories. Drift, absent review, oversized
+selected guidance and global override shadows remain blocked. No provider config
+or unrelated instructions are edited. Native behavior remains unverified.

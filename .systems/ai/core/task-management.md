@@ -39,6 +39,16 @@ format rules; owner authority, privacy, source/read-only and lifecycle gates rem
 - Path collision, symlink escape and unavailable selected store fail closed. Create is atomic
   and cannot overwrite an unrelated UI task. Never move a file merely to change category.
 
+SilverBullet creator attribution is `author: human|ai`. This is the creator of the
+task record, not its owner, assignee or last editor. AI assistants (including Codex)
+create tasks through the configured task-store/generator writer, which assigns ai.
+Manual SilverBullet form/template creation assigns human. Never use the manual
+form to misattribute an AI-created task. Editing, completion, reopening, timer
+controls and generation deduplication preserve the original author. Do not infer a
+new author from an AI edit. A legacy backfill requires exact owner scope and an
+explicit policy for unknown historical authors; existing valid author values stay.
+The AI/DONE labels and author sorting are presentation only, never file renames.
+
 New SilverBullet task writes receive a UUID task_id and actual UTC created_at only at
 successful creation, after deduplication. Existing tasks are never bulk-backfilled;
 the tracker lazily adds missing identity without inventing historical dates.

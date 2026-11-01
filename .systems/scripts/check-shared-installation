@@ -1,0 +1,13 @@
+#!/usr/bin/env python3
+"""Offline shared-installation boundary tests; no user state is changed."""
+import hashlib,json,subprocess,sys
+from pathlib import Path
+root=Path(__file__).resolve().parents[2]
+profile=root/'.systems/ai/capabilities/shared-workflow-v1.json'
+value=json.loads(profile.read_text())
+assert value['schema_version']==1 and value['contract']==profile.stem
+for relative,expected in value['source_files'].items():
+    source=root/relative
+    assert source.is_file() and not source.is_symlink()
+    assert hashlib.sha256(source.read_bytes()).hexdigest()==expected,relative
+raise SystemExit(subprocess.call([sys.executable,'-B',str(root/'.systems/scripts/tests/test_shared_installation.py')]))

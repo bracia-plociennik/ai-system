@@ -145,7 +145,8 @@ class TaskStore:
 
     def render(self,value):
         value=self.candidate(value)
-        primary=['type','title','status','priority','client','project','category','scheduled']
+        value['author']='ai'  # This writer creates tasks on behalf of AI; edits never use it.
+        primary=['type','title','author','status','priority','client','project','category','scheduled']
         provenance=['workspace','owner_scope','owned_asset','project_state','source_system','source_type',
                     'source_check_in_date','source_check_in_field','source_session_date','source_plan_item_id',
                     'source_week_id','source_week_item_id','source_week_plan','estimated_minutes','weekly_allocations_json',

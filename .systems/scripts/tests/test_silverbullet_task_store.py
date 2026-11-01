@@ -36,6 +36,12 @@ class StoreTests(unittest.TestCase):
   self.assertNotIn('task_id:',s.render(value));files,*_=s.write_candidates([value]);data=frontmatter(files[0].read_text())
   self.assertEqual(str(uuid.UUID(data['task_id'])),data['task_id']);self.assertIn('created_at',data)
   original=files[0].read_bytes();self.assertEqual(s.write_candidates([value])[1],1);self.assertEqual(files[0].read_bytes(),original)
+ def test_ai_creator_is_forced_and_dedup_preserves_human_creator(self):
+  s=TaskStore.load(self.w);value=self.candidate(source_session_date='2026-11-01',source_plan_item_id='creator')
+  files,*_=s.write_candidates([{**value,'author':'human'}]);path=files[0]
+  self.assertEqual(frontmatter(path.read_text())['author'],'ai')
+  path.write_text(path.read_text().replace('author: "ai"','author: "human"')+'Owner note stays\n')
+  before=path.read_bytes();self.assertEqual(s.write_candidates([value])[1],1);self.assertEqual(path.read_bytes(),before)
  def test_five_assignable_categories_match_ui(self):
   s=TaskStore.load(self.w)
   for category in ['do','defer','delegate','delete','dump']:

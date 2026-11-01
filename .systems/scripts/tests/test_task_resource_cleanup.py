@@ -74,10 +74,10 @@ class Consumer(unittest.TestCase):
             runtime=root/'durable';runtime.mkdir();record=runtime/'work.json'
             record.write_text(json.dumps({'task_resource_cleanup':{'schema':1,'canonical':durable_runtime.identity(repo),'workspace':str(runtime)}}))
             durable_runtime.bind(work,repo,runtime,record)
-            actual=agent_context.workflow_context(work,environment={})
+            actual=agent_context.workflow_context(work,environment={'HOME':str(root)})
             self.assertEqual(actual,(workflow,runtime,'target'))
             with self.assertRaises(agent_context.ContextError):
-                agent_context.workflow_context(work,environment={'AI_WORKFLOW_WORKSPACE_HOME':str(repo)})
+                agent_context.workflow_context(work,environment={'HOME':str(root),'AI_WORKFLOW_WORKSPACE_HOME':str(repo)})
         if storage_created:
             try:
                 storage.rmdir()

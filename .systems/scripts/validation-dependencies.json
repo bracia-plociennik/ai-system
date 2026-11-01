@@ -320,6 +320,15 @@
     "check-luna-first": {
       "dependencies": [],
       "runtime_capable": false
+    },
+    "check-shared-installation": {
+      "dependencies": [],
+      "runtime_capable": false,
+      "category": "integration",
+      "inputs": {
+        "complete": true,
+        "mode": "product-tree"
+      }
     }
   }
 }

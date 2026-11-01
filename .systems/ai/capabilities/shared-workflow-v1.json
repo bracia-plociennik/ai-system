@@ -1,0 +1,13 @@
+{
+  "contract": "shared-workflow-v1",
+  "native_verification": "requires-installation-specific-proof",
+  "schema_version": 1,
+  "source_files": {
+    ".systems/ai/core/shared-workflow.md": "087569be2dfa1939be2cb2f61f85f9acffd3154360b4e9149527a10969e96663",
+    ".systems/scripts/agent_context.py": "fc4b811bd9f06ac19a5dee147e87ce6f4b30e133388b547f825b7714cf192016",
+    ".systems/scripts/capture_parity.py": "d660d8e96e3e2c60474e0b5e0438b35e3d336de809e20596b82b4efc5f563f0e",
+    ".systems/scripts/configure-shared-workflow": "3f5589762d8d91c45008336b41d8f9ff465e0a260be342fabd595c2b504fe1b1",
+    ".systems/scripts/durable_runtime.py": "c4129939a0fbc127008b9858507d5959bf28207f9f67ab19993c45df1bf1cfab",
+    ".systems/scripts/project-orchestration-preflight": "02881e6e7e0b1bb386b06934e65b70a9b61306f054bbcda20840dedaab8128d9"
+  }
+}

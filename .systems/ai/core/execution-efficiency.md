@@ -108,3 +108,19 @@ A live current-goal Capture selection first inspects every sibling identity/depe
 ## Task finalization
 
 For a requested result or owner supplementation, apply `task-finalization.md`: batch consequential questions, reuse current source-bound context, keep advisory additions off the critical path, and finish at the accepted DoD. The optional `prepare-finalization` projection extends this record; no new queue or approval authority. Tiny answers need no extra record.
+
+## Proportional task execution
+
+Use task-efficiency.md for answers, research, diagnosis, planning, implementation,
+integrations and bounded operations. Select the minimum sufficient path inside
+existing intake and risk/approval/quality gates, without an extra mandatory phase
+or per-answer artifacts. State specific unknowns, stop research when evidence is
+sufficient, and stop work at accepted completion. Keep current model and explicit
+owner-only delegation. No universal minutes limit or automatic production action.
+
+## General outcome and check discipline
+
+Use task-efficiency.md for bounded deliverables, prerequisites, separate readiness
+states, current blockers, justified costly repeats and objective retrospectives
+across all task kinds. Keep one existing work record, truthful unknown timing and
+current source-bound verification; no new mandatory phase or approval database.

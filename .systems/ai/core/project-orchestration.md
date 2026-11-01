@@ -1,5 +1,14 @@
 > Compatible new implementation tasks use `default-sprint.md` V2: bounded targeted QA after acceptance and incremental phases5–7; explicit full verification/Phase8 remains separate. This scoped rule takes precedence over ordinary implementation/checkpoint chaining below. V1 and unsupported tasks retain installed rules. `Phase X` / `-all` follows `phase-x-maintenance.md`; manual only, never autopilot/Dreaming.
 
+## Shared Workflow
+
+An owner-enabled registered shared default selects `${AI_SYSTEM_HOME}/ai-workflow`
+for in-scope project execution. Each target keeps its own `ai-workflow-workspace`
+or verified durable binding. See `.systems/ai/core/shared-workflow.md`. Actual owner
+association, project intake, permission and QA remain mandatory. Missing/invalid
+configured support blocks the affected action; do not create another nested clone.
+
+
 # Project Orchestration
 
 Use agent-startup.md and system-workflow-authority.md for registered startup and work-lead authority. System is the superior coordinator within actual owner mandate. Local Workflow owns technical execution/evidence and follows covered configurable lead decisions through the same human/System procedure. This does not infer approval from metadata or bypass protected gates.
@@ -37,7 +46,7 @@ AI System is the owner's entry point for work in a selected workspace's project.
 ## Discover The Target
 
 1. Select exactly one AI System workspace and nearest project owner namespace. Resolve `repo-path` from its `project-state/<project>/links.md`, or an explicit owner-provided repository path. A project name alone is not a filesystem path or an AI Workflow project ID. Stop when multiple matches remain.
-2. Read the target repository's root `AGENTS.md`, its `ai-workflow/AGENTS.md`, relevant local contracts, `ai-workflow-workspace/repo/core/status.md`, and the selected `ai-workflow-workspace/projects/<workflow-project>/status.md`. Confirm a valid Git root, installed Workflow (nested target mode or official repository mode), initialized runtime, applicable repo intake and actual Workflow version. Official mode uses the repository itself as AI_WORKFLOW_HOME and never requires a self-clone. Do not infer installation from the presence of a directory alone.
+2. Read the target repository's root `AGENTS.md`, its `ai-workflow/AGENTS.md`, relevant local contracts, `ai-workflow-workspace/repo/core/status.md`, and the selected `ai-workflow-workspace/projects/<workflow-project>/status.md`. Confirm a valid Git root, resolved Workflow (shared, nested target or official source mode), initialized target runtime, applicable repo intake and actual Workflow version. Shared mode reads the returned shared home rather than requiring repo/ai-workflow. Official mode uses the repository itself as AI_WORKFLOW_HOME and never requires a self-clone. Do not infer installation from the presence of a directory alone.
 3. Resolve the Workflow project ID from an explicit owner reference or a single unambiguous local status match. Do not equate the AI System project slug, repository basename, and Workflow project ID by default. If local instructions conflict, installation or intake is incomplete, the project is ambiguous, or write ownership is unknown, stop and report the exact missing fact. Do not install, initialize, upgrade, or repair the target implicitly.
 4. Re-read Git baseline, dirty files in the intended write set, active project status, blockers, accepted artifacts, and other known writers immediately before implementation and after interruption. A prior orchestration summary is not a resume authority.
 

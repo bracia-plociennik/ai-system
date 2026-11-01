@@ -117,6 +117,112 @@ class AgentContext(unittest.TestCase):
         self.assertIsNone(out['workflow_home'])
         self.assertEqual(out['workspace_root'], str(self.personal))
 
+    def enable_shared(self):
+        import hashlib
+        shared = self.system / 'ai-workflow'
+        self.repo(shared)
+        for capability in ('work-lead-v1', 'shared-installation-v1'):
+            files = context.CAPABILITY_FILES[capability]
+            for name in files:
+                self.put(shared / name, '# Synthetic reviewed capability\n')
+            self.put(shared / '.systems/ai/capabilities' / (capability + '.json'),
+                     json.dumps(dict(schema_version=1, contract=capability,
+                        source_files={name: hashlib.sha256((shared / name).read_bytes()).hexdigest()
+                                      for name in files},
+                        native_verification='requires-installation-specific-proof')))
+        self.put(shared / '.systems/ai/core/repository-modes.md', '# Synthetic modes\n')
+        self.put(self.system / 'ai-workflow-workspace/shared-installation.json',
+                 json.dumps(dict(schema_version=1, enabled=True, workflow_home='ai-workflow')))
+        return shared
+
+    def test_shared_projects_keep_owner_target_and_separate_artifacts_without_nested_clones(self):
+        shared = self.enable_shared()
+        second = self.company / 'projects/second'; self.repo(second)
+        self.put(self.company / 'project-state/second/links.md', 'repo-path: ' + str(second) + '\n')
+        for target in (self.app, second):
+            out = self.resolve(target)
+            self.assertEqual(out['workflow_home'], str(shared))
+            self.assertEqual(out['workflow_mode'], 'shared')
+            self.assertEqual(out['workflow_workspace'], str(target / 'ai-workflow-workspace'))
+            self.assertEqual(out['workspace_root'], str(self.company))
+            self.assertEqual(out['repository_root'], str(target))
+            self.assertFalse((target / 'ai-workflow').exists())
+            self.assertFalse(out['authorization_assessed'])
+
+    def test_management_shared_availability_preserves_management_role(self):
+        shared = self.enable_shared()
+        out = self.resolve(self.system)
+        self.assertEqual(out['context_kind'], 'management')
+        self.assertEqual(out['checkout_role'], 'management')
+        self.assertEqual(out['workflow_home'], str(shared))
+        self.assertEqual(out['workflow_workspace'], str(self.system / 'ai-workflow-workspace'))
+
+    def test_unknown_in_scope_repo_observes_tools_without_private_owner_context(self):
+        shared = self.enable_shared()
+        unknown = self.system / 'unknown'; self.repo(unknown)
+        out = self.resolve(unknown)
+        self.assertEqual(out['workflow_home'], str(shared))
+        self.assertIsNone(out['workspace_root'])
+        self.assertIsNone(out['project_id'])
+        self.assertEqual(out['context_kind'], 'unregistered-repository')
+        self.assertNotIn(str(self.personal), out['read_roots'])
+
+    def test_shared_capability_mismatch_blocks_instead_of_using_old_nested_clone(self):
+        shared = self.enable_shared()
+        self.repo(self.app / 'ai-workflow')
+        self.put(shared / '.systems/scripts/durable_runtime.py', '# Changed unreviewed consumer\n')
+        with self.assertRaises(context.ContextError):
+            self.resolve()
+
+    def test_shared_configuration_preview_and_activation_are_separate_and_idempotent(self):
+        import hashlib
+        self.enable_shared()
+        for relative in context.CAPABILITY_FILES['shared-workflow-v1']:
+            self.put(self.system / relative, (ROOT / relative).read_text())
+        self.put(self.system / '.systems/ai/capabilities/shared-workflow-v1.json', json.dumps(dict(
+            schema_version=1, contract='shared-workflow-v1',
+            source_files={relative: hashlib.sha256((self.system / relative).read_bytes()).hexdigest()
+                          for relative in context.CAPABILITY_FILES['shared-workflow-v1']},
+            native_verification='requires-installation-specific-proof')))
+        config = self.system / 'ai-workflow-workspace/shared-installation.json'
+        config.unlink()
+        command = [sys.executable, '-B', str(ROOT / '.systems/scripts/configure-shared-workflow')]
+        preview = subprocess.run(command, env=self.env, text=True, capture_output=True)
+        self.assertEqual(preview.returncode, 0, preview.stderr)
+        self.assertEqual(json.loads(preview.stdout)['action'], 'would-write')
+        self.assertFalse(config.exists())
+        activated = subprocess.run(command + ['--approved'], env=self.env, text=True, capture_output=True)
+        self.assertEqual(activated.returncode, 0, activated.stderr)
+        self.assertEqual(json.loads(activated.stdout)['action'], 'written')
+        before = config.stat().st_mtime_ns
+        repeated = subprocess.run(command + ['--approved'], env=self.env, text=True, capture_output=True)
+        self.assertEqual(repeated.returncode, 0, repeated.stderr)
+        self.assertEqual(json.loads(repeated.stdout)['action'], 'unchanged')
+        self.assertEqual(config.stat().st_mtime_ns, before)
+
+    def test_reviewed_shared_local_entrypoint_preserves_full_contract_and_rejects_drift(self):
+        import hashlib
+        self.enable_shared()
+        original = self.app / 'AGENTS.md'
+        self.put(original, '# Preserved full local contract\n' + 'Rule.\n' * 3000)
+        override = self.app / 'AGENTS.override.md'
+        self.put(override, '# Shared entrypoint\nRead the original AGENTS.md before work.\n')
+        # Unreviewed shadows are still unavailable.
+        self.assertIn('instruction override requires deliberate review', self.resolve()['unresolved'])
+        index = self.system / 'ai-workflow-workspace/shared-entrypoints.json'
+        self.put(index, json.dumps(dict(schema_version=1, entries={str(self.app.relative_to(self.system)): dict(
+            original_sha256=hashlib.sha256(original.read_bytes()).hexdigest(),
+            override_sha256=hashlib.sha256(override.read_bytes()).hexdigest())})))
+        out = self.resolve()
+        self.assertEqual(out['instruction_chain']['status'], 'within-budget')
+        self.assertEqual(out['instruction_chain']['required_manual_reads'], [str(original)])
+        self.assertEqual(out['instruction_chain']['reviewed_shared_entrypoints'], [str(override)])
+        original.write_text(original.read_text() + 'New protected owner instruction.\n')
+        self.assertIn('instruction override requires deliberate review', self.resolve()['unresolved'])
+        # A review never covers a global override or a changed entrypoint.
+        self.put(self.home / '.codex/AGENTS.override.md', '# Unreviewed global shadow\n')
+        self.assertIn('instruction override requires deliberate review', self.resolve()['unresolved'])
+
     def test_subdirectory_and_worktree_keep_identity_and_actual_root(self):
         sub = self.app / 'src'; sub.mkdir()
         self.assertEqual(self.resolve(sub)['repository_root'], str(self.app))

@@ -17,3 +17,15 @@ After context resolution, substantive tasks may inspect personal-source-library.
 ## Independent judgment
 
 Use `.systems/ai/core/critical-judgment.md` for proportional, evidence-based assessment of the goal, proposed mechanism and the agent's own advice. State material objections directly with basis, consequence and a feasible recommendation; acknowledge sound ideas and uncertainty. Preserve existing authority and phase gates, short routine answers, informed permitted tradeoffs and applicable quiet handling of independent minor debt.
+
+## Shared Workflow availability
+
+When explicitly enabled, resolve shared support under shared-workflow.md. Return
+the shared tool home, actual target and local artifact namespace while preserving
+management role and verified project ownership. Unknown repositories may observe
+tools without enrollment/private default reads. Availability is never permission.
+
+If context reports `instruction_chain.required_manual_reads`, read every listed
+original target contract before project work. An owner-reviewed short shared
+entrypoint defers those full rules, never removes or supersedes them. Changed
+original or override bytes invalidate that review and block the affected context.

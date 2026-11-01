@@ -87,7 +87,7 @@ class Application:
                 'unsafe-task-path', 400)
         target = safe_path(self.tracker.store.root, self.tracker.store.root.joinpath(*parts))
         require(not target.exists(), 'task-title-path-collision', 412)
-        text = initialize_markdown(body.decode('utf-8'), created=True, at=self.tracker.clock())
+        text = initialize_markdown(body.decode('utf-8'), created=True, at=self.tracker.clock(), author='human')
         # A prefilled template ID cannot create a second task with the same identity.
         from task_store import frontmatter
         task_id = frontmatter(text)['task_id']

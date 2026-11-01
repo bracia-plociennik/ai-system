@@ -1,5 +1,15 @@
 # Response Contract
 
+## Satisfied goal and current blockers
+
+Before proposing continuation use task-efficiency.md: reconcile current evidence,
+separate artifact/quality/deployment/enabled effect and distinguish this goal from
+optional work or another goal. If accepted completion is satisfied and no material
+owner decision remains, a direct "no blockers / nothing further required" is a
+complete answer. This branch takes precedence over recommendation/alternative and
+Co dalej footer quotas below. Do not manufacture findings or unfinished work. A
+real missing mandatory check remains blocking; final-owner-yes is never inferred.
+
 ## Intent brief and private style context
 
 Use intent-to-execution-brief.md during existing intake: minimal inline/embedded fields with provenance and disposition; preserve original request/accepted decisions as independent QA anchors. Batch triage and current action/phase ceilings remain first. This adds no phase or approval. Use style-profile.md for optional explicitly enabled local style; recording needs actual exact-target consent and minimal provenance/privacy, observations stay tentative and current instruction overrides profile. Invalid/disabled profile supplies no preferences. Auto chooses only covered reversible options and queues protected owner decisions; Human groups material questions, settled answers not repeated and noninteractive routes stay so.
@@ -222,3 +232,12 @@ Use `.systems/ai/core/critical-judgment.md` for proportional, evidence-based ass
 ## Efficient final delivery
 
 Use task-finalization.md for the finalization of an accepted result. Report actual output, verification and material incomplete effects. Do not repeat completed source-bound steps or grow optional research after DoD. During ongoing work, give concrete progress within 60 seconds; missing telemetry remains unknown. This changes neither formal QA nor owner approval.
+
+## Proportional task execution
+
+Use task-efficiency.md for answers, research, diagnosis, planning, implementation,
+integrations and bounded operations. Select the minimum sufficient path inside
+existing intake and risk/approval/quality gates, without an extra mandatory phase
+or per-answer artifacts. State specific unknowns, stop research when evidence is
+sufficient, and stop work at accepted completion. Keep current model and explicit
+owner-only delegation. No universal minutes limit or automatic production action.

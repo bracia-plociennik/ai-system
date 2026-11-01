@@ -92,3 +92,11 @@ Existing/explicit schema1 task-local Sprint follows .systems/ai/core/sprint-iter
 Use `.systems/ai/core/critical-judgment.md` for proportional, evidence-based assessment of the goal, proposed mechanism and the agent's own advice. State material objections directly with basis, consequence and a feasible recommendation; acknowledge sound ideas and uncertainty. Preserve existing authority and phase gates, short routine answers, informed permitted tradeoffs and applicable quiet handling of independent minor debt.
 
 Default compatible implementation uses .systems/ai/core/default-sprint.md: preview, 300-second targeted QA on acceptance, explicit full Phase8. Existing Sprint V1 stays unchanged. Manual Phase X/-all follows phase-x-maintenance.md. Pending full QA pins closure/cleanup.
+
+## Shared Workflow
+
+When the registered shared default is enabled, use the Workflow home returned by
+resolve-agent-context and read its AGENTS.md. The target remains the actual repo;
+artifacts stay in its ai-workflow-workspace or verified durable binding. No nested
+clone is required. Follow .systems/ai/core/shared-workflow.md; retain management
+role, local project rules and all owner/QA gates.

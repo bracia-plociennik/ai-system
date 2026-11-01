@@ -13,6 +13,7 @@ from execution_efficiency import capability_record
 from validation_support import InvalidEvidence
 from orchestration_compatibility import negotiate, inspect_plan, Blocked
 from execution_modes import workflow_support, inspect_workflow_state, InvalidWork
+from agent_context import workflow_context, ContextError
 
 
 def git(path, *args):
@@ -128,9 +129,14 @@ def main():
 
         if (repo / "AGENTS.md").is_symlink() or not (repo / "AGENTS.md").is_file():
             blockers.append("target root AGENTS.md is missing")
-        official = (repo / ".systems/scripts/resolve-workflow-env").is_file() and (repo / ".systems/ai/core/repository-modes.md").is_file()
-        workflow = repo if official else repo / "ai-workflow"
-        result["workflow_mode"] = "official" if official else "target"
+        try:
+            discovered_workflow, discovered_runtime, discovered_mode = workflow_context(repo)
+        except ContextError as exc:
+            blockers.append("Workflow binding: " + str(exc))
+            discovered_workflow, discovered_runtime, discovered_mode = None, None, None
+        workflow = discovered_workflow or repo / "ai-workflow"
+        result["workflow_mode"] = discovered_mode
+        result["workflow_home"] = str(discovered_workflow) if discovered_workflow else None
         if workflow.is_symlink() or not workflow.is_dir() or (workflow / "AGENTS.md").is_symlink() or not (workflow / "AGENTS.md").is_file():
             blockers.append("nested AI Workflow AGENTS.md is missing")
         elif git(workflow, "rev-parse", "--show-toplevel") != str(workflow.resolve()):
@@ -169,11 +175,12 @@ def main():
             except (InvalidEvidence, OSError, ValueError) as exc:
                 blockers.append(str(exc))
 
-        runtime = repo / "ai-workflow-workspace"
+        runtime = discovered_runtime or repo / "ai-workflow-workspace"
+        result["workflow_workspace"] = str(runtime)
         repo_status = runtime / "repo/core/status.md"
         repo_intake = runtime / "repo/core/repo-intake.md"
         if runtime.is_symlink() or any(
-            path.is_symlink() or not path.is_file() or not path.resolve().is_relative_to(repo)
+            path.is_symlink() or not path.is_file() or not path.resolve().is_relative_to(runtime)
             for path in (repo_status, repo_intake)
         ):
             blockers.append("AI Workflow runtime status or repo intake is missing")

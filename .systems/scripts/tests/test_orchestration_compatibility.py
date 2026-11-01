@@ -416,6 +416,73 @@ class CaptureTests(Fixture):
         with self.assertRaises(c.Blocked):
             p.validate_formal(record, root)
 
+    def test_shared_capture_and_goal_claims_use_registered_policy_home(self):
+        root, owner, record, source, qa, distillation, data = self.formal()
+        system = self.directory("shared-system")
+        home = self.directory("registered-user")
+        (system / "ai-system.local.json").write_text(json.dumps(dict(schema_version=1, role="management")))
+        reg = home / ".config/ai-system/installation.json"
+        reg.parent.mkdir(parents=True)
+        reg.write_text(json.dumps(dict(schema_version=1, system_id="test", system_home=str(system),
+                    enabled=True, adapter_ids=["codex"], owner_workspace_id="test", owner_asset_id="host")))
+        config = system / "ai-workflow-workspace/shared-installation.json"
+        config.parent.mkdir()
+        config.write_text(json.dumps(dict(schema_version=1, enabled=True, workflow_home="ai-workflow")))
+        target = system / "projects/target"
+        target.parent.mkdir()
+        source.rename(target)
+        data["source_root"] = str(target)
+        workflow = system / "ai-workflow"
+        workflow.mkdir()
+        self.run_git(workflow, "init", "-q")
+        self.run_git(workflow, "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "--allow-empty", "-qm", "fixture")
+        for rel in ("AGENTS.md", ".systems/scripts/resolve-workflow-env", ".systems/ai/core/repository-modes.md", ".systems/ai/core/risk-model.md", "contract.md"):
+            out = workflow / rel
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text("synthetic installed policy")
+        text = qa.read_text().replace("### Definition Of Done Validation", "| workflow-source | contract.md | " + c.fingerprint(workflow / "contract.md") + " |\n### Definition Of Done Validation")
+        qa.write_text(text)
+        data["qa_refs"][0]["sha256"] = c.fingerprint(qa)
+        prefix = record.read_text().split("## Capture Verification", 1)[0]
+        record.write_text(prefix + "## Capture Verification\n```json\n" + json.dumps(data) + "\n```\n")
+        with mock.patch.dict(os.environ, dict(HOME=str(home), AI_SYSTEM_HOME=str(system))):
+            self.assertTrue(p.validate_formal(record, root)["current_quality"])
+            self.assertEqual(p.workflow_source_root(target), workflow)
+            import maintenance_policy
+            with mock.patch.object(maintenance_policy, "select_goal", wraps=maintenance_policy.select_goal) as select:
+                claims = p.goal_collection(root, owner, ["new"])
+                self.assertEqual(claims["gate_result"], "PASS")
+                self.assertIn(str(workflow / "contract.md"), select.call_args.args[1][0]["source_refs"])
+            self.assertFalse((target / "ai-workflow").exists())
+            for rel in (".systems/scripts/resolve-workflow-env", ".systems/ai/core/repository-modes.md"):
+                out = target / rel
+                out.parent.mkdir(parents=True, exist_ok=True)
+                out.write_text("synthetic official source")
+            with mock.patch.dict(os.environ, dict(AI_WORKFLOW_MODE="official")):
+                self.assertEqual(p.workflow_source_root(target), target)
+            self.assertEqual(p.workflow_source_root(target), workflow)
+            (workflow / "contract.md").write_text("drift")
+            with self.assertRaises(c.Blocked):
+                p.validate_formal(record, root)
+            config.write_text("{}")
+            with self.assertRaises(ValueError):
+                p.workflow_source_root(target)
+
+    def test_product_only_capture_does_not_require_workflow_registration(self):
+        root, owner, record, source, qa, distillation, data = self.formal()
+        import durable_runtime
+        with mock.patch.object(durable_runtime, "registered_system", side_effect=ValueError("unavailable")):
+            self.assertTrue(p.validate_formal(record, root)["current_quality"])
+            self.assertEqual(p.goal_collection(root, owner, ["new"])["gate_result"], "PASS")
+
+    def test_official_workflow_evidence_uses_source_itself(self):
+        source = self.git_repo()
+        for rel in (".systems/scripts/resolve-workflow-env", ".systems/ai/core/repository-modes.md"):
+            out = source / rel
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text("synthetic official source")
+        self.assertEqual(p.workflow_source_root(source), source)
+
     def test_shared_distillation_claim_and_missing_quality_completeness(self):
         root, owner, record, source, qa, distillation, data = self.formal()
         sibling = record.with_name("sibling.md")

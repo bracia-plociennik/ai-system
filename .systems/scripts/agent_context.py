@@ -16,6 +16,14 @@ REGISTRATION_KEYS = {'schema_version', 'system_id', 'system_home', 'enabled', 'a
 SLUG = re.compile(r'[a-z0-9]+(?:-[a-z0-9]+)*')
 POLICY = ('.systems/ai/core/agent-startup.md', '.systems/ai/core/system-workflow-authority.md')
 CAPABILITY_FILES = {
+    'shared-workflow-v1': ('.systems/scripts/agent_context.py', '.systems/scripts/durable_runtime.py',
+        '.systems/scripts/project-orchestration-preflight', '.systems/scripts/configure-shared-workflow',
+        '.systems/ai/core/shared-workflow.md', '.systems/scripts/capture_parity.py'),
+    'shared-installation-v1': ('.systems/scripts/durable_runtime.py',
+        '.systems/scripts/resolve-workflow-env', '.systems/scripts/init-workspace',
+        '.systems/scripts/update-workspace', '.systems/scripts/bootstrap-target-worktree',
+        '.systems/scripts/update-from-upstream', '.systems/ai/core/shared-installation.md',
+        '.systems/ai/templates/root-agents-shared.template.md'),
     'agent-startup-v1': (*POLICY, '.systems/ai/core/agent-adapters.md',
         '.systems/scripts/agent_context.py', '.systems/scripts/agent_adapters.py',
         '.systems/scripts/local_paths.py', '.systems/scripts/resolve-agent-context',
@@ -174,10 +182,26 @@ def project_associations(rows, repo, common, env):
     return matches, fingerprints
 
 
-def workflow_context(repo, environment=None):
+def workflow_context(repo, environment=None, *, system_home=None, shared_only=False):
     if repo is None:
         return None, None, None
     import durable_runtime
+    env = os.environ if environment is None else environment
+    try:
+        installed = system_home or durable_runtime.registered_system(env)
+        shared = durable_runtime.shared_installation(installed, repo) if installed else None
+        if shared is not None and repo != shared:
+            if source_consistency(shared, 'shared-installation-v1.json', 'shared-installation-v1') != 'verified-source':
+                raise ContextError('shared Workflow consumer source is not verified', 3)
+            selected = durable_runtime.workflow_environment(shared, mode='shared', target=repo,
+                system_root=installed, environment=env)
+            return shared, Path(selected['AI_WORKFLOW_WORKSPACE_HOME']), 'shared'
+        if shared_only:
+            return None, None, None
+    except (ValueError, OSError, subprocess.SubprocessError) as exc:
+        if isinstance(exc, ContextError):
+            raise
+        raise ContextError(str(exc), 4) from exc
     try:
         binding = durable_runtime.load(repo)
     except ValueError as exc:
@@ -214,7 +238,7 @@ def instruction_chain(current, repo, env, tool):
         for part in current.relative_to(repo).parts:
             cursor = cursor / part
             directories.append(cursor)
-    files, shadows, total = [], [], 0
+    files, shadows, reviewed, manual_reads, total = [], [], [], [], 0
     seen = set()
     for directory in directories:
         normal, override = directory / 'AGENTS.md', directory / 'AGENTS.override.md'
@@ -229,11 +253,33 @@ def instruction_chain(current, repo, env, tool):
         raw = safe_bytes(chosen)
         total += len(raw)
         files.append({'path': str(chosen), 'bytes': len(raw), 'sha256': hashlib.sha256(raw).hexdigest()})
-        if chosen == override: shadows.append(str(override))
-    issues = (['instruction override requires deliberate review'] if shadows else [])
+        if chosen == override:
+            shadows.append(str(override))
+            # A local shared-routing entry may defer the unchanged full source
+            # contract to an explicit read. This never admits global overrides.
+            installed = concrete(env['AI_SYSTEM_HOME'], environment=env) if env.get('AI_SYSTEM_HOME') else None
+            if installed and directory == repo and directory != codex and directory.is_relative_to(installed):
+                config = installed / 'ai-workflow-workspace/shared-installation.json'
+                reviews = installed / 'ai-workflow-workspace/shared-entrypoints.json'
+                if config.is_file() and reviews.is_file():
+                    setting, index = strict_json(config), strict_json(reviews)
+                    if (setting == {'schema_version': 1, 'enabled': True, 'workflow_home': 'ai-workflow'}
+                            and type(setting.get('schema_version')) is int
+                            and isinstance(index, dict) and set(index) == {'schema_version', 'entries'}
+                            and type(index['schema_version']) is int and index['schema_version'] == 1
+                            and isinstance(index['entries'], dict)):
+                        entry = index['entries'].get(str(directory.relative_to(installed)))
+                        if (isinstance(entry, dict) and set(entry) == {'original_sha256', 'override_sha256'}
+                                and normal.is_file()
+                                and entry['original_sha256'] == hashlib.sha256(safe_bytes(normal)).hexdigest()
+                                and entry['override_sha256'] == hashlib.sha256(raw).hexdigest()):
+                            reviewed.append(str(override))
+                            manual_reads.append(str(normal))
+    issues = (['instruction override requires deliberate review'] if set(shadows) - set(reviewed) else [])
     if total > 16384: issues.append('combined automatic guidance exceeds 16 KiB')
     return {'status': 'review-required' if issues else 'within-budget', 'native_verification': 'unverified',
-            'files': files, 'bytes': total, 'shadowing': shadows, 'issues': issues}
+            'files': files, 'bytes': total, 'shadowing': shadows, 'reviewed_shared_entrypoints': reviewed,
+            'required_manual_reads': manual_reads, 'issues': issues}
 
 
 def source_consistency(root, capability, contract):
@@ -295,12 +341,18 @@ def resolve_context(cwd, tool='codex', workspace=None, *, environment=None, syst
                 or role['role'] not in {'management', 'development'}):
             raise ContextError('invalid checkout role')
         checkout = role['role']
-    wf, wf_workspace, mode = workflow_context(repo, env) if owner else (None, None, None)
+    wf, wf_workspace, mode = workflow_context(repo, env, system_home=installed, shared_only=not owner) if repo else (None, None, None)
     hashes = [(str(path), hashlib.sha256(safe_bytes(path)).hexdigest()) for path in
               (regpath, registry, installed / 'ai-system.local.json', *(installed / x for x in POLICY))]
     hashes += association_hashes
+    if mode == 'shared':
+        config = installed / 'ai-workflow-workspace/shared-installation.json'
+        hashes += [(str(config), hashlib.sha256(safe_bytes(config)).hexdigest()),
+                   (str(wf), git(wf, 'rev-parse', 'HEAD'))]
     digest = hashlib.sha256(''.join(sorted(f'{a}={b}\n' for a,b in hashes)).encode()).hexdigest()
     read_roots = [str(installed / '.systems/ai/core')]
+    if mode == 'shared':
+        read_roots += [str(wf / '.systems/ai/core'), str(wf / 'AGENTS.md')]
     if owner:
         read_roots += [str(repo), str(matches[0][3])]
     elif selected:

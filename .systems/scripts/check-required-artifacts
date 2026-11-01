@@ -17,6 +17,14 @@ if git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 fi
 
 required=(
+  ".systems/scripts/agent_context.py"
+  ".systems/scripts/durable_runtime.py"
+  ".systems/scripts/project-orchestration-preflight"
+  ".systems/scripts/configure-shared-workflow"
+  ".systems/ai/core/shared-workflow.md"
+  ".systems/ai/capabilities/shared-workflow-v1.json"
+  ".systems/scripts/check-shared-installation"
+  ".systems/scripts/tests/test_shared_installation.py"
   ".systems/ai/core/default-sprint.md"
   ".systems/ai/core/phase-x-maintenance.md"
   ".systems/scripts/manage-maintenance"
