@@ -109,7 +109,7 @@
     },
     ".systems/ai/core/default-sprint.md": {
       "mode": "100644",
-      "sha256": "fa0c0d8ff7154a83221244e455cf22d664a680d5020e0de4a2df456a0673313d"
+      "sha256": "9df004aa712e5209010b0575eb3461464ae72dc566461eb59f3ee1ad77edf96b"
     },
     ".systems/ai/core/definition-of-done.md": {
       "mode": "100644",
@@ -135,9 +135,13 @@
       "mode": "100644",
       "sha256": "188b39a493637982e4ef02c8cbc86dcceeb5ab202b31615489411985595087b3"
     },
+    ".systems/ai/core/dreaming-maintenance.md": {
+      "mode": "100644",
+      "sha256": "c6b0f975ef97f276277560e9933ada68d1e26e18a510eec1c70a30ed09bf86a2"
+    },
     ".systems/ai/core/dreaming-mode.md": {
       "mode": "100644",
-      "sha256": "47af4251b80d92cdc821b924792f16a0105ea920683ba2550e49c534eee9883b"
+      "sha256": "440fea73e0646b4c7b2062f22a19c97b57c60dc9c7a02d91daff2ad20e60351b"
     },
     ".systems/ai/core/end-of-task-capture.md": {
       "mode": "100644",
@@ -145,7 +149,7 @@
     },
     ".systems/ai/core/execution-efficiency.md": {
       "mode": "100644",
-      "sha256": "da164f72b09484e67a0316f5b788cec01f168fe51e287e717cdb64d3964fc566"
+      "sha256": "d2a13fd02af641173708194464e1906faa87aaf974d130c2c4704598fe23a7a0"
     },
     ".systems/ai/core/execution-modes.md": {
       "mode": "100644",
@@ -225,7 +229,7 @@
     },
     ".systems/ai/core/phase-x-maintenance.md": {
       "mode": "100644",
-      "sha256": "79448b7c00ce5fc10de83caf280652a00423cedc2a13de9861f9c13c16852e02"
+      "sha256": "0ac0e27e6c65e76983fd2f894e34ec4cdf2320e0ce7ace259be818caa43b8a7d"
     },
     ".systems/ai/core/plan-quality-contract.md": {
       "mode": "100644",
@@ -261,7 +265,7 @@
     },
     ".systems/ai/core/response-contract.md": {
       "mode": "100644",
-      "sha256": "1d09eb6e97f79818d070c6e52b3836f108438f29fdfb768a68f41aa913d8bd40"
+      "sha256": "857a9f0585aabd63502f876e4c7a9d517a1d97784be14ec1e0f1a82208c3a6d8"
     },
     ".systems/ai/core/risk-model.md": {
       "mode": "100644",
@@ -302,6 +306,10 @@
     ".systems/ai/core/task-efficiency.md": {
       "mode": "100644",
       "sha256": "46e90c1cf87400e239692c21d0d7ed425be788f25a9f867c535fd84cba018b22"
+    },
+    ".systems/ai/core/task-finalization.md": {
+      "mode": "100644",
+      "sha256": "596a78f2f2cc88c13fbc9c38ccaa6a382fc0850a6ee828491e00b773e7f3b6d5"
     },
     ".systems/ai/core/task-intake.md": {
       "mode": "100644",
@@ -362,6 +370,10 @@
     ".systems/ai/examples/critical-judgment-example.md": {
       "mode": "100644",
       "sha256": "8f46ba7d9ebf0c43aed2f0ae319dca937e82e41088af6d0fa44fd8fed5100208"
+    },
+    ".systems/ai/examples/finalization/README.md": {
+      "mode": "100644",
+      "sha256": "efaf2e7129f7eb56e9a908bc1084eac986399f457e808f5ac12250b8d26b6afc"
     },
     ".systems/ai/examples/humans/EXAMPLE/README.md": {
       "mode": "100644",
@@ -1765,7 +1777,7 @@
     },
     ".systems/scripts/check-dreaming-mode": {
       "mode": "100755",
-      "sha256": "5df008f802bb5bee1f87d97c2da6698e03f2ca1782be61ef4e455518b20ef548"
+      "sha256": "b6897cdb482864461cdac75c3946ab4567d0df163f5264e7c90b555d53720833"
     },
     ".systems/scripts/check-end-of-task-capture": {
       "mode": "100755",
@@ -1975,6 +1987,10 @@
       "mode": "100644",
       "sha256": "c4129939a0fbc127008b9858507d5959bf28207f9f67ab19993c45df1bf1cfab"
     },
+    ".systems/scripts/finalization_support.py": {
+      "mode": "100644",
+      "sha256": "c1040ded94e690d159a841b0efb343b2ce259024375aa42c588e9b80bb621134"
+    },
     ".systems/scripts/init-workspace": {
       "mode": "100755",
       "sha256": "bfc48ce16c0a05543fc68bf0e477efd72de5f5c9ee6a7bad25bea7a3e7da371e"
@@ -1998,6 +2014,10 @@
     ".systems/scripts/lib/coordinator-status.py": {
       "mode": "100644",
       "sha256": "25ff8123d7093331bc7771e14e2245f793de04ffa1b3c16f600440bad2dc7819"
+    },
+    ".systems/scripts/lib/dreaming-maintenance.py": {
+      "mode": "100644",
+      "sha256": "302b579880c81af6b3081151f6a12ff651101ad7bcee7f3a03c51e946b1afb18"
     },
     ".systems/scripts/lib/execution-efficiency.py": {
       "mode": "100644",
@@ -2110,6 +2130,10 @@
     ".systems/scripts/plan-parallel-work": {
       "mode": "100755",
       "sha256": "55a0b476fef10e7c6b7d0b97a73a8938ecd9897289037ae8dfbfca61f43ad5e1"
+    },
+    ".systems/scripts/prepare-finalization": {
+      "mode": "100755",
+      "sha256": "5a4b9245205cdb29f3c915ac9f6c076bb157931b39bba7424117fb2b9156b447"
     },
     ".systems/scripts/prepare-quality-record": {
       "mode": "100755",
@@ -2267,6 +2291,10 @@
       "mode": "100644",
       "sha256": "29b751f502d904d12e89cb306393e967fe7f9b10853db47c4b511062a9af0d36"
     },
+    ".systems/scripts/tests/test_dreaming_maintenance.py": {
+      "mode": "100644",
+      "sha256": "8d1300df96a43fe6e1fa64325f65703a1dd003889ed9763b83a6ddab305db815"
+    },
     ".systems/scripts/tests/test_dreaming_native_compatibility.py": {
       "mode": "100644",
       "sha256": "6ffbefb6d2d057b8b6319828ee1344154d06b97206dda396e9055559ebe86a13"
@@ -2278,6 +2306,10 @@
     ".systems/scripts/tests/test_dreaming_universal_evidence.py": {
       "mode": "100644",
       "sha256": "82c1ee4ee07e8f490a15e5d3c205b08e764157ad5f5e6b614c3ed929f629a1cb"
+    },
+    ".systems/scripts/tests/test_finalization_support.py": {
+      "mode": "100644",
+      "sha256": "7188b9e6cd6f9ef5e1a9c85a781a8fd2e0a74e0bdd2071444ff03e3066fc8399"
     },
     ".systems/scripts/tests/test_luna_first.py": {
       "mode": "100644",
