@@ -217,3 +217,8 @@ For actual task-local Sprint selection use `sprint-iteration.md` and the compati
 ## Independent judgment
 
 Use `.systems/ai/core/critical-judgment.md` for proportional, evidence-based assessment of the goal, proposed mechanism and the agent's own advice. State material objections directly with basis, consequence and a feasible recommendation; acknowledge sound ideas and uncertainty. Preserve existing authority and phase gates, short routine answers, informed permitted tradeoffs and applicable quiet handling of independent minor debt.
+
+
+## Efficient final delivery
+
+Use task-finalization.md for the finalization of an accepted result. Report actual output, verification and material incomplete effects. Do not repeat completed source-bound steps or grow optional research after DoD. During ongoing work, give concrete progress within 60 seconds; missing telemetry remains unknown. This changes neither formal QA nor owner approval.
