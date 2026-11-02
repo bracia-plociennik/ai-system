@@ -63,6 +63,10 @@
       "mode": "100644",
       "sha256": "a68631e1daee505dde02f58a86c61d8983c37b800016cf9924f2a17de3ab7b14"
     },
+    ".systems/ai/capabilities/wig-mentoring-v1.json": {
+      "mode": "100644",
+      "sha256": "14dec1e882d84c5da3d91ffdf5d5520b96a77e9848cacd5834d8f21be209f407"
+    },
     ".systems/ai/capabilities/work-lead-v1.json": {
       "mode": "100644",
       "sha256": "9288d8286a96648bc1c0736393523e49d9fc138e05c09d8f21364802b54fdab0"
@@ -105,7 +109,7 @@
     },
     ".systems/ai/core/critical-judgment.md": {
       "mode": "100644",
-      "sha256": "9442addc4c57b943ce16258503f7fa775d72060809d8c803e800fde74c9eedef"
+      "sha256": "b3c4ed89d6946f34382b7b6586ecac6265acb1f879ee321fe7c9488d82c0f669"
     },
     ".systems/ai/core/cross-system-upgrade-handoff.md": {
       "mode": "100644",
@@ -346,6 +350,10 @@
     ".systems/ai/core/version.md": {
       "mode": "100644",
       "sha256": "ba71ff6c56284826d2e680b36270cbad3e0358d93a941be611bd9b12af72492b"
+    },
+    ".systems/ai/core/wig-mentoring.md": {
+      "mode": "100644",
+      "sha256": "27b5f2b1f3b5c365c40f0da862655e5938f23f98da04a15c508706072d75a920"
     },
     ".systems/ai/core/work-lead.md": {
       "mode": "100644",
@@ -1947,6 +1955,10 @@
       "mode": "100755",
       "sha256": "97f55c3e1155f0f283d308adea42e41fee9297ee4c5086dc1fc4e08c11d74403"
     },
+    ".systems/scripts/check-wig-mentoring": {
+      "mode": "100755",
+      "sha256": "203914bd277f30e068e9c50cf8e6d9fad9a9d4c575d240c97e7c49ba78a42c09"
+    },
     ".systems/scripts/check-work-lead": {
       "mode": "100755",
       "sha256": "b161016744fe45be0e0e2fc0f51b8758398a14502bf1eaa3ccef4910b3d8c127"
@@ -2089,7 +2101,7 @@
     },
     ".systems/scripts/lib/validation-checks.json": {
       "mode": "100644",
-      "sha256": "251ca5733c140419dead6076fb4ec530c02dfb6871a0f4e88a995ba6df4972fd"
+      "sha256": "203c48b585838d4cc4a007cfaaed98e33f5769aebbe796d659e8e3d8d2fd61ba"
     },
     ".systems/scripts/lib/validation-scope.py": {
       "mode": "100644",
@@ -2146,6 +2158,10 @@
     ".systems/scripts/prepare-quality-record": {
       "mode": "100755",
       "sha256": "c117765793f02cf79cbfecc6b8a98cd475a8b6ffbcd93b7d68b5019a456b5eae"
+    },
+    ".systems/scripts/prepare-wig-mentoring": {
+      "mode": "100755",
+      "sha256": "1f2e9f0d6fe4af5b766dc2bad4d6545acbae876aaeea0af20a7221e9612e1bcb"
     },
     ".systems/scripts/report-contract-topology": {
       "mode": "100755",
@@ -2343,6 +2359,10 @@
       "mode": "100644",
       "sha256": "df5e0d30941b36099788c871be4371276d1b8f71ec5c4c5515a677027144afa9"
     },
+    ".systems/scripts/tests/wig-mentoring.py": {
+      "mode": "100644",
+      "sha256": "4c58b99f1991c5fdd7b3370abb42f1665be4c6b11029f223e93f128110be516a"
+    },
     ".systems/scripts/tests/work-lead.py": {
       "mode": "100644",
       "sha256": "6258aa8191faed4ba7dc2a31313e196a41c58923f26f92b0ad08692f7a1eb174"
@@ -2357,7 +2377,7 @@
     },
     ".systems/scripts/validate-workflow": {
       "mode": "100755",
-      "sha256": "9147625a7a039e55023054b4103d52194bca73f1f55bf7a0b29cdb6e0ba8ce66"
+      "sha256": "01fe16b615d43d4eaedc50988b1cad3601404bb1360270ee66e8bd350e99b9f4"
     },
     ".systems/scripts/validation_input_guard.py": {
       "mode": "100644",

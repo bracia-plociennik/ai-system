@@ -1,0 +1,16 @@
+{
+  "authority": "none",
+  "contract": "wig-mentoring-v1",
+  "files": {
+    ".systems/ai/core/command-routing.md": "403b40c4eadd1056aacbaf8f854d989190291162c6d9085b37669912c1fe48c5",
+    ".systems/ai/core/task-intake.md": "296800c7af9b321737a4eafbd9c43fcf4eb145c4bbfa14b3b64e1c6a9c5771c7",
+    ".systems/ai/core/wig-mentoring.md": "d900a52dfd6685fe46460462589d91b547bbbdcb04cd679a009983b336d64fad",
+    ".systems/scripts/check-wig-mentoring": "6c64c7be7816e02f7fe7a91f2cca7ef37c60f7d4c338b30f5115196dccb2e3f1",
+    ".systems/scripts/prepare-wig-mentoring": "07bf62c971c687a874c0affb4cd78d92f4b91df7bbde2b39ebcc4e0590717dea",
+    ".systems/scripts/record-wig-mentoring": "0284db9031d39456a83f2941f004b65466ac5ff4c2e2a511c0b686de5ec20349",
+    ".systems/scripts/tests/test_wig_mentoring.py": "bdcfb383df58d7da9321a4aac0a50b4a1d91be33f5486945f3e217324ad4c10d",
+    ".systems/scripts/wig_mentoring.py": "4ad71e4d627bddeb61bc49cb5df3ec2414a0750b2f766e4f9ffc3d25d98cf753"
+  },
+  "project_contract": "wig-mentoring-project-v1",
+  "schema_version": 1
+}

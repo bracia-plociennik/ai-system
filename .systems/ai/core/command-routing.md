@@ -192,3 +192,6 @@ Personal PDF/notes, source-library, biblioteka źródeł, źródła Kuby, and so
 ## Sprint iteration
 
 For actual task-local Sprint selection use `sprint-iteration.md` and the compatible installed Workflow. Keep preview/feedback implementation open until genuine final current-effect acceptance or explicit verification request. Deferred quality is not completed/PASS or resource release. Preserve normal behavior without explicit activation.
+
+## WIG mentor routing
+WIG mentoring, priority drift and conscious task exceptions follow wig-mentoring.md inside existing intake/planning. System owns the read-only prepare-wig-mentoring context and explicit private record-wig-mentoring state; Workflow validates only the minimal project projection. No automatic private reads, background reminders or permission from metadata.
