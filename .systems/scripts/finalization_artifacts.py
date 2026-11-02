@@ -73,6 +73,8 @@ def spor_candidate(workspace, request):
     import personal_ops_drafts as drafts
     import personal_ops_v4 as v4
     from personal_ops_aggregates_v4 import observations,budget_facts
+    from spor_preflight import normalize_plan
+    request = normalize_plan(request)
     required={'date','draft_sha256','fields','properties','confirmed_properties','owner_reference'}
     if set(request)!=required or not request['owner_reference']:raise ValueError('Invalid normalization package')
     day=date.fromisoformat(request['date']);saved=drafts.read(workspace,day)
@@ -148,20 +150,25 @@ def native_spor_hooks(workspace):
     return {stage:run(stage) for stage in ('indexes','renderer')}
 
 
-def finalize_spor(workspace, request, *, apply=False, approved=False, integrations=(), hooks=None):
+def finalize_spor(workspace, request, *, apply=False, approved=False, integrations=(), hooks=None, preflights=None):
     import personal_ops_drafts as drafts
+    from spor_preflight import prepare_integrations,check_inputs,fingerprint
     hooks=native_spor_hooks(workspace) if hooks is None else hooks
     stages=spor_stages(integrations)
+    request_hash=fingerprint(request)
     candidate=spor_candidate(workspace,request)
-    if not apply:return {'status':'preview','path':candidate['path'],'diff':candidate['diff'],'required_stages':stages,'permission_granted':False}
-    if not approved:raise ValueError('Actual owner scope required')
+    if apply and not approved:raise ValueError('Actual owner scope required')
     if any(x not in hooks for x in stages):raise ValueError('Missing explicit trusted stage adapter')
+    preflight=prepare_integrations(workspace,candidate,integrations,preflights or {})
+    if not apply:return {'status':'preview','path':candidate['path'],'diff':candidate['diff'],'required_stages':stages,'preflight':preflight,'permission_granted':False}
     def guard():
+        if fingerprint(request)!=request_hash:raise ValueError('Normalization package changed before persistence')
+        check_inputs(workspace,preflight)
         current=drafts.read(workspace,date.fromisoformat(request['date']))
         if current['sha256']!=request['draft_sha256']:raise ValueError('Draft changed before persistence')
     receipt=publish(workspace,candidate['path'],candidate['body'].encode(),approved=approved,guard=guard)
     receipt.update(recovery_contract='spor-finalization-recovery-v1', required_stages=stages,
-                   draft_sha256=request['draft_sha256'], date=request['date'])
+                   draft_sha256=request['draft_sha256'], date=request['date'], preflight=preflight)
     done=['canonical'];attempted=[];current=receipt['sha256']
     try:
         for stage in stages:

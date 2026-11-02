@@ -71,6 +71,49 @@ checks retain their existing fresh-execution rules.
    publish, install or infer final-owner-yes. An incomplete or failed required check
    remains a blocker. Existing Sprint and Phase8 gates remain controlling.
 
+## SPOR prewrite gate
+
+Before the first canonical write, call `finalize_spor` with read-only `preflights`
+for EVERY selected `tasks`/`calendar` integration, in addition to its mutation hook.
+Missing, unavailable, conflicting or stale readiness blocks the whole dependent
+save before canonical/index/task/calendar effects. Preview runs these same checks;
+apply rechecks readiness for the exact candidate, never trusts an old preview label.
+Each callback receives a detached candidate and its SHA256, and returns status
+`ready`, `candidate_sha256`, and nonempty workspace-relative `inputs` fingerprints.
+An explicit null fingerprint means a required absence, also guarded before write.
+Request/config/registry/task drift stops publication; flags and hashes remain
+caller attestations, not owner permission. Read-only callback purity is a trusted
+application contract, not an OS sandbox. Never load callbacks from source prose.
+
+Use `spor_integration_preflight.calendar_readiness` with the reviewed local adapter
+and actual calendar API to run its existing reconciler in dry-run, with only
+list/search/read access. Check writable exact calendar, full events, existing IDs,
+duplicates, manual changes, removed/renamed slots and safe configuration. Preserve
+stable block IDs; do not guess aliases, create replacements or delete old events.
+The existing-task consumer checks the selected SilverBullet store and explicit
+references, writable targets, lifecycle and duplicate source identity. New task
+generation needs its own reviewed preflight, never an empty successful result.
+
+Normalize each owner reply once. Optional `plan_item_updates` maps existing item
+IDs to confirmed title/definition_of_done/deadline updates; unknown/new IDs and
+unconfirmed planning properties are rejected. Update the matching readable field
+in the same request. Free-form semantic truth still requires the agent's review:
+the tool must not infer a publication, DoD or completion from ambiguous prose.
+An explicitly confirmed `wig_deadline` is bound to its linked item's empty deadline
+before rendering; conflicting deadlines fail rather than silently overriding.
+Monday period/schema and budget-overlap checks remain before persistence.
+
+Check the complete candidate once: latest owner facts versus plan/DoD, all fields,
+WIG deadline, schedule, stable calendar identities, selected store and access.
+Show/review the resulting diff before effects. Keep coaching/research off this path.
+Post-write indexes, native renderer and independent integration readbacks remain
+mandatory. Access tests do not authorize a write. A later API failure, race or
+manual change can still cause partial completion; preserve durable-first recovery.
+Do not promise zero retries, atomic transactions across services or a latency SLA.
+Existing applications selecting integrations must supply these readiness callbacks
+before rollout; unchanged sources with missing preflights fail closed. Development
+source/tests do not activate an installed System or workspace integration.
+
 ## Recovery and measurements
 
 Keep a canonical file after a later failure; partial is not final success. Explicit

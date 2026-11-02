@@ -44,6 +44,11 @@ class SporTests(unittest.TestCase):
   if weekly:p.update(report_id='2026-W44',review_week_start='2026-10-26',review_week_end='2026-11-01',plan_week_start='2026-11-02',plan_week_end='2026-11-06')
   else:p.update(report_id='2026-10-26',session_date='2026-10-26',closure_date='2026-10-25',review_window_start='2026-10-23',review_window_end='2026-10-25',review_window_kind='weekend')
   return {'date':str(day),'draft_sha256':saved['sha256'],'fields':{},'properties':p,'confirmed_properties':[],'owner_reference':'synthetic-owner-reply'}
+ def preflights(self):
+  def ready(candidate,fingerprint):
+   source=self.ws/candidate['draft']['path']
+   return {'status':'ready','candidate_sha256':fingerprint,'inputs':{str(source.relative_to(self.ws)):sha(source)}}
+  return {x:ready for x in ('tasks','calendar')}
  def hooks(self,calls,fail=None):
   def hook(name):
    def call(path,fingerprint):
@@ -61,7 +66,7 @@ class SporTests(unittest.TestCase):
  def test_no_side_effect_without_approval_or_adapter(self):
   r=self.request()
   with self.assertRaises(ValueError):finalize_spor(self.ws,r,apply=True)
-  with self.assertRaises(ValueError):finalize_spor(self.ws,r,apply=True,approved=True,integrations=('calendar',),hooks={})
+  with self.assertRaises(ValueError):finalize_spor(self.ws,r,apply=True,approved=True,preflights=self.preflights(),integrations=('calendar',),hooks={})
   self.assertFalse((self.ws/'personal-ops/check-ins-v4').exists())
  def test_stale_draft_rejected(self):
   r=self.request();r['draft_sha256']='0'*64
@@ -77,7 +82,7 @@ class SporTests(unittest.TestCase):
   with self.assertRaisesRegex(ValueError,'Unconfirmed plan'):spor_candidate(self.ws,r)
  def test_failure_durable_and_explicit_recovery_without_replay(self):
   r=self.request();calls=[];hooks=self.hooks(calls,fail='calendar')
-  result=finalize_spor(self.ws,r,apply=True,approved=True,integrations=('calendar',),hooks=hooks)
+  result=finalize_spor(self.ws,r,apply=True,approved=True,preflights=self.preflights(),integrations=('calendar',),hooks=hooks)
   self.assertEqual(result['status'],'partial');self.assertTrue((self.ws/result['path']).exists())
   self.assertEqual(d.read(self.ws,date(2026,10,26))['metadata']['status'],'draft')
   before=list(calls);reads=[]
@@ -85,12 +90,12 @@ class SporTests(unittest.TestCase):
   recovered=resume_spor(self.ws,r,result,approved=True,integrations=('calendar',),hooks=self.hooks(calls),completed_checks={**{x:checks[x] for x in ('indexes','renderer')},'calendar':lambda p,h:{'status':'not-applied','source_sha256':h}})
   self.assertEqual(recovered['status'],'finalized');self.assertEqual(calls[len(before):],['calendar']);self.assertEqual(reads,['indexes','renderer'])
  def test_recovery_cannot_drop_required_calendar(self):
-  r=self.request();calls=[];receipt=finalize_spor(self.ws,r,apply=True,approved=True,integrations=('calendar',),hooks=self.hooks(calls,fail='calendar'))
+  r=self.request();calls=[];receipt=finalize_spor(self.ws,r,apply=True,approved=True,preflights=self.preflights(),integrations=('calendar',),hooks=self.hooks(calls,fail='calendar'))
   before=list(calls)
   with self.assertRaisesRegex(ValueError,'scope'):resume_spor(self.ws,r,receipt,approved=True,hooks=self.hooks(calls))
   self.assertEqual(calls,before);self.assertEqual(d.read(self.ws,date(2026,10,26))['metadata']['status'],'draft')
  def test_completed_tasks_never_replayed_when_check_missing(self):
-  r=self.request();calls=[];receipt=finalize_spor(self.ws,r,apply=True,approved=True,integrations=('tasks','calendar'),hooks=self.hooks(calls,fail='calendar'));before=list(calls)
+  r=self.request();calls=[];receipt=finalize_spor(self.ws,r,apply=True,approved=True,preflights=self.preflights(),integrations=('tasks','calendar'),hooks=self.hooks(calls,fail='calendar'));before=list(calls)
   checks=self.hooks([])
   result=resume_spor(self.ws,r,receipt,approved=True,integrations=('tasks','calendar'),hooks=self.hooks(calls),completed_checks={x:checks[x] for x in ('indexes','renderer')})
   self.assertEqual(result['status'],'partial');self.assertEqual(result['next_step'],'tasks');self.assertEqual(calls,before)
@@ -99,18 +104,18 @@ class SporTests(unittest.TestCase):
   self.assertEqual(again['status'],'partial');self.assertEqual(calls,before)
  def test_duplicate_integration_rejected_before_any_write(self):
   r=self.request();calls=[]
-  with self.assertRaisesRegex(ValueError,'Duplicate'):finalize_spor(self.ws,r,apply=True,approved=True,integrations=('calendar','calendar'),hooks=self.hooks(calls))
+  with self.assertRaisesRegex(ValueError,'Duplicate'):finalize_spor(self.ws,r,apply=True,approved=True,preflights=self.preflights(),integrations=('calendar','calendar'),hooks=self.hooks(calls))
   self.assertEqual(calls,[]);self.assertFalse((self.ws/'personal-ops/check-ins-v4').exists())
  def test_duplicate_recovery_integration_rejected(self):
-  r=self.request();calls=[];receipt=finalize_spor(self.ws,r,apply=True,approved=True,integrations=('calendar',),hooks=self.hooks(calls,fail='calendar'));before=list(calls)
+  r=self.request();calls=[];receipt=finalize_spor(self.ws,r,apply=True,approved=True,preflights=self.preflights(),integrations=('calendar',),hooks=self.hooks(calls,fail='calendar'));before=list(calls)
   with self.assertRaisesRegex(ValueError,'Duplicate'):resume_spor(self.ws,r,receipt,approved=True,integrations=('calendar','calendar'),hooks=self.hooks(calls))
   self.assertEqual(calls,before)
  def test_failed_attempt_needs_negative_readback_before_retry(self):
-  r=self.request();calls=[];receipt=finalize_spor(self.ws,r,apply=True,approved=True,integrations=('calendar',),hooks=self.hooks(calls,fail='calendar'));before=list(calls);checks=self.hooks([])
+  r=self.request();calls=[];receipt=finalize_spor(self.ws,r,apply=True,approved=True,preflights=self.preflights(),integrations=('calendar',),hooks=self.hooks(calls,fail='calendar'));before=list(calls);checks=self.hooks([])
   result=resume_spor(self.ws,r,receipt,approved=True,integrations=('calendar',),hooks=self.hooks(calls),completed_checks={x:checks[x] for x in ('indexes','renderer')})
   self.assertEqual(result['next_step'],'calendar');self.assertEqual(calls,before)
  def test_lost_success_can_be_confirmed_without_replay(self):
-  r=self.request();calls=[];receipt=finalize_spor(self.ws,r,apply=True,approved=True,integrations=('calendar',),hooks=self.hooks(calls,fail='calendar'));before=list(calls);reads=[]
+  r=self.request();calls=[];receipt=finalize_spor(self.ws,r,apply=True,approved=True,preflights=self.preflights(),integrations=('calendar',),hooks=self.hooks(calls,fail='calendar'));before=list(calls);reads=[]
   result=resume_spor(self.ws,r,receipt,approved=True,integrations=('calendar',),hooks=self.hooks(calls),completed_checks=self.hooks(reads))
   self.assertEqual(result['status'],'finalized');self.assertEqual(calls,before);self.assertEqual(reads,['indexes','renderer','calendar'])
  def test_negative_readback_cannot_undo_completed_stage(self):
