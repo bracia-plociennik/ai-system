@@ -25,7 +25,7 @@
     },
     ".systems/ai/capabilities/intent-to-execution-brief-v1.json": {
       "mode": "100644",
-      "sha256": "0234e22dcd8b1561f48f0bca9bed6084c0c742bdd9ff5fea7007ec3ad141c460"
+      "sha256": "a74aff86958c09270e345da452ec008f446df0d525611a6cf93bcb2781ceb236"
     },
     ".systems/ai/capabilities/luna-first-v1.json": {
       "mode": "100644",
@@ -57,7 +57,7 @@
     },
     ".systems/ai/capabilities/task-efficiency-v1.json": {
       "mode": "100644",
-      "sha256": "5dadad30765d19cfbf3035242585e8d11527ff7dcd8deb747e7abcc35e752b43"
+      "sha256": "ed8f66fd443fb543e86ef92ad9a4b018c146b66224094459f3d166d29c15af5b"
     },
     ".systems/ai/capabilities/task-resource-cleanup-v1.json": {
       "mode": "100644",
@@ -205,7 +205,7 @@
     },
     ".systems/ai/core/operating-model.md": {
       "mode": "100644",
-      "sha256": "9b5a523de47505fc912ee60efdfe12a4b40d7068a07c278ac35b43e50ee63212"
+      "sha256": "12fc97b0d6558b07c5896c6fea0954285d4082ac281bfcdf6247af9804b5ae92"
     },
     ".systems/ai/core/owner-decision-checkpoints.md": {
       "mode": "100644",
@@ -237,7 +237,7 @@
     },
     ".systems/ai/core/plan-quality-contract.md": {
       "mode": "100644",
-      "sha256": "0c32e7ac2d2ed09140c71e7a79124da442ef959971e1eccbbe8ab8beba49064a"
+      "sha256": "7f983262ec8eb1dd197809af945068eafc2952b6fabbf62c237cb1af68ac6356"
     },
     ".systems/ai/core/plans.md": {
       "mode": "100644",
@@ -269,7 +269,7 @@
     },
     ".systems/ai/core/response-contract.md": {
       "mode": "100644",
-      "sha256": "857a9f0585aabd63502f876e4c7a9d517a1d97784be14ec1e0f1a82208c3a6d8"
+      "sha256": "f1c54bad17e266c47ce10f866b3d69fe50d417ccdcf1b4c486550ce4a4bbfb2f"
     },
     ".systems/ai/core/risk-model.md": {
       "mode": "100644",
@@ -317,7 +317,7 @@
     },
     ".systems/ai/core/task-intake.md": {
       "mode": "100644",
-      "sha256": "46b09605c7fbb4ffa26221e5d8533cbc50fe0d4c4c8fcb4b480a18bdbf7d0b48"
+      "sha256": "879c2111b0fae9ab8f7636e1afdc7ef648348299a884d6b8f71c949e4638cb5a"
     },
     ".systems/ai/core/task-resource-cleanup.md": {
       "mode": "100644",
@@ -1881,7 +1881,7 @@
     },
     ".systems/scripts/check-response-evidence-trace": {
       "mode": "100755",
-      "sha256": "bce38d1aafd31d91cca68f200c8a1d096e565e85c34ba34972a6d3d1ae2f8efb"
+      "sha256": "3c205bc6fce73954ad5e2c48c13ac0daa8702d4b958a3db57f43320384e24635"
     },
     ".systems/scripts/check-review-completeness-gate": {
       "mode": "100755",
@@ -2325,7 +2325,7 @@
     },
     ".systems/scripts/tests/test_task_efficiency.py": {
       "mode": "100644",
-      "sha256": "90906995f9932b24f2939e7f72dcdd53d8691414253df970853a6be3c7df9ccd"
+      "sha256": "9e7ea8bec1d5e8fd686acf894eb4db67982fd946d88d6774b1612497ae4dee6e"
     },
     ".systems/scripts/tests/test_update_validation_scope.py": {
       "mode": "100644",
