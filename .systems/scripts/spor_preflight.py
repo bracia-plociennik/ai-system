@@ -81,6 +81,7 @@ def prepare_integrations(workspace, candidate, integrations, preflights):
     candidate_hash = hashlib.sha256(candidate['body'].encode()).hexdigest()
     inputs = {}
     results = {}
+    populations = []
     for name in integrations:
         callback = preflights.get(name)
         if not callable(callback):
@@ -101,10 +102,19 @@ def prepare_integrations(workspace, candidate, integrations, preflights):
                 raise ValueError('Conflicting preflight inputs')
             inputs[relative] = digest
         results[name] = result
-    return {'candidate_sha256': candidate_hash, 'inputs': inputs, 'integrations': results}
+        if 'task_population' in result:
+            if name!='tasks':raise ValueError('Task proof outside selected task integration')
+            from spor_new_tasks import check_task_population
+            check_task_population(workspace,result['task_population'])
+            populations.append(result['task_population'])
+    return {'candidate_sha256': candidate_hash, 'inputs': inputs, 'integrations': results,
+            'task_populations':populations}
 
 
 def check_inputs(workspace, preflight):
+    for proof in preflight.get('task_populations',[]):
+        from spor_new_tasks import check_task_population
+        check_task_population(workspace,proof)
     for relative, digest in preflight['inputs'].items():
         path = safe_path(workspace, relative)
         valid = not path.exists() if digest is None else (path.is_file() and sha(path) == digest)

@@ -289,6 +289,113 @@ class TaskStore:
             return result
         finally:os.close(fd)
 
+    def creation_snapshot(self):
+        """Read-only canonical task population; detect insertions as well as edits."""
+        files={}; identities={}
+        for path,_ in self.tasks():
+            parent=os.open(path.parent,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW)
+            try:raw,info=read_task_fd(parent,path.name)
+            finally:os.close(parent)
+            meta=frontmatter(raw.decode('utf-8'))
+            if meta.get('type')!='task':raise ValueError('task-population-changed-during-read')
+            key=identity(meta)
+            if key and key in identities:raise ValueError('ambiguous-task-source-identity')
+            if key:identities[key]=(path,meta)
+            files[str(path.relative_to(self.task_dir))]={'sha256':hashlib.sha256(raw).hexdigest(),'mode':stat.S_IMODE(info.st_mode)}
+        roots=[(p.stat().st_dev,p.stat().st_ino,stat.S_IMODE(p.stat().st_mode)) for p in (self.root,self.task_dir)]
+        digest=hashlib.sha256(json.dumps([roots,files],sort_keys=True).encode()).hexdigest()
+        return digest,files,identities
+
+    def creation_target(self,path):
+        path=safe_path(self.task_dir,Path(path))
+        if '..' in path.parts:raise ValueError('unsafe-task-path')
+        ancestor=path.parent
+        while not ancestor.exists():ancestor=ancestor.parent
+        if not ancestor.is_dir() or not os.access(ancestor,os.W_OK|os.X_OK):
+            raise ValueError('task-parent-not-writable')
+        return path
+
+    def prepare_candidates(self,candidates):
+        """Freeze the ENTIRE create/reuse batch, UUIDs and bytes without writing."""
+        if self.profile!='silverbullet-v1':raise ValueError('silverbullet-writer-profile-required')
+        if not isinstance(candidates,list) or not candidates:raise ValueError('nonempty-task-batch-required')
+        snapshot,files,existing=self.creation_snapshot()
+        entries=[];seen_keys=set();seen_paths=set()
+        for value in candidates:
+            value=self.candidate(value);key=identity(value)
+            if not key or key in seen_keys:raise ValueError('missing-or-duplicate-batch-task-identity')
+            seen_keys.add(key)
+            if key in existing:
+                target,meta=existing[key]
+                if str(meta.get('status','')).strip().lower() in {'done','completed','cancelled','archived','deleted'}:
+                    raise ValueError('closed-task-source-cannot-be-recreated')
+                body=None;expected=files[str(target.relative_to(self.task_dir))]['sha256']
+            else:
+                target=self.task_dir/segment(value['client'],'bez-klienta')/segment(value['project'],'bez-projektu')/(segment(value['title'],'Zadanie')+'.md')
+                if target.exists():raise ValueError('task-title-path-collision')
+                value={**value,**new_identity()};body=self.render(value);expected=None
+                if len(body.encode())>MAX_TASK:raise ValueError('task-exceeds-size-bound')
+            self.creation_target(target)
+            if str(target) in seen_paths:raise ValueError('batch-task-path-collision')
+            seen_paths.add(str(target))
+            entries.append({'path':str(target),'expected_sha256':expected,'value':value,'body':body})
+        plan={'contract':'silverbullet-create-plan-v1','task_dir':str(self.task_dir),'snapshot':snapshot,'snapshot_files':files,'entries':entries}
+        plan['fingerprint']=hashlib.sha256(json.dumps(plan,sort_keys=True).encode()).hexdigest()
+        return plan
+
+    def check_prepared(self,plan):
+        if not isinstance(plan,dict) or not isinstance(plan.get('entries'),list) or not plan['entries']:
+            raise ValueError('invalid-task-create-plan')
+        payload={k:v for k,v in plan.items() if k!='fingerprint'}
+        if (plan.get('contract')!='silverbullet-create-plan-v1' or plan.get('task_dir')!=str(self.task_dir)
+                or hashlib.sha256(json.dumps(payload,sort_keys=True).encode()).hexdigest()!=plan.get('fingerprint')):
+            raise ValueError('changed-task-create-plan')
+        if self.creation_snapshot()[0]!=plan['snapshot']:raise ValueError('task-population-drift')
+        paths=set();keys=set()
+        for entry in plan['entries']:
+            path=self.creation_target(entry['path']);expected=entry['expected_sha256']
+            key=identity(entry['value'])
+            if not key or key in keys or str(path) in paths:raise ValueError('duplicate-prepared-task')
+            keys.add(key);paths.add(str(path))
+            if expected is None:
+                if path.exists():raise ValueError('task-title-path-collision')
+                if self.render(entry['value'])!=entry['body']:raise ValueError('changed-prepared-task-body')
+            elif not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest()!=expected:
+                raise ValueError('reused-task-version-conflict')
+
+    def write_prepared(self,plan):
+        """Commit exact prepared bytes once; caller verifies actual owner scope."""
+        if self.profile!='silverbullet-v1':raise ValueError('silverbullet-writer-profile-required')
+        self.check_prepared(plan)
+        lock=safe_path(self.root,self.root/'.ai-system-task-store.lock')
+        written=[];reused=[]
+        with os.fdopen(os.open(lock,os.O_CREAT|os.O_RDWR|os.O_NOFOLLOW,0o600),'r+') as stream:
+            fcntl.flock(stream,fcntl.LOCK_EX);self.check_prepared(plan)
+            for entry in plan['entries']:
+                path=Path(entry['path'])
+                if entry['expected_sha256'] is not None:
+                    reused.append(path);continue
+                self.creation_target(path);path.parent.mkdir(parents=True,exist_ok=True)
+                safe_path(self.task_dir,path.parent);temporary=None
+                try:
+                    with tempfile.NamedTemporaryFile(dir=path.parent,prefix='.ai-system-create-',delete=False) as out:
+                        temporary=Path(out.name);os.fchmod(out.fileno(),0o600)
+                        out.write(entry['body'].encode());out.flush();os.fsync(out.fileno())
+                    safe_path(self.task_dir,path.parent)
+                    os.link(temporary,path,follow_symlinks=False)
+                    if path.read_bytes()!=entry['body'].encode():raise ValueError('task-create-readback-conflict')
+                finally:
+                    if temporary is not None:temporary.unlink(missing_ok=True)
+                written.append(path)
+            expected_files=dict(plan['snapshot_files'])
+            for entry in plan['entries']:
+                if entry['expected_sha256'] is None:
+                    expected_files[str(Path(entry['path']).relative_to(self.task_dir))]={
+                        'sha256':hashlib.sha256(entry['body'].encode()).hexdigest(),'mode':0o600}
+            if self.creation_snapshot()[1]!=expected_files:
+                raise ValueError('task-population-drift-after-create; inspect before recovery')
+        return written,reused
+
     def write_candidates(self,candidates):
         if self.profile!='silverbullet-v1':raise ValueError('silverbullet-writer-profile-required')
         # Preflight complete candidate population before the first file mutation.

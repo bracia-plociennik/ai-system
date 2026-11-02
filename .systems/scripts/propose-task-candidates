@@ -505,9 +505,10 @@ def candidates_from_index_v3_check_in(path: Path, workspace: Path, labels: dict[
     return candidates
 
 
-def candidates_from_v4_daily(path: Path, workspace: Path, labels: dict[str, list[tuple[str, str]]]) -> list[dict[str, object]]:
-    top, properties, body = parse_v4_frontmatter(path)
-    validate_v4_daily(top, properties, path, body)
+def candidates_from_v4_daily(path: Path, workspace: Path, labels: dict[str, list[tuple[str, str]]], *, properties=None) -> list[dict[str, object]]:
+    if properties is None:
+        top, properties, body = parse_v4_frontmatter(path)
+        validate_v4_daily(top, properties, path, body)
     session_date = str(properties["session_date"])
     items = v4_json_value(properties, "planned_items_json", [])
     candidates: list[dict[str, object]] = []
@@ -538,9 +539,10 @@ def candidates_from_v4_daily(path: Path, workspace: Path, labels: dict[str, list
     return candidates
 
 
-def candidates_from_v4_weekly(path: Path, workspace: Path, labels: dict[str, list[tuple[str, str]]]) -> list[dict[str, object]]:
-    top, properties, body = parse_v4_frontmatter(path)
-    validate_v4_weekly(top, properties, path, body)
+def candidates_from_v4_weekly(path: Path, workspace: Path, labels: dict[str, list[tuple[str, str]]], *, properties=None) -> list[dict[str, object]]:
+    if properties is None:
+        top, properties, body = parse_v4_frontmatter(path)
+        validate_v4_weekly(top, properties, path, body)
     week_id = str(properties["report_id"])
     items = v4_json_value(properties, "future_plan_items_json", [])
     candidates: list[dict[str, object]] = []

@@ -94,6 +94,27 @@ The existing-task consumer checks the selected SilverBullet store and explicit
 references, writable targets, lifecycle and duplicate source identity. New task
 generation needs its own reviewed preflight, never an empty successful result.
 
+New SilverBullet tasks use `spor_new_tasks.prepare_task_request` with an explicit
+list of selected, confirmed Daily/Weekly plan item IDs. It projects through the
+native generator in memory with explicit canonical mappings and buckets only;
+no title heuristics, guessed clients, deadlines or estimates. It freezes the
+complete native creation batch and computed canonical references before save.
+`task_generation_status: prepared` describes preparation, never completed creation.
+Caller selection and computed references are data, not permission.
+
+Supply `new_tasks_readiness` for the selected tasks integration. Native
+`TaskStore.prepare_candidates` writes no file/directory/lock, validates the entire
+batch, source-identity reuse, closed/ambiguous identities, sanitized path collisions,
+size and writable ancestors, and freezes UUIDs/bytes. The source-bound proof includes
+absent new targets, existing hashes and the selected task population, guarded again
+before canonical. Any population insertion/edit, config or source drift blocks save.
+`write_prepared` then commits those exact bytes under the existing store lock,
+verifies readback and the resulting population, and preserves reused tasks/manual
+content. A mixed task stage creates new tasks and applies separately confirmed OSNR
+patches once; calendar remains in the same finalization pipeline. Receipts include
+new-task and OSNR before/after hashes for independent recovery checks. A late race
+or I/O failure is partial, not a replay instruction or a cross-service transaction.
+
 Normalize each owner reply once. Optional `plan_item_updates` maps existing item
 IDs to confirmed title/definition_of_done/deadline updates; unknown/new IDs and
 unconfirmed planning properties are rejected. Update the matching readable field

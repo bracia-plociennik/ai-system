@@ -293,7 +293,7 @@
     },
     ".systems/ai/core/task-finalization.md": {
       "mode": "100644",
-      "sha256": "8ab626e937f48163a7b2a50be4d3ff704f24974904ad03af77b7585a7572b3de"
+      "sha256": "20c6bdc5d5878d3b6ceaccef53a3b23f79cf39f1dd27a663a305004f5b412d3b"
     },
     ".systems/ai/core/task-intake.md": {
       "mode": "100644",
@@ -1709,7 +1709,7 @@
     },
     ".systems/scripts/propose-task-candidates": {
       "mode": "100755",
-      "sha256": "26552b8af284c1a33a9611bda5cbaaa34a65cc8f73679e16856573c1184c14fa"
+      "sha256": "4097a4f27e80f6023dd8df55a7a2e312f9aa0b8da6c3bfa76c5695858009bccc"
     },
     ".systems/scripts/qa_source_binding.py": {
       "mode": "100644",
@@ -1795,9 +1795,13 @@
       "mode": "100644",
       "sha256": "b76d16a878360322f10a42c8b589c48af82eb4bb018bd944f4c9769f5599e3da"
     },
+    ".systems/scripts/spor_new_tasks.py": {
+      "mode": "100644",
+      "sha256": "ad03f2ffd98cf185f7841815aeedfaa63695b1dbbf56619ac3acbcebffccbffd"
+    },
     ".systems/scripts/spor_preflight.py": {
       "mode": "100644",
-      "sha256": "632821612f42665f1f1e5bce90af675755b7e8e30026d6cc6c3f06acfc3a9c9f"
+      "sha256": "fe1e67be18ae2fff2f44553b14ffbbd9e5e7aa90f501b62416a24a4040be56ae"
     },
     ".systems/scripts/sprint_adapter.py": {
       "mode": "100644",
@@ -1841,7 +1845,7 @@
     },
     ".systems/scripts/task_store.py": {
       "mode": "100644",
-      "sha256": "3858c812194c4aa1dd4954a834d133364e605dec3a6b997bfa082c776c608ae1"
+      "sha256": "6e051b904d07b3bfe68c05639778b4aa138c040aa1b0a08dec4f4a2a8b0dca53"
     },
     ".systems/scripts/test_dreaming_chat.py": {
       "mode": "100644",
@@ -2026,6 +2030,10 @@
     ".systems/scripts/tests/test_source_library.py": {
       "mode": "100644",
       "sha256": "2156c4fc6d7c0a1ae810da6ae3050170e4cc0c8ee470b88dbbce9ca659e04ba0"
+    },
+    ".systems/scripts/tests/test_spor_new_tasks.py": {
+      "mode": "100644",
+      "sha256": "d71f1c19e78ab6eb8f61e33548250cdf9156f69185aeee419296ab8aa98ce9aa"
     },
     ".systems/scripts/tests/test_spor_preflight.py": {
       "mode": "100644",
