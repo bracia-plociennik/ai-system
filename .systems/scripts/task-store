@@ -3,11 +3,14 @@
 import argparse,json,sys
 from pathlib import Path
 from task_store import TaskStore
-p=argparse.ArgumentParser();p.add_argument('action',choices=['inspect','list','create']);p.add_argument('--workspace',type=Path,required=True);p.add_argument('--input',type=Path);p.add_argument('--owner-approved',action='store_true');args=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('action',choices=['inspect','list','create','plan']);p.add_argument('--workspace',type=Path,required=True);p.add_argument('--input',type=Path);p.add_argument('--owner-approved',action='store_true');p.add_argument('--task-id');p.add_argument('--expected-sha256');args=p.parse_args()
 try:
  store=TaskStore.load(args.workspace)
  if args.action=='inspect':result={'profile':store.profile,'vault':str(store.root),'task_directory':str(store.task_dir),'writes':False}
  elif args.action=='list':result=[{'path':str(path),'metadata':metadata} for path,metadata in store.tasks()]
+ elif args.action=='plan':
+  if args.input is None:raise ValueError('plan-input-required')
+  value=json.loads(args.input.read_text(encoding='utf-8'));result=store.write_plan(args.task_id,value,args.expected_sha256,apply=args.owner_approved)
  else:
   if not args.owner_approved or args.input is None:raise ValueError('create-requires-owner-approval-and-input')
   value=json.loads(args.input.read_text(encoding='utf-8'));written,skipped,_,_=store.write_candidates([value]);result={'written':[str(path) for path in written],'skipped':skipped}

@@ -2,7 +2,7 @@ import importlib.machinery,importlib.util,json,os,sys,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
 S=Path(__file__).resolve().parents[1];sys.path.insert(0,str(S))
-from task_store import TaskStore,frontmatter
+from task_store import TaskStore,frontmatter,merge_plan,validate_plan
 
 def generator():
  loader=importlib.machinery.SourceFileLoader('silverbullet_generator',str(S/'propose-task-candidates'));spec=importlib.util.spec_from_loader(loader.name,loader);module=importlib.util.module_from_spec(spec);loader.exec_module(module);return module
@@ -119,4 +119,86 @@ class StoreTests(unittest.TestCase):
   s=TaskStore.load(self.w);paths,*_=s.write_candidates([self.candidate()]);p=paths[0];p.write_text(p.read_text()+'password: synthetic-secret\n');ref={'root_alias':'silverbullet','relative_path':str(p.relative_to(self.root)),'sha256':__import__('hashlib').sha256(p.read_bytes()).hexdigest(),'observed_at':'2026-10-20T08:00:00+02:00','fact_date':'2026-10-20','evidence_level':'local-test'}
   result=source_candidate(ref,{'source_roots':{'silverbullet':str(self.root)}},role='task',fact_date='2026-10-20')
   self.assertEqual(result['source_role'],'task');self.assertFalse(result['canonical_entry_created']);self.assertIsNone(result['duration_seconds']);self.assertNotIn('synthetic-secret',str(result))
+ def plan(self,extra=False):
+  steps=[{'id':'start','text':'Rozpocząć plan'}]
+  if extra:steps.append({'id':'verify','text':'Sprawdzić wynik'})
+  steps.append({'id':'finish','text':'Zakończyć: Evidence i rzeczywisty stan WEP'})
+  return {'id':'fixture-plan','stages':steps}
+ def created(self,plan=False):
+  s=TaskStore.load(self.w);v=self.candidate()
+  if plan:v['plan']=self.plan()
+  files,*_=s.write_candidates([v]);p=files[0];return s,p,frontmatter(p.read_text())['task_id']
+ def sha(self,p):return __import__('hashlib').sha256(p.read_bytes()).hexdigest()
+ def test_create_complete_plan_and_repeat_preserves_human_edits(self):
+  s,p,tid=self.created(True);text=p.read_text();self.assertIn('ai-system-plan:fixture-plan:start',text);self.assertNotIn('- [ ] Prepare fix',text)
+  p.write_text(text.replace('author: "ai"','author: "human"')+'Manual note\n');before=p.read_bytes()
+  self.assertEqual(s.write_candidates([dict(self.candidate(),plan=self.plan())])[1],1);self.assertEqual(p.read_bytes(),before)
+ def test_plan_preview_no_locks_or_writes(self):
+  s,p,tid=self.created();lock=s.root/'.ai-system-task-store.lock';lock.unlink();before=p.read_bytes();mtime=p.stat().st_mtime_ns
+  result=s.write_plan(tid,self.plan(),self.sha(p));self.assertTrue(result['changed']);self.assertFalse(result['writes']);self.assertFalse(lock.exists());self.assertEqual(p.read_bytes(),before);self.assertEqual(p.stat().st_mtime_ns,mtime)
+ def test_plan_update_preserves_every_non_todo_byte_and_file_mode(self):
+  s,p,tid=self.created();p.write_text(p.read_text().replace('author: "ai"','author: "human"').replace('status: "open"','status: "waiting"').replace('---\n#','custom: "manual"\n---\n#')+'## TODO\n- [x] raw dump checkbox\n')
+  p.chmod(0o640);before=p.read_text();result=s.write_plan(tid,self.plan(),self.sha(p),apply=True);after=p.read_text()
+  self.assertTrue(result['writes']);self.assertEqual(before.split('## TODO',1)[0],after.split('## TODO',1)[0]);self.assertEqual(before.split('## Evidence',1)[1],after.split('## Evidence',1)[1]);self.assertEqual(p.stat().st_mode&0o777,0o640)
+ def test_retry_and_extension_preserve_manual_checked_text(self):
+  s,p,tid=self.created(True);p.write_text(p.read_text().replace('- [ ] Rozpocząć plan','- [x] Owner changed label'))
+  before=p.read_bytes();result=s.write_plan(tid,self.plan(),self.sha(p),apply=True);self.assertFalse(result['changed']);self.assertEqual(p.read_bytes(),before)
+  result=s.write_plan(tid,self.plan(True),self.sha(p),apply=True);self.assertTrue(result['writes']);text=p.read_text();self.assertIn('- [x] Owner changed label',text);self.assertLess(text.index('Sprawdzić wynik'),text.index('Zakończyć:'));self.assertEqual(text.count('ai-system-plan:fixture-plan:start'),1)
+ def test_completed_plan_requires_explicit_reopen_before_extension(self):
+  s,p,tid=self.created(True);p.write_text(p.read_text().replace('- [ ] Zakończyć:','- [x] Zakończyć:'));before=p.read_bytes()
+  with self.assertRaisesRegex(ValueError,'reopening'):s.write_plan(tid,self.plan(True),self.sha(p),apply=True)
+  self.assertEqual(p.read_bytes(),before)
+ def test_stale_hash_duplicate_uuid_and_missing_task_are_refused(self):
+  s,p,tid=self.created();old=self.sha(p);p.write_text(p.read_text()+'Owner edit\n');before=p.read_bytes()
+  with self.assertRaisesRegex(ValueError,'version-conflict'):s.write_plan(tid,self.plan(),old,apply=True)
+  self.assertEqual(p.read_bytes(),before)
+  copy=s.task_dir/'duplicate.md';copy.write_bytes(before)
+  with self.assertRaisesRegex(ValueError,'ambiguous-task'):s.write_plan(tid,self.plan(),self.sha(p),apply=True)
+  copy.unlink()
+  with self.assertRaisesRegex(ValueError,'missing-or-ambiguous'):s.write_plan('00000000-0000-0000-0000-000000000000',self.plan(),self.sha(p),apply=True)
+ def test_concurrent_native_edit_detected_before_replace(self):
+  s,p,tid=self.created();real=__import__('task_store').read_task_fd;count=0
+  def changed(*args):
+   nonlocal count
+   count+=1
+   if count==3:p.write_text(p.read_text()+'UI edit wins\n')
+   return real(*args)
+  with patch('task_store.read_task_fd',side_effect=changed),self.assertRaisesRegex(ValueError,'version-conflict'):s.write_plan(tid,self.plan(),self.sha(p),apply=True)
+  self.assertTrue(p.read_text().endswith('UI edit wins\n'));self.assertNotIn('ai-system-plan:fixture-plan:start',p.read_text());self.assertFalse(list(p.parent.glob('.ai-system-plan-*')))
+ def test_invalid_plan_and_malformed_markdown_no_mutation(self):
+  s,p,tid=self.created();original=p.read_text()
+  for value in [{},{'id':'../escape','stages':[]},{'id':'a','stages':[]},{'id':'a','stages':[{'id':'start','text':'a'},{'id':'finish','text':'bad\n## Evidence'}]}]:
+   with self.assertRaises(ValueError):s.write_plan(tid,value,self.sha(p),apply=True)
+   self.assertEqual(p.read_text(),original)
+  for text in [original.replace('## TODO','## OTHER'),original.replace('## TODO','## TODO\n## TODO')]:
+   p.write_text(text)
+   with self.assertRaises(ValueError):s.write_plan(tid,self.plan(),self.sha(p),apply=True)
+   self.assertEqual(p.read_text(),text)
+ def test_crlf_and_raw_dump_headings_preserved(self):
+  s,p,tid=self.created();p.write_bytes((p.read_text()+'## TODO\nraw\n').replace('\n','\r\n').encode());before=p.read_bytes().split(b'## Working dump',1)[1]
+  s.write_plan(tid,self.plan(),self.sha(p),apply=True);self.assertEqual(p.read_bytes().split(b'## Working dump',1)[1],before)
+ def test_linked_task_and_foreign_profile_cannot_be_updated(self):
+  s,p,tid=self.created();outside=self.w/'outside.md';outside.write_bytes(p.read_bytes());p.unlink();p.symlink_to(outside);before=outside.read_bytes()
+  with self.assertRaises(ValueError):s.write_plan(tid,self.plan(),self.sha(p),apply=True)
+  self.assertEqual(outside.read_bytes(),before)
+  (self.root/'TaskNotes/Tasks').mkdir(parents=True)
+  with self.assertRaisesRegex(ValueError,'profile-required'):TaskStore(self.root,'tasknotes-v1').write_plan(tid,self.plan(),'0'*64)
+ def test_plan_cli_preview_apply_and_stale_hash(self):
+  import subprocess
+  s,p,tid=self.created();before=p.read_bytes();digest=self.sha(p);input=self.w/'plan.json';input.write_text(json.dumps(self.plan()))
+  cmd=[sys.executable,str(S/'task-store'),'plan','--workspace',str(self.w),'--task-id',tid,'--input',str(input)]
+  missing=subprocess.run(cmd,capture_output=True,text=True);self.assertNotEqual(missing.returncode,0);self.assertEqual(p.read_bytes(),before)
+  preview=subprocess.run(cmd+['--expected-sha256',digest],capture_output=True,text=True);self.assertEqual(preview.returncode,0,preview.stderr);self.assertFalse(json.loads(preview.stdout)['writes']);self.assertEqual(p.read_bytes(),before)
+  applied=subprocess.run(cmd+['--expected-sha256',digest,'--owner-approved'],capture_output=True,text=True);self.assertEqual(applied.returncode,0,applied.stderr);self.assertTrue(json.loads(applied.stdout)['writes'])
+  updated=p.read_bytes();stale=subprocess.run(cmd+['--expected-sha256',digest,'--owner-approved'],capture_output=True,text=True);self.assertNotEqual(stale.returncode,0);self.assertEqual(p.read_bytes(),updated)
+ def test_malformed_managed_blocks_and_hardlinks_refused(self):
+  s,p,tid=self.created(True);original=p.read_text()
+  variants=[original.replace('fixture-plan:end','fixture-plan:other'),original.replace('fixture-plan:finish','fixture-plan:start'),original.replace('- [ ] Rozpocząć plan','- [ ] unmarked\n- [ ] Rozpocząć plan')]
+  for text in variants:
+   p.write_text(text)
+   with self.assertRaises(ValueError):s.write_plan(tid,self.plan(True),self.sha(p),apply=True)
+   self.assertEqual(p.read_text(),text)
+  p.write_text(original);os.link(p,self.w/'hardlink')
+  with self.assertRaisesRegex(ValueError,'unsupported-task-file'):s.write_plan(tid,self.plan(True),self.sha(p),apply=True)
+  self.assertEqual(p.read_text(),original)
 if __name__=='__main__':unittest.main()

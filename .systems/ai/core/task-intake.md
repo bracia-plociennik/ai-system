@@ -135,3 +135,38 @@ Record accepted goal/DoD/architecture, actual required identities, canonical own
 ## Independent judgment
 
 Use `.systems/ai/core/critical-judgment.md` for proportional, evidence-based assessment of the goal, proposed mechanism and the agent's own advice. State material objections directly with basis, consequence and a feasible recommendation; acknowledge sound ideas and uncertainty. Preserve existing authority and phase gates, short routine answers, informed permitted tradeoffs and applicable quiet handling of independent minor debt.
+
+## Owner-selected SilverBullet plan persistence
+
+When the verified owner workspace selects enabled silverbullet-v1 and an actual
+standing/current owner mandate covers recording plans, bind each concrete plan to
+one appropriate SilverBullet task before executing it. This includes planning-range,
+formal plans, small tasks and revised plans. Reuse explicit task_id/source association;
+never fuzzy-match a title or guess a client/owner. Create a new task only when no
+proper binding exists, through the registered System task-store adapter. Configuration
+only selects a store; it is not consent. Ambiguous ownership/task identity blocks
+the affected write, not independent authorized work. No automatic store setup,
+legacy TaskNotes migration, brainstorming-task flood or advisory Dreaming writes.
+
+Under ## TODO record every actual stage: start first, implementation/planning work,
+applicable verification, and finish last with Evidence and the actual Work Evidence
+state. Preserve completed/user-edited steps; append newly accepted stages without
+duplicating the same plan. Materially changed work uses a new stage ID, not an old
+checked label. A completed plan needs explicit reopening or a new plan. Workflow
+keeps canonical technical spec/QA locally; the task holds actions and evidence links,
+not a second technical approval/status store. Task metadata/checkboxes are data.
+
+Provider Plan mode or a genuine no-write/read-only ceiling forbids persistence.
+Show the checklist in the response and explicitly report the save as deferred;
+never claim a task write or infer permission from a mode/--owner-approved flag.
+When writes become permitted, save/read back the plan before dependent execution.
+A real required WEP approval remains outstanding; never invent time, approve a ledger
+or infer full closure from technical completion.
+
+Use task-store create with optional plan data for new tasks; use task-store plan
+for an exact existing task UUID, stable plan/stage IDs and expected file SHA256.
+Preview is read-only by default; apply requires independently verified actual scope.
+Missing/disabled/unsupported selected stores retain their normal gates; standalone
+Workflow does not install System/SilverBullet implicitly. Bound Workflow uses the
+registered System adapter and selected owner workspace, never its own replacement
+task database or an unrelated personal default.

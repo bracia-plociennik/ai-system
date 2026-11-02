@@ -33,7 +33,7 @@
     },
     ".systems/ai/capabilities/task-efficiency-v1.json": {
       "mode": "100644",
-      "sha256": "c904f9320bbe7752d97a7d95ffd2653ba41166bb8606f15feb359ed11e04ac36"
+      "sha256": "28c3b214ccf844c1feb835367639b84e712a46c19d510fa9eef44ef599ecffdf"
     },
     ".systems/ai/capabilities/workflow-execution-modes-v1.json": {
       "mode": "100644",
@@ -41,11 +41,11 @@
     },
     ".systems/ai/capabilities/workflow-goal-focused-maintenance-v1.json": {
       "mode": "100644",
-      "sha256": "9fef549c58bfcd42373a9ab62bcac8b4eb0cb06c5976e2c8e414a317072797d2"
+      "sha256": "0e0b7e85ea84e98a74dc51265cea5f4e164ac5aa5c4c25bbb3db8fa5d9bc490e"
     },
     ".systems/ai/capabilities/workflow-intent-to-execution-brief-v1.json": {
       "mode": "100644",
-      "sha256": "4583ee5164ede26257faeb3d50bf3f44909c23591f6cfc4827add6dd738ab2e7"
+      "sha256": "a74aff86958c09270e345da452ec008f446df0d525611a6cf93bcb2781ceb236"
     },
     ".systems/ai/core/README.md": {
       "mode": "100644",
@@ -249,7 +249,7 @@
     },
     ".systems/ai/core/response-contract.md": {
       "mode": "100644",
-      "sha256": "c4b63ffbdf1f3b225ad0ef1ff216c5251f47875d68f80310e4cf73d284336828"
+      "sha256": "c348ccfce16fe7176d7e2c57aaba90b87209e67671ac1be885b6f112e8f0fbb5"
     },
     ".systems/ai/core/runtime-capture-binding.md": {
       "mode": "100644",
@@ -293,15 +293,15 @@
     },
     ".systems/ai/core/task-finalization.md": {
       "mode": "100644",
-      "sha256": "36b8ffd285c6596713716664df089e3d08123a2d30acf75158fe00aae2f25467"
+      "sha256": "8ab626e937f48163a7b2a50be4d3ff704f24974904ad03af77b7585a7572b3de"
     },
     ".systems/ai/core/task-intake.md": {
       "mode": "100644",
-      "sha256": "9e5addf71738240c3a9dbc5a59466170e349750c9be82ecdb85e48529afe1cc8"
+      "sha256": "9f3f499493febcbe727175f805ed23d712cdd9c68a34a14c3190702fa07aea05"
     },
     ".systems/ai/core/task-management.md": {
       "mode": "100644",
-      "sha256": "464f1878ef81de7d20395bcede5f63b8e87acd6a60cca67d31a0b20bdea1fcdf"
+      "sha256": "8b21443b454ead274f9331ab1e8ebe6880603f8c063804437364f178f10a4ee9"
     },
     ".systems/ai/core/task-resource-cleanup.md": {
       "mode": "100644",
@@ -1557,7 +1557,7 @@
     },
     ".systems/scripts/finalization_artifacts.py": {
       "mode": "100644",
-      "sha256": "ed12bc2545eb163137f7046d6579b1de7045a97c56485f6f2055445cc20bc305"
+      "sha256": "e504a1fabe627a266d01473ffdfd2c597b8828943890eada5d8741383b353299"
     },
     ".systems/scripts/finalization_support.py": {
       "mode": "100644",
@@ -1791,6 +1791,14 @@
       "mode": "100644",
       "sha256": "a5e3436389a86d6cc3a07b1d42e6ec5845435fdcff2bb527f8c523d73249772b"
     },
+    ".systems/scripts/spor_integration_preflight.py": {
+      "mode": "100644",
+      "sha256": "b76d16a878360322f10a42c8b589c48af82eb4bb018bd944f4c9769f5599e3da"
+    },
+    ".systems/scripts/spor_preflight.py": {
+      "mode": "100644",
+      "sha256": "632821612f42665f1f1e5bce90af675755b7e8e30026d6cc6c3f06acfc3a9c9f"
+    },
     ".systems/scripts/sprint_adapter.py": {
       "mode": "100644",
       "sha256": "99d77eabf94f25984190ab2dd851534c55fbf2dadbbbcf269f105647f67a55b8"
@@ -1817,7 +1825,7 @@
     },
     ".systems/scripts/task-store": {
       "mode": "100755",
-      "sha256": "3bd095c45ccd47a64404512d91844d3b6a7f4ed6401ac764b928661559911e00"
+      "sha256": "81618f074a322d0da0c0d51f67be32c7f6aa4ea9313aaa9c51cd257f5d12bff5"
     },
     ".systems/scripts/task_cleanup_adapter.py": {
       "mode": "100644",
@@ -1833,7 +1841,7 @@
     },
     ".systems/scripts/task_store.py": {
       "mode": "100644",
-      "sha256": "efe0f6c42c7513adbcaedc6404b044316f9ad4ff5ab427c61e1104e6ecc5efaf"
+      "sha256": "3858c812194c4aa1dd4954a834d133364e605dec3a6b997bfa082c776c608ae1"
     },
     ".systems/scripts/test_dreaming_chat.py": {
       "mode": "100644",
@@ -1949,7 +1957,7 @@
     },
     ".systems/scripts/tests/test_finalization_artifacts.py": {
       "mode": "100644",
-      "sha256": "dfb41dde9d3fceacf924b0b05e21dc3c10c998b73740e18091d0c64d31630bbb"
+      "sha256": "2eece58f2cb9c89221213c1401acd0c73540fc022a5ac93828a205c9eefd3457"
     },
     ".systems/scripts/tests/test_finalization_support.py": {
       "mode": "100644",
@@ -2005,7 +2013,7 @@
     },
     ".systems/scripts/tests/test_silverbullet_task_store.py": {
       "mode": "100644",
-      "sha256": "d349e0a3c55ced18112791c7d25df130b5464b28dfebaba274ebebf0f004f5b0"
+      "sha256": "0a17db8cd6ce1e99cb54f4b81f377a2a3edb4491f794e1e937edcddcffe83e1b"
     },
     ".systems/scripts/tests/test_silverbullet_tracker.py": {
       "mode": "100644",
@@ -2019,6 +2027,10 @@
       "mode": "100644",
       "sha256": "2156c4fc6d7c0a1ae810da6ae3050170e4cc0c8ee470b88dbbce9ca659e04ba0"
     },
+    ".systems/scripts/tests/test_spor_preflight.py": {
+      "mode": "100644",
+      "sha256": "f784bc1a849f6689ce5fc1228204c46d52d2177b5f272cba62c3d4d9ab35dbf6"
+    },
     ".systems/scripts/tests/test_sprint_adapter.py": {
       "mode": "100644",
       "sha256": "eae57c911873782aba01a799017dfc35be80e6dd7413d23e9c84a78d8e4eff8f"
@@ -2029,7 +2041,7 @@
     },
     ".systems/scripts/tests/test_task_efficiency.py": {
       "mode": "100644",
-      "sha256": "90906995f9932b24f2939e7f72dcdd53d8691414253df970853a6be3c7df9ccd"
+      "sha256": "688104cdc061f322aa2c468168557c5f1e7a6f3b2ca9244e75907a88bf81d51a"
     },
     ".systems/scripts/tests/test_task_resource_cleanup.py": {
       "mode": "100644",

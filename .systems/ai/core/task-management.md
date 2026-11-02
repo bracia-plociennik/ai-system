@@ -342,3 +342,28 @@ Candidate generation may auto-detect task candidates and conservative source map
 The proposal script does not initialize TaskForge vault structure. `--owner-approved --write --task-vault <taskforge-vault>` requires an existing vault directory and an existing `TaskNotes/Tasks/` directory; if either is missing, stop before writing.
 
 Do not promote task content into memory, project-state, system-insights, external-memory, or checkpoints automatically. Use the Knowledge Capture Gate when task work closes and route any durable capture separately.
+
+## Planned work in the selected SilverBullet task
+Apply task-intake.md Owner-selected SilverBullet plan persistence. The existing
+create action accepts optional plan: {id, stages: [{id, text}]}; IDs are lowercase
+slugs, stages unique, first id start and last finish. New tasks retain normal
+author: ai and actual UUID/creation time. source_plan_id supplies exact creation
+deduplication; a retry never overwrites an existing manual edit. Task-only capture
+without an actual plan keeps its existing behavior.
+
+For an existing task, task-store plan --workspace OWNER --task-id UUID --input
+PLAN_JSON --expected-sha256 SHA previews without writes. Add --owner-approved
+only after actual scope/mode checks to apply. No path editing, generic HTTP route,
+status/timer/ledger operation or body command execution is exposed. The task UUID
+must match uniquely; malformed/ambiguous canonical TODO or plan markers reject.
+Each managed block has a stable plan ID and per-step IDs; extension only inserts
+missing unchecked steps before finish, preserving existing order/text/checkmarks.
+A done finish prevents extension until explicitly reopened or a new plan is used.
+Do not reuse a checked stage ID for materially changed work.
+
+Only the canonical TODO before raw Working dump is spliced; metadata, Evidence,
+creator, lifecycle and raw text stay byte-identical. Expected full-file hash,
+cooperative vault lock, no-follow directory descriptors, atomic replacement and
+readback detect known conflicts; uncertain readback requires inspection, not replay.
+These are cooperative guards, not kernel compare-and-swap against a noncooperating
+native editor. No fuzzy dedup, silent retry or fake WEP/approval.

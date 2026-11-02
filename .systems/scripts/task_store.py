@@ -8,6 +8,8 @@ import json
 import os
 from pathlib import Path
 import re
+import stat
+import uuid
 from local_paths import resolve_path
 from task_identity import new_identity
 
@@ -16,6 +18,82 @@ CATEGORIES = {'do': ('open','high'), 'defer': ('planned','normal'),
               'delegate': ('waiting','normal'), 'delete': ('cancelled','none'),
               'dump': ('open','none')}
 MAX_TASK = 1024 * 1024
+PLAN_ID = re.compile(r'[a-z0-9]+(?:-[a-z0-9]+)*\Z')
+
+
+def validate_plan(value):
+    if not isinstance(value,dict) or set(value)!={'id','stages'} or not isinstance(value['id'],str) or not PLAN_ID.fullmatch(value['id']):
+        raise ValueError('invalid-plan-identity')
+    steps=value['stages']
+    if not isinstance(steps,list) or len(steps)<2:raise ValueError('plan-requires-start-and-finish')
+    ids=[]
+    for step in steps:
+        if (not isinstance(step,dict) or set(step)!={'id','text'} or not isinstance(step['id'],str)
+                or not PLAN_ID.fullmatch(step['id']) or not isinstance(step['text'],str)
+                or not step['text'].strip() or any(ord(c)<32 or c in '\x85\u2028\u2029' for c in step['text']) or '<!--' in step['text']):
+            raise ValueError('invalid-plan-stage')
+        ids.append(step['id'])
+    if ids[0]!='start' or ids[-1]!='finish' or len(set(ids))!=len(ids):
+        raise ValueError('plan-requires-unique-stages-start-first-finish-last')
+    if len(json.dumps(value,ensure_ascii=False).encode())>MAX_TASK:raise ValueError('plan-exceeds-size-bound')
+    return value
+
+
+def plan_block(plan):
+    validate_plan(plan);pid=plan['id']
+    return (f'<!-- ai-system-plan:{pid}:start -->\n'+
+            ''.join(f'- [ ] {s["text"]} <!-- ai-system-plan-step:{pid}:{s["id"]} -->\n' for s in plan['stages'])+
+            f'<!-- ai-system-plan:{pid}:end -->\n')
+
+
+def merge_plan(text,plan):
+    """Splice only the canonical TODO. Raw dump and user stage lines are opaque."""
+    validate_plan(plan)
+    dump=re.search(r'^## Working dump[ \t]*\r?$',text,re.M)
+    active=text if dump is None else text[:dump.start()]
+    headings=list(re.finditer(r'^## TODO[ \t]*\r?$',active,re.M))
+    if len(headings)!=1:raise ValueError('ambiguous-or-missing-todo-section')
+    start=headings[0].end()
+    following=re.search(r'^## ',active[start:],re.M)
+    end=start+following.start() if following else len(active)
+    body=text[start:end];pid=plan['id']
+    opening=f'<!-- ai-system-plan:{pid}:start -->';closing=f'<!-- ai-system-plan:{pid}:end -->'
+    if opening not in body and closing not in body:
+        if f'ai-system-plan-step:{pid}:' in body:raise ValueError('orphan-plan-stage')
+        return text[:end].rstrip('\n')+'\n\n'+plan_block(plan)+'\n'+text[end:]
+    if body.count(opening)!=1 or body.count(closing)!=1:raise ValueError('ambiguous-plan-markers')
+    left=body.index(opening);right=body.index(closing)
+    if right<left:raise ValueError('invalid-plan-marker-order')
+    block=body[left+len(opening):right]
+    lines=block.splitlines(keepends=True);ids=[];finish=None
+    pattern=re.compile(r'^- \[[ xX]\] .+ <!-- ai-system-plan-step:'+re.escape(pid)+r':([a-z0-9]+(?:-[a-z0-9]+)*) -->\r?\n?$')
+    for i,line in enumerate(lines):
+        match=pattern.fullmatch(line)
+        if match:
+            sid=match[1];ids.append(sid)
+            if sid=='finish':finish=i
+        elif 'ai-system-plan' in line or re.match(r'^\s*- \[[ xX]\]',line):
+            raise ValueError('ambiguous-managed-plan-stage')
+    if not ids or ids[0]!='start' or ids[-1]!='finish' or len(set(ids))!=len(ids):raise ValueError('invalid-managed-plan-stages')
+    missing=[s for s in plan['stages'] if s['id'] not in ids]
+    if not missing:return text
+    # Extending a completed plan requires explicit reopening; never invent completion.
+    if re.match(r'^- \[[xX]\]',lines[finish]):raise ValueError('completed-plan-needs-explicit-reopening')
+    extra=''.join(f'- [ ] {s["text"]} <!-- ai-system-plan-step:{pid}:{s["id"]} -->\n' for s in missing)
+    lines.insert(finish,extra)
+    updated=body[:left+len(opening)]+''.join(lines)+body[right:]
+    return text[:start]+updated+text[end:]
+
+
+def read_task_fd(parent,name):
+    fd=os.open(name,os.O_RDONLY|os.O_NOFOLLOW|os.O_NONBLOCK,dir_fd=parent)
+    with os.fdopen(fd,'rb') as stream:
+        before=os.fstat(stream.fileno())
+        if not stat.S_ISREG(before.st_mode) or before.st_nlink!=1 or before.st_size>MAX_TASK:raise ValueError('unsupported-task-file')
+        raw=stream.read(MAX_TASK+1);after=os.fstat(stream.fileno())
+        if (before.st_dev,before.st_ino,before.st_size,before.st_mtime_ns,before.st_ctime_ns)!=(after.st_dev,after.st_ino,after.st_size,after.st_mtime_ns,after.st_ctime_ns):
+            raise ValueError('task-changed-during-read')
+        return raw,before
 
 
 def frontmatter(text):
@@ -43,7 +121,7 @@ def config_path(workspace):
 
 
 def identity(values):
-    for kind,fields in [('weekly',('source_week_id','source_week_item_id')),
+    for kind,fields in [('plan',('source_plan_id',)),('weekly',('source_week_id','source_week_item_id')),
                         ('check-in',('source_session_date','source_plan_item_id')),
                         ('dream',('source_dream_report','source_candidate_id'))]:
         parts=tuple(str(values.get(k) or '') for k in fields)
@@ -110,6 +188,9 @@ class TaskStore:
         """Project an existing source candidate into the selected app's field contract."""
         result=dict(value)
         if self.profile!='silverbullet-v1':return result
+        if 'plan' in result:
+            validate_plan(result['plan'])
+            result['source_plan_id']=result['plan']['id']
         bucket=str(result.get('category') or result.get('execution_bucket') or 'do').lower()
         if bucket=='done':raise ValueError('done-is-status-requires-real-category')
         if bucket not in CATEGORIES and bucket!='daily':raise ValueError('unsupported-task-category')
@@ -151,15 +232,62 @@ class TaskStore:
                     'source_check_in_date','source_check_in_field','source_session_date','source_plan_item_id',
                     'source_week_id','source_week_item_id','source_week_plan','estimated_minutes','weekly_allocations_json',
                     'source_dream_report','candidate_key','source_candidate_id','source_deadline',
-                    'task_id','created_at','completed_at','reopened_at']
+                    'task_id','created_at','completed_at','reopened_at','source_plan_id']
         lines=['---']+[key+': '+json.dumps(value.get(key,''),ensure_ascii=False) for key in primary]
         lines += [key+': '+json.dumps(value[key],ensure_ascii=False) for key in provenance if key in value]
         dod=str(value.get('definition_of_done') or '').replace('\r','').replace('\n','\n  ')
         lines += ['---','# '+value['title'],'- Category: '+value['category'],'- DoD: '+dod,
                   '- Deadline: '+value['scheduled'],'','## Checkpoint OSNR','- O — Outcome:',
-                  '- S — Status:','- N — Next:','- R — Resume:','','## TODO','- [ ] '+value['title'],
+                  '- S — Status:','- N — Next:','- R — Resume:','','## TODO',plan_block(value['plan']).rstrip('\n') if 'plan' in value else '- [ ] '+value['title'],
                   '','## Evidence','','## Working dump','']
         return '\n'.join(lines)
+
+    def write_plan(self,task_id,plan,expected_sha256,*,apply=False):
+        """Exact task selection, read-only preview by default; cooperative guarded save."""
+        if self.profile!='silverbullet-v1':raise ValueError('silverbullet-writer-profile-required')
+        if not isinstance(task_id,str) or str(uuid.UUID(task_id))!=task_id:raise ValueError('invalid-task-id')
+        validate_plan(plan)
+        if not isinstance(expected_sha256,str) or not re.fullmatch(r'[0-9a-f]{64}',expected_sha256):raise ValueError('expected-task-hash-required')
+        matches=[p for p,m in self.tasks() if m.get('task_id')==task_id]
+        if len(matches)!=1:raise ValueError('missing-or-ambiguous-task-identity')
+        path=safe_path(self.task_dir,matches[0])
+        fd=os.open(self.task_dir,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW)
+        try:
+            for name in path.parent.relative_to(self.task_dir).parts:
+                child=os.open(name,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW,dir_fd=fd);os.close(fd);fd=child
+            raw,info=read_task_fd(fd,path.name)
+            if hashlib.sha256(raw).hexdigest()!=expected_sha256:raise ValueError('task-version-conflict')
+            if frontmatter(raw.decode()).get('task_id')!=task_id:raise ValueError('task-identity-conflict')
+            proposed=merge_plan(raw.decode(),plan).encode()
+            if len(proposed)>MAX_TASK:raise ValueError('task-exceeds-size-bound')
+            result={'task_id':task_id,'plan_id':plan['id'],'path':str(path),'changed':proposed!=raw,
+                    'before_sha256':expected_sha256,'after_sha256':hashlib.sha256(proposed).hexdigest(),
+                    'writes':False,'authority':'none'}
+            if not apply or proposed==raw:return result
+            lock=safe_path(self.root,self.root/'.ai-system-task-store.lock')
+            with os.fdopen(os.open(lock,os.O_CREAT|os.O_RDWR|os.O_NOFOLLOW,0o600),'r+') as stream:
+                fcntl.flock(stream,fcntl.LOCK_EX)
+                latest,current=read_task_fd(fd,path.name)
+                if latest!=raw or (current.st_dev,current.st_ino)!=(info.st_dev,info.st_ino):raise ValueError('task-version-conflict')
+                temp='.ai-system-plan-'+uuid.uuid4().hex
+                try:
+                    out=os.open(temp,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,stat.S_IMODE(info.st_mode),dir_fd=fd)
+                    with os.fdopen(out,'wb') as output:
+                        os.fchmod(output.fileno(),stat.S_IMODE(info.st_mode));output.write(proposed);output.flush();os.fsync(output.fileno())
+                    safe_path(self.task_dir,path)
+                    parent=path.parent.stat()
+                    if (parent.st_dev,parent.st_ino)!=(os.fstat(fd).st_dev,os.fstat(fd).st_ino):raise ValueError('task-parent-conflict')
+                    latest,current=read_task_fd(fd,path.name)
+                    if latest!=raw or (current.st_dev,current.st_ino)!=(info.st_dev,info.st_ino):raise ValueError('task-version-conflict')
+                    os.replace(temp,path.name,src_dir_fd=fd,dst_dir_fd=fd);os.fsync(fd)
+                    observed,_=read_task_fd(fd,path.name)
+                    if observed!=proposed:raise ValueError('plan-write-readback-conflict-inspect-before-retry')
+                finally:
+                    try:os.unlink(temp,dir_fd=fd)
+                    except FileNotFoundError:pass
+            result['writes']=True
+            return result
+        finally:os.close(fd)
 
     def write_candidates(self,candidates):
         if self.profile!='silverbullet-v1':raise ValueError('silverbullet-writer-profile-required')
@@ -181,9 +309,10 @@ class TaskStore:
                 directory=self.task_dir/segment(value['client'],'bez-klienta')/segment(value['project'],'bez-projektu')
                 target=safe_path(self.task_dir,directory/(segment(value['title'],'Zadanie')+'.md'))
                 if target.exists():raise ValueError('task-title-path-collision')
-                directory.mkdir(parents=True,exist_ok=True);safe_path(self.task_dir,directory)
                 # O_EXCL prevents overwriting a task created by the UI concurrently.
                 data=self.render({**value, **new_identity()})
+                if len(data.encode())>MAX_TASK:raise ValueError('task-exceeds-size-bound')
+                directory.mkdir(parents=True,exist_ok=True);safe_path(self.task_dir,directory)
                 temporary = None
                 try:
                     with tempfile.NamedTemporaryFile(dir=directory,prefix='.ai-system-create-',delete=False) as output:
