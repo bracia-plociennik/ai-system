@@ -41,7 +41,7 @@
     },
     ".systems/ai/capabilities/workflow-goal-focused-maintenance-v1.json": {
       "mode": "100644",
-      "sha256": "0e0b7e85ea84e98a74dc51265cea5f4e164ac5aa5c4c25bbb3db8fa5d9bc490e"
+      "sha256": "db3bc84460919c07337ba5982f0c484e17fbde4e56b93757f224931162acc51a"
     },
     ".systems/ai/capabilities/workflow-intent-to-execution-brief-v1.json": {
       "mode": "100644",

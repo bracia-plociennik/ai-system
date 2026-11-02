@@ -33,7 +33,7 @@
     },
     ".systems/ai/capabilities/next-webpack-cache-v1.json": {
       "mode": "100644",
-      "sha256": "21abde83d56a5e11c8b188de0107ff033ab95d8d1e6ad01753929d4bac62bb3f"
+      "sha256": "1dae84943133bffbeb569bad57e4e6c1d3f7c86371bba0419cf06b10ec5e2ea0"
     },
     ".systems/ai/capabilities/parallel-task-orchestration-v1.json": {
       "mode": "100644",
@@ -61,7 +61,7 @@
     },
     ".systems/ai/capabilities/task-resource-cleanup-v1.json": {
       "mode": "100644",
-      "sha256": "2510c960dc6a426edf9dbd5288e9159d3a539c6d643d8609eb42e6b6a8af11de"
+      "sha256": "a68631e1daee505dde02f58a86c61d8983c37b800016cf9924f2a17de3ab7b14"
     },
     ".systems/ai/capabilities/work-lead-v1.json": {
       "mode": "100644",
@@ -321,7 +321,7 @@
     },
     ".systems/ai/core/task-resource-cleanup.md": {
       "mode": "100644",
-      "sha256": "98fcda81f197756f4529e5da2f62f425f2484a602eddf186ee981481b6d61bcf"
+      "sha256": "67883d1396f24464c5ab300e8620a6b192e943581fef544056a8fc4d95f7f3a6"
     },
     ".systems/ai/core/update-from-upstream.md": {
       "mode": "100644",
@@ -1735,6 +1735,10 @@
       "mode": "100644",
       "sha256": "549f9d6f7ca259ad9a611ecf89fa0310e0227ec1af42200bdc0a953716b965bc"
     },
+    ".systems/scripts/audit-storage": {
+      "mode": "100755",
+      "sha256": "ffe26302b14eb883dcec2d1649de36f8bbd97ccaa220123a3060309d65a7b45c"
+    },
     ".systems/scripts/bootstrap-target-worktree": {
       "mode": "100755",
       "sha256": "c842e1d065853f6f96a72c7f61efffde1479012268470f34a36e8730b7bfd96f"
@@ -1841,7 +1845,7 @@
     },
     ".systems/scripts/check-naming": {
       "mode": "100755",
-      "sha256": "2c258c9b4583ac49b0a4f879d10e8bde835ef36893083272b8f5517d5ce652e9"
+      "sha256": "3516b0a82b9750d2826b3ec0daec3cdedd44a470cd97fda7c9efd066f7bdfd2e"
     },
     ".systems/scripts/check-owner-decision-checkpoints": {
       "mode": "100755",
@@ -1917,7 +1921,7 @@
     },
     ".systems/scripts/check-task-resource-cleanup": {
       "mode": "100755",
-      "sha256": "4272dd07d89744c8eb5b33ec33ee65508842c852849f575976755600443aef93"
+      "sha256": "4fa7467808175ada8e9fd594b256218ac4331b07ef553cb9c1c79ab5a884befc"
     },
     ".systems/scripts/check-validation-completion": {
       "mode": "100755",
@@ -2275,13 +2279,17 @@
       "mode": "100644",
       "sha256": "a85e1d76340ba016a237b372542ea319b048e79fd290aba0259e8a1f509e80dc"
     },
+    ".systems/scripts/tests/storage-audit.py": {
+      "mode": "100644",
+      "sha256": "d664c9d74da9d763def90b383730108d4f3f95b19a6f58034fa4f6ab64ab5b3f"
+    },
     ".systems/scripts/tests/style-profile.py": {
       "mode": "100644",
       "sha256": "8234164d6defdd393ef45668a45a02a217710d6b5ea480a7fd1b511fb8ae97ab"
     },
     ".systems/scripts/tests/task-resource-cleanup.py": {
       "mode": "100644",
-      "sha256": "d217fe628e57496612bf51418587993ee7b10308de21dbef63e15c58b4bf755b"
+      "sha256": "8da04d50657abf8a20be2d221ed7fef7145072571c7db077fb43245dadeb9a1c"
     },
     ".systems/scripts/tests/test_dreaming_evidence_contract.py": {
       "mode": "100644",
