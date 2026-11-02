@@ -329,6 +329,15 @@
         "complete": true,
         "mode": "product-tree"
       }
+    },
+    "check-wig-mentoring": {
+      "dependencies": [],
+      "runtime_capable": false,
+      "category": "product",
+      "inputs": {
+        "complete": true,
+        "mode": "product-tree"
+      }
     }
   }
 }

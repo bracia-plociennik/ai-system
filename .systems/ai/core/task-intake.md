@@ -170,3 +170,6 @@ Missing/disabled/unsupported selected stores retain their normal gates; standalo
 Workflow does not install System/SilverBullet implicitly. Bound Workflow uses the
 registered System adapter and selected owner workspace, never its own replacement
 task database or an unrelated personal default.
+
+## WIG mentoring at decision boundaries
+When actual owner activation is present, apply wig-mentoring.md on new-task, next-task, scope-change and plan-review. Use the verified System lead and minimal project projection; no private default import. Mentoring is advisory, one intervention per stable task/context, with a conscious exception respected across resume. Missing context does not block approved ordinary execution. No warnings for every command/test, inferred inactivity or mandatory polishing after DoD.

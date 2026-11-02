@@ -35,13 +35,17 @@
       "mode": "100644",
       "sha256": "28c3b214ccf844c1feb835367639b84e712a46c19d510fa9eef44ef599ecffdf"
     },
+    ".systems/ai/capabilities/wig-mentoring-v1.json": {
+      "mode": "100644",
+      "sha256": "550274373bb3ec495c58de075207b128927bc8c4a579927c9790cd0a3d1e266a"
+    },
     ".systems/ai/capabilities/workflow-execution-modes-v1.json": {
       "mode": "100644",
       "sha256": "e4616c9bb646b695b4d92c0c8d87aee3d5da11e23ea888d95d174bf20ee70ef0"
     },
     ".systems/ai/capabilities/workflow-goal-focused-maintenance-v1.json": {
       "mode": "100644",
-      "sha256": "db3bc84460919c07337ba5982f0c484e17fbde4e56b93757f224931162acc51a"
+      "sha256": "f101142dffb856d2e20b7feefea0a48c90b5335141707f2a88d1bb2f961b971b"
     },
     ".systems/ai/capabilities/workflow-intent-to-execution-brief-v1.json": {
       "mode": "100644",
@@ -77,7 +81,7 @@
     },
     ".systems/ai/core/command-routing.md": {
       "mode": "100644",
-      "sha256": "8f5accda97c17142f6ef04385a3ae49ee727d9db7d32063b19a9c229528a1f47"
+      "sha256": "403b40c4eadd1056aacbaf8f854d989190291162c6d9085b37669912c1fe48c5"
     },
     ".systems/ai/core/context-as-data.md": {
       "mode": "100644",
@@ -297,7 +301,7 @@
     },
     ".systems/ai/core/task-intake.md": {
       "mode": "100644",
-      "sha256": "9f3f499493febcbe727175f805ed23d712cdd9c68a34a14c3190702fa07aea05"
+      "sha256": "296800c7af9b321737a4eafbd9c43fcf4eb145c4bbfa14b3b64e1c6a9c5771c7"
     },
     ".systems/ai/core/task-management.md": {
       "mode": "100644",
@@ -326,6 +330,10 @@
     ".systems/ai/core/weekly-planning.md": {
       "mode": "100644",
       "sha256": "d35a74c6b477d0cd3b72d430a0d5b15bb34b08b3eb3bb7a1ac13e6485f44d9e3"
+    },
+    ".systems/ai/core/wig-mentoring.md": {
+      "mode": "100644",
+      "sha256": "534969557ad30abfc8ab45441bfbb7690ce5b983da26219ecca84c5cda74b115"
     },
     ".systems/ai/core/work-evidence-editorial.md": {
       "mode": "100644",
@@ -1419,6 +1427,10 @@
       "mode": "100755",
       "sha256": "73108bf4608008c1ffad5d2d23f6aefa5d9f536634f7ddc8f0b5cdbe2233c6c5"
     },
+    ".systems/scripts/check-wig-mentoring": {
+      "mode": "100755",
+      "sha256": "6c64c7be7816e02f7fe7a91f2cca7ef37c60f7d4c338b30f5115196dccb2e3f1"
+    },
     ".systems/scripts/check-work-evidence": {
       "mode": "100755",
       "sha256": "61cd2183ad1c9a6cc14da69160a4ce1a7a4ead0931963fce94751943b86a8526"
@@ -1695,6 +1707,10 @@
       "mode": "100755",
       "sha256": "7c920c7d28d36787163a98e5a9955087ecac469ce74aa739861074bc8da1afe3"
     },
+    ".systems/scripts/prepare-wig-mentoring": {
+      "mode": "100755",
+      "sha256": "07bf62c971c687a874c0affb4cd78d92f4b91df7bbde2b39ebcc4e0590717dea"
+    },
     ".systems/scripts/product_publication.py": {
       "mode": "100644",
       "sha256": "89b11bfa808e4e7a3d74543e7b7532c65443c86609b3c73be31ce9def65a4089"
@@ -1714,6 +1730,10 @@
     ".systems/scripts/qa_source_binding.py": {
       "mode": "100644",
       "sha256": "e499945ea6f9b8d59e1253eb7e36285b21c63db8048129504609b6556536e396"
+    },
+    ".systems/scripts/record-wig-mentoring": {
+      "mode": "100755",
+      "sha256": "0284db9031d39456a83f2941f004b65466ac5ff4c2e2a511c0b686de5ec20349"
     },
     ".systems/scripts/render-personal-ops-daily-summary": {
       "mode": "100755",
@@ -2063,6 +2083,10 @@
       "mode": "100644",
       "sha256": "b642c7f16a98047d8a77b3ee4885645aec6e20ea725f8b35595b4a8754aff92a"
     },
+    ".systems/scripts/tests/test_wig_mentoring.py": {
+      "mode": "100644",
+      "sha256": "4615f49d9fd24881ece1083ea1017bf05d4d62139d520230fd09232fb5388fad"
+    },
     ".systems/scripts/tests/test_work_evidence.py": {
       "mode": "100644",
       "sha256": "49f5c6999edd58c2f3ce119794617a99857e0d7eb3f874fd12a6da86316ac97b"
@@ -2129,11 +2153,11 @@
     },
     ".systems/scripts/validate-ai-system": {
       "mode": "100755",
-      "sha256": "a6f891230da34fa8098f1ac2c7b88fd5a9f5b763a051d953da7b1592b74066e8"
+      "sha256": "fc513f3c8a94d85823aff16bae2c59a350f524a5cb64ca0ef0873b8b90cf0aff"
     },
     ".systems/scripts/validation-dependencies.json": {
       "mode": "100644",
-      "sha256": "c79cd47587529e6efd494352f301901653b764826bc59a0a7e55b884b82cb33f"
+      "sha256": "9f88ed4a4c4e5010b0f411f91ea1685269f5058cddbe6c6271a7ea9c08b1d918"
     },
     ".systems/scripts/validation_input_guard.py": {
       "mode": "100644",
@@ -2146,6 +2170,10 @@
     ".systems/scripts/validation_support.py": {
       "mode": "100644",
       "sha256": "1c947f88a477b8f4979cb337477a2c7ee4ae05e04bc515664e529b44627a9882"
+    },
+    ".systems/scripts/wig_mentoring.py": {
+      "mode": "100644",
+      "sha256": "a248fef02a0d27e552f247650df9694a0fa4922685f22f342bdf627d3526cba5"
     },
     ".systems/scripts/work-evidence-apply": {
       "mode": "100755",
@@ -2242,6 +2270,10 @@
     ".systems/scripts/work_evidence_xlsx.py": {
       "mode": "100644",
       "sha256": "43876bf8d25a05cdf51877b6cb2ee27fc62dabd5c25c2f56e8f1d58474a831fc"
+    },
+    "AGENTS.md": {
+      "mode": "100644",
+      "sha256": "c528c8a18ea513b42eb5f19a2ba84dfa4f8f47c944311cc3b7d87c2dc7f810e0"
     },
     "HUMANS.md": {
       "mode": "100644",
