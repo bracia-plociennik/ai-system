@@ -60,8 +60,17 @@ def read_json(path):
 
 def owner_root(workspace):
     root = unlinked(workspace)
-    if not root.is_dir() or (root / '.git').exists():
-        raise ValueError('explicit personal workspace required, not a project repository')
+    if not root.is_dir():
+        raise ValueError('explicit personal workspace required')
+    if (root / '.git').exists():
+        # Private owner workspaces can themselves be Git repositories. Reuse the
+        # user registration and require an exact active workspace root, never a
+        # default or a child project. This is binding evidence, not consent.
+        from agent_context import registration, workspace_registry
+        record, installed, _, environment = registration()
+        rows, _ = workspace_registry(installed, environment)
+        if not record['enabled'] or root not in {row[1] for row in rows}:
+            raise ValueError('project repository is not the selected owner workspace')
     return root
 
 

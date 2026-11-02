@@ -41,6 +41,22 @@ class Mentor(unittest.TestCase):
         path.write_text('---\ntype: weekly-plan\nweek_start: 2026-11-02\nplan_readiness: ready\nwig_title: '+title+'\nwig_definition_of_done: Weekly delivered result\nweekly_plan_items_json: "[]"\n---\n')
         return path
 
+    def test_registered_private_git_workspace_is_supported(self):
+        (self.root/'.git').mkdir()
+        with patch('agent_context.registration', return_value=({'enabled': True}, self.root, None, {})), patch('agent_context.workspace_registry', return_value=([('owner', self.root, False)], None)):
+            self.assertEqual(self.prepare()['source_status'], 'available')
+            self.assertEqual(self.save(self.prepare())['disposition'], 'seen')
+
+    def test_unregistered_git_project_does_not_import_default(self):
+        (self.root/'.git').mkdir()
+        with patch('agent_context.registration', return_value=({'enabled': True}, self.root, None, {})), patch('agent_context.workspace_registry', return_value=([('owner', self.root/'other', True)], None)):
+            with self.assertRaises(ValueError): self.prepare()
+
+    def test_nested_git_project_is_not_its_registered_owner(self):
+        (self.root/'.git').mkdir()
+        with patch('agent_context.registration', return_value=({'enabled': True}, self.root, None, {})), patch('agent_context.workspace_registry', return_value=([('owner', self.root.parent, True)], None)):
+            with self.assertRaises(ValueError): self.prepare()
+
     def test_sources_are_read_only_and_raw_body_is_not_priority(self):
         before = {str(p): p.read_bytes() for p in self.root.rglob('*') if p.is_file()}
         result = self.prepare(relation='aligned')
