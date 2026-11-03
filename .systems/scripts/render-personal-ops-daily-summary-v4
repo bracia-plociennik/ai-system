@@ -150,15 +150,50 @@ def score_advice(kind: str, score: object) -> str:
 
 def state_note(value: object) -> str:
     if isinstance(value, dict):
-        return str(value.get("note") or "nie podano")
-    return "nie podano"
+        for key in ("note", "context"):
+            note = value.get(key)
+            if isinstance(note, str) and note.strip():
+                return note.strip()
+    return ""
 
 
 def state_score(properties: dict, current: dict, name: str, fallback_key: str) -> object:
     value = current.get(name)
-    if isinstance(value, dict) and str(value.get("score", "")).strip():
+    if isinstance(value, dict) and value.get("score") is not None and str(value.get("score", "")).strip():
         return value.get("score")
-    return properties.get(fallback_key, "")
+    fallback = properties.get(fallback_key)
+    return "" if fallback is None else fallback
+
+
+def state_assessment(label: str, kind: str, score: object, value: object) -> str:
+    display = f"{score}/5" if str(score).strip() else "nie podano"
+    note = state_note(value)
+    detail = f" — {note}" if note else ""
+    punctuation = "" if note.endswith((".", "!", "?")) else "."
+    return f"- **{label}:** `{display}`{detail}{punctuation} Wskazówka operacyjna: {score_advice(kind, score)}."
+
+
+def render_monthly_budget(properties: dict, monthly: dict) -> list[str]:
+    currency = monthly.get("currency", properties.get("planned_budget_currency", ""))
+    base_remaining, buffer = monthly.get("remaining_base_budget"), monthly.get("buffer")
+    total_remaining = None if base_remaining is None or buffer is None else Decimal(str(base_remaining)) + Decimal(str(buffer))
+    lines = [
+        "### Budżet wydatków",
+        f"- Limit dnia: `{number(properties.get('planned_budget_max'))} {properties.get('planned_budget_currency', currency)}`",
+        f"- Budżet bazowy: `{number(monthly.get('base_budget'))} {currency}`",
+        f"- Bufor: `{number(buffer)} {currency}`",
+        f"- Wydatki: `{number(monthly.get('current_spending'))} {currency}`",
+        f"- Pozostało z bazy: `{number(base_remaining)} {currency}`",
+        f"- Pozostało łącznie z buforem: `{number(total_remaining)} {currency}`",
+        f"- Pozostałe dni włącznie z dzisiaj: `{number(monthly.get('remaining_days_inclusive'))}`",
+        f"- Średnia z pozostałej bazy na dzień: `{number(monthly.get('average_available_per_remaining_day'))} {currency}`",
+        f"- Przekroczenie tempa: `{number(monthly.get('pace_overrun'))} {currency}`",
+        f"- Dni bez wydatków od dziś: `{number(monthly.get('no_spend_days_from_today'))}`",
+        f"- Powrót do limitu: `{monthly.get('standard_spend_resume_date') or 'nie podano'}`",
+    ]
+    if monthly.get("approximate"):
+        lines.append("- Status danych: `wartości przybliżone`")
+    return lines
 
 
 def state_items(value: object, fallback: list[str]) -> str:
@@ -185,8 +220,6 @@ def render_state(properties: dict, items: list[dict]) -> list[str]:
         raise ValueError("current_state_json must be an object")
     mental = state_score(properties, current, "mental", "mental_clarity_score")
     body = state_score(properties, current, "body", "body_readiness_score")
-    mental_display = f"{mental}/5" if str(mental).strip() else "nie podano"
-    body_display = f"{body}/5" if str(body).strip() else "nie podano"
     constraints = []
     for constraint in current.get("constraints", []) if isinstance(current.get("constraints"), list) else []:
         if isinstance(constraint, dict):
@@ -199,8 +232,8 @@ def render_state(properties: dict, items: list[dict]) -> list[str]:
     close_fallback = [str(item.get("title", "")).strip() for item in items if str(item.get("stream", "")).strip().lower() in {"close", "close-ones", "close_ones"}]
     return [
         "### Stan i kierunek dnia",
-        f"- **Mental:** `{mental_display}` — {state_note(current.get('mental'))}. Wskazówka operacyjna: {score_advice('mental', mental)}.",
-        f"- **Ciało:** `{body_display}` — {state_note(current.get('body'))}. Wskazówka operacyjna: {score_advice('body', body)}.",
+        state_assessment("Mental", "mental", mental, current.get("mental")),
+        state_assessment("Ciało", "body", body, current.get("body")),
         f"- **Ograniczenia / zagrożenia:** {'; '.join(constraints) if constraints else 'nie podano'}.",
         f"- **Tryb pracy:** `{properties.get('work_mode') or 'nie podano'}` — {current.get('work_mode_reason') or 'powód nie podany'}.",
         f"- **Tryb organizmu:** `{properties.get('organism_mode') or 'nie podano'}` — {current.get('organism_mode_reason') or 'powód nie podany'}.",
@@ -421,22 +454,7 @@ def render(properties: dict, rows: list[dict], budget_report: dict, workspace: P
     lines.extend(["", *render_food(food_schedule)])
     monthly = budget_report["monthly_spending"]
     weekly = budget_report["weekly_calories"]
-    currency = monthly.get("currency", properties.get("planned_budget_currency", ""))
-    lines.extend([
-        "", "### Budżet wydatków",
-        f"- Limit dnia: `{number(properties.get('planned_budget_max'))} {properties.get('planned_budget_currency', currency)}`",
-        f"- Budżet bazowy: `{number(monthly.get('base_budget'))} {currency}`",
-        f"- Bufor: `{number(monthly.get('buffer'))} {currency}`",
-        f"- Wydatki: `{number(monthly.get('current_spending'))} {currency}`",
-        f"- Pozostało: `{number(monthly.get('remaining_base_budget'))} {currency}`",
-        f"- Pozostałe dni włącznie z dzisiaj: `{number(monthly.get('remaining_days_inclusive'))}`",
-        f"- Średnia na pozostały dzień: `{number(monthly.get('average_available_per_remaining_day'))} {currency}`",
-        f"- Przekroczenie tempa: `{number(monthly.get('pace_overrun'))} {currency}`",
-        f"- Dni bez wydatków od dziś: `{number(monthly.get('no_spend_days_from_today'))}`",
-        f"- Powrót do limitu: `{monthly.get('standard_spend_resume_date') or 'nie podano'}`",
-    ])
-    if monthly.get("approximate"):
-        lines.append("- Status danych: `wartości przybliżone`")
+    lines.extend(["", *render_monthly_budget(properties, monthly)])
     lines.extend([
         "", "### Budżet kalorii",
         f"- Tygodniowy limit: `{number(weekly.get('weekly_budget'))} kcal`",
