@@ -161,6 +161,10 @@ def paths(cfg, cycle):
 def clock(): return datetime.now(ZONE)
 
 
+def decision_scope(cfg):
+    return digest({k: cfg[k] for k in ('workspace', 'report_owner', 'sources')})
+
+
 def session_key(cfg):
     # Decisions can change between cycles without authorizing new source access.
     scripts=Path(__file__).parent
@@ -241,13 +245,23 @@ def begin(config_path, stamp=None, manual=False, cycle=None):
         mkdir(p['inputs']); mkdir(p['drafts'])
         for c in chunks:
             atomic(p['inputs'] / (c['chunk_id'] + '.json'), c)
+        prior = previous['findings'] if same_scope else []
+        same_decision_scope = same_scope or previous.get('lineage_scope') == decision_scope(cfg)
+        need(same_decision_scope or not previous.get('findings') or
+             not any(d['recipient'] == cfg['report_owner'] for d in cfg['decisions']),
+             'unverified-decision-lineage')
+        lineage = lineage_rows(previous.get('findings', []) if same_decision_scope else [],
+                               previous.get('finding_lineage', []) if same_decision_scope else [])
+        fingerprints = {(r['source_id'], r['path']): r['sha256'] for r in coverage if r.get('sha256') and r['state'] in ('pending', 'reviewed')}
+        fresh_prior = current_cache(prior, fingerprints)
         state = {'schema_version': 1, 'cycle_id': cycle, 'attempt': 1, 'status': 'prepared',
                  'started_at': stamp.isoformat(), 'deadline': stamp.timestamp() + BUDGET,
                  'analysis_deadline': stamp.timestamp() + BUDGET - RESERVE,
                  'config_path': str(Path(config_path).absolute()), 'config_digest': digest(cfg),
                  'scope_key': session_key(cfg), 'input_hashes': {c['chunk_id']: digest(c) for c in chunks},
                  'files': by_file, 'coverage': coverage, 'accepted': [], 'findings': [],
-                 'previous_findings': previous['findings'] if same_scope else [], 'checkpoint_revision': 0,
+                 'previous_findings': fresh_prior, 'finding_lineage': lineage,
+                 'discarded_previous_findings': len(prior) - len(fresh_prior), 'checkpoint_revision': 0,
                  'manual': manual, 'authority': 'advisory-only', 'export_policy': 'owner-private-only'}
         brief = {k: state[k] for k in ('cycle_id','attempt','deadline','analysis_deadline','checkpoint_revision')}
         brief.update({'chunks': [{'chunk_id': c['chunk_id'], 'file': c['chunk_id'] + '.json',
@@ -263,6 +277,64 @@ def begin(config_path, stamp=None, manual=False, cycle=None):
         atomic(p['inputs'] / 'brief.json', brief)
         atomic(p['state'], state)
     return cfg, state
+
+
+def logical_key(item):
+    return item['topic'], item['lens']
+
+
+def lineage_rows(items, previous=()):
+    """Trusted private identity history; never accepted from model checkpoints."""
+    keys = defaultdict(set)
+    for row in previous:
+        keys[logical_key(row)].update(row['ids'])
+    for item in items:
+        keys[logical_key(item)].update([item['finding_id'], *item.get('decision_aliases', [])])
+    return [{'topic': k[0], 'lens': k[1], 'ids': sorted(ids)} for k, ids in sorted(keys.items())]
+
+
+def current_cache(items, fingerprints):
+    """Compare every evidence version, not the last version of a path."""
+    kept = []; groups = defaultdict(list)
+    for item in items:
+        refs = item['context_refs'] + item['evidence_refs']
+        if refs and all(fingerprints.get((r['source_id'], r['path'])) == r['sha256'] for r in refs):
+            groups[logical_key(item)].append(item)
+    # An already polluted cache has no trustworthy winner without a new review.
+    for group in groups.values():
+        if len(group) == 1: kept.extend(group)
+    return kept
+
+
+def merge_findings(cached, current, lineage=()):
+    need(len({logical_key(f) for f in current}) == len(current), 'ambiguous-current-findings')
+    need(len({logical_key(f) for f in cached}) == len(cached), 'ambiguous-cached-findings')
+    history = {logical_key(row): set(row['ids']) for row in lineage_rows(cached + current, lineage)}
+    merged = {logical_key(f): f for f in cached + current}
+    return [{**f, 'decision_aliases': sorted(history[k] - {f['finding_id']})} for k, f in merged.items()]
+
+
+def report_route(cfg, items):
+    # Preserve recipient-local owner decisions across a provenance-driven rekey.
+    # Technical recipients receive neither aliases nor transferred decisions.
+    aliases = {}
+    for f in items:
+        for alias in [f['finding_id'], *f.get('decision_aliases', [])]:
+            need(alias not in aliases or aliases[alias] == f['finding_id'], 'ambiguous-decision-alias')
+            aliases[alias] = f['finding_id']
+    decisions = {}; owner = cfg['report_owner']
+    for original in cfg['decisions']:
+        d = dict(original)
+        if d['recipient'] == owner: d['finding_id'] = aliases.get(d['finding_id'], d['finding_id'])
+        key = d['finding_id'], d['recipient']
+        if key in decisions:
+            need(decisions[key] == d, 'conflicting-logical-decisions')
+        decisions[key] = d
+    packets = route(items, cfg['recipients'], owner, list(decisions.values()))
+    for recipient, packet in packets.items():
+        if recipient != owner:
+            for item in packet['findings']: item.pop('decision_aliases', None)
+    return packets
 
 
 def retain_findings(previous, current):
@@ -333,24 +405,27 @@ def finalize(cfg, s, p):
         reviewed.update(old.get('reviewed', {})); partial.update(old.get('partial', {}))
     # All reused current claims depend on a fresh hash check, including unchanged cache.
     rows = {(r['source_id'], r['path']): r for r in inventory(cfg)}
-    refs = {}
+    # Keep all versions for individual claim validation; read each locator once.
+    expected = defaultdict(set)
     for item in s['findings'] + s['previous_findings']:
-        for ref in item['context_refs']: refs[(ref['source_id'],ref['path'])] = ref
-    for row in s['files'].values():
-        refs[(row['source_id'],row['path'])] = row
-    for row in s['coverage']:
-        if row['state'] == 'reviewed': refs[(row['source_id'],row['path'])] = row
-    for locator, ref in refs.items():
+        for ref in item['context_refs'] + item['evidence_refs']:
+            expected[ref['source_id'], ref['path']].add(ref['sha256'])
+    for row in list(s['files'].values()) + [r for r in s['coverage'] if r['state'] == 'reviewed']:
+        expected[row['source_id'], row['path']].add(row['sha256'])
+    fingerprints = {}
+    for locator in expected:
         row = rows.get(locator)
         try:
             need(row is not None and row['state'] == 'pending', 'source-unavailable')
-            fresh = hashlib.sha256(read(sources[locator[0]], row)).hexdigest()
-            need(fresh == ref['sha256'], 'source-changed')
-        except (ValueError, OSError, KeyError): changed.add(locator)
-    valid = [f for f in s['findings'] if not any((r['source_id'],r['path']) in changed for r in f['context_refs'])]
-    cached = [f for f in s['previous_findings'] if not any((r['source_id'],r['path']) in changed for r in f['context_refs'])]
-    # New observations replace a prior topic; recipient decisions stay in the registry.
-    merged = {f['finding_id']: f for f in cached + valid}
+            fingerprints[locator] = hashlib.sha256(read(sources[locator[0]], row)).hexdigest()
+        except (ValueError, OSError, KeyError): pass
+    # Conservative within-cycle invalidation remains path-wide across all read context.
+    for row in list(s['files'].values()) + [r for r in s['coverage'] if r['state'] == 'reviewed']:
+        locator = row['source_id'], row['path']
+        if fingerprints.get(locator) != row['sha256']: changed.add(locator)
+    valid = current_cache(s['findings'], fingerprints)
+    cached = current_cache(s['previous_findings'], fingerprints)
+    merged = merge_findings(cached, valid, s.get('finding_lineage', []))
     finalization = {
         'draft_findings': len(s['findings']),
         'previous_findings': len(s['previous_findings']),
@@ -358,6 +433,9 @@ def finalize(cfg, s, p):
         'verified_findings': len(merged),
         'changed_sources': len(changed),
     }
+    superseded = sum(logical_key(f) in {logical_key(x) for x in valid} for f in cached)
+    if superseded: finalization['superseded_findings'] = superseded
+    if s.get('discarded_previous_findings'): finalization['stale_before_cycle'] = s['discarded_previous_findings']
     for key, row in s['files'].items():
         if (row['source_id'],row['path']) in changed:
             reviewed.pop(key, None); partial.pop(key, None); continue
@@ -372,7 +450,7 @@ def finalize(cfg, s, p):
     count = {}
     for row in s['coverage']: count[row['state']] = count.get(row['state'], 0) + 1
     s.update({'status': 'completed' if s.get('synthesis_complete') and not changed else 'partial',
-              'findings': list(merged.values()), 'coverage_counts': count, 'changed_count': len(changed),
+              'findings': merged, 'coverage_counts': count, 'changed_count': len(changed),
               'finalization': finalization,
               'finished_at': clock().isoformat()})
     mkdir(p['report'])
@@ -389,7 +467,9 @@ def finalize(cfg, s, p):
         with os.fdopen(fd, 'w') as stream: stream.write(report); stream.flush(); os.fsync(stream.fileno())
     atomic(old_index, {'scope_key':session_key(cfg),'reviewed':reviewed,'partial':partial,
                        'inventory':{digest([r['source_id'],r['path']]):r.get('sha256') for r in s['coverage']},
-                       'findings':s['findings'],'cycle_id':s['cycle_id']})
+                       'findings':s['findings'],'finding_lineage':lineage_rows(s['findings'], s.get('finding_lineage', [])),
+                       'lineage_scope':decision_scope(cfg),
+                       'cycle_id':s['cycle_id']})
     atomic(p['state'], s)
     return s
 
@@ -412,6 +492,8 @@ def render_report(cfg, s):
                       'Wycofane ustalenia nie są aktualnymi wnioskami ani nowymi propozycjami działań. '
                       'Nie oznacza to, że podczas analizy nie powstały obserwacje.',
                       'Roboczy checkpoint tego cyklu pozostaje zachowany; nie zastępuje zweryfikowanego raportu.', '']
+    if disposition.get('superseded_findings') or disposition.get('stale_before_cycle'):
+        lines += [f"Starsze wersje zastąpione aktualnym ustaleniem: {disposition.get('superseded_findings', 0)}; nieaktualne przed rozpoczęciem cyklu: {disposition.get('stale_before_cycle', 0)}. Historyczne raporty i decyzje pozostają zachowane.", '']
     if 'maintenance' in s:
         lines += ['## Utrzymanie środowiska', '', 'Wynik etapu: ' + s['maintenance']['status'],
                   'Etap wykonuje wyłącznie oddzielnie zatwierdzone operacje utrzymania; ustalenia analizy pozostają propozycjami.', '']
@@ -419,12 +501,12 @@ def render_report(cfg, s):
             lines.append('- ' + operation + ': ' + receipt['status'] +
                          ('; ' + receipt['reason'] if 'reason' in receipt else ''))
         lines += ['', 'Szczegółowy zapis: ' + s['maintenance']['state'], '']
-    packets = route(s['findings'], cfg['recipients'], cfg['report_owner'], cfg['decisions'])
+    packets = report_route(cfg, s['findings'])
     decisions = {d['finding_id']:d['state'] for d in packets[cfg['report_owner']]['decisions']}
     active = packets[cfg['report_owner']]['findings']
-    prior = {f['finding_id']:f for f in s['previous_findings']}
-    new = [f for f in active if f['finding_id'] not in prior]
-    updated = [f for f in active if f['finding_id'] in prior and f['summary'] != prior[f['finding_id']]['summary']]
+    prior = {logical_key(f):f for f in s['previous_findings']}
+    new = [f for f in active if logical_key(f) not in prior]
+    updated = [f for f in active if logical_key(f) in prior and f['summary'] != prior[logical_key(f)]['summary']]
     lines += ['## Najważniejsze ustalenia', '',
               f'Nowe tematy: {len(new)}; zaktualizowane podsumowania: {len(updated)}.', '']
     selected = []; ordered = new + updated + active
