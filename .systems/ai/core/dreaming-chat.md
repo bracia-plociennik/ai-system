@@ -61,3 +61,25 @@ Run `check-dreaming-chat`, existing Dreaming/WEP and SPOR regressions, native
 standard-mode checks and queue failure controls, then required full release/updater checks with smoke. A
 completed session can still leave historical backlog. Two actual natural terms
 are required after activation; a manual pilot cannot satisfy those observations.
+
+## Cross-cycle logical replacement and decisions
+
+The chat cache uses topic/lens as the logical replacement key, while native global
+IDs retain recomputed owner/subject provenance. Before a new brief, each cached
+context and evidence version must match the guarded snapshot; stale or ambiguous
+legacy cache groups are omitted, never silently relabeled as current. Finalization
+checks each reference version against one fresh read per locator; a later version
+cannot mask an older hash. Uncited read context and within-cycle drift remain
+conservative invalidation dependencies.
+
+Trusted owner-private identity lineage preserves recipient-local owner decisions
+when provenance rekeys a finding. Conflicting aliased decisions fail closed;
+aliases never transfer approvals to technical recipients. Model checkpoints cannot
+supply aliases. Lineage can survive an analyzer/code cache reset only under the
+same explicit owner/source manifest; content reuse still requires the full scope
+binding. Historical reports and decisions remain unchanged. Superseded findings
+and stale-before-cycle cache disposition are reported separately. Legacy cache
+without a matching decision-scope binding supplies no cross-scope alias authority.
+A legacy/reset cache with existing owner decisions and no verifiable lineage
+scope blocks preparation pending explicit reconciliation instead of reopening
+rejected work under a changed global ID. No decision is guessed or migrated.
