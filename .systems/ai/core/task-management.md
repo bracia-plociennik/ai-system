@@ -367,3 +367,9 @@ cooperative vault lock, no-follow directory descriptors, atomic replacement and
 readback detect known conflicts; uncertain readback requires inspection, not replay.
 These are cooperative guards, not kernel compare-and-swap against a noncooperating
 native editor. No fuzzy dedup, silent retry or fake WEP/approval.
+
+## SilverBullet idea assessment
+
+Use task-store idea with --workspace, --task-id, --input and --expected-sha256 for read-only preview, then --owner-approved under the actual approved scope. The input fields and classification follow task-efficiency.md New ideas during an active stage. This operation changes only canonical TODO, using the same locked atomic writer as plan persistence. Stable idea identity deduplicates retries and detects conflicting content. A captured idea has one assessment checkbox. Resolution records its disposition and evidence while preserving its manually edited label. Existing task creation handles a new unambiguously owned destination; linking multiple tasks requires readback of every actual write before retry.
+
+For offline historical accounting use analyze-task-usage --native followed by explicitly selected native-evidence.json snapshots, or supply normalized JSON event arrays. Each event has session_id, event_id, kind (delta or cumulative), usage with input_tokens/cached_input_tokens/output_tokens and optional task_id, role, model, effort, epoch and global response_id. Counter decreases produce an explicit warning and retain a lower bound. Use a new explicit epoch only with evidence of a reset. Cached input remains part of input, reasoning remains part of output. Native final snapshots rely on their original collector's accounting. Classify repair, integration and validation only when source metadata provides that association. Output groups preserve unassigned/unknown fields. Historical credit estimates and account-limit snapshots are separate evidence.

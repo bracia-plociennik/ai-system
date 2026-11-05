@@ -338,6 +338,15 @@
         "complete": true,
         "mode": "product-tree"
       }
+    },
+    "check-roadmap-tools": {
+      "dependencies": [],
+      "runtime_capable": false,
+      "category": "integration",
+      "inputs": {
+        "complete": true,
+        "mode": "product-tree"
+      }
     }
   }
 }
