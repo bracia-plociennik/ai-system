@@ -57,6 +57,7 @@ standard_checks=(
   check-validation-integrity
   check-execution-efficiency
   check-wig-mentoring
+  check-roadmap-tools
 )
 checks="$(IFS=,; echo "${standard_checks[*]}")"
 exec python3 -B "$script_dir/validation_runner.py" "$@" --default-profile "$profile" --standard-checks "$checks" --full-smoke-check check-validator-smoke-tests

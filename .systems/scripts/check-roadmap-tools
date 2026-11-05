@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+python3 -B "$root/.systems/scripts/tests/test_task_ideas.py"
+python3 -B "$root/.systems/scripts/tests/test_task_usage.py"
+python3 -B "$root/.systems/scripts/tests/test_storage_tools.py"

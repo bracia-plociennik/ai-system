@@ -244,9 +244,22 @@ class TaskStore:
 
     def write_plan(self,task_id,plan,expected_sha256,*,apply=False):
         """Exact task selection, read-only preview by default; cooperative guarded save."""
-        if self.profile!='silverbullet-v1':raise ValueError('silverbullet-writer-profile-required')
-        if not isinstance(task_id,str) or str(uuid.UUID(task_id))!=task_id:raise ValueError('invalid-task-id')
         validate_plan(plan)
+        return self._write_todo(task_id, expected_sha256, lambda text: merge_plan(text, plan),
+                                {'plan_id': plan['id']}, apply=apply)
+
+    def write_idea(self, task_id, idea, expected_sha256, *, apply=False):
+        from task_ideas import merge_idea
+        if not isinstance(idea, dict):
+            raise ValueError('idea input must be an object')
+        return self._write_todo(task_id, expected_sha256, lambda text: merge_idea(text, idea),
+                                {'idea_id': idea.get('id')}, apply=apply)
+
+    def _write_todo(self, task_id, expected_sha256, transform, identity, *, apply=False):
+        if self.profile != 'silverbullet-v1':
+            raise ValueError('silverbullet-writer-profile-required')
+        if not isinstance(task_id, str) or str(uuid.UUID(task_id)) != task_id:
+            raise ValueError('invalid-task-id')
         if not isinstance(expected_sha256,str) or not re.fullmatch(r'[0-9a-f]{64}',expected_sha256):raise ValueError('expected-task-hash-required')
         matches=[p for p,m in self.tasks() if m.get('task_id')==task_id]
         if len(matches)!=1:raise ValueError('missing-or-ambiguous-task-identity')
@@ -258,9 +271,9 @@ class TaskStore:
             raw,info=read_task_fd(fd,path.name)
             if hashlib.sha256(raw).hexdigest()!=expected_sha256:raise ValueError('task-version-conflict')
             if frontmatter(raw.decode()).get('task_id')!=task_id:raise ValueError('task-identity-conflict')
-            proposed=merge_plan(raw.decode(),plan).encode()
+            proposed=transform(raw.decode()).encode()
             if len(proposed)>MAX_TASK:raise ValueError('task-exceeds-size-bound')
-            result={'task_id':task_id,'plan_id':plan['id'],'path':str(path),'changed':proposed!=raw,
+            result={'task_id':task_id,**identity,'path':str(path),'changed':proposed!=raw,
                     'before_sha256':expected_sha256,'after_sha256':hashlib.sha256(proposed).hexdigest(),
                     'writes':False,'authority':'none'}
             if not apply or proposed==raw:return result

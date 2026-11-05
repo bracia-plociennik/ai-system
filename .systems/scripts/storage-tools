@@ -1,0 +1,33 @@
+#!/usr/bin/env python3
+"""Route explicit storage operations to the source-verified Workflow consumer."""
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+from task_cleanup_adapter import select_workflow
+from durable_runtime import read_json, unlinked
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--canonical', required=True, type=Path)
+parser.add_argument('--workflow-root', type=Path)
+parser.add_argument('tool', choices=['manage-storage-capacity', 'create-source-worktree', 'analyze-task-retrospective'])
+args, remaining = parser.parse_known_args()
+try:
+    root = unlinked(args.workflow_root or select_workflow(args.canonical))
+    capability = read_json(root / '.systems/ai/capabilities/managed-storage-v1.json')
+    expected = {'.systems/scripts/' + name for name in
+                ('manage-storage-capacity', 'storage_capacity.py', 'create-source-worktree',
+                 'analyze-task-retrospective', 'task_retrospective.py', 'task_resource_cleanup.py', 'durable_runtime.py')}
+    if (set(capability) != {'schema', 'capability', 'files', 'authority'} or
+            capability['schema'] != 1 or capability['capability'] != 'managed-storage-v1' or
+            capability['authority'] != 'none' or set(capability['files']) != expected):
+        raise ValueError('incompatible managed storage consumer')
+    for relative, digest in capability['files'].items():
+        if hashlib.sha256(unlinked(root / relative).read_bytes()).hexdigest() != digest:
+            raise ValueError('managed storage source differs: ' + relative)
+    if args.tool == 'create-source-worktree':
+        remaining = ['--canonical', str(unlinked(args.canonical)), *remaining]
+    raise SystemExit(subprocess.run([str(root / '.systems/scripts' / args.tool), *remaining]).returncode)
+except (ValueError, OSError, KeyError, TypeError) as exc:
+    parser.exit(2, 'Storage tools: ' + str(exc) + '\n')
