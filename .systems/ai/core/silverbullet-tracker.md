@@ -90,6 +90,17 @@ the authority for approved work. Export time-tracker.xlsx afterwards with native
 Manual Inputs preservation. Export failure keeps the committed entry and a visible
 pending-refresh receipt; refreshing never repeats the ledger write.
 
+Prepared recovery distinguishes an already canonical commit from an uncommitted
+candidate. State reads reconcile committed native manifests into SQLite receipts;
+they never apply an uncommitted candidate or export the workbook implicitly.
+Uncommitted retries recheck session disposition, outstanding time review, task
+content, tracker version and native snapshot, including after reacquiring SQLite's
+write lock. A changed state requires a fresh preview and explicit approval. A new
+preview supersedes prior uncommitted previews for that run. Its entry/session IDs
+are deterministic within that preview, so old immutable partial records remain
+as audit evidence without blocking a newly approved correction. Task grouping and
+run-piece work IDs stay stable; existing IDs and committed history are preserved.
+
 Rollback restores the previous native panel/routing and disables the service;
 retain SQLite, native events, approval receipts and committed WEP. Do not remove
 history or bulk-rewrite task IDs as part of deployment/rollback. Test against an

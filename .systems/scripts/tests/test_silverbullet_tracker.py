@@ -1,5 +1,6 @@
 """Synthetic tracker lifecycle, evidence and recovery; never uses owner runtime."""
 from datetime import datetime, timedelta, timezone
+from contextlib import contextmanager
 import json
 from pathlib import Path
 import sys
@@ -190,6 +191,125 @@ class TrackerTests(TrackerFixture, unittest.TestCase):
         base='---\ntype: task\n%s\n---\nNotes remain\n'
         for metadata in ['author: human\nauthor: ai','author: future','author: human\n"author": ai']:
             with self.assertRaises(ValueError):assign_author(base%metadata,'human')
+
+
+class PreparedRecoveryTests(TrackerFixture, unittest.TestCase):
+    def interrupted(self, failpoint=None):
+        self.event('start');self.time+=timedelta(minutes=10);self.event('stop')
+        preview=self.tracker.preview({'run_id':self.run,'outcome':'Verified original work',
+            'unassigned_confirmed':True},'owner')
+        if failpoint:
+            with self.assertRaises(EvidenceError):
+                self.tracker.approve(preview['preview_id'],preview['preview_hash'],'owner',failpoint=failpoint)
+        else:
+            with patch('silverbullet_tracker.Ledger.apply',side_effect=OSError('before native apply')):
+                with self.assertRaises(OSError):
+                    self.tracker.approve(preview['preview_id'],preview['preview_hash'],'owner')
+        return preview
+
+    def approve(self, preview):
+        return self.tracker.approve(preview['preview_id'],preview['preview_hash'],'owner')
+
+    def corrected_preview(self):
+        return self.tracker.preview({'run_id':self.run,'outcome':'Reviewed zero-time correction',
+            'unassigned_confirmed':True,'time_confirmed':True},'owner')
+
+    def test_discard_blocks_old_prepared_retry(self):
+        old=self.interrupted();self.event('discard',reason='Exclude erroneous timer')
+        with self.assertRaisesRegex(TrackerError,'state-changed-repreview'):self.approve(old)
+        self.assertEqual(len(Ledger(self.w).committed()[0]),0)
+        self.assertEqual(self.tracker.state()['runs'][0]['state'],'discarded')
+        with self.assertRaisesRegex(TrackerError,'stop-before-preview'):self.corrected_preview()
+
+    def correction_after_interruption(self, failpoint=None):
+        old=self.interrupted(failpoint)
+        # Keep every uncommitted immutable native file; a new candidate must coexist.
+        orphans={p:p.read_bytes() for root in [self.w/'work-log',self.w/'work-evidence/sessions']
+                 for p in root.rglob('*.json')}
+        self.event('resolve',correction={'2026-10-30':0},reason='Reviewed erroneous timer')
+        with self.assertRaisesRegex(TrackerError,'state-changed-repreview'):self.approve(old)
+        self.assertEqual(len(Ledger(self.w).committed()[0]),0)
+        new=self.corrected_preview();self.assertEqual(new['total_seconds'],0)
+        self.assertEqual(new['task_work_id'],old['task_work_id'])
+        self.approve(new);self.approve(new)
+        entries=Ledger(self.w).committed()[0]
+        self.assertEqual(len(entries),1);self.assertEqual(next(iter(entries.values()))['duration']['seconds'],0)
+        for p,data in orphans.items():self.assertEqual(p.read_bytes(),data)
+        with self.assertRaisesRegex(TrackerError,'state-changed-repreview'):self.approve(old)
+
+    def test_correction_requires_new_approval(self):
+        self.correction_after_interruption()
+
+    def test_partial_record_kept_and_fresh_corrected_approval_succeeds(self):
+        self.correction_after_interruption('after-record-0')
+
+    def test_partial_records_and_sessions_kept_before_manifest(self):
+        self.correction_after_interruption('before-manifest')
+
+    def test_offline_conflict_blocks_prepared_then_resolution_needs_new_preview(self):
+        old=self.interrupted();result,_=self.event('stop',replay=True,version=0)
+        self.assertEqual(result['status'],'conflict')
+        with self.assertRaisesRegex(TrackerError,'resolve-time-conflicts'):self.approve(old)
+        self.assertEqual(len(Ledger(self.w).committed()[0]),0)
+        self.event('resolve',correction={'2026-10-30':0},reason='Reviewed device collision')
+        with self.assertRaisesRegex(TrackerError,'state-changed-repreview'):self.approve(old)
+        new=self.corrected_preview();self.approve(new)
+        entries=Ledger(self.w).committed()[0]
+        self.assertEqual(len(entries),1);self.assertEqual(next(iter(entries.values()))['duration']['seconds'],0)
+        self.assertEqual(len(self.tracker.state()['runs'][0]['events']),4)
+
+    def test_unchanged_prepared_retry_exactly_once(self):
+        preview=self.interrupted();receipt=self.approve(preview)
+        self.assertEqual(self.approve(preview),receipt)
+        self.assertEqual(len(Ledger(self.w).committed()[0]),1)
+
+    def test_new_preview_supersedes_old_prepared_even_without_version_change(self):
+        old=self.interrupted();new=self.corrected_preview()
+        with self.assertRaisesRegex(TrackerError,'state-changed-repreview'):self.approve(old)
+        self.approve(new);self.assertEqual(len(Ledger(self.w).committed()[0]),1)
+
+    def test_changed_task_blocks_uncommitted_prepared_retry(self):
+        old=self.interrupted();self.task.write_text(self.task.read_text()+'Changed owner notes\n')
+        with self.assertRaisesRegex(TrackerError,'task-changed-repreview'):self.approve(old)
+        self.approve(self.corrected_preview());self.assertEqual(len(Ledger(self.w).committed()[0]),1)
+
+    def test_canonical_commit_recovers_receipt_before_resolution_and_repreview(self):
+        old=self.interrupted('after-manifest')
+        # Exercise event/preview directly, without first letting GET state recover.
+        event={'operation_id':str(uuid.uuid4()),'device_id':self.device,'task_id':self.task_id,
+               'run_id':self.run,'action':'discard','reason':'Late exclusion',
+               'occurred_at':self.time.isoformat(),'expected_version':2}
+        # Receipt recovery advances the version, rejecting the caller's old state.
+        with self.assertRaisesRegex(TrackerError,'stale-state'):self.tracker.event(event)
+        with self.assertRaisesRegex(TrackerError,'run-already-approved'):self.corrected_preview()
+        state=self.tracker.state();run=state['runs'][0]
+        self.assertEqual(run['state'],'stopped');self.assertEqual(run['receipt']['status'],'committed')
+        self.assertEqual(state['version'],3);self.assertEqual(self.tracker.state()['version'],3)
+        with self.assertRaisesRegex(TrackerError,'stop-before-resolution'):
+            self.tracker.event({**event,'expected_version':3})
+        self.assertEqual(self.approve(old)['transaction_id'],run['receipt']['transaction_id'])
+        self.assertEqual(self.tracker.refresh_workbook(old['preview_id'])['xlsx_status'],'current')
+        self.assertEqual(len(Ledger(self.w).committed()[0]),1)
+
+    def test_change_in_prepare_commit_gap_cannot_apply_stale_candidate(self):
+        self.event('start');self.time+=timedelta(minutes=10);self.event('stop')
+        preview=self.corrected_preview();original_db=self.tracker.db;fired=[]
+        class Connection:
+            def __init__(inner,db):inner.db=db;inner.begins=0
+            def __getattr__(inner,name):return getattr(inner.db,name)
+            def execute(inner,sql,*args):
+                if sql=='BEGIN IMMEDIATE':
+                    inner.begins+=1
+                    if inner.begins==2 and not fired:
+                        fired.append(True)
+                        self.event('discard',reason='Concurrent owner exclusion')
+                return inner.db.execute(sql,*args)
+        @contextmanager
+        def interleaved_db():
+            with original_db() as db:yield Connection(db)
+        with patch.object(self.tracker,'db',interleaved_db):
+            with self.assertRaisesRegex(TrackerError,'state-changed-repreview'):self.approve(preview)
+        self.assertEqual(fired,[True]);self.assertEqual(len(Ledger(self.w).committed()[0]),0)
 
 
 if __name__=='__main__':unittest.main()

@@ -141,6 +141,40 @@ class TaskTracker:
                 db.execute("UPDATE runs SET review=1 WHERE state='active'")
                 self.bump(db)
 
+    def record_commit(self, db, approval, saved):
+        """Reconcile operational receipts with an already canonical native commit."""
+        old = db.execute('SELECT receipt FROM runs WHERE id=?', (approval['run_id'],)).fetchone()
+        require(old and (not old['receipt'] or
+                json.loads(old['receipt'])['transaction_id'] == saved['transaction_id']),
+                'transaction-receipt-conflict')
+        receipt = {'status': 'committed', **saved, 'preview_id': approval['id'], 'xlsx_status': 'pending'}
+        db.execute("UPDATE approvals SET state='committed',receipt=? WHERE id=?",
+                   (json.dumps(receipt), approval['id']))
+        db.execute('UPDATE runs SET receipt=? WHERE id=?', (json.dumps(receipt), approval['run_id']))
+        self.bump(db)
+        return receipt
+
+    def recover_committed(self, db):
+        pending = db.execute("SELECT * FROM approvals WHERE state='prepared' ORDER BY rowid").fetchall()
+        if not pending:
+            return
+        commits = {c['transaction_id']: c for c in Ledger(self.workspace).committed()[2]}
+        for approval in pending:
+            saved = json.loads(approval['receipt'])
+            committed = commits.get(saved['transaction_id'])
+            if committed:
+                require(committed['manifest_hash'] == saved['manifest_hash'], 'transaction-receipt-conflict')
+                self.record_commit(db, approval, saved)
+
+    def require_current_approval(self, db, body, ledger):
+        run = db.execute('SELECT * FROM runs WHERE id=?', (body['run_id'],)).fetchone()
+        require(run and run['state'] == 'stopped' and not run['receipt'], 'state-changed-repreview')
+        require(not db.execute('SELECT 1 FROM runs WHERE review=1').fetchone(), 'resolve-time-conflicts-first')
+        path, _ = self.task(body['task_id'])
+        require(file_hash(path) == body['task_source']['sha256'], 'task-changed-repreview')
+        require(body['version'] == self.version(db) and body['snapshot'] == ledger.snapshot(),
+                'state-changed-repreview')
+
     def task(self, task_id):
         uid(task_id)
         found = []
@@ -187,6 +221,7 @@ class TaskTracker:
             if previous:
                 require(previous['intent_hash'] == intent_hash, 'operation-id-content-conflict')
                 return json.loads(previous['result'])
+            self.recover_committed(db)
             self.remember_task(db, request['task_id'])
             run = db.execute('SELECT * FROM runs WHERE id=?', (run_id,)).fetchone() if run_id else None
             require(not run or run['task_id'] == request['task_id'], 'run-task-conflict')
@@ -269,6 +304,8 @@ class TaskTracker:
         if task_id:
             uid(task_id)
         with self.db() as db:
+            db.execute('BEGIN IMMEDIATE')
+            self.recover_committed(db)
             rows = db.execute('SELECT * FROM runs ORDER BY created DESC').fetchall()
             runs = []
             for row in rows:
@@ -311,6 +348,7 @@ class TaskTracker:
         require(isinstance(outcome, str) and 0 < len(outcome.strip()) <= 10000, 'outcome-required', 400)
         with self.db() as db:
             db.execute('BEGIN IMMEDIATE')
+            self.recover_committed(db)
             run = db.execute('SELECT * FROM runs WHERE id=?', (run_id,)).fetchone()
             require(run and run['state'] == 'stopped', 'stop-before-preview')
             require(not run['receipt'], 'run-already-approved')
@@ -350,8 +388,10 @@ class TaskTracker:
             candidate = {'schema_version': 1, 'changes': [], 'sessions': []}
             piece_bindings = []
             for index, piece in enumerate(pieces):
-                entry_id = str(uuid.uuid5(NAMESPACE, run_id + ':entry:' + str(index)))
-                session_id = str(uuid.uuid5(NAMESPACE, run_id + ':session:' + str(index)))
+                # A superseded partial apply can leave immutable, noncanonical files.
+                # New previews need independent record IDs; retries reuse this preview.
+                entry_id = str(uuid.uuid5(NAMESPACE, preview_id + ':entry:' + str(index)))
+                session_id = str(uuid.uuid5(NAMESPACE, preview_id + ':session:' + str(index)))
                 piece_work_id = str(uuid.uuid5(NAMESPACE, work_id + ':' + run_id + ':' + str(index)))
                 piece_ref = task_ref + '/runs/' + run_id + '/pieces/' + str(index)
                 piece_bindings.append({'task_ref': piece_ref, 'owner_workspace': self.workspace.name, 'work_id': piece_work_id})
@@ -396,6 +436,8 @@ class TaskTracker:
                     'total_seconds': sum(p['seconds'] for p in pieces), 'pieces': pieces, 'correction': correction,
                     'outcome': outcome.strip(), 'client_id': client, 'project_id': project}
             checksum = digest(body)
+            db.execute("UPDATE approvals SET state='superseded' WHERE run_id=? AND state IN ('preview','prepared')",
+                       (run_id,))
             db.execute('INSERT INTO approvals VALUES(?,?,?,?,?,NULL)',
                        (preview_id, run_id, json.dumps(body, sort_keys=True), checksum, 'preview'))
             return {'preview_id': preview_id, 'preview_hash': checksum, 'total_seconds': body['total_seconds'],
@@ -412,15 +454,14 @@ class TaskTracker:
             require(row and hmac.compare_digest(row['hash'], str(checksum)), 'stale-preview')
             body = json.loads(row['body'])
             require(body['principal'] == principal, 'approval-owner-conflict', 403)
+            require(row['state'] in {'preview', 'prepared', 'committed'}, 'state-changed-repreview')
             if row['state'] == 'committed':
                 return json.loads(row['receipt'])
             run = db.execute('SELECT * FROM runs WHERE id=?', (row['run_id'],)).fetchone()
             require(not run['receipt'] or row['state'] == 'prepared', 'run-already-approved')
             ledger = Ledger(self.workspace)
             if row['state'] == 'preview':
-                path, _ = self.task(body['task_id'])
-                require(file_hash(path) == body['task_source']['sha256'], 'task-changed-repreview')
-                require(body['version'] == self.version(db) and body['snapshot'] == ledger.snapshot(), 'state-changed-repreview')
+                self.require_current_approval(db, body, ledger)
                 proof = {'schema_version': 1, 'principal': principal, 'approved_at': stamp(self.clock()),
                          'preview_id': preview_id, 'preview_hash': checksum, 'candidate_hash': digest(body['candidate'])}
                 approval_path = task_path(self.workspace, Path(body['approval_path']));approval_path.parent.mkdir(mode=0o700, exist_ok=True)
@@ -438,17 +479,18 @@ class TaskTracker:
                 db.execute("UPDATE approvals SET state='prepared',receipt=? WHERE id=?", (json.dumps(saved), preview_id))
                 db.commit()  # Persist recovery coordinates before the native transaction.
                 db.execute('BEGIN IMMEDIATE')
+                # Another request can run between commit and reacquiring the lock.
+                row = db.execute('SELECT * FROM approvals WHERE id=?', (preview_id,)).fetchone()
+                require(row['state'] == 'prepared', 'state-changed-repreview')
             else:
                 saved = json.loads(row['receipt'])
             committed = next((c for c in ledger.committed()[2] if c['transaction_id'] == saved['transaction_id']), None)
             if committed:
                 require(committed['manifest_hash'] == saved['manifest_hash'], 'transaction-receipt-conflict')
             else:
+                self.require_current_approval(db, body, ledger)
                 ledger.apply(saved['transaction_id'], saved['manifest_hash'], failpoint=failpoint)
-            receipt = {'status': 'committed', **saved, 'preview_id': preview_id, 'xlsx_status': 'pending'}
-            db.execute("UPDATE approvals SET state='committed',receipt=? WHERE id=?", (json.dumps(receipt), preview_id))
-            db.execute('UPDATE runs SET receipt=? WHERE id=?', (json.dumps(receipt), row['run_id']))
-            self.bump(db)
+            self.record_commit(db, row, saved)
         return self.refresh_workbook(preview_id)
 
     def refresh_workbook(self, preview_id):
