@@ -163,3 +163,13 @@ baseline, model reasoning, minute attribution, percentages or savings. Compare t
 whole path to accepted quality, including rework, coordination and owner effort.
 Preserve raw/private sources with their owner; portable rules/examples are generic.
 A retrospective recommends policy changes; it does not self-modify policy or history.
+
+## Managed resource and continuity operations
+
+For capacity reservations, source checkout, compact resume and evidence-bound retrospective follow managed-storage.md within the current approved scope.
+
+## New ideas during an active stage
+
+Classify the current human message before changing scope. A correction that overrides current requirements is handled before dependent work, refreshing the affected plan and checks. A separate extension of the current stage is captured in the bound SilverBullet TODO and revisited automatically after the substantive stage and its required check. Perform covered actions, and request an actual decision for a material expansion. An idea outside that stage is captured in the appropriate bound task and presented as one grouped owner question after the stage. Real current-goal blockers are handled immediately.
+
+System writes through the selected task-store adapter with exact task identity and expected file hash. Capture fields are id, text, source, parent_task_id, parent_stage_id and kind (correction, stage-extension, unrelated). Resolve by supplying the same identity plus disposition (accepted, deferred, declined, covered) and evidence. The idea checkbox means its assessment is complete. Accepted implementation has separate plan stages. Re-read task metadata and idea records after resume, preserve manual checkbox edits, and check existing dispositions before asking again. Confirmed task ownership controls routing and privacy.
