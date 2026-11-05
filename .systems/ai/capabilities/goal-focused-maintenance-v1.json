@@ -45,7 +45,7 @@
     },
     ".systems/ai/capabilities/workflow-goal-focused-maintenance-v1.json": {
       "mode": "100644",
-      "sha256": "f101142dffb856d2e20b7feefea0a48c90b5335141707f2a88d1bb2f961b971b"
+      "sha256": "1efeb689af6b7e42b4ed43569a9f7b960fa22667cc9547e1cb39ba5438f81a83"
     },
     ".systems/ai/capabilities/workflow-intent-to-execution-brief-v1.json": {
       "mode": "100644",
@@ -113,7 +113,7 @@
     },
     ".systems/ai/core/dreaming-chat.md": {
       "mode": "100644",
-      "sha256": "aa9016c29a2ee7195c3f858ae7c68c7df52d6aa2f2c340e805acfd0ae3b62d8e"
+      "sha256": "c241b150f8422a3bd64d8ec245ad36715a37bfae6a0f5b0891c45e7d3c2e6fc9"
     },
     ".systems/ai/core/dreaming-maintenance.md": {
       "mode": "100644",
@@ -174,6 +174,10 @@
     ".systems/ai/core/luna-first.md": {
       "mode": "100644",
       "sha256": "78422a114136634085d87d69ebe86979325fce98bfb003bebc402e2a07dccbb3"
+    },
+    ".systems/ai/core/managed-storage.md": {
+      "mode": "100644",
+      "sha256": "35d4ef02ac14e54fac2c1b45df03b2e6ca1a273069c4d726444492a2b2f78adb"
     },
     ".systems/ai/core/management-agent-contract.md": {
       "mode": "100644",
@@ -265,7 +269,7 @@
     },
     ".systems/ai/core/silverbullet-tracker.md": {
       "mode": "100644",
-      "sha256": "d1edb92bf17d7203d148ad3b67d6eae4c2855c0f634e615d63a5337c8f65d6dd"
+      "sha256": "8c83be96d4f8eb6dc8081b18a7dafea9e416ba5632af380654434df84a943a90"
     },
     ".systems/ai/core/spor-drafts.md": {
       "mode": "100644",
@@ -293,7 +297,7 @@
     },
     ".systems/ai/core/task-efficiency.md": {
       "mode": "100644",
-      "sha256": "46e90c1cf87400e239692c21d0d7ed425be788f25a9f867c535fd84cba018b22"
+      "sha256": "a2eb3598041debfeb41eb6e04437a36df40ef026817a304bf1c2affec0afd9c6"
     },
     ".systems/ai/core/task-finalization.md": {
       "mode": "100644",
@@ -305,7 +309,7 @@
     },
     ".systems/ai/core/task-management.md": {
       "mode": "100644",
-      "sha256": "8b21443b454ead274f9331ab1e8ebe6880603f8c063804437364f178f10a4ee9"
+      "sha256": "08672ae1f9641be52caf7ab9b80d0884d48c95bba925e36b45f16a68726391e6"
     },
     ".systems/ai/core/task-resource-cleanup.md": {
       "mode": "100644",
@@ -1207,6 +1211,14 @@
       "mode": "100644",
       "sha256": "fc4b811bd9f06ac19a5dee147e87ce6f4b30e133388b547f825b7714cf192016"
     },
+    ".systems/scripts/analyze-task-usage": {
+      "mode": "100755",
+      "sha256": "12338cad02294427676138f3d339ebe08b3e1bc2b5eb6279f392b8f5ec7fd1eb"
+    },
+    ".systems/scripts/analyze_task_usage.py": {
+      "mode": "100644",
+      "sha256": "a34b1aca93e4526b8881247d6789964df310ea17332fc53532eb379b5440995a"
+    },
     ".systems/scripts/calculate-personal-ops-budgets": {
       "mode": "100755",
       "sha256": "53ad2e7625e4ed953ab34fe618f11e862d29687c454ecf064f44e326c5b7fd8b"
@@ -1363,6 +1375,10 @@
       "mode": "100755",
       "sha256": "12905167e6463addaf1a3227e15cc5458d58888f1e887bb03618a6803e9c2a12"
     },
+    ".systems/scripts/check-roadmap-tools": {
+      "mode": "100755",
+      "sha256": "16a52e3aee6ac9ce1efacce01f96e17533c283930466fa0e2a7a25ed0c2ae9e1"
+    },
     ".systems/scripts/check-shared-installation": {
       "mode": "100755",
       "sha256": "49bd9f273f1821c710035b877b9e79febd9cddf6bbcefdf8f555b8b3a1e9f9ee"
@@ -1373,7 +1389,7 @@
     },
     ".systems/scripts/check-spor-v4": {
       "mode": "100755",
-      "sha256": "618b100639a83c639df73d0db6cfb8bdbefc7ee21d2e7396a8963863989d991f"
+      "sha256": "5c98e4a135f1a11b5c02a28087648beae760ed7d9474f84170e38b538ebd8944"
     },
     ".systems/scripts/check-sprint-iteration": {
       "mode": "100755",
@@ -1489,7 +1505,7 @@
     },
     ".systems/scripts/dreaming_chat.py": {
       "mode": "100644",
-      "sha256": "1cf82c3701611e9f6743fb3ebd8caa6fbcb128308dd1013135d59a3d5ba3e1a9"
+      "sha256": "00f0f63eed83a651cade8de6d6451e18fa698ec7e5d4625429e6f6caa4c3f34d"
     },
     ".systems/scripts/dreaming_chat_dispatch.py": {
       "mode": "100644",
@@ -1741,7 +1757,7 @@
     },
     ".systems/scripts/render-personal-ops-daily-summary-v4": {
       "mode": "100755",
-      "sha256": "38aca94fb1d1568337590dcd6d4cf75938b124fb2970ab6d0545ec9413da507c"
+      "sha256": "2e4c37def6d9c61c00256ead4d6ca3ec66a1b6c63ec66fcb373a1606ab641537"
     },
     ".systems/scripts/render-personal-ops-weekly-summary": {
       "mode": "100755",
@@ -1773,7 +1789,7 @@
     },
     ".systems/scripts/silverbullet_tracker.py": {
       "mode": "100644",
-      "sha256": "194d41a84a2208bf41fc0d9666aa77f8036a0e1c88745412b264d74cb25c965c"
+      "sha256": "ebea6cec7e18ba4c40bf3270c638b9d3e090268f352682f75e0bad3e455df4df"
     },
     ".systems/scripts/silverbullet_tracker_http.py": {
       "mode": "100644",
@@ -1827,6 +1843,10 @@
       "mode": "100644",
       "sha256": "99d77eabf94f25984190ab2dd851534c55fbf2dadbbbcf269f105647f67a55b8"
     },
+    ".systems/scripts/storage-tools": {
+      "mode": "100755",
+      "sha256": "fadd6b04162c0d155fc0847178c3b03606257e584e03ed568c0906bd65378328"
+    },
     ".systems/scripts/style-profile": {
       "mode": "100755",
       "sha256": "7b9466b1383184f2435d98466f4f517e9c0c2145f05679db2a47032801591050"
@@ -1849,7 +1869,7 @@
     },
     ".systems/scripts/task-store": {
       "mode": "100755",
-      "sha256": "81618f074a322d0da0c0d51f67be32c7f6aa4ea9313aaa9c51cd257f5d12bff5"
+      "sha256": "26cf7db17aa57f458b2c90f7d6d8af9938e604625402e7afe4a154ec1e5f7f77"
     },
     ".systems/scripts/task_cleanup_adapter.py": {
       "mode": "100644",
@@ -1859,13 +1879,17 @@
       "mode": "100644",
       "sha256": "1bd798206e9ad66b2e729ae5b5f6925776d88f1eb3231c0f0a18ca975907718d"
     },
+    ".systems/scripts/task_ideas.py": {
+      "mode": "100644",
+      "sha256": "5153c3feedf05cb4312478982f7cdf805027a7817433852ccde868209a65a795"
+    },
     ".systems/scripts/task_identity.py": {
       "mode": "100644",
       "sha256": "a9360c6d8fc2c80b8125979756668725ea0e2a869c6099e01c561853a5742c11"
     },
     ".systems/scripts/task_store.py": {
       "mode": "100644",
-      "sha256": "6e051b904d07b3bfe68c05639778b4aa138c040aa1b0a08dec4f4a2a8b0dca53"
+      "sha256": "d038b11337d6cdb2c2a3ba23f546e2caf3e79cd238280f50aa1a4e65b6cd063e"
     },
     ".systems/scripts/test_dreaming_chat.py": {
       "mode": "100644",
@@ -1878,6 +1902,10 @@
     ".systems/scripts/test_dreaming_chat_maintenance.py": {
       "mode": "100644",
       "sha256": "bd8f9ccd6b902a9aca9c2eb260a198452179546a9a2cb89c5fb610717d7baf12"
+    },
+    ".systems/scripts/test_dreaming_chat_merge.py": {
+      "mode": "100644",
+      "sha256": "acf5670e58d0a43a9d5fa27d0a71e16a616b924f824a93e8e4b5cc12a13e634d"
     },
     ".systems/scripts/test_personal_ops_drafts.py": {
       "mode": "100644",
@@ -1922,6 +1950,10 @@
     ".systems/scripts/tests/test_critical_judgment.py": {
       "mode": "100644",
       "sha256": "aff1741e63796158f285e7197daa21df2899ab7ec2f4ed040c304e19d5a14d09"
+    },
+    ".systems/scripts/tests/test_daily_state_budget_display.py": {
+      "mode": "100644",
+      "sha256": "8a8c6415e8092ca21818b2c05a688780cb1b270c3cdf8a2f5814bf94615a823f"
     },
     ".systems/scripts/tests/test_dreaming_candidates.py": {
       "mode": "100644",
@@ -2041,7 +2073,7 @@
     },
     ".systems/scripts/tests/test_silverbullet_tracker.py": {
       "mode": "100644",
-      "sha256": "ec0df16a5bee8e9eef3aaec322e0f2f9ffdea1686ebd2f9f4073bb86bb5a1982"
+      "sha256": "0d6f0ec327501651db1f948ca39d24ae4e756cd846800f4a1d9da09dc2642b93"
     },
     ".systems/scripts/tests/test_silverbullet_tracker_http.py": {
       "mode": "100644",
@@ -2063,6 +2095,10 @@
       "mode": "100644",
       "sha256": "eae57c911873782aba01a799017dfc35be80e6dd7413d23e9c84a78d8e4eff8f"
     },
+    ".systems/scripts/tests/test_storage_tools.py": {
+      "mode": "100644",
+      "sha256": "016f6a215c823f1e108dee88766efb7f224ab7046c1cd9570d0c3f9343a069ad"
+    },
     ".systems/scripts/tests/test_style_profile.py": {
       "mode": "100644",
       "sha256": "ef0bd589a58b76ef522c1f5b0ff0832708fc407fc201440d83c61da7988148db"
@@ -2071,9 +2107,17 @@
       "mode": "100644",
       "sha256": "688104cdc061f322aa2c468168557c5f1e7a6f3b2ca9244e75907a88bf81d51a"
     },
+    ".systems/scripts/tests/test_task_ideas.py": {
+      "mode": "100644",
+      "sha256": "4f1e1c3c4b58eeb43e346951cadf87311e52b6d5e3740eff0a459df977bdcbf7"
+    },
     ".systems/scripts/tests/test_task_resource_cleanup.py": {
       "mode": "100644",
       "sha256": "32e01a0972dff207ecc6617496f4bf11ca7f6043842239706485f200fca17702"
+    },
+    ".systems/scripts/tests/test_task_usage.py": {
+      "mode": "100644",
+      "sha256": "018fb7f527fb5ed618ac777a268e48329730053ea090b075efd9111ce5a8ae27"
     },
     ".systems/scripts/tests/test_validation_input_guard.py": {
       "mode": "100644",
@@ -2153,11 +2197,11 @@
     },
     ".systems/scripts/validate-ai-system": {
       "mode": "100755",
-      "sha256": "fc513f3c8a94d85823aff16bae2c59a350f524a5cb64ca0ef0873b8b90cf0aff"
+      "sha256": "33a6109f470ceeff465418c3e031a11b0c4a2f684e378aa22965fa31c177758a"
     },
     ".systems/scripts/validation-dependencies.json": {
       "mode": "100644",
-      "sha256": "9f88ed4a4c4e5010b0f411f91ea1685269f5058cddbe6c6271a7ea9c08b1d918"
+      "sha256": "b4b29158504c8269de9f9f14f47a58468b4fb67f4e4709bc699a88b94e68571f"
     },
     ".systems/scripts/validation_input_guard.py": {
       "mode": "100644",
