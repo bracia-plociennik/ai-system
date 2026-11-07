@@ -39,6 +39,78 @@ class Sessions(unittest.TestCase):
                'findings':[f],'synthesis_complete':True}
         value.update(overrides); chat.atomic(p['drafts']/'checkpoint.json',value)
 
+    def batch_fixture(self):
+        for i in range(4):
+            (self.root / 'sources' / ('extra%d.md' % i)).write_text('More documented result %d.\n' % i)
+        with patch.object(chat, 'MAX_INPUT_BYTES', 30):
+            _, state, paths = self.begin()
+        return state, paths
+
+    def advance(self, state, number, stamp=None):
+        with patch.object(chat, 'MAX_INPUT_BYTES', 30), patch.object(chat, 'clock', return_value=stamp or self.stamp):
+            return chat.next_batch(self.config, state['cycle_id'], number, stamp or self.stamp)
+
+    def test_all_batches_share_cycle_budget_and_cumulative_evidence(self):
+        state, p = self.batch_fixture(); original = state['deadline']; reviewed = []
+        for number in range(1, 8):
+            reviewed += [cid for cid in state['input_hashes'] if cid not in reviewed]
+            self.submit(state, p, revision=number, reviewed_chunk_ids=reviewed, synthesis_complete=False)
+            state = self.advance(state, number)
+            self.assertEqual(state['deadline'], original)
+            self.assertEqual(state['attempt'], 1)
+            if state['batch_result'] == 'exhausted': break
+        self.assertEqual(state['batch_result'], 'exhausted')
+        self.assertGreater(state['batch_index'], 1)
+        self.assertEqual(len(state['accepted']), 5)
+        self.assertEqual(len(list(p['inputs'].glob('*.json'))), 6)
+        self.submit(state, p, revision=number+1, reviewed_chunk_ids=reviewed)
+        result = chat.accept(self.config, state['cycle_id'], self.stamp, final=True)
+        self.assertEqual(result['coverage_counts']['reviewed'], 5)
+        self.assertEqual(result['coverage_counts'].get('pending', 0), 0)
+        self.assertEqual(result['findings'][0]['facts'], ['The source reports a result.'])
+
+    def test_batch_retry_reconciles_after_lost_reply(self):
+        state, p = self.batch_fixture(); self.submit(state, p, synthesis_complete=False)
+        new = self.advance(state, 1); again = self.advance(state, 1)
+        self.assertEqual(new['input_hashes'], again['input_hashes'])
+        self.assertEqual(new['batch_index'], again['batch_index'])
+        self.assertEqual(again['batch_result'], 'reconciled')
+
+    def test_batch_cannot_skip_unread_inputs_or_reset_deadline(self):
+        state, p = self.batch_fixture()
+        self.submit(state, p, reviewed_chunk_ids=[], findings=[], synthesis_complete=False)
+        with self.assertRaisesRegex(ValueError, 'batch-not-reviewed'): self.advance(state, 1)
+        self.submit(state, p, revision=2, synthesis_complete=False)
+        late = self.stamp + timedelta(seconds=chat.BUDGET-chat.RESERVE-60)
+        result = self.advance(state, 1, late)
+        self.assertEqual(result['batch_result'], 'time-budget')
+        self.assertEqual(result['input_hashes'], state['input_hashes'])
+        self.assertEqual(result['deadline'], state['deadline'])
+
+    def test_batch_source_change_never_replaces_snapshot(self):
+        state, p = self.batch_fixture(); self.submit(state, p, synthesis_complete=False)
+        for f in (self.root/'sources').glob('extra*.md'): f.write_text('Changed.\n')
+        with self.assertRaisesRegex(ValueError, 'batch-source-changed'): self.advance(state, 1)
+        self.assertEqual(chat.load(p['state'])['input_hashes'], state['input_hashes'])
+
+    def test_batch_reconcile_checks_new_snapshot_integrity(self):
+        state, p = self.batch_fixture(); self.submit(state, p, synthesis_complete=False)
+        new = self.advance(state, 1)
+        cid = new['active_batch_ids'][0]
+        chunk = chat.load(p['inputs']/(cid+'.json')); chunk['text'] = 'tampered'
+        chat.atomic(p['inputs']/(cid+'.json'), chunk)
+        with self.assertRaisesRegex(ValueError, 'snapshot-drift'): self.advance(state, 1)
+
+    def test_batch_requires_unfinished_synthesis_and_valid_number(self):
+        state, p = self.batch_fixture(); self.submit(state, p)
+        with self.assertRaisesRegex(ValueError, 'batch-analysis-closed'): self.advance(state, 1)
+
+    def test_batch_scope_revocation_and_stale_request_fail_closed(self):
+        state, p = self.batch_fixture(); self.submit(state, p, synthesis_complete=False)
+        with self.assertRaisesRegex(ValueError, 'stale-batch-request'): self.advance(state, 100)
+        self.cfg['authority_ref'] = 'revoked'; chat.atomic(self.config, self.cfg)
+        with self.assertRaisesRegex(ValueError, 'configuration-revoked'): self.advance(state, 1)
+
     def test_prepare_is_not_review(self):
         _,s,_=self.begin()
         self.assertFalse(s['accepted']); self.assertEqual(s['coverage'][0]['state'],'pending')

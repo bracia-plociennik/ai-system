@@ -27,6 +27,7 @@ RESERVE = 300
 MAX_JSON = 32 * 1024 * 1024
 MAX_CHUNKS = 128
 MAX_INPUT_BYTES = 512 * 1024
+MIN_BATCH_SECONDS = 120
 CYCLE = re.compile(r'chat-(?:\d{4}-\d{2}-\d{2}|manual-\d{8}T\d{6}-[a-f0-9]{8})\Z')
 
 
@@ -229,7 +230,7 @@ def begin(config_path, stamp=None, manual=False, cycle=None):
             already = set(previous.get('partial', {}).get(row['key'], [])) if same_scope else set()
             already &= {c['chunk_id'] for c in material}
             remaining = [c for c in material if c['chunk_id'] not in already]
-            by_file[row['key']] = {**row, 'all_chunk_ids': row['chunk_ids'], 'prior_chunk_ids': sorted(already),
+            by_file[row['key']] = {**row, 'priority': priority, 'all_chunk_ids': row['chunk_ids'], 'prior_chunk_ids': sorted(already),
                                   'selected_chunk_ids': []}
             queues[priority][row['source_id']].extend((row['key'],c) for c in remaining)
             coverage.append({**row, 'state': 'pending'})
@@ -262,7 +263,8 @@ def begin(config_path, stamp=None, manual=False, cycle=None):
                  'files': by_file, 'coverage': coverage, 'accepted': [], 'findings': [],
                  'previous_findings': fresh_prior, 'finding_lineage': lineage,
                  'discarded_previous_findings': len(prior) - len(fresh_prior), 'checkpoint_revision': 0,
-                 'manual': manual, 'authority': 'advisory-only', 'export_policy': 'owner-private-only'}
+                 'manual': manual, 'authority': 'advisory-only', 'export_policy': 'owner-private-only',
+                 'batch_index': 1, 'active_batch_ids': [c['chunk_id'] for c in chunks]}
         brief = {k: state[k] for k in ('cycle_id','attempt','deadline','analysis_deadline','checkpoint_revision')}
         brief.update({'chunks': [{'chunk_id': c['chunk_id'], 'file': c['chunk_id'] + '.json',
                                   'source_id': c['ref']['source_id'], 'bytes': c['end'] - c['start']} for c in chunks],
@@ -270,6 +272,7 @@ def begin(config_path, stamp=None, manual=False, cycle=None):
                                              'summary': f['summary']} for f in state['previous_findings']][-100:],
                       'decisions': cfg['decisions'], 'source_count': len(cfg['sources']),
                       'selection_policy':'new/changed first; bootstrap last7 days; source round-robin; older backlog remains queued',
+                      'batch_index': 1, 'next_batch_action': 'next-batch',
                       'checkpoint_contract': {'revision': 'consecutive integer from 1', 'cycle_id': cycle,
                                                'reviewed_chunk_ids': 'cumulative list actually reviewed',
                                                'findings': 'cumulative v2 findings; cite evidence_ids',
@@ -277,6 +280,89 @@ def begin(config_path, stamp=None, manual=False, cycle=None):
         atomic(p['inputs'] / 'brief.json', brief)
         atomic(p['state'], state)
     return cfg, state
+
+
+def batch_brief(cfg, state, p):
+    ids = state.get('active_batch_ids', list(state['input_hashes']))
+    chunks = [load(p['inputs'] / (cid + '.json')) for cid in ids]
+    need(all(digest(c) == state['input_hashes'][c['chunk_id']] for c in chunks), 'snapshot-drift')
+    return {**{k: state[k] for k in ('cycle_id', 'attempt', 'deadline', 'analysis_deadline')},
+            'checkpoint_revision': state['checkpoint_revision'],
+            'batch_index': state.get('batch_index', 1),
+            'chunks': [{'chunk_id': c['chunk_id'], 'file': c['chunk_id'] + '.json',
+                        'source_id': c['ref']['source_id'], 'bytes': c['end'] - c['start']} for c in chunks],
+            'source_count': len(cfg['sources']), 'decisions': cfg['decisions'],
+            'previous_findings': [], 'next_batch_action': 'next-batch',
+            'selection_policy': 'same original snapshot; source round-robin; cumulative checkpoint retained'}
+
+
+def next_batch(config_path, cycle, after_batch, stamp=None):
+    """Extend one native turn's prepared inputs; never start another cycle/model.
+
+    An explicit batch number makes a lost command reply safely replayable. The
+    existing snapshot fingerprints, configuration and original deadlines remain
+    authoritative. Only the guarded reader may dereference original source paths.
+    """
+    stamp = stamp or clock()
+    cfg = config(load(config_path)); p = paths(cfg, cycle)
+    accept(config_path, cycle, stamp)
+    with lock(p['control']):
+        s = load(p['state'])
+        need(s['config_digest'] == digest(cfg) and s['scope_key'] == session_key(cfg), 'batch-scope-drift')
+        need(s['status'] == 'running' and not s.get('synthesis_complete'), 'batch-analysis-closed')
+        index = s.get('batch_index', 1)
+        need(type(after_batch) is int and after_batch >= 1, 'invalid-batch-index')
+        need(after_batch in (index, index - 1), 'stale-batch-request')
+        if after_batch == index - 1:
+            # Reconcile the original extension, without reading more sources.
+            atomic(p['inputs'] / 'brief.json', batch_brief(cfg, s, p))
+            return {**s, 'batch_result': 'reconciled'}
+        need(set(s.get('active_batch_ids', s['input_hashes'])) <= set(s['accepted']), 'batch-not-reviewed')
+        if stamp.timestamp() + MIN_BATCH_SECONDS >= s['analysis_deadline']:
+            return {**s, 'batch_result': 'time-budget'}
+        queues = {0: defaultdict(deque), 1: defaultdict(deque)}
+        sources = {x['id']: x for x in cfg['sources']}
+        for key, row in s['files'].items():
+            remaining = set(row['all_chunk_ids']) - set(row['prior_chunk_ids']) - set(row['selected_chunk_ids'])
+            if remaining:
+                queues[row.get('priority', 1)][row['source_id']].append((key, row, remaining))
+        if not any(q for group in queues.values() for q in group.values()):
+            return {**s, 'batch_result': 'exhausted'}
+        selected = []; total = 0; batch_full = False
+        material_cache = {}
+        # Read only source files actually reached by this batch. No full-corpus
+        # scan per chunk, and no new source enrollment or re-snapshot on restart.
+        for priority in (0, 1):
+            if batch_full: break
+            active = deque(queues[priority])
+            while active and len(selected) < MAX_CHUNKS:
+                need(clock().timestamp() + MIN_BATCH_SECONDS < s['analysis_deadline'], 'batch-preparation-deadline')
+                sid = active.popleft(); q = queues[priority][sid]
+                key, row, remaining = q[0]
+                if key not in material_cache:
+                    material = source_chunks(sources[sid], row, read(sources[sid], row))
+                    need(material[0]['ref']['sha256'] == row['sha256'] and
+                         [c['chunk_id'] for c in material] == row['all_chunk_ids'], 'batch-source-changed')
+                    material_cache[key] = deque(c for c in material if c['chunk_id'] in remaining)
+                candidates = material_cache[key]; c = candidates.popleft(); size = len(c['text'].encode())
+                if total + size > MAX_INPUT_BYTES:
+                    # End this batch rather than discarding the head of the
+                    # backlog or starving a large fragment on every iteration.
+                    batch_full = True
+                    break
+                selected.append((key, c)); total += size
+                if not candidates: q.popleft()
+                if q: active.append(sid)
+        need(selected, 'empty-next-batch')
+        for key, c in selected:
+            atomic(p['inputs'] / (c['chunk_id'] + '.json'), c)
+            s['input_hashes'][c['chunk_id']] = digest(c)
+            s['files'][key]['selected_chunk_ids'].append(c['chunk_id'])
+        s['batch_index'] = index + 1
+        s['active_batch_ids'] = [c['chunk_id'] for _, c in selected]
+        atomic(p['state'], s)
+        atomic(p['inputs'] / 'brief.json', batch_brief(cfg, s, p))
+        return {**s, 'batch_result': 'prepared'}
 
 
 def logical_key(item):
@@ -538,14 +624,16 @@ def render_report(cfg, s):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=['begin','accept','finalize','inspect'])
+    parser.add_argument('action', choices=['begin','accept','finalize','inspect','next-batch'])
     parser.add_argument('--config', required=True); parser.add_argument('--cycle'); parser.add_argument('--manual',action='store_true')
+    parser.add_argument('--after-batch', type=int)
     a = parser.parse_args()
     if a.action == 'begin': _, result = begin(a.config, manual=a.manual, cycle=a.cycle)
+    elif a.action == 'next-batch': result = next_batch(a.config, a.cycle, a.after_batch)
     elif a.action == 'inspect':
         cfg = config(load(a.config)); result = load(paths(cfg,a.cycle)['state'])
     else: result = accept(a.config,a.cycle,final=a.action == 'finalize')
-    print(json.dumps({k:result[k] for k in ('cycle_id','status','attempt','checkpoint_revision','deadline')},ensure_ascii=False))
+    print(json.dumps({k:result[k] for k in ('cycle_id','status','attempt','checkpoint_revision','deadline','batch_index','batch_result') if k in result},ensure_ascii=False))
 
 
 if __name__ == '__main__': main()

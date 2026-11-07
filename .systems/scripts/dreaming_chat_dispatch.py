@@ -254,6 +254,16 @@ W cyklu używaj jednego ustalenia dla każdej pary topic/lens i zachowuj jej klu
 Wcześniejsze facts i evidence_ids zachowuj dosłownie; możesz je rozszerzać. Podsumowanie, interpretacje,
 niewiadome i propozycje możesz doprecyzować na podstawie nowych dowodów bez usuwania wcześniejszych faktów.
 Krótkie podsumowania obszarów mają umożliwić syntezę bez kopiowania wszystkich dowodów.
+Po przeanalizowaniu CAŁEJ bieżącej partii zapisz checkpoint z synthesis_complete=false.
+Następnie pobierz kolejną partię tego SAMEGO cyklu poleceniem deterministycznym:
+python3 -B {Path(__file__).with_name('dreaming_chat.py')} next-batch --config {s['config_path']} --cycle {s['cycle_id']} --after-batch <batch_index z brief.json>
+To jedyny dopuszczony pośredni odczyt oryginałów: wykonuje go Source Guard w helperze, nie Ty.
+Po wyniku prepared lub reconciled przeczytaj nowy brief.json i jego nowe fragmenty, zachowując wszystkie
+wcześniejsze reviewed_chunk_ids, facts i evidence_ids w tym samym checkpoincie. Powtarzaj do exhausted
+albo time-budget. Nie kończ po pierwszej partii tylko dlatego, że powstały ustalenia.
+Przy utracie odpowiedzi ponów wyłącznie to samo --after-batch; nie zgaduj kolejnego numeru.
+Przy błędzie integralności/drift przerwij dalsze pobieranie i zrób syntezę faktycznie przeczytanego zakresu.
+Nie uruchamiaj begin, finalize, schedulera ani nowego cyklu. Helper nie uruchamia modelu ani sieci.
 Zakończ analizę do epoch {s['analysis_deadline']}; cały budżet kończy się {s['deadline']}.
 Zapisz końcowy checkpoint z synthesis_complete=true tylko po rzeczywistej syntezie przeczytanego zakresu.
 Na koniec przedstaw tutaj najważniejsze wnioski, niewiadome, pozostały zakres i informację, że kontroler
@@ -309,8 +319,15 @@ def monitor(client,module,c,cfg,s,p,d):
         checkpoint=p['drafts']/'checkpoint.json'
         if d.get('phase')=='analysis' and checkpoint.exists():
             draft=session.load(checkpoint)
+            trusted=session.load(p['state'])
+            need(trusted['cycle_id']==s['cycle_id'] and trusted['deadline']==s['deadline'], 'cycle-budget-drift')
+            s=trusted
             if draft.get('revision',0)>s['checkpoint_revision']:
-                s=session.accept(c['source_config'],s['cycle_id'])
+                try: s=session.accept(c['source_config'],s['cycle_id'])
+                except BlockingIOError:
+                    # The analyst's next-batch operation owns the same lock.
+                    # Retain the turn and reconcile at the next bounded poll.
+                    time.sleep(c['poll_seconds']); continue
         turn=own_turn(client,module,c,d['client_id'],d.get('turn_id'))
         if turn and turn['status'] in ('completed','failed','interrupted'):
             if turn['status']=='completed' and d.get('phase')=='summary':

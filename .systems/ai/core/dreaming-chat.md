@@ -83,3 +83,20 @@ without a matching decision-scope binding supplies no cross-scope alias authorit
 A legacy/reset cache with existing owner decisions and no verifiable lineage
 scope blocks preparation pending explicit reconciliation instead of reopening
 rejected work under a changed global ID. No decision is guessed or migrated.
+
+## Multiple batches within the original native turn
+
+The initial brief is a bounded batch, not the cycle's full analysis allowance.
+After reviewing it, the main-chat analyst saves a cumulative nonfinal checkpoint
+and calls `dreaming_chat.py next-batch --config ... --cycle ... --after-batch N`.
+This deterministic Source Guard command extends only the same cycle and writes a
+new brief; no model/network process, new turn, source enrollment or deadline reset.
+The analyst reads every newly prepared chunk, preserves earlier findings/facts and
+evidence verbatim, and repeats until exhausted or time-budget, reserving synthesis.
+Batch numbers reconcile lost replies without preparing a second batch. Unreviewed
+inputs cannot be advanced. Source/config/implementation changes stop preparation;
+no source version is silently replaced. The controller reloads trusted batch state
+before accepting checkpoints. Original snapshots/reports and terminal cycles stay
+immutable. Global coverage counts complete files, not fragments or registry roots.
+`completed` describes synthesis of actual reviewed scope; pending archive remains
+explicit. Only the helper may dereference registered original paths in this stage.

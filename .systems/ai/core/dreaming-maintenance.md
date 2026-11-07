@@ -60,3 +60,10 @@ maintenance's600second budget; those mechanisms are not selected here.
 artifact-reconcile uses the paired same-identity path-move consumer. Optional workspace sync_generated accepts only canonical-v4-checkins and tracker-projection; canonical date/year paths are checked and credential-screened. Arbitrary new files still need explicit reviewed inventory.
 
 workbook-refresh invokes only native export of committed ledger state, retaining manual drafts and receipts. Open/conflicting views block. No import, time event or WEP approval is permitted; workbook binary/backups are outside text repository sync.
+
+Failed fixed commands retain a closed diagnostic receipt: exit code, output hash,
+category and a recognized validator ID when available. It contains no raw process
+output, paths, values or arbitrary exception prose. DNS/authentication, noncanonical
+upstream, validator failure, timeout and signal remain distinguishable. A retained
+failure is not retried blindly or promoted to update success; actual official full
+validation and smoke are still required. Historical receipts are not rewritten.

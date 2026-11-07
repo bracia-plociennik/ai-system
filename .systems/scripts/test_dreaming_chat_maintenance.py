@@ -41,6 +41,42 @@ class Maintenance(unittest.TestCase):
 
     def operator(self): return maintenance.Operator(self.config, self.state)
 
+    def test_failed_updater_receipt_has_safe_validator_reason(self):
+        from types import SimpleNamespace
+        output = b'private original content\nAI_WORKFLOW_VALIDATE_COMPLETE profile=full result=fail exit_code=1 check=.systems/scripts/check-status-consistency\n'
+        self.policy['operations'] = [{'id': 'update', 'kind': 'product-update', 'target': 'workflow'}]
+        self.policy['products'] = {'workflow': {'root': str(self.workflow), 'kind': 'workflow',
+            'remote_url': 'https://github.com/example/workflow.git', 'branch': 'main'}}
+        scripts = self.workflow/'.systems/scripts'; (scripts/'update-from-upstream').write_text('# fixture')
+        chat.atomic(self.config, self.policy)
+        state = chat.load(self.state); state['policy_digest'] = maintenance.digest(self.policy);chat.atomic(self.state,state)
+        def command(argv, **kw):
+            return SimpleNamespace(pid=999, returncode=1, communicate=lambda **kw: (output, b'password=DoNotReturnThisSecret'))
+        with patch.object(maintenance.Operator, 'git', return_value=self.policy['products']['workflow']['remote_url']), patch.object(maintenance.subprocess, 'Popen', side_effect=command):
+            receipt = self.operator().execute('update')
+        self.assertEqual(receipt['status'], 'blocked')
+        self.assertEqual(receipt['diagnostic']['category'], 'validation-fail')
+        self.assertEqual(receipt['diagnostic']['check'], 'check-status-consistency')
+        self.assertNotIn('DoNotReturn', json.dumps(receipt))
+        self.assertNotIn('private original', json.dumps(receipt))
+        self.assertEqual(self.operator().execute('update'), receipt)
+
+    def test_command_diagnostics_closed_vocabulary(self):
+        for code, out, err, category in [
+            (128, b'', b'Could not resolve host: private.example', 'network-dns'),
+            (128, b'', b'Authentication failed for private URL', 'git-authentication'),
+            (1, b'AI_WORKFLOW_UPSTREAM_STATE relation=diverged local_only=1', b'', 'noncanonical-upstream'),
+            (124, b'', b'', 'command-timeout'), (-15, b'', b'', 'command-signal'),
+            (1, b'secret path private original data', b'', 'command-failed')]:
+            d = maintenance.command_diagnostic(['update-from-upstream'], code, out, err)
+            self.assertEqual(d['category'], category)
+            self.assertNotIn('private', json.dumps(d))
+            self.assertEqual(len(d['output_sha256']), 64)
+        misleading = b'AI_WORKFLOW_VALIDATE_COMPLETE result=pass check=.systems/scripts/check-status-consistency'
+        self.assertEqual(maintenance.command_diagnostic([], 1, misleading)['category'], 'command-failed')
+        spoof = b'AI_WORKFLOW_VALIDATE_COMPLETE result=fail check=.systems/scripts/check-private-secretvalue'
+        self.assertEqual(maintenance.command_diagnostic([], 1, spoof)['check'], 'other-validator')
+
     def test_restart_retains_deadlines_and_policy_revocation_blocks(self):
         old = chat.load(self.state)
         again = maintenance.start(self.config, self.state, 'chat-2026-11-01', time.time() + 100)

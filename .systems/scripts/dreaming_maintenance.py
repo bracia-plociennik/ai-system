@@ -34,6 +34,42 @@ SECRET = re.compile(rb'(?i)(-----BEGIN .*PRIVATE KEY|\bBearer\s+\S+|\b(?:gh[pous
 SLUG = re.compile(r'[a-z0-9]+(?:-[a-z0-9]+)*')
 
 
+class CommandFailure(ValueError):
+    """Closed diagnostic vocabulary; raw stdout/stderr never enters receipts."""
+    def __init__(self, reason, diagnostic):
+        super().__init__(reason)
+        self.diagnostic = diagnostic
+
+
+def command_diagnostic(argv, status, out=b'', err=b''):
+    # Parse fixed marker fields, never exception strings or arbitrary log lines.
+    output = out.decode('utf-8', errors='replace')
+    raw = (out + b'\n' + err).lower()
+    reason = 'command-failed'
+    check = None
+    marker = re.search(r'^AI_WORKFLOW_VALIDATE_COMPLETE .*?result=(fail|timeout|interrupted)\b.*?check=(\S+)', output, re.M)
+    if marker:
+        reason = 'validation-' + marker.group(1)
+        allowed = {'check-status-consistency', 'check-qa-evidence', 'check-required-artifacts',
+                   'check-contract-compliance', 'check-validation-concurrency', 'check-naming',
+                   'check-full-qa-verification', 'check-validator-smoke-tests',
+                   'check-execution-efficiency', 'check-goal-focused-maintenance'}
+        name = marker.group(2).removeprefix('.systems/scripts/')
+        check = name if name in allowed else 'other-validator'
+    elif re.search(r'^AI_WORKFLOW_UPSTREAM_STATE relation=(ahead|diverged)\b', output, re.M):
+        reason = 'noncanonical-upstream'
+    elif b'could not resolve host' in raw or b'temporary failure in name resolution' in raw:
+        reason = 'network-dns'
+    elif b'authentication failed' in raw or b'could not read username' in raw or b'permission denied (publickey)' in raw:
+        reason = 'git-authentication'
+    elif status == 124: reason = 'command-timeout'
+    elif status < 0: reason = 'command-signal'
+    result = {'category': reason, 'exit_code': status,
+              'output_sha256': hashlib.sha256(out + b'\0' + err).hexdigest()}
+    if check: result['check'] = check
+    return result
+
+
 def sha(path):
     return hashlib.sha256(chat.read_bytes(path)).hexdigest()
 
@@ -187,9 +223,11 @@ class Operator:
             try: process.communicate(timeout=2)
             except subprocess.TimeoutExpired:
                 os.killpg(process.pid, signal.SIGKILL); process.communicate()
-            raise ValueError('maintenance-command-timeout') from None
+            raise CommandFailure('maintenance-command-timeout', command_diagnostic(argv, 124)) from None
         # Never copy raw stdout/stderr (possibly private) into model logs.
-        need(process.returncode in ((0, 1) if return_status else (0,)), 'maintenance-command-failed:' + Path(argv[0]).name)
+        if process.returncode not in ((0, 1) if return_status else (0,)):
+            raise CommandFailure('maintenance-command-failed:' + Path(argv[0]).name,
+                                 command_diagnostic(argv, process.returncode, out, err))
         need(len(out) <= 4 * 1024 * 1024, 'maintenance-output-too-large')
         text = out.decode('utf-8', errors='strict').strip()
         return (text, process.returncode) if return_status else text
@@ -495,6 +533,7 @@ class Operator:
                 # retried as a new commit. No raw subprocess diagnostics exported.
                 receipt.update(status='uncertain' if receipt.get('commit') else 'blocked',
                                reason=str(error)[:200])
+                if isinstance(error, CommandFailure): receipt['diagnostic'] = error.diagnostic
             self.checkpoint()
             return receipt
 
@@ -533,7 +572,9 @@ def controller_update_barrier(policy_path, state_path, workspace):
                 operator.git(repo,'fetch','origin',target['branch'])
                 before=operator.git(repo,'rev-parse','HEAD');upstream=operator.git(repo,'rev-parse','FETCH_HEAD')
             except (ValueError,OSError) as error:
-                receipt.update(status='blocked',reason=str(error)[:200]);operator.checkpoint();continue
+                receipt.update(status='blocked',reason=str(error)[:200])
+                if isinstance(error, CommandFailure): receipt['diagnostic'] = error.diagnostic
+                operator.checkpoint();continue
             if before == upstream:
                 receipt.update(status='no-change',reason='official-source-equal');operator.checkpoint();continue
             _, behind=operator.git(repo,'merge-base','--is-ancestor',before,upstream,return_status=True)
@@ -546,7 +587,9 @@ def controller_update_barrier(policy_path, state_path, workspace):
             try:
                 result=operator.product(target,controller_barrier=True)
             except (ValueError,OSError) as error:
-                receipt.update(status='blocked',reason=str(error)[:200]);operator.checkpoint()
+                receipt.update(status='blocked',reason=str(error)[:200])
+                if isinstance(error, CommandFailure): receipt['diagnostic'] = error.diagnostic
+                operator.checkpoint()
                 raise ValueError('controller-update-failed-requires-reconciliation') from None
             receipt.update(result);operator.checkpoint()
             return {'restart_required':True}
