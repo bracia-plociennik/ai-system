@@ -11,7 +11,7 @@
   "sources": {
     ".systems/ai/core/command-routing.md": {
       "mode": "100644",
-      "sha256": "be90a5a235fbbfb9fe215d615c385ea48bb6007127d7fcc20c80c794a7a1dae0"
+      "sha256": "e997074b833423c1a9e9c15affb3b35410202f8baa94070692a4686b88753638"
     },
     ".systems/ai/core/delivery-constraints.md": {
       "mode": "100644",

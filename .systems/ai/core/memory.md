@@ -63,7 +63,7 @@ When `.systems/ai/core/project-orchestration.md` applies, the target AI Workflow
 
 `.systems/ai/core/end-of-task-capture.md` handles chat-end prompts such as `Koniec pracy`, `Koniec zadania`, `to koniec zadania`, `dziękuję, utrwal wiedzę`, and `end task and capture knowledge`.
 
-Default End-of-Task Capture output is proposal-only. Exact `Koniec pracy` and `Koniec zadania` mean `capture-now` and provide owner-approved capture intent for the current clear scope. Durable memory, distillation, checkpoint, System Insights, External Memory, or status/evidence writes still require a clear target, selected workspace, privacy/scope check, quality, evidence, and write permission.
+End-of-Task Capture follows the current owner intent and the incremental whole-chat coverage in end-of-task-capture.md. Read-only output has zero durable effects. Unclear capture authority remains proposal-only. Exact `Koniec pracy` and `Koniec zadania` mean `capture-now` and provide owner-approved capture intent for the current clear scope. Durable memory, distillation, checkpoint, System Insights, External Memory, or status/evidence writes still require a clear target, selected workspace, privacy/scope check, quality, evidence, and write permission.
 
 End-of-Task Capture must not store raw client data in `system-insights/` and must not store product-domain lessons in `external-memory/`.
 

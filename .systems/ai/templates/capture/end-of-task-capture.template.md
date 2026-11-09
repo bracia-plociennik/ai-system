@@ -5,9 +5,19 @@
 - Precedence check:
 - Work mode:
 - Source scope reviewed:
+- Conversation scope:
+- Coverage start:
+- Coverage end:
+- Prior capture evidence:
+- Topic coverage:
+- History coverage:
+- Persisted coverage:
+- Resume point:
+- Readback verification:
+- Uncaptured items:
 - Completion state:
 - Capture targets:
-- Capture mode: <capture-now|proposal-only>
+- Capture mode: <capture-now|proposal-only|read-only>
 - Writes allowed:
 - Owner approval:
 - Privacy/scope check:

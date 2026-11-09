@@ -215,7 +215,15 @@ class Fixtures(unittest.TestCase):
 
     def test_all_declared_negative_causes_are_specific(self):
         cases = json.loads((SCRIPTS / "smoke/negative-expectations.json").read_text())["cases"]
-        self.assertEqual(len(cases), 223)
+        self.assertEqual(len(cases), 228)
+        for name in (
+            "end-of-task-capture-requires-coverage-start",
+            "end-of-task-capture-requires-topic-coverage",
+            "end-of-task-capture-requires-readback",
+            "end-of-task-capture-blocks-read-only-write",
+            "end-of-task-capture-blocks-unverified-boundary",
+        ):
+            self.assertEqual(cases[name]["suite"], "core", name)
         self.assertEqual(cases["execution-modes-missing-contract"]["suite"], "core")
         self.assertEqual(cases["orchestration-parallel-unnegotiated-workflow"]["suite"], "core")
         self.assertEqual(cases["orchestration-parallel-stale-source"]["suite"], "core")
