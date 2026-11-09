@@ -97,6 +97,8 @@ End-of-Task Capture routes through `.systems/ai/core/end-of-task-capture.md` whe
 
 Exact `Koniec pracy` and `Koniec zadania` mean `capture-now` and cannot end as acknowledge-only responses. Other completion wording is capture review/proposal by default unless it contains explicit durable capture intent. Capture-now still requires clear target, selected workspace, scope, privacy, quality, evidence, and write permission.
 
+Direct `Zdestyluj i zapisz`, `Zdestyluj i zapisz wiedzę`, standalone `Koniec` and standalone `Kończymy` use end-of-task-capture.md Incremental whole-chat coverage. Review the full uncaptured conversation interval and all topics. Explicit `read-only`, `tylko w czacie` or `bez zapisu` selects inline-only output with zero durable effects. Quoted/example/idea-validation wording supplies no current capture trigger. Preserve formal-phase precedence and the separate `koniec bloku` route. Unfinished work receives factual status and a resume point while formal quality remains pending.
+
 Precedence remains: `Zrób distillation` routes to distillation, not End-of-Task Capture. `Zrób checkpoint` routes to checkpoint, not End-of-Task Capture. `Zrób final check` routes to final check, not End-of-Task Capture. `Zrób final review` routes to final review, not final check. Commit readiness, push readiness, contract-compliance, and Knowledge Capture Gate routes keep priority over End-of-Task Capture.
 
 For substantive AI System or AI Workflow upgrades, apply `.systems/ai/core/cross-system-upgrade-handoff.md` before commit or handoff. `Cross-system impact: pending` blocks that boundary; `yes` requires one privacy-safe External Memory handoff in the selected workspace.

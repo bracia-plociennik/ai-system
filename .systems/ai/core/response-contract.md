@@ -251,3 +251,7 @@ existing intake and risk/approval/quality gates, without an extra mandatory phas
 or per-answer artifacts. State specific unknowns, stop research when evidence is
 sufficient, and stop work at accepted completion. Keep current model and explicit
 owner-only delegation. No universal minutes limit or automatic production action.
+
+## Incremental chat-end confirmation
+
+Use end-of-task-capture.md for the full uncaptured conversation interval and per-topic coverage. Confirm the actual saved range, references, uncovered items and useful resume point briefly. Read-only requests receive their summary or export inline, with zero durable effects. A no-new-knowledge result is complete when every relevant topic is already covered. Missing implementation QA remains visible as unfinished work.

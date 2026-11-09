@@ -1115,6 +1115,31 @@
       "suite": "quality",
       "exit_code": 1,
       "diagnostic": "Cross-system handoff contains a raw client or credential marker"
+    },
+    "end-of-task-capture-requires-coverage-start": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing end-of-task capture reference in .systems/ai/templates/capture/end-of-task-capture.template.md: incremental template field: Coverage start"
+    },
+    "end-of-task-capture-requires-topic-coverage": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing end-of-task capture reference in .systems/ai/templates/capture/end-of-task-capture.template.md: incremental template field: Topic coverage"
+    },
+    "end-of-task-capture-requires-readback": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "Missing end-of-task capture reference in .systems/ai/templates/capture/end-of-task-capture.template.md: incremental template field: Readback verification"
+    },
+    "end-of-task-capture-blocks-read-only-write": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "read-only capture may write memory."
+    },
+    "end-of-task-capture-blocks-unverified-boundary": {
+      "suite": "core",
+      "exit_code": 1,
+      "diagnostic": "capture boundary may advance after failed write."
     }
   }
 }

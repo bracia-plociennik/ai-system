@@ -149,6 +149,46 @@ require_ref ".systems/scripts/validate-ai-system" 'check-end-of-task-capture' "v
 require_ref ".systems/scripts/check-required-artifacts" 'check-end-of-task-capture' "required artifact list"
 require_ref ".systems/scripts/check-validator-smoke-tests" 'end-of-task-capture' "smoke coverage"
 
+for field in \
+  'Conversation scope' \
+  'Coverage start' \
+  'Coverage end' \
+  'Prior capture evidence' \
+  'Topic coverage' \
+  'History coverage' \
+  'Persisted coverage' \
+  'Resume point' \
+  'Readback verification' \
+  'Uncaptured items' \
+  'Capture mode'
+do
+  require_ref "$contract" "$field" "incremental field: $field"
+  require_ref "$template" "$field" "incremental template field: $field"
+done
+
+for requirement in \
+  '## Incremental whole-chat coverage' \
+  'Coverage starts at the earliest uncovered topic' \
+  'Read-only capture has zero durable effects' \
+  'Session closure preserves unfinished work' \
+  'Advance persisted coverage only after successful write and readback' \
+  'A repeated request with no new knowledge' \
+  'Zdestyluj i zapisz'
+do
+  require_ref "$contract" "$requirement" "incremental rule: $requirement"
+done
+
+# Affirmative incremental write hazards must not pass the legacy safe-word filter.
+for incremental_pattern in \
+  '^[[:space:]]*read-only capture (may|can|will) (create|write|save|persist)' \
+  '^[[:space:]]*capture boundary (may|can|will) advance after (failed|unverified|partial)'
+do
+  if rg -n -i -- "$incremental_pattern" "$repo_root/$contract" "$repo_root/$template"; then
+    echo "Unsafe incremental capture write rule"
+    fail=1
+  fi
+done
+
 unsafe_patterns=(
   '(Koniec pracy|Koniec zadania)[^.\n]{0,120}\b(may|can|should|will)\b[^.\n]{0,100}\b(acknowledge only|ask what to do next|proposal-only)\b'
   '(Koniec pracy|Koniec zadania)[^.\n]{0,120}\bdoes not require\b[^.\n]{0,80}\bcapture\b'

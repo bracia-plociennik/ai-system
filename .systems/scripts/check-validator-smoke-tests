@@ -427,6 +427,33 @@ perl -0pi -e 's/^- Capture mode:.*\n//m' "$end_of_task_template"
 run_must_fail "end-of-task-capture-requires-capture-mode" "$end_of_task_validator"
 mv "$end_of_task_template.bak" "$end_of_task_template"
 
+
+# Incremental whole-chat coverage regressions.
+cp "$end_of_task_template" "$end_of_task_template.incremental-bak"
+perl -0pi -e 's/^- Coverage start:.*\n//m' "$end_of_task_template"
+run_must_fail "end-of-task-capture-requires-coverage-start" "$end_of_task_validator"
+mv "$end_of_task_template.incremental-bak" "$end_of_task_template"
+
+cp "$end_of_task_template" "$end_of_task_template.incremental-bak"
+perl -0pi -e 's/^- Topic coverage:.*\n//m' "$end_of_task_template"
+run_must_fail "end-of-task-capture-requires-topic-coverage" "$end_of_task_validator"
+mv "$end_of_task_template.incremental-bak" "$end_of_task_template"
+
+cp "$end_of_task_template" "$end_of_task_template.incremental-bak"
+perl -0pi -e 's/^- Readback verification:.*\n//m' "$end_of_task_template"
+run_must_fail "end-of-task-capture-requires-readback" "$end_of_task_validator"
+mv "$end_of_task_template.incremental-bak" "$end_of_task_template"
+
+cp "$end_of_task_core" "$end_of_task_core.incremental-bak"
+printf '\nread-only capture may write memory.\n' >> "$end_of_task_core"
+run_must_fail "end-of-task-capture-blocks-read-only-write" "$end_of_task_validator"
+mv "$end_of_task_core.incremental-bak" "$end_of_task_core"
+
+cp "$end_of_task_core" "$end_of_task_core.incremental-bak"
+printf '\ncapture boundary may advance after failed write.\n' >> "$end_of_task_core"
+run_must_fail "end-of-task-capture-blocks-unverified-boundary" "$end_of_task_validator"
+mv "$end_of_task_core.incremental-bak" "$end_of_task_core"
+
 project_state_validator="$copy_repo/.systems/scripts/check-project-state"
 project_state_core="$copy_repo/.systems/ai/core/project-state.md"
 project_state_workspaces_core="$copy_repo/.systems/ai/core/workspaces.md"

@@ -33,11 +33,11 @@
     },
     ".systems/ai/capabilities/task-efficiency-v1.json": {
       "mode": "100644",
-      "sha256": "28c3b214ccf844c1feb835367639b84e712a46c19d510fa9eef44ef599ecffdf"
+      "sha256": "373f0de74e90e47c8665d64c883bc09dc9f02f6778a752c9d61311a3444f2c4f"
     },
     ".systems/ai/capabilities/wig-mentoring-v1.json": {
       "mode": "100644",
-      "sha256": "550274373bb3ec495c58de075207b128927bc8c4a579927c9790cd0a3d1e266a"
+      "sha256": "6176838ac69f713a4e6dcd207e44af1ca20854c18b6db42ad417f793102ec03a"
     },
     ".systems/ai/capabilities/workflow-execution-modes-v1.json": {
       "mode": "100644",
@@ -45,11 +45,11 @@
     },
     ".systems/ai/capabilities/workflow-goal-focused-maintenance-v1.json": {
       "mode": "100644",
-      "sha256": "1efeb689af6b7e42b4ed43569a9f7b960fa22667cc9547e1cb39ba5438f81a83"
+      "sha256": "a10392422b5761d31e5bd9a373ccdb962d4b3d87bc913340997cfd9b854a4f35"
     },
     ".systems/ai/capabilities/workflow-intent-to-execution-brief-v1.json": {
       "mode": "100644",
-      "sha256": "a74aff86958c09270e345da452ec008f446df0d525611a6cf93bcb2781ceb236"
+      "sha256": "41bd5dff5cb14fb8eb3efdcfbaaeb54c39617f432dfd99d7a3cb10cb47937592"
     },
     ".systems/ai/core/README.md": {
       "mode": "100644",
@@ -81,7 +81,7 @@
     },
     ".systems/ai/core/command-routing.md": {
       "mode": "100644",
-      "sha256": "403b40c4eadd1056aacbaf8f854d989190291162c6d9085b37669912c1fe48c5"
+      "sha256": "d19a7264b23f9282183971aef4ec9430e8f94333417b8b049059910f4dae86b6"
     },
     ".systems/ai/core/context-as-data.md": {
       "mode": "100644",
@@ -129,7 +129,7 @@
     },
     ".systems/ai/core/end-of-task-capture.md": {
       "mode": "100644",
-      "sha256": "b430ef375486f3c9126865a6ace928eb58f3238aa7cc621b1e1250a38d9b52cf"
+      "sha256": "a73032cedf2644fdb3ee553a8e69898760774b5d2f6b1925dc8362fc75ef9fcd"
     },
     ".systems/ai/core/execution-efficiency.md": {
       "mode": "100644",
@@ -185,7 +185,7 @@
     },
     ".systems/ai/core/memory.md": {
       "mode": "100644",
-      "sha256": "3d6737269784c06fd00d5c9695c02b035b7b0dfb83e431c15efc44679edf8d8e"
+      "sha256": "60235ac64d4808005fb9dcb5d0290c17c0d25eb233911cefd87aefa4fc135675"
     },
     ".systems/ai/core/model-selection-guidance.md": {
       "mode": "100644",
@@ -257,7 +257,7 @@
     },
     ".systems/ai/core/response-contract.md": {
       "mode": "100644",
-      "sha256": "c348ccfce16fe7176d7e2c57aaba90b87209e67671ac1be885b6f112e8f0fbb5"
+      "sha256": "d59dd3d6499bb01e5e89dd77687b79ef61c5f85d6b24536106d28c6b30bd71ea"
     },
     ".systems/ai/core/runtime-capture-binding.md": {
       "mode": "100644",
@@ -661,7 +661,7 @@
     },
     ".systems/ai/templates/capture/end-of-task-capture.template.md": {
       "mode": "100644",
-      "sha256": "6442a35cf91966b157184245183ff9b3ce63b171ccd9958bdc6691f3b817a618"
+      "sha256": "26d3b2a92cd15c33201504fa3b120a534ca5f08a1f79492281bd1325d7530710"
     },
     ".systems/ai/templates/checkpoint/block-checkpoint.template.md": {
       "mode": "100644",
@@ -1277,7 +1277,7 @@
     },
     ".systems/scripts/check-end-of-task-capture": {
       "mode": "100755",
-      "sha256": "5a0c4e8c7bf5fdd07e3f817d7f5af96d15a23fc7171977af508e4426717ca559"
+      "sha256": "81eb64e70075927d55a2e82e87436bf76f65bea3dd9a1d063d4ccabd8b4bfda5"
     },
     ".systems/scripts/check-execution-efficiency": {
       "mode": "100755",
@@ -1433,7 +1433,7 @@
     },
     ".systems/scripts/check-validator-smoke-tests": {
       "mode": "100755",
-      "sha256": "147b383f94e96ed449241ad1a279e03f8ecbf21df27db784d2bf08a3806f5b45"
+      "sha256": "9648cc16830d5c09e1c3ca61b04ca3341658b0dec8307f8576f8e2148bc8d23d"
     },
     ".systems/scripts/check-weekly-planning": {
       "mode": "100755",
@@ -1801,7 +1801,7 @@
     },
     ".systems/scripts/smoke/negative-expectations.json": {
       "mode": "100644",
-      "sha256": "0937e3d08aaeec0d5fb9d93010945fa5a5a43463890b0dfc1400e4c2e11c38ca"
+      "sha256": "39ae79a442cd71e0bebac1e0e89073d287ef0a82c6d23a84f6c0d4cb2956529c"
     },
     ".systems/scripts/smoke_assertion.py": {
       "mode": "100644",
@@ -2125,7 +2125,7 @@
     },
     ".systems/scripts/tests/test_validation_integrity.py": {
       "mode": "100644",
-      "sha256": "b642c7f16a98047d8a77b3ee4885645aec6e20ea725f8b35595b4a8754aff92a"
+      "sha256": "71fbad9e2cb32b74d128de1162a83ecac5b66bedd6229924dcc92e65cb044536"
     },
     ".systems/scripts/tests/test_wig_mentoring.py": {
       "mode": "100644",
