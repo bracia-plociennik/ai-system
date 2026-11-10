@@ -33,23 +33,23 @@
     },
     ".systems/ai/capabilities/task-efficiency-v1.json": {
       "mode": "100644",
-      "sha256": "373f0de74e90e47c8665d64c883bc09dc9f02f6778a752c9d61311a3444f2c4f"
+      "sha256": "686afd9c39a7b16b7de0ac9e3b1efbc435c3b84b9e70f7119b39e265dc629487"
     },
     ".systems/ai/capabilities/wig-mentoring-v1.json": {
       "mode": "100644",
-      "sha256": "6176838ac69f713a4e6dcd207e44af1ca20854c18b6db42ad417f793102ec03a"
+      "sha256": "e20f0715626e39d413793627a71741afddb859e110bdef20690e824b1fc38109"
     },
     ".systems/ai/capabilities/workflow-execution-modes-v1.json": {
       "mode": "100644",
-      "sha256": "e4616c9bb646b695b4d92c0c8d87aee3d5da11e23ea888d95d174bf20ee70ef0"
+      "sha256": "d91ab7aae3508d752595d6453491910e952ec031b03c792a956143adbd8c5d6f"
     },
     ".systems/ai/capabilities/workflow-goal-focused-maintenance-v1.json": {
       "mode": "100644",
-      "sha256": "a10392422b5761d31e5bd9a373ccdb962d4b3d87bc913340997cfd9b854a4f35"
+      "sha256": "2e3f89c6a8a99e8ff25e2534fcaacecab04275e90d52e412d9566939a3bf3dba"
     },
     ".systems/ai/capabilities/workflow-intent-to-execution-brief-v1.json": {
       "mode": "100644",
-      "sha256": "41bd5dff5cb14fb8eb3efdcfbaaeb54c39617f432dfd99d7a3cb10cb47937592"
+      "sha256": "c0922bbb883fc0772ca92dbf045c5621c4f19a49c8efad6260f264c4d455c645"
     },
     ".systems/ai/core/README.md": {
       "mode": "100644",
@@ -81,7 +81,7 @@
     },
     ".systems/ai/core/command-routing.md": {
       "mode": "100644",
-      "sha256": "d19a7264b23f9282183971aef4ec9430e8f94333417b8b049059910f4dae86b6"
+      "sha256": "92aaa3baf95b0ad5ef096c945a39fd8318546828e19e1227b13034b7befd1c84"
     },
     ".systems/ai/core/context-as-data.md": {
       "mode": "100644",
@@ -137,7 +137,7 @@
     },
     ".systems/ai/core/execution-modes.md": {
       "mode": "100644",
-      "sha256": "3fe603b41ab7a1b65c6c0be25ed4ea0c00ac95ff25e522eca3ffaadb90a32a06"
+      "sha256": "43d3f5cf0b8a30a533f6a4ffc520daf36d509dbfbf4806056df46317d30c6f2d"
     },
     ".systems/ai/core/external-export-import-workflow.md": {
       "mode": "100644",
@@ -257,7 +257,7 @@
     },
     ".systems/ai/core/response-contract.md": {
       "mode": "100644",
-      "sha256": "d59dd3d6499bb01e5e89dd77687b79ef61c5f85d6b24536106d28c6b30bd71ea"
+      "sha256": "e61cb9b7b2287775c9b08af01058fad86bb527b796a76f12d8f98a420a48422c"
     },
     ".systems/ai/core/runtime-capture-binding.md": {
       "mode": "100644",
@@ -1081,7 +1081,7 @@
     },
     ".systems/ai/templates/workspace/project-state/orchestration-record.template.md": {
       "mode": "100644",
-      "sha256": "276f9ce549af749e3fdb8630de6ffd8b5d6ba37774b9b44fa04bb60ecbddfd2a"
+      "sha256": "475f2ca4d56869822f9d9977ae1f9395f782fd8dac9b45e063161f88f60635be"
     },
     ".systems/ai/templates/workspace/project-state/parallel-run.template.json": {
       "mode": "100644",
@@ -1285,7 +1285,7 @@
     },
     ".systems/scripts/check-execution-modes": {
       "mode": "100755",
-      "sha256": "55756f38fea4d1ef8f51be5590144b2dabc1c49cc6249b47cac8c18aa43a027f"
+      "sha256": "8b9ed14a3b65abfeb52fb841805c3ad5116644ecd14644c6adeab3988028bfc6"
     },
     ".systems/scripts/check-external-export-import-workflow": {
       "mode": "100755",
@@ -1581,7 +1581,7 @@
     },
     ".systems/scripts/execution_modes.py": {
       "mode": "100644",
-      "sha256": "35215caf1adc232a079b6add403dc7f496d62935bf64543ef8aa97f1b178fe51"
+      "sha256": "53b6d257b396c451bba2a0773b57d9bd32d73489777312e5f8b1628b07bd2a95"
     },
     ".systems/scripts/finalization_artifacts.py": {
       "mode": "100644",
@@ -2009,7 +2009,7 @@
     },
     ".systems/scripts/tests/test_execution_modes.py": {
       "mode": "100644",
-      "sha256": "78913a14569aa2f32ace561d9490b121662524cea2ec0b94f4f890af9d1f4dad"
+      "sha256": "6e0087c47baf1c79c8a1744658f40f147b16c95c13072ca99e00ac3b8f347d20"
     },
     ".systems/scripts/tests/test_finalization_artifacts.py": {
       "mode": "100644",

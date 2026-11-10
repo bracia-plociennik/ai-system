@@ -144,3 +144,13 @@ Use system-workflow-authority.md with actual scoped owner evidence. Extend this 
 - provenance_assessed: false until executing agent checks actual owner evidence/revocation
 
 No stored field or hash authenticates consent; read-only status never authorizes execution.
+
+## Optional AFK/ZW continuation
+
+- AFK scope and absence: <same task/scope ID, current owner source, absent/returned>
+- Current slice and last verified result: <existing unit/evidence references>
+- Runnable subset and independent preparation: <verified units, dependency/resource evidence>
+- Deferred owner queue: <existing decision artifact IDs, sources tried, options/impact/unlocked work>
+- Exhaustion/stop reason and resume point: <no runnable/running/preparation, or actual platform limit>
+
+These references extend the existing record; no second queue, approval store, dispatch permission or fabricated background progress. Use execution-modes.md AFK/ZW owner absence.

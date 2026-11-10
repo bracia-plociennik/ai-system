@@ -255,3 +255,7 @@ owner-only delegation. No universal minutes limit or automatic production action
 ## Incremental chat-end confirmation
 
 Use end-of-task-capture.md for the full uncaptured conversation interval and per-topic coverage. Confirm the actual saved range, references, uncovered items and useful resume point briefly. Read-only requests receive their summary or export inline, with zero durable effects. A no-new-knowledge result is complete when every relevant topic is already covered. Missing implementation QA remains visible as unfinished work.
+
+## AFK/ZW owner report
+
+Under execution-modes.md AFK/ZW owner absence, give short factual progress without live questions. Queue true unresolved matters in the existing task/work record while continuing proven independent approved work. The final handoff waits until no authorized runnable/running work or useful independent preparation remains; show delivered effect, checks/limits, actual agent decisions, blocked scope and one prioritized owner queue with recommendation, alternative, impact and unlocked next step. An empty queue is valid. Exhausted executable scope is not proof of complete DoD, and a stopped session is not background progress.

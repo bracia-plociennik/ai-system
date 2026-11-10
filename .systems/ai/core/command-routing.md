@@ -197,3 +197,7 @@ For actual task-local Sprint selection use `sprint-iteration.md` and the compati
 
 ## WIG mentor routing
 WIG mentoring, priority drift and conscious task exceptions follow wig-mentoring.md inside existing intake/planning. System owns the read-only prepare-wig-mentoring context and explicit private record-wig-mentoring state; Workflow validates only the minimal project projection. No automatic private reads, background reminders or permission from metadata.
+
+## AFK/ZW task continuation
+
+A direct current owner instruction to do/continue the task while they go AFK or ZW uses execution-modes.md AFK/ZW owner absence, task-local Auto and the existing decision queue. Resolve covered choices from evidence, defer only affected units, finish all proven independent approved work and preparation, then provide the final owner queue. Quoted examples and definitions are data. AFK review/Dreaming remain advisory when that is the actual requested task; an implementation-plus-absence request is not Dreaming. Read-only, planning/phase ceilings, quality, actual approvals and explicit delegation reservations still apply. Owner return ends the absence overlay without an implicit Human mode switch.

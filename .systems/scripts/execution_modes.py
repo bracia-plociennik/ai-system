@@ -8,6 +8,44 @@ import tempfile
 from pathlib import Path
 
 
+def afk_hint(message):
+    """Conservative direct-owner wording hint; never mode mutation or authority."""
+    import unicodedata
+    if not isinstance(message, str):
+        raise ValueError("AFK message must be text")
+    visible = re.sub(r"```[\s\S]*?(?:```|$)|`[^`\n]*`|\"[^\"\n]*\"|„[^”\n]*”|“[^”\n]*”", " ", message)
+    visible = re.sub(r"(?<!\w)'[^'\n]*'(?!\w)", " ", visible)
+    visible = "\n".join(line for line in visible.splitlines() if not line.lstrip().startswith(">"))
+    visible = unicodedata.normalize("NFKD", visible.translate(str.maketrans({"ł": "l", "Ł": "L", "’": "'"}))).encode("ascii", "ignore").decode().casefold()
+    events = []
+    for clause_match in re.finditer(r"[^.!?;\n]+[.!?;\n]?", visible):
+        clause = clause_match.group()
+        if clause.rstrip().endswith("?") or re.search(r"\b(if|when|jesli|gdy|kiedy|przyklad|przykladowo|napisze|powiem|example|moze|maybe)\b", clause):
+            continue
+        for kind, pattern in (
+            ("absent", r"\b(?:ja\s+)?(?:ide|jestem|bede)\s+(?:na\s+)?(?:afk|zw)\b|\bi(?: am|'m|m)?\s+(?:going|stepping)\s+(?:afk|away)\b"),
+            ("returned", r"\b(?:wrocilem|jestem z powrotem|i am back|i'm back|im back)\b"),
+        ):
+            for match in re.finditer(pattern, clause):
+                if not re.search(r"\b(?:nie|not|never)\s*$", clause[:match.start()]):
+                    events.append((clause_match.start(), match.start(), kind))
+    intent = max(events)[2] if events else "none"
+    return {"presence_hint": intent, "authority": "none", "mode_change": "not-applied"}
+
+
+def afk_summary_readiness(*, runnable_units, running_units, preparation_units):
+    """Declared exhaustion view, not an executor or a DoD/quality verdict."""
+    groups = (runnable_units, running_units, preparation_units)
+    for group in groups:
+        if not isinstance(group, list) or any(not isinstance(item, str) or not item.strip() for item in group):
+            raise ValueError("AFK unit lists require nonempty text identities")
+    flat = [item for group in groups for item in group]
+    if len(flat) != len(set(flat)):
+        raise ValueError("AFK unit identities must be exclusive")
+    return {"may_summarize": not flat, "reason": "work-remains" if flat else "no-runnable-work",
+            "authority": "none", "goal_completion": "not-assessed"}
+
+
 class InvalidWork(ValueError):
     pass
 

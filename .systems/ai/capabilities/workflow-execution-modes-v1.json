@@ -1,6 +1,6 @@
 {
   "contract": 1,
-  "tested_commit": "d820fccfa86188ad84c04e3446b1cabc7eccb88a",
+  "tested_commit": "bedac99dd2da131f0bcd55adad3f8d795f8d81a1",
   "mode_mapping": {
     "auto": "auto",
     "human": "human-coop"
@@ -19,7 +19,7 @@
       "mode": "100644"
     },
     ".systems/ai/core/execution-modes.md": {
-      "sha256": "92883e093f1f2e293dff494a918582fc956477ff0f52715734c0bf5b53203dcd",
+      "sha256": "9104b9b10ff41b2fe275d77045f69251820887d8222fa1830e6f705c08fa9e98",
       "mode": "100644"
     },
     ".systems/ai/core/owner-decision-checkpoints.md": {
@@ -55,15 +55,15 @@
       "mode": "100644"
     },
     ".systems/ai/templates/autopilot/task-decisions.template.md": {
-      "sha256": "a92710c7f49d64e6b36e99617437a7b6b142ea9cb478902530ef45c6772475d7",
+      "sha256": "eb131ce7230802e9fd02b4abb1ba8080998e4b1fdeee73aca209591b621e5202",
       "mode": "100644"
     },
     ".systems/scripts/check-execution-modes": {
-      "sha256": "084ae1ee68359f189e4abe626a3139a1092bd183cc21e0ef5b8316be9af53990",
+      "sha256": "32aa6ad92db52b120e5312239dbe82aa7d082a5a3bc906fe7819e2cf371a77d9",
       "mode": "100755"
     },
     ".systems/scripts/lib/execution-modes.py": {
-      "sha256": "fc6fc0162c9380e2d301b081decc1d553395b253c115342d4360dbd09f5cb73a",
+      "sha256": "586aed00db9f3df9cec64e3973dfd9e7b5118351031009059c8c1c014bff06b8",
       "mode": "100644"
     }
   }

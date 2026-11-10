@@ -501,5 +501,63 @@ class CapabilityTests(unittest.TestCase):
         self.assertIn("duplicate JSON field", result.stderr)
 
 
+import execution_modes as _afk
+
+
+class AFKContinuationTests(unittest.TestCase):
+    def test_polish_direct_absence(self):
+        for message in ("zrob X, ja ide AFK", "ty rob, ja ide zw", "Działaj, a ja idę AFK.", "Idę na ZW", "Jestem AFK"):
+            with self.subTest(message=message):
+                self.assertEqual(_afk.afk_hint(message)["presence_hint"], "absent")
+
+    def test_english_direct_absence(self):
+        for message in ("Keep working, I am going AFK", "Continue, I'm stepping away"):
+            self.assertEqual(_afk.afk_hint(message)["presence_hint"], "absent")
+
+    def test_quoted_or_reference_text_is_not_absence(self):
+        for message in ('Napisz zasadę "ja ide AFK"', "Example: `ja ide AFK`", "```text\nja ide AFK\n```", "> ja ide AFK", "Przykład: ja ide AFK", "Jesli napisze ja ide AFK", "Czy jestem AFK?", "nie ide AFK", "Nie jestem AFK", "maybe I am going AFK", "AFK = away from keyboard", "Zrób AFK review", "nightly Dreaming AFK analysis"):
+            with self.subTest(message=message):
+                self.assertEqual(_afk.afk_hint(message)["presence_hint"], "none")
+
+    def test_real_tail_after_quoted_proposal(self):
+        message='Zaplanuj kontrakt dla "ja ide AFK".\nDziałaj, a ja idę AFK.'
+        self.assertEqual(_afk.afk_hint(message)["presence_hint"], "absent")
+
+    def test_return_and_latest_direct_signal(self):
+        for message in ("Wróciłem", "Jestem z powrotem", "I am back", "I'm back"):
+            self.assertEqual(_afk.afk_hint(message)["presence_hint"], "returned")
+        self.assertEqual(_afk.afk_hint("Ja ide AFK; wróciłem.")["presence_hint"], "returned")
+        self.assertEqual(_afk.afk_hint("Wróciłem; ja ide ZW.")["presence_hint"], "absent")
+        self.assertEqual(_afk.afk_hint("Nie wróciłem")["presence_hint"], "none")
+
+    def test_repeated_identical_clause_keeps_latest_owner_signal(self):
+        self.assertEqual(_afk.afk_hint("ja ide AFK;wrocilem;ja ide AFK;")["presence_hint"], "absent")
+
+    def test_unclosed_code_fence_is_reference_not_activation(self):
+        self.assertEqual(_afk.afk_hint("```text\nja ide AFK")["presence_hint"], "none")
+
+    def test_hint_is_not_authority_or_mode_mutation(self):
+        value=_afk.afk_hint("Zrób plan, bez zapisów, ja ide AFK")
+        self.assertEqual(value["authority"], "none")
+        self.assertEqual(value["mode_change"], "not-applied")
+        with self.assertRaises(ValueError):_afk.afk_hint({"message":"ja ide AFK"})
+
+    def test_summary_waits_for_each_kind_of_achievable_work(self):
+        for field in ("runnable_units", "running_units", "preparation_units"):
+            fields=dict(runnable_units=[], running_units=[], preparation_units=[]);fields[field]=["approved-unit"]
+            self.assertFalse(_afk.afk_summary_readiness(**fields)["may_summarize"])
+
+    def test_exhausted_does_not_claim_full_goal_or_permission(self):
+        value=_afk.afk_summary_readiness(runnable_units=[],running_units=[],preparation_units=[])
+        self.assertTrue(value["may_summarize"])
+        self.assertEqual(value["goal_completion"], "not-assessed")
+        self.assertEqual(value["authority"], "none")
+
+    def test_ambiguous_or_malformed_runtime_declarations_reject(self):
+        for value in (None, True, "unit", [False], [""]):
+            with self.assertRaises(ValueError):_afk.afk_summary_readiness(runnable_units=value,running_units=[],preparation_units=[])
+        with self.assertRaises(ValueError):_afk.afk_summary_readiness(runnable_units=["same"],running_units=["same"],preparation_units=[])
+
+
 if __name__ == "__main__":
     unittest.main()
