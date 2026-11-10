@@ -15,6 +15,18 @@ approved release uses a new main-based worktree, never a dev-to-main merge.
 
 Compatibility adaptation between AI System and AI Workflow routes through `project-orchestration.md` and `orchestration-compatibility.md`, after scoped owner approval and planning QA. Handoffs and schema/version metadata are advisory, not implementation, native dispatch or Git approval. Future phase Git decisions use `phase-commit-policy.md`; explicit no-commit wins and final-owner-yes remains separate.
 
+## Owner additions during active work
+
+Actionable owner prefixes `btw`, `btw.`, `by the way`, `dodatkowo`, `w dodatku`,
+`dodatk.` and `dodat.` route to task-efficiency.md Addition signals and preserving
+the main plan, using the existing task-management.md SilverBullet idea assessment.
+Preserve the main goal and return point, classify correction/stage-extension/unrelated
+by content and retain the bound TODO. A definition such as `btw = by the way`,
+quoted example or bare prefix adds no task. Read-only stays inline with zero writes;
+missing binding/readback is pending capture. No cancellation, scope or delegation
+authority follows from a prefix. Current requirement/safety corrections precede
+dependent work; accepted execution stages extend the actual plan before finish.
+
 ## Efficiency Routing
 
 Validation reuse, bounded-defect eligibility, historical assessment lifecycle, schema-driven

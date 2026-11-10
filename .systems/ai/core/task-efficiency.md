@@ -173,3 +173,59 @@ For capacity reservations, source checkout, compact resume and evidence-bound re
 Classify the current human message before changing scope. A correction that overrides current requirements is handled before dependent work, refreshing the affected plan and checks. A separate extension of the current stage is captured in the bound SilverBullet TODO and revisited automatically after the substantive stage and its required check. Perform covered actions, and request an actual decision for a material expansion. An idea outside that stage is captured in the appropriate bound task and presented as one grouped owner question after the stage. Real current-goal blockers are handled immediately.
 
 System writes through the selected task-store adapter with exact task identity and expected file hash. Capture fields are id, text, source, parent_task_id, parent_stage_id and kind (correction, stage-extension, unrelated). Resolve by supplying the same identity plus disposition (accepted, deferred, declined, covered) and evidence. The idea checkbox means its assessment is complete. Accepted implementation has separate plan stages. Re-read task metadata and idea records after resume, preserve manual checkbox edits, and check existing dispositions before asking again. Confirmed task ownership controls routing and privacy.
+
+
+## Addition signals and preserving the main plan
+
+Recognize actionable current owner additions introduced by `btw`, `btw.`,
+`by the way`, `dodatkowo`, `w dodatku`, `dodatk.` or `dodat.`. Match case-insensitively,
+trim surrounding whitespace, accept prefix punctuation such as a colon, comma,
+period or dash, and require complete token or phrase boundaries. Do not match
+fragments inside other words, URLs, filenames or source code. These are natural
+language routing hints, not a shell command or a new permission. A bare alias,
+the explanation `btw = by the way`, quoted examples and discussions of this rule
+supply no actionable extra task by themselves.
+
+A short owner question or status request is answered briefly, then main work
+resumes. Create a TODO for an actual additional action or idea to assess, not
+merely for conversational wording.
+
+Without an active main task, route an actual new request through ordinary intake;
+do not invent a suspended plan or a previous stage.
+
+Treat an incoming steer as additive unless the actual owner explicitly cancels,
+replaces or reprioritizes the main task. Preserve the main goal, accepted scope,
+DoD, active stage, next safe action and approval ceiling in the existing plan and
+OSNR/status. Before continuing after interruption, keep that return point current.
+Do not reset the main checklist, discard unfinished stages or replace the main
+plan with the new idea. No extra agent or model is authorized by an alias.
+
+Classify by content, never by the prefix alone, using New ideas during an active
+stage above. Current-requirement corrections and actual safety/current-goal blockers
+precede dependent actions; refresh the affected plan/checks immediately. The
+owner's clarification of accepted trigger spelling is such a correction, not
+a separate feature to postpone. A related extension gets a durable assessment
+checkbox in the bound SilverBullet TODO, with id, source, parent_task_id and
+parent_stage_id. Keep multiple independent additions as separate identifiable
+entries. The checkbox records assessment; accepted implementation requires actual
+execution stages in the existing plan before its finish stage, through the same
+plan writer. An assessment checkbox alone never means the requested work is done.
+
+After saving and reading back the addition, briefly acknowledge what was added,
+which main stage continues and when the addition will be revisited. Finish the
+substantive main stage and its required check, then automatically assess its
+related additions and perform only already covered work. Unrelated topics stay
+in their verified owning task; group necessary owner decisions after the stage.
+An addition is not an automatic scope expansion, release, production write or
+permission to skip QA. Explicit owner priority changes still govern.
+
+On resume inspect existing idea identities/dispositions and the return point
+before acting or asking again. Replays preserve manual labels and checkboxes;
+never create duplicates or reopen a resolved idea without a new actual decision.
+Read-only keeps additions in the visible inline plan with zero durable writes.
+If binding, ownership, write authority or readback is missing, report the addition
+as pending durable capture, never as saved; resolve the exact missing gate before
+its dependent execution. Continue independent approved main work when safe.
+Do not silently choose another owner, lose the new instruction, or bypass a
+failed write by claiming a checkbox exists. Use the existing task-store idea and
+plan interfaces, with expected file SHA256 and readback; no second queue/database.

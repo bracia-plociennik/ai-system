@@ -33,11 +33,11 @@
     },
     ".systems/ai/capabilities/task-efficiency-v1.json": {
       "mode": "100644",
-      "sha256": "686afd9c39a7b16b7de0ac9e3b1efbc435c3b84b9e70f7119b39e265dc629487"
+      "sha256": "4de677124a0b18f9209a21401b1e51e22c61086cad2422cc4a44360e09e988b9"
     },
     ".systems/ai/capabilities/wig-mentoring-v1.json": {
       "mode": "100644",
-      "sha256": "e20f0715626e39d413793627a71741afddb859e110bdef20690e824b1fc38109"
+      "sha256": "b19a73361cac4195ea638a4b5a7591ac945df1f2526d8fb730df0c6ebe1f8c61"
     },
     ".systems/ai/capabilities/workflow-execution-modes-v1.json": {
       "mode": "100644",
@@ -81,7 +81,7 @@
     },
     ".systems/ai/core/command-routing.md": {
       "mode": "100644",
-      "sha256": "92aaa3baf95b0ad5ef096c945a39fd8318546828e19e1227b13034b7befd1c84"
+      "sha256": "4dfb2ac1242100579321b8b3c0dd02c9d90002234bc8ee7c82138a1f17ff5d71"
     },
     ".systems/ai/core/context-as-data.md": {
       "mode": "100644",
@@ -297,7 +297,7 @@
     },
     ".systems/ai/core/task-efficiency.md": {
       "mode": "100644",
-      "sha256": "a2eb3598041debfeb41eb6e04437a36df40ef026817a304bf1c2affec0afd9c6"
+      "sha256": "c3d518b2ac114f10485e6124c7a18c81cbdffbf93a0b6f5cb72b04d81b0dfc51"
     },
     ".systems/ai/core/task-finalization.md": {
       "mode": "100644",
@@ -309,7 +309,7 @@
     },
     ".systems/ai/core/task-management.md": {
       "mode": "100644",
-      "sha256": "08672ae1f9641be52caf7ab9b80d0884d48c95bba925e36b45f16a68726391e6"
+      "sha256": "377a4967b892ffb2c06c13d10dae790429c56a27a4dd853615f1003c76acefcc"
     },
     ".systems/ai/core/task-resource-cleanup.md": {
       "mode": "100644",
@@ -2109,7 +2109,7 @@
     },
     ".systems/scripts/tests/test_task_ideas.py": {
       "mode": "100644",
-      "sha256": "4f1e1c3c4b58eeb43e346951cadf87311e52b6d5e3740eff0a459df977bdcbf7"
+      "sha256": "f002265e4162ef5bc6bccb6da72c22c815d0ad9f7ddcc030f7c5f079f763eac4"
     },
     ".systems/scripts/tests/test_task_resource_cleanup.py": {
       "mode": "100644",

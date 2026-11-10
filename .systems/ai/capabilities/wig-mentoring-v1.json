@@ -2,7 +2,7 @@
   "authority": "none",
   "contract": "wig-mentoring-v1",
   "files": {
-    ".systems/ai/core/command-routing.md": "92aaa3baf95b0ad5ef096c945a39fd8318546828e19e1227b13034b7befd1c84",
+    ".systems/ai/core/command-routing.md": "4dfb2ac1242100579321b8b3c0dd02c9d90002234bc8ee7c82138a1f17ff5d71",
     ".systems/ai/core/task-intake.md": "296800c7af9b321737a4eafbd9c43fcf4eb145c4bbfa14b3b64e1c6a9c5771c7",
     ".systems/ai/core/wig-mentoring.md": "534969557ad30abfc8ab45441bfbb7690ce5b983da26219ecca84c5cda74b115",
     ".systems/scripts/check-wig-mentoring": "6c64c7be7816e02f7fe7a91f2cca7ef37c60f7d4c338b30f5115196dccb2e3f1",
