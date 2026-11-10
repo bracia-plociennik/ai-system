@@ -4,7 +4,7 @@
   "files": {
     ".systems/ai/core/execution-efficiency.md": "e17929bed9eafc45541173f15839bf25d7a3a0d1468130b20537ca830a0c07df",
     ".systems/ai/core/response-contract.md": "e61cb9b7b2287775c9b08af01058fad86bb527b796a76f12d8f98a420a48422c",
-    ".systems/ai/core/task-efficiency.md": "a2eb3598041debfeb41eb6e04437a36df40ef026817a304bf1c2affec0afd9c6",
+    ".systems/ai/core/task-efficiency.md": "c3d518b2ac114f10485e6124c7a18c81cbdffbf93a0b6f5cb72b04d81b0dfc51",
     ".systems/scripts/task_efficiency.py": "1bd798206e9ad66b2e729ae5b5f6925776d88f1eb3231c0f0a18ca975907718d"
   },
   "schema_version": 1
