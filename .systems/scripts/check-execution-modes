@@ -33,14 +33,14 @@ def main():
             print(json.dumps(result, indent=2))
             return 1 if result.get("workflow", {}).get("status") == "invalid" else 0
         required = {
-            ".systems/ai/core/execution-modes.md": ["New work defaults to `auto`", "owner-approval.md", "dependent-blocker", "three attempts", "final-owner-yes", "auto-unconstrained"],
+            ".systems/ai/core/execution-modes.md": ["New work defaults to `auto`", "owner-approval.md", "dependent-blocker", "three attempts", "final-owner-yes", "auto-unconstrained", "## AFK/ZW owner absence", "## Resolution before deferral", "## Exhaustion gate and final queue"],
             ".systems/ai/core/owner-approval.md": ["execution-modes.md"],
             ".systems/ai/core/task-intake.md": ["execution-modes.md"],
-            ".systems/ai/core/command-routing.md": ["execution-modes.md"],
+            ".systems/ai/core/command-routing.md": ["execution-modes.md", "## AFK/ZW task continuation"],
             ".systems/ai/core/delivery-constraints.md": ["auto-unconstrained"],
             ".systems/ai/core/operating-model.md": ["execution-modes.md"],
             ".systems/ai/core/project-orchestration.md": ["execution-modes.md"],
-            ".systems/ai/core/response-contract.md": ["execution-modes.md"],
+            ".systems/ai/core/response-contract.md": ["execution-modes.md", "## AFK/ZW owner report"],
             ".systems/scripts/project-orchestration-preflight": ["workflow_support", "--execution-mode"],
             ".systems/ai/templates/root/AGENTS.template.md": ["execution-modes.md"],
             ".systems/ai/templates/workspace/project-state/orchestration-record.template.md": ["Execution mode:", "Workflow execution support:", "Owner decision queue:"],
@@ -57,6 +57,8 @@ def main():
             if not path.is_file() or path.is_symlink():
                 raise InvalidWork("missing execution-modes artifact: " + name)
             body = path.read_text()
+            if re.search(r"(?im)^\s*(?:AFK|ZW) (?:grants|authorizes|waives|bypasses)\b", body):
+                raise InvalidWork("unsafe AFK/ZW authority: " + name)
             if re.search(r"auto(?: mode)? (?:grants|authorizes) (?:implementation|writes|push|merge|final-owner-yes)", body, re.I):
                 raise InvalidWork("unsafe execution-modes authority: " + name)
             for marker in markers:

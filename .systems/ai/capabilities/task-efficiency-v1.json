@@ -3,7 +3,7 @@
   "contract": "task-efficiency-v1",
   "files": {
     ".systems/ai/core/execution-efficiency.md": "e17929bed9eafc45541173f15839bf25d7a3a0d1468130b20537ca830a0c07df",
-    ".systems/ai/core/response-contract.md": "d59dd3d6499bb01e5e89dd77687b79ef61c5f85d6b24536106d28c6b30bd71ea",
+    ".systems/ai/core/response-contract.md": "e61cb9b7b2287775c9b08af01058fad86bb527b796a76f12d8f98a420a48422c",
     ".systems/ai/core/task-efficiency.md": "a2eb3598041debfeb41eb6e04437a36df40ef026817a304bf1c2affec0afd9c6",
     ".systems/scripts/task_efficiency.py": "1bd798206e9ad66b2e729ae5b5f6925776d88f1eb3231c0f0a18ca975907718d"
   },
