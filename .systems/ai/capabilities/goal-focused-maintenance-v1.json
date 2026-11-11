@@ -213,7 +213,7 @@
     },
     ".systems/ai/core/personal-ops-budgets.md": {
       "mode": "100644",
-      "sha256": "d22fcb280a3061e247a4a3a081045c4948a0ee2d891fed78a2d6324f9bec535e"
+      "sha256": "7893d6d46458ba4a85756e7d70a86a027103dc957d7b3ef41094ed30a2dd6fd4"
     },
     ".systems/ai/core/personal-ops.md": {
       "mode": "100644",
@@ -269,15 +269,15 @@
     },
     ".systems/ai/core/silverbullet-tracker.md": {
       "mode": "100644",
-      "sha256": "8c83be96d4f8eb6dc8081b18a7dafea9e416ba5632af380654434df84a943a90"
+      "sha256": "22c0ae78ed3044f846890e589da6c7f677bf5b23e6a60c00c1a31aa71d9aeb23"
     },
     ".systems/ai/core/spor-drafts.md": {
       "mode": "100644",
-      "sha256": "3f88cd673327c4c247c1365a322645445114d40cec284df3963560ff5ed27ecc"
+      "sha256": "a02b49d0d226b408f06152c472aa10fe6d6798e6f2af8600b765885460fc81ea"
     },
     ".systems/ai/core/spor-proposals.md": {
       "mode": "100644",
-      "sha256": "5bb09ba78fafec4a39b39c00edea4b9e27e1f3aac60d21d7fe8f2ebd8067b552"
+      "sha256": "780e125916ecdb7ce777a2e6c1acf365df9bb4933a131373eaa5c80da6d853e7"
     },
     ".systems/ai/core/sprint-iteration.md": {
       "mode": "100644",
@@ -1031,6 +1031,10 @@
       "mode": "100644",
       "sha256": "2b69a1512c9c9a751ff0da5b22db63c0987deceb45d843693f2d8034bd785e83"
     },
+    ".systems/ai/templates/workspace/personal-ops/daily-spor-proposal-v2.template.md": {
+      "mode": "100644",
+      "sha256": "4209d475d02b17ec299da7645c65e6ac5d4af9af88db1559d50bedb1a12c511b"
+    },
     ".systems/ai/templates/workspace/personal-ops/daily-spor-proposal.template.md": {
       "mode": "100644",
       "sha256": "ae8c024943af4eecafe4babb93d6918adedcd09eb898d1b72e6dc3717be5c914"
@@ -1050,6 +1054,10 @@
     ".systems/ai/templates/workspace/personal-ops/weekly-check-in-v4.template.md": {
       "mode": "100644",
       "sha256": "e0baa52c3e8102c992f75607b3227eaaf9941c5685383b5a3768e630e4be17c8"
+    },
+    ".systems/ai/templates/workspace/personal-ops/weekly-spor-proposal-v2.template.md": {
+      "mode": "100644",
+      "sha256": "719496e19d41766c71d4d8c9341b79513e7df218044f28ee7edfde633e01d576"
     },
     ".systems/ai/templates/workspace/personal-ops/weekly-spor-proposal.template.md": {
       "mode": "100644",
@@ -1155,13 +1163,17 @@
       "mode": "100644",
       "sha256": "bfca31c8f922f6400618953331cb06cee78bafe20237c0f65b799378532bf3a6"
     },
+    ".systems/ai/templates/workspace/tasks/silverbullet-panel-ui.mjs": {
+      "mode": "100644",
+      "sha256": "fde79e0515dcff588bb612b9a1909b9b0cb21f073081df706b5857cfce3342c9"
+    },
     ".systems/ai/templates/workspace/tasks/silverbullet-task.template.md": {
       "mode": "100644",
       "sha256": "47ace0ea445ac59fc09ed2bb2911f19243ecb3380f5c74bd953a9338fd0584d3"
     },
     ".systems/ai/templates/workspace/tasks/silverbullet-tracker-ui.mjs": {
       "mode": "100644",
-      "sha256": "033d9090f7ce5fa071310844b80a88ff3878ba4281cd775761b0fd22ebd4f36c"
+      "sha256": "8c6488215d0731a6ec65fda35f98c1b7b16ec947667f6e1b3bf5d70c4c40717c"
     },
     ".systems/ai/templates/workspace/tasks/task-candidate.template.md": {
       "mode": "100644",
@@ -1221,7 +1233,7 @@
     },
     ".systems/scripts/calculate-personal-ops-budgets": {
       "mode": "100755",
-      "sha256": "53ad2e7625e4ed953ab34fe618f11e862d29687c454ecf064f44e326c5b7fd8b"
+      "sha256": "bc2d7fdea4e34be7a56f0952b431d9adc89d5a53a8359b82c86bbdd70404e077"
     },
     ".systems/scripts/calculate-personal-ops-life-alignment": {
       "mode": "100755",
@@ -1385,11 +1397,11 @@
     },
     ".systems/scripts/check-spor-proposals": {
       "mode": "100755",
-      "sha256": "3770adec391e53ed287bc3af2310eed7009d45970e77d07a44f8105022593c87"
+      "sha256": "286f4f0221b244a8234daf15de763537e7a8870c92c0520abf07abe1e82aa4a5"
     },
     ".systems/scripts/check-spor-v4": {
       "mode": "100755",
-      "sha256": "5c98e4a135f1a11b5c02a28087648beae760ed7d9474f84170e38b538ebd8944"
+      "sha256": "c86d04a8b4878ffb9dc9f5fbc32af2441cfdaf74b65247893f1825bae590238a"
     },
     ".systems/scripts/check-sprint-iteration": {
       "mode": "100755",
@@ -1585,7 +1597,7 @@
     },
     ".systems/scripts/finalization_artifacts.py": {
       "mode": "100644",
-      "sha256": "e504a1fabe627a266d01473ffdfd2c597b8828943890eada5d8741383b353299"
+      "sha256": "34b2f1ca935a0922672992a1f5ed8c47b65e89e0186a178dc9143655beeca9bb"
     },
     ".systems/scripts/finalization_support.py": {
       "mode": "100644",
@@ -1645,7 +1657,7 @@
     },
     ".systems/scripts/manage-personal-ops-draft": {
       "mode": "100755",
-      "sha256": "a39cc73aa758c225f5bd134a12f0e851a04fbc61ea81904e58e1321386acd4ae"
+      "sha256": "5889e3c8e5f684f4c5b3aea44e1e1e82a8450ab7d38a1692ec4307afa07fedbd"
     },
     ".systems/scripts/manage-source-library": {
       "mode": "100755",
@@ -1689,7 +1701,7 @@
     },
     ".systems/scripts/personal_ops_drafts.py": {
       "mode": "100644",
-      "sha256": "bf1406021387880beda680f358749119894eb864c926dd76f73b00d46116caef"
+      "sha256": "0d2ebe451653f9201b6ac12d71cee970272d8ac39b658d5c24e46231abf44f96"
     },
     ".systems/scripts/personal_ops_properties_v3.py": {
       "mode": "100644",
@@ -1697,7 +1709,7 @@
     },
     ".systems/scripts/personal_ops_spor_proposals.py": {
       "mode": "100644",
-      "sha256": "65dde07425ef559be48f7244b737b253a488a7dc0bbd06be9b0e44f7dcf6f907"
+      "sha256": "6490e540fc3b87cb8eb8d6f9bb5cc30e9bff8b060979508f748f60b6fd0331a3"
     },
     ".systems/scripts/personal_ops_v4.py": {
       "mode": "100755",
@@ -1757,7 +1769,7 @@
     },
     ".systems/scripts/render-personal-ops-daily-summary-v4": {
       "mode": "100755",
-      "sha256": "2e4c37def6d9c61c00256ead4d6ca3ec66a1b6c63ec66fcb373a1606ab641537"
+      "sha256": "423d1644b0a1c2885c550ecbb8dadd2c9b1751c293b6caab3c7ce3b4a6a2be5e"
     },
     ".systems/scripts/render-personal-ops-weekly-summary": {
       "mode": "100755",
@@ -1789,11 +1801,11 @@
     },
     ".systems/scripts/silverbullet_tracker.py": {
       "mode": "100644",
-      "sha256": "ebea6cec7e18ba4c40bf3270c638b9d3e090268f352682f75e0bad3e455df4df"
+      "sha256": "855906e2c6815c8a9c8d81ac30edee7b467c1a96fa7194fe193f71cf36ab81fc"
     },
     ".systems/scripts/silverbullet_tracker_http.py": {
       "mode": "100644",
-      "sha256": "bc9ac53a784210f3e4dc302335ae505ad346b34572626522d5f51a0acc1f8b71"
+      "sha256": "b1d98ce97c957eda22c584351ae4467e4015aef51b46c7cc2ccb90aa15f5f6c7"
     },
     ".systems/scripts/smoke/README.md": {
       "mode": "100644",
@@ -1827,6 +1839,10 @@
       "mode": "100644",
       "sha256": "a5e3436389a86d6cc3a07b1d42e6ec5845435fdcff2bb527f8c523d73249772b"
     },
+    ".systems/scripts/spor_draft_chat.py": {
+      "mode": "100644",
+      "sha256": "31d6c2c24cd2660a40a235cc951af93014f27fb1d144557cf5921a2c8e42d77d"
+    },
     ".systems/scripts/spor_integration_preflight.py": {
       "mode": "100644",
       "sha256": "b76d16a878360322f10a42c8b589c48af82eb4bb018bd944f4c9769f5599e3da"
@@ -1838,6 +1854,10 @@
     ".systems/scripts/spor_preflight.py": {
       "mode": "100644",
       "sha256": "fe1e67be18ae2fff2f44553b14ffbbd9e5e7aa90f501b62416a24a4040be56ae"
+    },
+    ".systems/scripts/spor_question_queue.py": {
+      "mode": "100644",
+      "sha256": "9e2ad488487d855c39f177de44044f9d313e87c6986111c497b3cbb927d33960"
     },
     ".systems/scripts/sprint_adapter.py": {
       "mode": "100644",
@@ -1869,7 +1889,7 @@
     },
     ".systems/scripts/task-store": {
       "mode": "100755",
-      "sha256": "26cf7db17aa57f458b2c90f7d6d8af9938e604625402e7afe4a154ec1e5f7f77"
+      "sha256": "185272a63d64985352564fe3870f500b7845162a66e787398b910b8e79b8725a"
     },
     ".systems/scripts/task_cleanup_adapter.py": {
       "mode": "100644",
@@ -1889,7 +1909,7 @@
     },
     ".systems/scripts/task_store.py": {
       "mode": "100644",
-      "sha256": "d038b11337d6cdb2c2a3ba23f546e2caf3e79cd238280f50aa1a4e65b6cd063e"
+      "sha256": "527d17cf1479e1b24b227dee19b7115160a79a6df76fe596be4f7b3e3e0cdd23"
     },
     ".systems/scripts/test_dreaming_chat.py": {
       "mode": "100644",
@@ -2067,6 +2087,14 @@
       "mode": "100644",
       "sha256": "1bf2d48a9f9f7cda68ae17c94f48d09b7ddbc6c1c09be3c82a9d2074eff51b27"
     },
+    ".systems/scripts/tests/test_silverbullet_panel.mjs": {
+      "mode": "100644",
+      "sha256": "027eb4befc0d1fe2cf85b68ad1dac31abbd9638c2ccea8a472bcb18a6feaa093"
+    },
+    ".systems/scripts/tests/test_silverbullet_panel.py": {
+      "mode": "100644",
+      "sha256": "e661322066237f764135818737b8a754a170add0a5d4a974fd199db1d9623d02"
+    },
     ".systems/scripts/tests/test_silverbullet_task_store.py": {
       "mode": "100644",
       "sha256": "0a17db8cd6ce1e99cb54f4b81f377a2a3edb4491f794e1e937edcddcffe83e1b"
@@ -2090,6 +2118,10 @@
     ".systems/scripts/tests/test_spor_preflight.py": {
       "mode": "100644",
       "sha256": "f784bc1a849f6689ce5fc1228204c46d52d2177b5f272cba62c3d4d9ab35dbf6"
+    },
+    ".systems/scripts/tests/test_spor_question_queue.py": {
+      "mode": "100644",
+      "sha256": "5f387a1f8e02af5bb84eba00b1590d8f87fef13dd0b3a3acc55232901caf751a"
     },
     ".systems/scripts/tests/test_sprint_adapter.py": {
       "mode": "100644",

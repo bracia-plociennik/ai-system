@@ -214,6 +214,37 @@ class ProposalTests(unittest.TestCase):
         unknown = budget_projection([], date(2026, 10, 1), self.config, {}, {"v3": "missing", "v4": "missing"})
         self.assertIn(unknown["food_schedule"]["status"], {"unavailable", "unknown"})
 
+    def test_owner_spending_defaults_preserve_facts_and_calorie_gaps(self):
+        target = date(2026, 11, 4)
+        config = {**self.config, "missing_spending_policy": "assume-zero"}
+        current = {"v3": "reported-current", "v4": "reported-current"}
+        fact = {"metric": "spending", "period_start": "2026-11-02",
+                "period_end": "2026-11-02", "value": 30, "approximate": False}
+        rows = [{"session_date": "2026-11-03", "aggregate_observations": [fact]}]
+        calculator = budget_module()
+        standalone = calculator.monthly_report(rows, target, config)
+        self.assertEqual(standalone["coverage"]["assumed_zero_dates"], ["2026-11-01", "2026-11-03"])
+        self.assertEqual(standalone["coverage"]["known_dates"], ["2026-11-02"])
+        self.assertEqual(standalone["remaining_base_budget"], standalone["base_budget"] - 30)
+        self.assertEqual(calculator.monthly_report(rows, target, self.config)["coverage"]["status"], "partial-known-subtotal")
+
+        projected = budget_projection(rows, target, config, {}, current)
+        self.assertEqual(projected["monthly_balance"]["coverage"]["assumed_zero_dates"], ["2026-11-01", "2026-11-03"])
+        self.assertIn("2026-11-03", projected["coverage"]["calories"]["missing_dates"])
+        self.assertNotIn("weekly_balance", projected)
+        stale = budget_projection(rows, target, config, {}, {**current, "v4": "stale-or-unknown"})
+        self.assertNotIn("monthly_balance", stale)
+
+        corrected = {**fact, "period_start": "2026-11-03", "period_end": "2026-11-03", "value": 5}
+        after = calculator.monthly_report([{"session_date": "2026-11-04", "aggregate_observations": [fact, corrected]}], target, config)
+        self.assertEqual(after["current_spending"], 35)
+        self.assertEqual(after["coverage"]["assumed_zero_dates"], ["2026-11-01"])
+
+        crossing = {**fact, "period_start": "2026-10-31", "period_end": "2026-11-01"}
+        uncertain = [{"session_date": "2026-11-03", "aggregate_observations": [fact, crossing]}]
+        self.assertIsNone(calculator.monthly_report(uncertain, target, config)["remaining_base_budget"])
+        self.assertNotIn("monthly_balance", budget_projection(uncertain, target, config, {}, current))
+
     def test_onlinen_exact_related_root_and_foreign_exclusion(self):
         other = self.ws.parent / "onlinen-workspace"
         good = other / "clients/example/memory.md"
@@ -268,6 +299,8 @@ class ProposalTests(unittest.TestCase):
 # Draft persistence is a separate producer, exercised in the same source gate.
 # Imported TestCase classes are included by unittest's module loader.
 from test_personal_ops_drafts import DraftTests
+sys.path.insert(0, str(ROOT / ".systems/scripts/tests"))
+from test_spor_question_queue import QueueTests
 
 
 if __name__ == "__main__":

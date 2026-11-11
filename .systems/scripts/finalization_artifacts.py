@@ -82,12 +82,12 @@ def spor_candidate(workspace, request):
     fields=request['fields']
     if not isinstance(fields,dict):raise ValueError('Field patch must be an object')
     mode=saved['metadata']['mode']
-    if saved['metadata'].get('template_sha256')!=drafts.digest(drafts.template(mode).encode()):
+    if saved['metadata'].get('template_sha256')!=drafts.digest(drafts.template(mode,saved['metadata'].get('form_version',1)).encode()):
         raise ValueError('Template changed; explicit reconciliation required')
     matches=list(drafts.FIELD.finditer(saved['body']))
-    if len(matches)!=len(drafts.form(mode)) or {m[1] for m in matches}!=set(drafts.form(mode)):
+    if len(matches)!=len(drafts.form(mode,saved['metadata'].get('form_version',1))) or {m[1] for m in matches}!=set(drafts.form(mode,saved['metadata'].get('form_version',1))):
         raise ValueError('Edited field structure requires manual reconciliation')
-    if fields:drafts.validate_fields(mode,fields,initial=False)
+    if fields:drafts.validate_fields(mode,fields,initial=False,form_version=saved["metadata"].get("form_version",1))
     props=dict(request['properties']);confirmed=request['confirmed_properties']
     if not isinstance(confirmed,list) or any(x not in props for x in confirmed):raise ValueError('Invalid confirmed property list')
     # The model performs normalization once; only explicit properties are accepted.
@@ -110,7 +110,21 @@ def spor_candidate(workspace, request):
     target=safe_path(workspace,rel)
     if target.exists():raise ValueError('Canonical exists; explicit reconciliation required')
     body=drafts.FIELD.sub(lambda m:'<!-- spor-field:'+m[1]+' -->\n'+fields.get(m[1],m[2])+'\n<!-- /spor-field -->',saved['body'])
+    if saved['metadata'].get('form_version') == 2:
+        from spor_question_queue import validate, resolved, replace_tail
+        values={m[1]: m[2] for m in drafts.FIELD.finditer(body)}
+        queue=resolved(saved['metadata']['questions'],values,fields)
+        validate(queue,mode,drafts.form(mode,2),values)
+        body=replace_tail(body,queue,saved["metadata"]["questions"])
     body=__import__('re').sub(r'^<!-- (?:spor-field:f\d{3}|/spor-field) -->\n?','',body,flags=__import__('re').MULTILINE)
+    if saved['metadata'].get('form_version') == 2:
+        from spor_question_queue import strip_markers
+        body=strip_markers(body)
+        # Canonical V4 retains its independent full-REVIEW question contract.
+        # This is not a new owner prompt in the noncanonical draft projection.
+        from spor_question_queue import FULL_QUESTION
+        heading='## REVIEW (dziś) / Life Alignment' if mode=='daily' else '## REVIEW (przyszły tydzień) / Life Alignment'
+        body=body.replace(heading,heading+'\n\n'+FULL_QUESTION[mode],1)
     body=body.replace('— szkic do uzupełnienia','— zapis właściciela',1)
     body=body.replace('Szkic niezatwierdzony; nie jest źródłem faktów ani zatwierdzonym planem.','Canonical po uzupełnieniu właściciela; propozycje AI zachowują swoje oznaczenie.',1)
     body=body.replace('- Szkic nie zasila indeksów, TaskNotes ani kalendarza. Zapis canonical wymaga aktualnego zatwierdzenia właściciela.','- Zakres dalszych zapisów wynika z aktualnej zgody właściciela.')

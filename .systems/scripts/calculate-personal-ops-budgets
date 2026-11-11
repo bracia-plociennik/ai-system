@@ -381,15 +381,17 @@ def relocate_food_schedule(properties: dict, schedule: dict) -> dict:
                 "per-day meal interval is invalid",
                 [f"meal_slot_{meal.get('meal_slot')}_time"],
             )
-        target_index = next((
-            index for index, (_block_id, time_range) in enumerate(FOOD_BLOCKS)
-            if start is not None and end is not None and block_time(time_range)[0] <= start < end <= block_time(time_range)[1]
-        ), None)
+        target_index = None
+        if start is not None and end is not None and block_time(FOOD_BLOCKS[0][1])[0] <= start < end <= block_time(FOOD_BLOCKS[-1][1])[1]:
+            for index, (_block_id, time_range) in enumerate(FOOD_BLOCKS):
+                window_start, window_end = block_time(time_range)
+                if max(start, window_start) < min(end, window_end):
+                    target_index = index
         if target_index is None or target_index in used_targets:
             return unavailable_food_schedule(
                 Decimal(str(schedule.get("planned_calorie_target"))),
                 str(schedule.get("day_type", "")),
-                "each per-day meal must fit one unique macro block",
+                "each per-day meal must map to a unique macro block within the configured day",
                 [f"meal_slot_{meal.get('meal_slot')}_time"],
             )
         used_targets.add(target_index)
@@ -472,6 +474,17 @@ def records_available_as_of(records: list[dict], target: date) -> list[dict]:
     return available
 
 
+def spending_coverage(coverage: dict, config: dict[str, str]) -> dict:
+    """Retain factual coverage; owner defaults apply only to undisputed gaps."""
+    policy = config.get("missing_spending_policy", "unknown")
+    if policy not in {"unknown", "assume-zero"}:
+        stop("Invalid missing_spending_policy; expected unknown or assume-zero")
+    assumed = coverage["missing_dates"] if policy == "assume-zero" and not coverage["unallocated_aggregates"] else []
+    if not assumed:
+        return coverage
+    return {**coverage, "assumed_zero_dates": list(assumed), "status": "complete-with-assumed-zeros"}
+
+
 def monthly_report(records: list[dict], target: date, config: dict[str, str]) -> dict:
     base = positive(decimal(config.get("monthly_base_budget"), "monthly_base_budget", True), "monthly_base_budget")
     buffer = positive(decimal(config.get("monthly_buffer"), "monthly_buffer", True), "monthly_buffer")
@@ -520,10 +533,18 @@ def monthly_report(records: list[dict], target: date, config: dict[str, str]) ->
         "standard_spend_resume_date": resume.isoformat(),
         "approximate": approximate,
     }
+    if coverage is None and config.get("missing_spending_policy", "unknown") != "unknown":
+        first = target.replace(day=1)
+        expected = {(first + timedelta(days=i)).isoformat() for i in range((target - first).days)}
+        known = {str(row.get("closure_date")) for row in actual_records
+                 if str(row.get("closure_date")) in expected and numeric_property(row, "previous_day_finance_amount") is not None}
+        coverage = {"known_dates": sorted(known), "missing_dates": sorted(expected - known),
+                    "unallocated_aggregates": [], "status": "complete" if known == expected else "partial-known-subtotal"}
     if coverage is not None:
+        coverage = spending_coverage(coverage, config)
         result["coverage"] = coverage
-        result["known_spending_subtotal"] = json_number(spending) if actual_records or not coverage["missing_dates"] else None
-        if coverage["status"] != "complete":
+        result["known_spending_subtotal"] = json_number(spending) if coverage["known_dates"] or not coverage["missing_dates"] else None
+        if coverage["status"] not in {"complete", "complete-with-assumed-zeros"}:
             for key in ("remaining_base_budget", "average_available_per_remaining_day", "pace_overrun", "no_spend_days_after_today", "no_spend_days_from_today", "standard_spend_resume_date"):
                 result[key] = None
             result["current_spending"] = result["known_spending_subtotal"]
@@ -628,6 +649,8 @@ def print_human(report: dict) -> None:
         if isinstance(value, float):
             value = format_decimal(Decimal(str(value)))
         print(f"  {key}: {value}")
+    if assumed := month.get("coverage", {}).get("assumed_zero_dates"):
+        print(f"  assumed_zero_dates: {', '.join(assumed)}")
     print("weekly-calories:")
     for key in ("weekly_budget", "actual_consumed", "remaining_before_today", "remaining_days_inclusive", "planned_today", "projected_after_today", "remaining_after_today", "mechanical_limit_after_today", "training_day_standard", "rest_day_standard", "minimum_daily_calories", "common_sense_limit_after_today", "unbalanced_balance"):
         value = week[key]

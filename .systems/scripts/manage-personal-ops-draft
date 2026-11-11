@@ -25,14 +25,26 @@ def main():
     args.workspace = args.workspace.absolute()
     info = draft.identity(args.workspace, args.date)
     if args.action == "describe":
-        result = {"contract": draft.CONTRACT, **info, "path": draft.relative_path(info), "fields": draft.form(info["mode"])}
+        version = 2
+        if (args.workspace / draft.relative_path(info)).exists():
+            version = draft.read(args.workspace, args.date)['metadata'].get('form_version', 1)
+        result = {"contract": draft.CONTRACT, **info, "path": draft.relative_path(info),
+                  "form_version": version, "fields": draft.form(info["mode"], version)}
+        if version == 2:
+            result['question_contract'] = 'spor-question-queue-v1'
+            from spor_question_queue import FULL_QUESTION
+            result['life_alignment_question'] = FULL_QUESTION[info['mode']]
     elif args.action == "read":
         result = draft.read(args.workspace, args.date)
     elif args.action == "emit":
         # A pure stdout rendezvous; the read-only model cannot invoke writer I/O.
         if not args.nonce or len(args.nonce) != 64:
             raise ValueError("Dispatcher nonce required")
-        payload = json.loads(sys.stdin.read(draft.MAX_BYTES + 1))
+        raw = sys.stdin.read(draft.MAX_BYTES + 1)
+        if len(raw.encode()) > draft.MAX_BYTES:
+            raise ValueError("Oversize emit package")
+        payload = json.loads(raw)
+        draft.validate_payload(info["mode"], payload)
         result = {"nonce": args.nonce, "payload": payload}
         print("SPOR_DRAFT_REQUEST_V1 " + json.dumps(result, ensure_ascii=False, separators=(",", ":")))
         return
