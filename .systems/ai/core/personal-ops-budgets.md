@@ -94,6 +94,12 @@ Each reporting week is Monday through Sunday. Saturday and Sunday from the previ
 
 When the configured minimum prevents closing the weekly budget, report the remaining amount as `unbalanced_balance` for later days or weeks. The calculator must not prescribe a lower limit or interpret health effects.
 
+### Owner-local defaults and meal boundaries
+
+`missing_spending_policy: assume-zero` in the local settings treats otherwise missing elapsed spending days as zero for projections only. Outputs retain the actual missing dates and identify which were assumed zero. An undistributed aggregate, a conflict, or stale official indexes cannot become a complete balance by this rule. With no opt-in, missing spending remains unknown. The policy never fills calorie gaps or writes an observed value.
+
+A meal in the approved per-day schedule that overlaps multiple macro windows is assigned as one package to the latest window it overlaps for a positive duration. Ending exactly on a boundary does not overlap the next window. The real meal interval still governs IF and calendar display. Meals outside the configured day or multiple packages mapped to the same window remain unavailable.
+
 ## Post-Write Use
 
 After a successful daily check-in write or update, the route must:

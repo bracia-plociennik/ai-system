@@ -193,6 +193,8 @@ def render_monthly_budget(properties: dict, monthly: dict) -> list[str]:
     ]
     if monthly.get("approximate"):
         lines.append("- Status danych: `wartości przybliżone`")
+    if assumed := monthly.get("coverage", {}).get("assumed_zero_dates"):
+        lines.append(f"- Saldo wyliczono z domyślnym 0 {currency} dla: {', '.join(assumed)} (brak zgłoszonych wydatków).")
     return lines
 
 
@@ -255,6 +257,8 @@ def is_meal_row(row: dict) -> bool:
 def matching_food_block(row: dict, blocks: dict[str, dict]) -> tuple[str, dict] | None:
     if not is_meal_row(row):
         return None
+    if row.get("meal_slot") is not None and any("meal_slot" in block for block in blocks.values()):
+        return next(((time, block) for time, block in blocks.items() if block.get("meal_slot") == row["meal_slot"]), None)
     row_start = minutes(row.get("start"))
     for time in FOOD_TIMES:
         block = blocks.get(time, {})
@@ -485,7 +489,7 @@ def render(properties: dict, rows: list[dict], budget_report: dict, workspace: P
     warnings = []
     for label, report in (("wydatków", monthly), ("kalorii", weekly)):
         coverage = report.get("coverage")
-        if coverage and coverage["status"] != "complete":
+        if coverage and coverage["status"] not in {"complete", "complete-with-assumed-zeros"}:
             warnings.append(f"budżet {label}: znana suma częściowa; brak danych dla {len(coverage['missing_dates'])} dni; pełne saldo nieznane")
     for label, key in (("mental", "mental_clarity_score"), ("ciało", "body_readiness_score")):
         try:

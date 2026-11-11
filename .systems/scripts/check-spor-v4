@@ -232,6 +232,32 @@ food = calculator.relocate_food_schedule(
 assert food["status"] == "unavailable", food
 assert "unique macro block" in food["reason"], food
 
+original_food = report["weekly_calories"]["food_schedule"]
+def project_meal(start, end):
+    intervals = {1: ("11:00", "11:30"), 2: (start, end)}
+    altered = [{**row, "start": intervals[row["meal_slot"]][0], "end": intervals[row["meal_slot"]][1]}
+               if row.get("meal_slot") in intervals else row for row in rows]
+    projected = calculator.relocate_food_schedule(
+        {**per_day_properties, "planned_schedule_json": json.dumps(altered)}, original_food)
+    return altered, projected
+
+altered, crossed = project_meal("14:50", "15:20")
+assert crossed["status"] == "available", crossed
+assert crossed["totals"] == original_food["totals"]
+assert crossed["block_calorie_sum"] == original_food["block_calorie_sum"]
+assert len(crossed["food_blocks"]) == 6
+slot = next(block for block in crossed["food_blocks"] if block.get("meal_slot") == 2)
+assert (slot["time"], slot["planned_start"], slot["planned_end"]) == ("15:00-17:00", "14:50", "15:20")
+rendered = renderer.render(per_day_properties, altered, {
+    **report, "weekly_calories": {**report["weekly_calories"], "food_schedule": crossed}}, workspace)
+meal_line = next(line for line in rendered.splitlines() if "| 14:50–15:20 |" in line)
+assert "kcal" in meal_line
+assert "| 15:00–" not in rendered  # no synthetic second meal
+_, exact = project_meal("14:50", "15:00")
+assert next(block["time"] for block in exact["food_blocks"] if block.get("meal_slot") == 2) == "13:00-15:00"
+assert project_meal("14:50", "21:01")[1]["status"] == "unavailable"
+assert project_meal("18:50", "19:20")[1]["status"] == "unavailable"  # collides with slot 3
+
 conflict_rows = [{"block_id": "overnight", "start": "18:00", "end": "07:30", "end_day_offset": 1, "label": "Overnight"}]
 conflict_output = renderer.render(per_day_properties, conflict_rows, report, workspace)
 assert "konflikt posiłku 19:00–21:00" in conflict_output

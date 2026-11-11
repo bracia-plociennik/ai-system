@@ -45,16 +45,19 @@ def relative_path(info):
     return f"personal-ops/check-in-drafts/{info['mode']}/{info['date'][:4]}/{info['date']}.md"
 
 
-def template(mode):
+def template(mode, form_version=1):
     if mode not in {"daily", "weekly"}:
         raise ValueError("Invalid mode")
-    return (ROOT / f".systems/ai/templates/workspace/personal-ops/{mode}-spor-proposal.template.md").read_text()
+    if form_version not in (1, 2):
+        raise ValueError("Unsupported form version")
+    suffix = "-v2" if form_version == 2 else ""
+    return (ROOT / f".systems/ai/templates/workspace/personal-ops/{mode}-spor-proposal{suffix}.template.md").read_text()
 
 
-def form(mode):
+def form(mode, form_version=1):
     fields = {}
     section = ""
-    for line in template(mode).splitlines():
+    for line in template(mode, form_version).splitlines():
         if line.startswith("## "):
             section = line[3:]
         if line.startswith("- ") and not line.startswith("- Propozycja jest read-only"):
@@ -63,9 +66,9 @@ def form(mode):
     return fields
 
 
-def validate_fields(mode, fields, *, initial):
+def validate_fields(mode, fields, *, initial, form_version=1):
     from personal_ops_spor_proposals import SECRET
-    expected = form(mode)
+    expected = form(mode, form_version)
     if not isinstance(fields, dict) or (initial and set(fields) != set(expected)) or not set(fields) <= set(expected) or not fields:
         raise ValueError("Missing, unknown or empty form fields")
     for key, value in fields.items():
@@ -75,6 +78,10 @@ def validate_fields(mode, fields, *, initial):
             raise ValueError("Every field requires a source/confidence label")
         if "<!--" in value or re.search(r"(?m)^(?:#{1,6} |---\s*$)", value):
             raise ValueError("Field cannot replace form structure")
+        if initial and form_version == 2 and "?" in re.sub(r"https?://[^\s<>]+", "", value):
+            raise ValueError("Owner questions belong in the final question queue")
+        if initial and form_version == 2 and value.startswith(("Nieznane — pytanie:", "Nieznane - pytanie:")) and "UNKNOWN" not in value:
+            raise ValueError("Unknown fields need explicit UNKNOWN and a question reference")
         if SECRET.search(value):
             raise ValueError("Secret-like field requires private review")
         owner_field = expected[key]["label"].startswith("Odpowiedź:") or (
@@ -85,7 +92,7 @@ def validate_fields(mode, fields, *, initial):
 
 
 def render(info, fields):
-    lines = template(info["mode"]).splitlines()
+    lines = template(info["mode"], info.get("form_version", 1)).splitlines()
     out, index = [], 0
     for line in lines:
         if line.startswith("# "):
@@ -101,6 +108,9 @@ def render(info, fields):
             out.extend([line, f"<!-- spor-field:{key} -->", fields[key], "<!-- /spor-field -->"])
         else:
             out.append(line)
+    if info.get("form_version") == 2:
+        from spor_question_queue import render as render_queue
+        out.extend(["", render_queue(info["questions"])])
     return "\n".join(out) + "\n"
 
 
@@ -254,6 +264,24 @@ def canonical_sources(workspace, target):
     return found
 
 
+def validate_payload(mode, payload):
+    base = {"contract", "proposal_id", "fields", "sources"}
+    version = payload.get("form_version", 1) if isinstance(payload, dict) else None
+    expected = base | {"form_version", "questions"} if version == 2 else base
+    if (not isinstance(payload, dict) or set(payload) != expected or type(version) is not int or version not in (1, 2)
+            or payload.get("contract") != CONTRACT):
+        raise ValueError("Invalid draft package")
+    if not isinstance(payload["sources"], list) or not payload["sources"] or len(payload["sources"]) > 150:
+        raise ValueError("Draft requires source references")
+    for source in payload["sources"]:
+        if not isinstance(source, str) or not source.strip() or len(source) > 1500 or "\n" in source:
+            raise ValueError("Invalid source reference")
+    validate_fields(mode, payload["fields"], initial=True, form_version=version)
+    if version == 2:
+        from spor_question_queue import validate
+        validate(payload["questions"], mode, form(mode, version), payload["fields"])
+
+
 def create(workspace, target, payload, *, clock=stamp):
     """Scheduled create only. Actual standing approval is checked by caller."""
     workspace = Path(workspace).absolute()
@@ -261,14 +289,11 @@ def create(workspace, target, payload, *, clock=stamp):
     if current.date() != target:
         raise ValueError("No catch-up or date rollover writes")
     info = identity(workspace, target)
-    if set(payload) != {"contract", "proposal_id", "fields", "sources"} or payload["contract"] != CONTRACT or payload["proposal_id"] != info["proposal_id"]:
+    validate_payload(info["mode"], payload)
+    if payload["proposal_id"] != info["proposal_id"]:
         raise ValueError("Invalid draft package identity")
-    validate_fields(info["mode"], payload["fields"], initial=True)
-    if not isinstance(payload["sources"], list) or not payload["sources"] or len(payload["sources"]) > 150:
-        raise ValueError("Draft requires source references")
-    for source in payload["sources"]:
-        if not isinstance(source, str) or not source.strip() or len(source) > 1500 or "\n" in source:
-            raise ValueError("Invalid source reference")
+    if payload.get("form_version") == 2:
+        info.update(form_version=2, questions=payload["questions"])
     # Reuse the real read-only collector to reject source-error/already-recorded.
     from personal_ops_spor_proposals import prepare
     package = prepare(workspace, target, scheduled=True)
@@ -276,7 +301,7 @@ def create(workspace, target, payload, *, clock=stamp):
         raise ValueError("Draft sources not ready: " + package["status"])
     meta = {"schema_version": 1, **info, "status": "draft", "created_at": current.isoformat(),
             "updated_at": current.isoformat(), "revision": 1, "sources": payload["sources"],
-            "template_sha256": digest(template(info["mode"]).encode()),
+            "template_sha256": digest(template(info["mode"], info.get("form_version", 1)).encode()),
             "authority": "unapproved-draft", "canonical_source": None}
     data = encode(meta, render({**info, "prepared_at": current.isoformat()}, payload["fields"]))
     with directory(workspace, info, create=True) as (fd, name), locked(fd):
@@ -294,7 +319,6 @@ def update(workspace, target, updates, expected, owner_reference, *, clock=stamp
     if not owner_reference or not re.fullmatch(r"[a-f0-9]{64}", expected):
         raise ValueError("Owner reply reference and read hash required")
     info = identity(Path(workspace), target)
-    validate_fields(info["mode"], updates, initial=False)
     with directory(workspace, info) as (fd, name), locked(fd):
         data = read_at(fd, name)
         if digest(data) != expected:
@@ -302,12 +326,39 @@ def update(workspace, target, updates, expected, owner_reference, *, clock=stamp
         meta, body = decode(data)
         if meta.get("proposal_id") != info["proposal_id"] or meta["status"] != "draft" or canonical_sources(workspace, target):
             raise ValueError("Draft identity/lifecycle conflict")
-        if meta.get("template_sha256") != digest(template(info["mode"]).encode()):
+        version = meta.get("form_version", 1)
+        if meta.get("template_sha256") != digest(template(info["mode"], version).encode()):
             raise ValueError("Template changed; explicit reconciliation required")
+        answered = []
+        if version == 2 and isinstance(updates, dict) and "fields" in updates:
+            if set(updates) != {"fields", "answered_question_ids"}:
+                raise ValueError("Invalid answer patch")
+            answered = updates["answered_question_ids"]
+            updates = updates["fields"]
+        validate_fields(info["mode"], updates, initial=False, form_version=version)
         matches = list(FIELD.finditer(body))
         if len({m[1] for m in matches}) != len(matches) or not set(updates) <= {m[1] for m in matches}:
             raise ValueError("Edited field structure requires manual reconciliation")
         body = FIELD.sub(lambda m: f"<!-- spor-field:{m[1]} -->\n{updates.get(m[1], m[2])}\n<!-- /spor-field -->", body)
+        if version == 2:
+            from spor_question_queue import validate, replace_tail, resolved, known
+            if not isinstance(answered, list) or len(set(answered)) != len(answered):
+                raise ValueError("Invalid answered question IDs")
+            existing = {q["id"]: q for q in meta["questions"]["items"]}
+            if not set(answered) <= set(existing):
+                raise ValueError("Unknown answered question ID")
+            values = {m[1]: m[2] for m in FIELD.finditer(body)}
+            for ident in answered:
+                if not set(existing[ident]["field_ids"]) & set(updates):
+                    raise ValueError("Answer patch must update a selected field")
+                if any(not known(values[k]) for k in existing[ident]["field_ids"]):
+                    raise ValueError("Partial answer must retain its question")
+            queue = resolved(meta["questions"], values, updates)
+            answered = [ident for ident in existing if ident not in {q["id"] for q in queue["items"]}]
+            validate(queue, info["mode"], form(info["mode"], version), values)
+            body = replace_tail(body, queue, meta["questions"])
+            meta["questions"] = queue
+            meta["answered_question_ids"] = list(dict.fromkeys(meta.get("answered_question_ids", []) + answered))
         meta.update(updated_at=clock().isoformat(), revision=meta["revision"] + 1, owner_reply_reference=owner_reference)
         atomic(fd, name, encode(meta, body), expected=expected)
     return read(workspace, target)
