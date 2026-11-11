@@ -3,11 +3,12 @@
 import argparse,json,sys
 from pathlib import Path
 from task_store import TaskStore
-p=argparse.ArgumentParser();p.add_argument('action',choices=['inspect','list','create','plan','idea']);p.add_argument('--workspace',type=Path,required=True);p.add_argument('--input',type=Path);p.add_argument('--owner-approved',action='store_true');p.add_argument('--task-id');p.add_argument('--expected-sha256');args=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('action',choices=['inspect','list','create','plan','idea']);p.add_argument('--workspace',type=Path,required=True);p.add_argument('--input',type=Path);p.add_argument('--owner-approved',action='store_true');p.add_argument('--task-id');p.add_argument('--expected-sha256');p.add_argument('--status',choices=['done']);args=p.parse_args()
 try:
  store=TaskStore.load(args.workspace)
+ if args.status and args.action!='list':raise ValueError('status-filter-requires-list')
  if args.action=='inspect':result={'profile':store.profile,'vault':str(store.root),'task_directory':str(store.task_dir),'writes':False}
- elif args.action=='list':result=[{'path':str(path),'metadata':metadata} for path,metadata in store.tasks()]
+ elif args.action=='list':result=store.completed() if args.status=='done' else [{'path':str(path),'metadata':metadata} for path,metadata in store.tasks()]
  elif args.action in {'plan','idea'}:
   if args.input is None:raise ValueError('plan-input-required')
   value=json.loads(args.input.read_text(encoding='utf-8'));writer=store.write_plan if args.action=='plan' else store.write_idea;result=writer(args.task_id,value,args.expected_sha256,apply=args.owner_approved)

@@ -105,3 +105,29 @@ Rollback restores the previous native panel/routing and disables the service;
 retain SQLite, native events, approval receipts and committed WEP. Do not remove
 history or bulk-rewrite task IDs as part of deployment/rollback. Test against an
 isolated owner fixture; production verification must not create demo work entries.
+
+
+## Native task panel and read-only DONE
+
+The native panel provides DASHBOARD, DAILY (scheduled equals today's date in
+Europe/Warsaw), DUE (valid other scheduled days), ALL and DONE. Categories remain
+DO/DEFER/DELEGATE/DELETE/DUMP. Client/project sections collapse independently;
+local preferences contain only UI choices and hashed section keys, never task
+contents. Contextual ADD keeps the human creator contract. Editing never changes
+author; default ordering keeps human tasks before AI within each project.
+
+GET /tasks/done and task-store list --status done expose a versioned read-only
+projection. Missing dates/identity remain unknown, duplicate identities are
+explicit, and WEP approval is not inferred from DONE. A panel checkbox uses the
+native editor lifecycle path; legacy undo requires the existing status choice.
+
+WEP preview requests bind the response to the current form revision. Delayed
+responses never enable approval of edited inputs. Timer clock updates preserve
+focused controls. The summary includes paused timers and unapproved sessions.
+Run navigation resolves current paths by task UUID and reports missing/conflicted
+identities rather than using a stale path.
+
+An outstanding time review blocks other sessions unless both sides have closed,
+measured segments whose complete Warsaw day sets are provably disjoint. Active,
+unpaired, offline, unknown or anomalous-clock time retains the conservative hold.
+This does not relax preview version, native snapshot, task hash or recovery guards.

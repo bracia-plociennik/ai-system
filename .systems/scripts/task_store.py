@@ -184,6 +184,40 @@ class TaskStore:
                 if self.profile=='silverbullet-v1' and values.get('type')!='task':continue
                 yield path,values
 
+    def completed(self):
+        """Explicit read-only DONE contract. Never create identity or infer time."""
+        rows = list(self.tasks())
+        scalar = lambda value: value if isinstance(value, str) and value else None
+        counts = {}
+        for _, meta in rows:
+            identity = scalar(meta.get('task_id'))
+            if identity:
+                counts[identity] = counts.get(identity, 0) + 1
+        result = []
+        for path, meta in rows:
+            if str(meta.get('status', '')).lower() != 'done':
+                continue
+            identity = scalar(meta.get('task_id'))
+            try:
+                valid = bool(identity) and str(uuid.UUID(identity)) == identity
+            except (ValueError, TypeError, AttributeError):
+                valid = False
+            conflicted = (counts.get(identity, 0) > 1 or '.conflicted-' in path.name or
+                          bool(list(path.parent.glob(path.stem + '.conflicted-*.md'))))
+            state = 'conflict' if conflicted else 'ready' if valid else 'missing-or-invalid'
+            result.append({'task_id': identity, 'task_ref': 'silverbullet:' + identity if valid else None,
+                'source_path': path.relative_to(self.root).as_posix(), 'identity_status': state,
+                'title': meta.get('title') or path.stem, 'status': 'done',
+                'author': scalar(meta.get('author')) if scalar(meta.get('author')) in {'human', 'ai'} else None,
+                'category': scalar(meta.get('category')), 'client': scalar(meta.get('client')),
+                'project': scalar(meta.get('project')), 'scheduled': scalar(meta.get('scheduled')),
+                'created_at': scalar(meta.get('created_at')), 'completed_at': scalar(meta.get('completed_at')),
+                'completed_at_basis': scalar(meta.get('completed_at_basis')),
+                'wep_approval_status': 'not_checked'})
+        result.sort(key=lambda item: (item['completed_at'] or '', item['source_path']), reverse=True)
+        return {'schema_version': 1, 'status_filter': 'done', 'writes': False, 'tasks': result,
+                'identity_conflicts': sum(item['identity_status'] == 'conflict' for item in result)}
+
     def candidate(self,value):
         """Project an existing source candidate into the selected app's field contract."""
         result=dict(value)

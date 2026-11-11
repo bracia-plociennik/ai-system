@@ -29,7 +29,7 @@ export const tracker = (() => {
   async function call(path,body){
     const response=await fetch(new URL(api+path,document.baseURI),{method:body===undefined?'GET':'POST',credentials:'same-origin',redirect:'error',signal:AbortSignal.timeout(10000),headers:body===undefined?{}:{'Content-Type':'application/json','X-Task-Tracker-CSRF':token},body:body===undefined?undefined:JSON.stringify(body)});
     let result;try{result=await response.json();}catch{throw new Error('Nieprawidłowa odpowiedź adaptera timera.');}
-    if(!response.ok){const error=new Error(result.error||'Nie udało się zapisać.');error.code=result.error;error.http=response.status;throw error;}
+    if(!response.ok){const messages={'resolve-time-conflicts-first':'Najpierw rozstrzygnij wskazane konflikty czasu w panelu WEP.','task-identity-ambiguous':'Zadanie ma powtórzone ID. Rozstrzygnij konflikt plików przed pomiarem.','task-conflict-needs-resolution':'Zadanie ma nierozstrzygniętą kopię konfliktową.','authentication-required':'Sesja logowania wygasła. Zaloguj się ponownie.','state-changed-repreview':'Stan zmienił się. Przygotuj nowy podgląd WEP.','task-changed-repreview':'Zadanie zmieniło się. Przygotuj nowy podgląd WEP.'};const error=new Error(messages[result.error]||result.error||'Nie udało się zapisać.');error.code=result.error;error.http=response.status;throw error;}
     return result;
   }
   async function inventory(){
@@ -152,20 +152,21 @@ export const tracker = (() => {
     const correction=node('input',undefined,{type:'checkbox','aria-label':'Popraw czas pracy'});correction.checked=saved.correct===true||!!run.review||run.state==='conflict';const correctionLabel=node('label',' Popraw czas pracy');correctionLabel.prepend(correction);
     const timeBox=node('div');timeBox.style.cssText='display:grid;gap:.3em';const dayInputs={};
     const addDay=(date,seconds)=>{if(dayInputs[date])return;const label=node('label',date+' — minuty pracy: '),input=node('input',undefined,{type:'number',min:'0',step:'0.01','aria-label':'Minuty pracy '+date});input.style.cssText=fieldStyle;input.value=saved.days?.[date]??(seconds===null?'':String(seconds/60));dayInputs[date]=input;label.append(input);timeBox.append(label);};for(const [date,seconds]of Object.entries({...Object.fromEntries(Object.keys(saved.days||{}).map(d=>[d,null])),...daysFor(run)}))addDay(date,seconds);
-    const additionalDay=node('input',undefined,{type:'date','aria-label':'Dodaj dzień korekty'});additionalDay.style.cssText=fieldStyle;timeBox.append(additionalDay,button('Dodaj dzień korekty',()=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(additionalDay.value))throw new Error('Wybierz dzień korekty.');addDay(additionalDay.value,null);}));
+    const additionalDay=node('input',undefined,{type:'date','aria-label':'Dodaj dzień korekty'});additionalDay.style.cssText=fieldStyle;timeBox.append(additionalDay,button('Dodaj dzień korekty',()=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(additionalDay.value))throw new Error('Wybierz dzień korekty.');addDay(additionalDay.value,null);box.dispatchEvent(new Event('input',{bubbles:true}));}));
     const reason=node('textarea',undefined,{'aria-label':'Powód korekty czasu',placeholder:'Dlaczego zmieniasz zarejestrowany czas?'});reason.style.cssText=fieldStyle;reason.value=saved.reason||'';timeBox.append(reason);timeBox.hidden=!correction.checked;correction.addEventListener('change',()=>{timeBox.hidden=!correction.checked;});
     const confirmation=node('input',undefined,{type:'checkbox','aria-label':'Potwierdzam rzeczywisty czas pracy'});confirmation.checked=saved.time_confirmed===true;const confirmationLabel=node('label',' Potwierdzam, że ten czas dotyczy mojej rzeczywistej pracy');confirmationLabel.prepend(confirmation);
     const result=node('div');result.setAttribute('role','status');
-    let preview=null;
+    let preview=null,formRevision=0,previewRequest=0;
     const correctionValue=()=>{const values={};for(const [d,input]of Object.entries(dayInputs)){if(input.value===''||!Number.isFinite(Number(input.value))||Number(input.value)<0)throw new Error('Uzupełnij poprawny czas dla każdego dnia; zero wpisz jawnie.');values[d]=Math.round(Number(input.value)*60);}if(!reason.value.trim())throw new Error('Podaj powód korekty czasu.');return values;};
     const snapshot=()=>{const value={outcome:outcome.value,client_id:client.value,project_id:project.value,unassigned_confirmed:unassigned.checked,correct:correction.checked,reason:reason.value,time_confirmed:confirmation.checked,days:Object.fromEntries(Object.entries(dayInputs).map(([d,i])=>[d,i.value]))};drafts.set(run.id,value);return value;};const save=async()=>write(draftPath(run.id),snapshot(),'tracker-draft');
-    let timer;box.addEventListener('input',()=>{snapshot();preview=null;approve.disabled=true;clearTimeout(timer);timer=setTimeout(()=>save().catch(()=>{}),300);});
+    let timer;const invalidate=()=>{formRevision++;snapshot();preview=null;approve.disabled=true;clearTimeout(timer);timer=setTimeout(()=>save().catch(()=>{}),300);};box.addEventListener('input',invalidate);box.addEventListener('change',invalidate);
     const approve=button('Zatwierdź wpis WEP',async()=>{if(!preview)return;if(!online||pending.length)throw new Error('Najpierw zsynchronizuj zdarzenia.');const value=await call('wep/approve',{preview_id:preview.preview_id,preview_hash:preview.preview_hash});result.textContent=value.xlsx_status==='current'?'Wpis WEP zatwierdzony. Arkusz zaktualizowany.':'Wpis WEP zatwierdzony. Arkusz oczekuje na odświeżenie.';preview=null;await refresh();});approve.disabled=true;
-    const prepare=button('Przygotuj podgląd WEP',async()=>{
-      await save();if(!online||pending.length)throw new Error('Zatwierdzanie wymaga połączenia i synchronizacji.');
+    const prepare=button('Przygotuj podgląd WEP',async()=>{prepare.dataset.running='true';try{
+      const revision=formRevision,requestId=++previewRequest;preview=null;approve.disabled=true;await save();if(revision!==formRevision)return;if(busy||!online||pending.length||!state.runs.some(r=>r.id===run.id&&r.state==='stopped'))throw new Error('Poczekaj na potwierdzenie Stop i synchronizację.');
       const payload={run_id:run.id,outcome:outcome.value,client_id:client.value||null,project_id:project.value||null,unassigned_confirmed:unassigned.checked,time_confirmed:confirmation.checked};if(correction.checked){payload.correction=correctionValue();payload.reason=reason.value;}
-      preview=await call('wep/preview',payload);result.replaceChildren();const overview=node('div');overview.textContent=`Do WEP: ${duration(preview.total_seconds)} · ${preview.pieces.length} odcinków · ${preview.status}. ${preview.correction?'Korekta zachowana wraz z oryginałem.':''}`;result.append(overview);for(const piece of preview.pieces)result.append(node('div',piece.day+' · '+(piece.start?clock(piece.start)+' → '+clock(piece.end)+' · ':'')+duration(piece.seconds)+' · '+(piece.basis==='measured'?'pomiar online':'czas potwierdzony przez właściciela')));const evidence=node('details');evidence.append(node('summary','Dowód i powiązanie wpisu'),node('pre',JSON.stringify({task_ref:preview.task_ref,task_work_id:preview.task_work_id,evidence:preview.evidence},null,2)));result.append(evidence);approve.disabled=false;
+      const candidate=await call('wep/preview',payload);if(revision!==formRevision||requestId!==previewRequest||!box.isConnected){result.textContent='Formularz zmienił się. Przygotuj nowy podgląd WEP.';return;}preview=candidate;result.replaceChildren();const overview=node('div');overview.textContent=`Do WEP: ${duration(preview.total_seconds)} · ${preview.pieces.length} odcinków · ${preview.status}. ${preview.correction?'Korekta zachowana wraz z oryginałem.':''}`;result.append(overview,node('div','Wynik: '+preview.outcome),node('div','Klient: '+(preview.client_id||'bez przypisania')+' · Projekt: '+(preview.project_id||'bez przypisania')));for(const piece of preview.pieces)result.append(node('div',piece.day+' · '+(piece.start?clock(piece.start)+' → '+clock(piece.end)+' · ':'')+duration(piece.seconds)+' · '+(piece.basis==='measured'?'pomiar online':'czas potwierdzony przez właściciela')));const evidence=node('details');evidence.append(node('summary','Dowód i powiązanie wpisu'),node('pre',JSON.stringify({task_ref:preview.task_ref,task_work_id:preview.task_work_id,evidence:preview.evidence},null,2)));result.append(evidence);approve.disabled=false;}finally{delete prepare.dataset.running;}
     });
+    prepare.dataset.wepPrepare='true';
     box.append(outcome,client,project,unassignedLabel,correctionLabel,timeBox,confirmationLabel);
     if(run.review||run.state==='conflict'){
       box.append(button('Potwierdź rozstrzygnięcie czasu',async()=>{await save();if(!online)throw new Error('Rozstrzyganie wymaga połączenia.');await dispatch('resolve',page,{run_id:run.id,correction:correctionValue(),reason:reason.value});host.dataset.run='';notify();}),button('Wyłącz tę sesję z WEP',async()=>{if(!reason.value.trim())throw new Error('Podaj powód wyłączenia.');await dispatch('discard',page,{run_id:run.id,reason:reason.value});host.dataset.run='';notify();}));
@@ -173,30 +174,43 @@ export const tracker = (() => {
     box.append(result,button('Zamknij szkic',async()=>{await save();selected=null;host.replaceChildren();host.dataset.run='';}));host.replaceChildren(box);host.dataset.run=run.id;
   }
   function controls(page,text,callback,onNavigate){
-    configure(callback);let meta=taskMeta(text);const wrap=node('div');wrap.className='sb-task-tracker';wrap.style.cssText='display:grid;gap:.6em;padding:.7em 0';
+    configure(callback);let meta=taskMeta(text),barKey='',historyKey='';const wrap=node('div');wrap.className='sb-task-tracker';wrap.style.cssText='display:grid;gap:.6em;padding:.7em 0';
     const bar=node('div'),history=node('div'),reviewHost=node('div'),noticeNode=node('div');noticeNode.setAttribute('role','status');bar.style.cssText='display:flex;flex-wrap:wrap;align-items:center;gap:.4em';wrap.append(bar,noticeNode,history,reviewHost);
     const act=action=>async()=>{const receipt=await dispatch(action,page);meta=taskMeta(String(await native('current',{page})));return receipt;};
     function render(){
       if(!wrap.isConnected)return;
-      const current=view(),own=current.runs.find(r=>r.task_id===meta.task_id&&['active','paused'].includes(r.state));bar.replaceChildren(node('strong','Timer'));
+      const current=view(),own=current.runs.find(r=>r.task_id===meta.task_id&&['active','paused'].includes(r.state));const key=JSON.stringify([own?.id,own?.state,meta.task_id,busy]);if(key!==barKey){barKey=key;bar.replaceChildren(node('strong','Timer'));
       if(!own)bar.append(button('Start',act('start')));
-      else{bar.append(node('span',duration(elapsed(own))));bar.append(button(own.state==='active'?'Pauza':'Wznów',act(own.state==='active'?'pause':'resume')),button('Stop',act('stop')));}
-      noticeNode.textContent=[controlMessage(),message].filter(Boolean).join(' · ');history.replaceChildren();
+      else{bar.append(node('span',duration(elapsed(own)),{'data-tracker-clock':'true'}));bar.append(button(own.state==='active'?'Pauza':'Wznów',act(own.state==='active'?'pause':'resume')),button('Stop',act('stop')));}
+      for(const b of bar.querySelectorAll('button'))b.disabled=busy;}const clockNode=bar.querySelector('[data-tracker-clock]');if(clockNode&&own)clockNode.textContent=duration(elapsed(own));
+      noticeNode.textContent=[controlMessage(),message].filter(Boolean).join(' · ');const historyFingerprint=JSON.stringify(current.runs.filter(r=>r.task_id===meta.task_id).map(r=>[r.id,r.state,r.review,r.receipt,r.created,r.context_error]));if(historyFingerprint!==historyKey){historyKey=historyFingerprint;history.replaceChildren();
       for(const run of current.runs.filter(r=>r.task_id===meta.task_id&&['stopped','conflict'].includes(r.state)&&!r.receipt))history.append(button((run.review||run.state==='conflict'?'Rozstrzygnij czas':'Otwórz szkic WEP')+' · '+clock(run.created||run.segments[0]?.start||new Date().toISOString()),async()=>{selected=run.id;reviewHost.dataset.run='';notify();}));
-      for(const run of current.runs.filter(r=>r.task_id===meta.task_id&&r.receipt)){const row=node('div','WEP: zatwierdzono');if(run.receipt.xlsx_status==='pending')row.append(button('Odśwież arkusz',async()=>{await call('wep/refresh',{preview_id:run.receipt.preview_id});await refresh();}));history.append(row);}
+      for(const run of current.runs.filter(r=>r.task_id===meta.task_id&&r.receipt)){const row=node('div','WEP: zatwierdzono');if(run.receipt.xlsx_status==='pending')row.append(button('Odśwież arkusz',async()=>{await call('wep/refresh',{preview_id:run.receipt.preview_id});await refresh();}));history.append(row);}}
       const chosen=current.runs.find(r=>r.id===selected&&r.task_id===meta.task_id);
-      if(chosen&&!chosen.receipt&&reviewHost.dataset.run!==chosen.id){reviewHost.dataset.run=chosen.id;review(reviewHost,chosen,page,meta).catch(e=>notice(e.message));}
+      if(chosen&&['stopped','conflict'].includes(chosen.state)&&!chosen.receipt&&reviewHost.dataset.run!==chosen.id){reviewHost.dataset.run=chosen.id;review(reviewHost,chosen,page,meta).catch(e=>notice(e.message));}
       if(chosen?.receipt){reviewHost.replaceChildren();reviewHost.dataset.run='';}
+      const prepare=reviewHost.querySelector('[data-wep-prepare]');if(prepare)prepare.disabled=prepare.dataset.running==='true'||busy||!online||pending.length>0||!state.runs.some(r=>r.id===chosen?.id&&r.state==='stopped');
     }
     listeners.add(render);requestAnimationFrame(()=>{render();sync().catch(e=>notice(e.message));});
     const timer=setInterval(()=>{if(!wrap.isConnected){clearInterval(timer);listeners.delete(render);return;}render();},1000);return wrap;
   }
+  function openRun(run,onNavigate){
+    if(run.context_error||!run.path){notice('Nie można otworzyć zadania: '+(run.context_error||'brak aktualnej ścieżki')+'. Rozstrzygnij tożsamość zadania.');return;}
+    selected=run.id;return onNavigate(run.path.replace(/\.md$/,''));
+  }
   function summary(callback,onNavigate){
-    configure(callback);const wrap=node('div');wrap.className='sb-tracker-summary';wrap.style.cssText='display:grid;gap:.3em;margin:.5em 0';
-    function render(){if(!wrap.isConnected)return;const current=view(),active=current.runs.find(r=>r.state==='active');wrap.replaceChildren();if(active){wrap.append(node('strong','Trwa pomiar: '+duration(elapsed(active))),button(active.path.split('/').pop()||'Otwórz zadanie',()=>onNavigate(active.path.replace(/\.md$/,''))));}
-      const conflicts=current.runs.filter(r=>r.review||r.state==='conflict');for(const run of conflicts)wrap.append(button('Konflikt czasu — otwórz zadanie',()=>onNavigate(run.path.replace(/\.md$/,''))));if(!online||pending.length)wrap.append(node('small',controlMessage()));}
-    listeners.add(render);requestAnimationFrame(()=>{render();sync().catch(()=>{});});const timer=setInterval(()=>{if(!wrap.isConnected){clearInterval(timer);listeners.delete(render);return;}sync().catch(()=>{});render();},5000);return wrap;
+    configure(callback);const wrap=node('div');wrap.className='sb-tracker-summary';wrap.style.cssText='display:grid;gap:.5em;margin:.5em 0';let fingerprint='';
+    function render(){if(!wrap.isConnected)return;const current=view();const relevant=current.runs.filter(r=>['active','paused','stopped','conflict'].includes(r.state)&&(!r.receipt||r.review));const key=JSON.stringify([relevant.map(r=>[r.id,r.state,r.review,r.path,r.context_error,r.receipt]),online,pending.length,message]);
+      if(key!==fingerprint){fingerprint=key;wrap.replaceChildren();
+        for(const run of relevant.filter(r=>['active','paused'].includes(r.state))){const row=node('div');row.style.cssText='display:flex;gap:.5em;align-items:center;flex-wrap:wrap';row.append(node('strong',run.state==='active'?'Trwa pomiar':'Pauza'),node('span',duration(elapsed(run)),{'data-summary-clock':run.id}),button(run.path?.split('/').pop()?.replace(/\.md$/,'')||'Zadanie wymaga rozstrzygnięcia',()=>openRun(run,onNavigate)));wrap.append(row);}
+        const drafts=relevant.filter(r=>['stopped','conflict'].includes(r.state));if(drafts.length){const details=node('details'),heading=node('summary','WEP: '+drafts.length+' szkiców do sprawdzenia');heading.style.cssText='cursor:pointer;padding:.5em 0;font-weight:600';details.append(heading);for(const run of drafts){const row=node('div');row.style.cssText='margin:.3em 0';row.append(button((run.review||run.state==='conflict'?'Konflikt czasu · ':'Szkic WEP · ')+(run.path?.split('/').pop()?.replace(/\.md$/,'')||'Nieznane zadanie')+' · '+duration(elapsed(run)),()=>openRun(run,onNavigate)));details.append(row);}wrap.append(details);}
+        const conflicts=relevant.filter(r=>r.review);for(const run of conflicts)if(!drafts.includes(run))wrap.append(button('Konflikt czasu — otwórz zadanie',()=>openRun(run,onNavigate)));
+        if(!online||pending.length)wrap.append(node('small',controlMessage()));if(message)wrap.append(node('small',message,{role:'status'}));
+      }
+      for(const el of wrap.querySelectorAll('[data-summary-clock]')){const run=current.runs.find(r=>r.id===el.dataset.summaryClock);if(run)el.textContent=duration(elapsed(run));}
+    }
+    listeners.add(render);requestAnimationFrame(()=>{render();sync().catch(e=>notice(e.message));});const timer=setInterval(()=>{if(!wrap.isConnected){clearInterval(timer);listeners.delete(render);return;}sync().catch(e=>notice(e.message));render();},5000);return wrap;
   }
   window.addEventListener('online',()=>sync().catch(e=>notice(e.message)));
-  return {controls,summary,identityEdit,completionWithLifecycle,beforeCompletion,createHeaders,taskMeta,patchFields,edit,configure,sync,dispatch};
+  return {controls,summary,identityEdit,completionWithLifecycle,beforeCompletion,createHeaders,taskMeta,patchFields,edit,configure,sync,dispatch,state:()=>clone(view()),subscribe:fn=>{listeners.add(fn);return()=>listeners.delete(fn);},openRun};
 })();

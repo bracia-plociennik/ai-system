@@ -169,11 +169,68 @@ class TaskTracker:
     def require_current_approval(self, db, body, ledger):
         run = db.execute('SELECT * FROM runs WHERE id=?', (body['run_id'],)).fetchone()
         require(run and run['state'] == 'stopped' and not run['receipt'], 'state-changed-repreview')
-        require(not db.execute('SELECT 1 FROM runs WHERE review=1').fetchone(), 'resolve-time-conflicts-first')
+        require(not self.blocking_conflicts(db, body['run_id']), 'resolve-time-conflicts-first')
         path, _ = self.task(body['task_id'])
         require(file_hash(path) == body['task_source']['sha256'], 'task-changed-repreview')
         require(body['version'] == self.version(db) and body['snapshot'] == ledger.snapshot(),
                 'state-changed-repreview')
+
+    def run_days(self, db, run):
+        """Prove a bounded set of Warsaw days, or retain the global safety hold.
+
+        Calendar disjointness is intentionally conservative. Unknown/active time,
+        backwards clocks and unpaired replay openings cannot authorize other work.
+        """
+        if run['state'] == 'active':
+            return None
+        days, opened = set(), None
+        try:
+            events = [json.loads(row['payload']) for row in db.execute(
+                'SELECT payload FROM events WHERE run_id=? ORDER BY rowid', (run['id'],))]
+            for row in db.execute('SELECT payload,result FROM events WHERE run_id=?', (run['id'],)):
+                payload, result = json.loads(row['payload']), json.loads(row['result'])
+                at = moment(payload['occurred_at'])
+                if result.get('basis') != 'measured' or at > self.clock() + timedelta(minutes=5):
+                    return None
+                if result.get('basis') == 'measured' and abs((at - moment(result['event_at'])).total_seconds()) > 120:
+                    return None
+            for event in sorted(events, key=lambda item: moment(item['occurred_at'])):
+                at = event['occurred_at']
+                days.add(moment(at).astimezone(ZONE).date().isoformat())
+                if event['action'] in {'start', 'resume'}:
+                    opened = at if opened is None else min(opened, at, key=moment)
+                elif event['action'] in {'pause', 'stop', 'complete'} and opened is not None:
+                    days.update(piece['day'] for piece in split_interval(opened, at))
+                    opened = None
+            if opened is not None:
+                return None
+            segments = list(db.execute('SELECT * FROM segments WHERE run_id=?', (run['id'],)))
+            if not segments or any(segment['basis'] != 'measured' for segment in segments):
+                return None
+            for segment in segments:
+                if segment['end'] is None:
+                    return None
+                days.update(piece['day'] for piece in split_interval(segment['start'], segment['end']))
+            if run['correction']:
+                days.update(json.loads(run['correction'])['days'])
+            if not segments and not any(e['action'] in {'start', 'resume'} for e in events):
+                return None
+            return days or None
+        except (ValueError, TypeError, KeyError):
+            return None
+
+    def blocking_conflicts(self, db, run_id):
+        conflicts = list(db.execute('SELECT * FROM runs WHERE review=1'))
+        if not conflicts:
+            return []
+        target = db.execute('SELECT * FROM runs WHERE id=?', (run_id,)).fetchone()
+        target_days = self.run_days(db, target) if target else None
+        blocked = []
+        for conflict in conflicts:
+            days = self.run_days(db, conflict)
+            if conflict['id'] == run_id or target_days is None or days is None or target_days & days:
+                blocked.append(conflict['id'])
+        return blocked
 
     def task(self, task_id):
         uid(task_id)
@@ -303,6 +360,11 @@ class TaskTracker:
     def state(self, task_id=None):
         if task_id:
             uid(task_id)
+        try:
+            task_index = list(self.store.tasks())
+            index_error = False
+        except (ValueError, OSError):
+            task_index, index_error = [], True
         with self.db() as db:
             db.execute('BEGIN IMMEDIATE')
             self.recover_committed(db)
@@ -316,8 +378,18 @@ class TaskTracker:
                 value['receipt'] = json.loads(value['receipt']) if value['receipt'] else None
                 value['segments'] = [dict(x) for x in db.execute('SELECT * FROM segments WHERE run_id=? ORDER BY start', (row['id'],))]
                 value['events'] = [json.loads(x['payload']) for x in db.execute('SELECT payload FROM events WHERE run_id=? ORDER BY rowid', (row['id'],))]
-                task = db.execute('SELECT path FROM tasks WHERE id=?', (row['task_id'],)).fetchone()
-                value['path'] = task['path'] if task else ''
+                matches = [(path, meta) for path, meta in task_index if meta.get('task_id') == row['task_id']]
+                value['path'], value['context_error'] = '', None
+                if index_error:
+                    value['context_error'] = 'task-index-unavailable'
+                elif len(matches) != 1:
+                    value['context_error'] = 'task-identity-ambiguous' if matches else 'task-not-synced'
+                else:
+                    path, _ = matches[0]
+                    value['path'] = path.relative_to(self.store.root).as_posix()
+                    if '.conflicted-' in path.name or list(path.parent.glob(path.stem + '.conflicted-*.md')):
+                        value['context_error'] = 'task-conflict-needs-resolution'
+                value['blocking_conflicts'] = self.blocking_conflicts(db, row['id']) if row['state'] == 'stopped' else []
                 runs.append(value)
             registry = Ledger(self.workspace).registry
             return {'version': self.version(db), 'server_now': stamp(self.clock()), 'runs': runs,
@@ -352,7 +424,7 @@ class TaskTracker:
             run = db.execute('SELECT * FROM runs WHERE id=?', (run_id,)).fetchone()
             require(run and run['state'] == 'stopped', 'stop-before-preview')
             require(not run['receipt'], 'run-already-approved')
-            require(not db.execute('SELECT 1 FROM runs WHERE review=1').fetchone(), 'resolve-time-conflicts-first')
+            require(not self.blocking_conflicts(db, run_id), 'resolve-time-conflicts-first')
             path, task, work_id, task_ref = self.bind(run['task_id'], db)
             segments = [dict(x) for x in db.execute('SELECT * FROM segments WHERE run_id=? ORDER BY start', (run_id,))]
             correction = json.loads(run['correction']) if run['correction'] else None

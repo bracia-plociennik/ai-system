@@ -114,7 +114,10 @@ class Application:
         require(path.startswith(PREFIX) or path.startswith('/.task-create/tasks/'), 'not-found', 404)
         principal, cookie = self.authenticate(headers)
         if method == 'GET':
-            require(path == PREFIX + 'state', 'not-found', 404)
+            require(path in {PREFIX + 'state', PREFIX + 'tasks/done'}, 'not-found', 404)
+            if path == PREFIX + 'tasks/done':
+                require(not parsed.query, 'unknown-query', 400)
+                return 200, self.tracker.store.completed(), {}
             query = parse_qs(parsed.query)
             require(set(query) <= {'task_id'}, 'unknown-query', 400)
             state = self.tracker.state(query.get('task_id', [None])[0])
