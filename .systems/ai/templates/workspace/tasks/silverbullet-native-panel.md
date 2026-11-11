@@ -309,7 +309,7 @@ function nativeTasks.workspace(kind, mode)
     end,
     presentation=mode == "table" and {mode="table",limit=10000,columns={
       {attribute="fieldRef",label="Zadanie",type="ref"},{attribute="clientValue",label="Klient",type="text"},{attribute="projectValue",label="Projekt",type="text"},{attribute="author",label="Autor",type="text"},{attribute="priority",label="Priorytet",type="text"},{attribute="scheduled",label="Termin",type="text"},{attribute="completed_at",label="Ukończono",type="text"},
-    }} or {mode="tree",limit=10000,hierarchy={field="name",separator=SEP},expandAll=true,row={primary="displayTitle",label="displayTitle",description="detail",icon=function(row) return row.isFolder and "folder" or (row.completed and "check-circle" or "circle") end,decorations=function(row) return row.conflicted and {{text="Konflikt plików",icon="alert-triangle",position="right"}} or {} end}},
+    }} or {mode="tree",limit=10000,hierarchy={field="name",separator=SEP},expandAll=true,row={primary="displayTitle",label="displayTitle",description="detail",cssClass=function(row) return row.isFolder and "" or "native-task-row" end,icon=function(row) return row.isFolder and "folder" or (row.completed and "check-circle" or "circle") end,decorations=function(row) return row.conflicted and {{text="Konflikt plików",icon="alert-triangle",position="right"}} or {} end}},
     filter={inline=true,fields={title=4,client=2,project=2,author=1,scheduled=1}},
     onSelect=function(row) if not row.isFolder then editor.navigate(row.sourceName) end end,
     actions={
@@ -321,13 +321,17 @@ function nativeTasks.workspace(kind, mode)
   }
 end
 function nativeTasks.sidebar()
-  local result = {{name="add",title="ADD — dodaj zadanie",icon="plus",action="add"},{name="index",title="DASHBOARD",icon="home",page="index"}}
-  for _, item in ipairs({{"daily","DAILY","calendar"},{"due","DUE","calendar"},{"all","ALL","list"},{"done","DONE","check-circle"}}) do
+  local result = {
+    {name="add",title="ADD",icon="plus",action="add"},
+    {name="index",title="DASHBOARD",icon="home",page="index"},
+  }
+  for _, item in ipairs({{"daily","DAILY","calendar"},{"due","DUE","calendar"},{"done","DONE","check-circle"}}) do
     table.insert(result,{name=item[1],title=item[2],icon=item[3],page=routes[item[1]],count=#nativeTasks.rows(item[1],false)})
   end
-  table.insert(result,{name="lists-heading",title="My Lists",icon="folder"})
-  for _, category in ipairs(categories) do table.insert(result,{name=category,title=category:upper(),icon="list",page=routes[category],count=#nativeTasks.rows(category,false)}) end
   local pending = 0;for _, run in ipairs(array(state().runs)) do if (run.state == "stopped" or run.state == "conflict") and not run.receipt then pending=pending+1 end end
+  table.insert(result,{name="wep",title="WEP",icon="clock",page="views/tracker",count=pending})
+  table.insert(result,{name="all",title="ALL",icon="list",page=routes.all,count=#nativeTasks.rows("all",false)})
+  for _, category in ipairs(categories) do table.insert(result,{name=category,title=category:upper(),icon="list",page=routes[category],count=#nativeTasks.rows(category,false)}) end
   for _, run in ipairs(array(state().runs)) do
     if run.state == "active" or run.state == "paused" then
       local page=not run.context_error and run.path and run.path:gsub("%.md$", "") or "views/tracker"
@@ -335,7 +339,6 @@ function nativeTasks.sidebar()
       table.insert(result,{name="timer-" .. run.id,title=(run.state == "active" and "Trwa pomiar: " or "Pauza: ") .. title,description=core.duration(core.elapsed(js.tojs(run))),icon="clock",page=page})
     end
   end
-  table.insert(result,{name="wep",title="Timer i szkice WEP",icon="clock",page="views/tracker",count=pending})
   return result
 end
 function nativeTasks.dashboard()
@@ -613,4 +616,34 @@ core.connect(bridge(),js.tojs(function(reason) event.dispatch(reason == "clock" 
 
 ```space-style
 html { --editor-width: 1200px; }
+/* Native task leaves only; retain full labels in the data and accessible text. */
+#sb-main .sb-inline-view .sb-nav-row.native-task-row {
+  flex-wrap: nowrap;
+}
+#sb-main .sb-inline-view .sb-nav-row.native-task-row .sb-nav-primary {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#sb-main .sb-inline-view .sb-nav-row.native-task-row .sb-nav-description {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+#sb-main .sb-inline-view:has(.native-task-row) {
+  container-type: inline-size;
+}
+@container (max-width: 38rem) {
+  #sb-main .sb-inline-view .sb-nav-row.native-task-row {
+    display: grid;
+    grid-template-columns: 1.2rem 1.2rem minmax(0, 1fr) auto;
+  }
+  #sb-main .sb-inline-view .sb-nav-row.native-task-row .sb-nav-description {
+    grid-column: 3 / -1;
+    white-space: normal;
+  }
+  #sb-main .sb-inline-view .native-task-row .sb-row-actions {
+    grid-column: 4;
+    grid-row: 1;
+  }
+}
 ```
