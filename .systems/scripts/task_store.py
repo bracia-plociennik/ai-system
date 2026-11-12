@@ -137,6 +137,11 @@ def segment(value, fallback):
     return value or fallback
 
 
+def task_filename(title):
+    # A trailing .eu/.tech is interpreted as a document extension by SilverBullet.
+    return re.sub(r'\.([A-Za-z0-9]+)$',r'-\1',segment(title,'Zadanie'))+'.md'
+
+
 def safe_path(root,path):
     root=Path(root);path=Path(path)
     if not path.is_relative_to(root) or any(p.is_symlink() for p in (path,*path.parents)):
@@ -378,7 +383,7 @@ class TaskStore:
                     raise ValueError('closed-task-source-cannot-be-recreated')
                 body=None;expected=files[str(target.relative_to(self.task_dir))]['sha256']
             else:
-                target=self.task_dir/segment(value['client'],'bez-klienta')/segment(value['project'],'bez-projektu')/(segment(value['title'],'Zadanie')+'.md')
+                target=self.task_dir/segment(value['client'],'bez-klienta')/segment(value['project'],'bez-projektu')/task_filename(value['title'])
                 if target.exists():raise ValueError('task-title-path-collision')
                 value={**value,**new_identity()};body=self.render(value);expected=None
                 if len(body.encode())>MAX_TASK:raise ValueError('task-exceeds-size-bound')
@@ -461,7 +466,7 @@ class TaskStore:
                 key=identity(value)
                 if key and key in existing:skipped+=1;continue
                 directory=self.task_dir/segment(value['client'],'bez-klienta')/segment(value['project'],'bez-projektu')
-                target=safe_path(self.task_dir,directory/(segment(value['title'],'Zadanie')+'.md'))
+                target=safe_path(self.task_dir,directory/task_filename(value['title']))
                 if target.exists():raise ValueError('task-title-path-collision')
                 # O_EXCL prevents overwriting a task created by the UI concurrently.
                 data=self.render({**value, **new_identity()})

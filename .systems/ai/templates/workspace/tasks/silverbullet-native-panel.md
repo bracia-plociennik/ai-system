@@ -121,6 +121,7 @@ local function array(value) return type(value) == "table" and value or {} end
 local function state() return js.tolua(core.snapshot()) end
 local function prefs() return js.tolua(core.preferences()) end
 local function refresh() event.dispatch("nativeTasks:views", {}) end
+local function openTask(page) editor.navigate(page) end
 local function choose(label, options)
   local selected = editor.filterBox(label, options)
   return selected and selected.value or nil
@@ -177,8 +178,8 @@ function nativeTasks.rows(kind, includeDone)
   local pages = query[[from p = index.pages() where p.type == "task" select p]]
   for _, row in ipairs(nativeTasks.normalise(pages, today)) do
     local actionable = row.category ~= "DELETE" and row.status ~= "cancelled" and row.status ~= "canceled" and row.status ~= "archived" and row.status ~= "deleted"
-    local selected = kind == "all" or kind == "dashboard" or (kind == "done" and row.completed) or (kind == "daily" and actionable and row.scheduled == today) or (kind == "due" and actionable and row.scheduled ~= "" and row.scheduled ~= today) or (row.category:lower() == kind and (kind == "delete" or actionable or row.completed))
-    if selected and (kind == "done" or includeDone or not row.completed) then
+    local selected = kind == "all" or kind == "dashboard" or (kind == "done" and row.completed and row.category ~= "DELETE") or (kind == "daily" and actionable and row.scheduled == today) or (kind == "due" and actionable and row.scheduled ~= "" and row.scheduled ~= today) or (row.category:lower() == kind and (kind == "delete" or actionable or row.completed))
+    if selected and (kind == "delete" or kind == "done" or includeDone or not row.completed) then
       row.sourceName = row.name
       row.displayTitle = (row.completed and "DONE " or "") .. (row.author == "ai" and "AI " or "") .. row.title
       local short = #row.displayTitle > 24 and row.displayTitle:sub(1,24) .. "…" or row.displayTitle
@@ -235,7 +236,22 @@ function nativeTasks.add(context)
   local scheduled = prompt("Termin YYYY-MM-DD (puste = bez terminu)",context.scheduled or "")
   if scheduled == nil then return end
   local created = js.tolua(core.createTask(js.tojs({title=title,category=category,client=client,project=project,scheduled=scheduled})))
-  editor.navigate(created.page)
+  openTask(created.page)
+end
+
+function nativeTasks.trash(returnPage)
+  local page, source, meta = task()
+  if page:find(".conflicted-",1,true) then error("Najpierw rozstrzygnij konflikt plików zadania.") end
+  local original = js.tolua(api.metadataValues(source))
+  if original.category == "delete" then return end
+  for _, run in ipairs(array(state().runs)) do
+    if meta.task_id and run.task_id == meta.task_id and (run.state == "active" or run.state == "paused") then
+      error("Zakończ pomiar przyciskiem Stop przed przeniesieniem zadania do DELETE.")
+    end
+  end
+  if not editor.confirm("Przenieść zadanie do DELETE?\n\nPlik, treść, ID, autor i historia pozostaną zachowane. Możesz przywrócić zadanie, zmieniając jego kategorię.") then return end
+  apply(page,function(before) return api.metadataEdit(before,js.tojs({changes={category="delete"},expected={category=original.category}})) end)
+  if returnPage then editor.navigate(returnPage) end
 end
 
 function nativeTasks.editMetadata()
@@ -270,7 +286,8 @@ function nativeTasks.complete(action, returnPage)
 end
 
 function nativeTasks.timer(action)
-  local page = task()
+  local page, source = task()
+  if action == "start" and js.tolua(api.metadataValues(source)).category == "delete" then error("Przywróć kategorię zadania z DELETE przed rozpoczęciem pomiaru.") end
   if action == "stop" and not editor.confirm("Czy na pewno zakończyć ten pomiar?\n\nStop zakończy bieżący pomiar i otworzy szkic WEP. Tego pomiaru nie można później wznowić — kolejny Start rozpocznie nowy pomiar.\n\nJeśli chcesz później kontynuować ten sam pomiar, anuluj i wybierz Pauza.\n\nStatus zadania się nie zmieni. Wpis WEP zapisze się dopiero po osobnym zatwierdzeniu.") then return end
   local receipt = js.tolua(core.dispatch(action,page))
   if action == "stop" and receipt.run_id then nativeTasks.openDraft(receipt.run_id) end
@@ -311,12 +328,13 @@ function nativeTasks.workspace(kind, mode)
       {attribute="fieldRef",label="Zadanie",type="ref"},{attribute="clientValue",label="Klient",type="text"},{attribute="projectValue",label="Projekt",type="text"},{attribute="author",label="Autor",type="text"},{attribute="priority",label="Priorytet",type="text"},{attribute="scheduled",label="Termin",type="text"},{attribute="completed_at",label="Ukończono",type="text"},
     }} or {mode="tree",limit=10000,hierarchy={field="name",separator=SEP},expandAll=true,row={primary="displayTitle",label="displayTitle",description="detail",cssClass=function(row) return row.isFolder and "" or "native-task-row" end,icon=function(row) return row.isFolder and "folder" or (row.completed and "check-circle" or "circle") end,decorations=function(row) return row.conflicted and {{text="Konflikt plików",icon="alert-triangle",position="right"}} or {} end}},
     filter={inline=true,fields={title=4,client=2,project=2,author=1,scheduled=1}},
-    onSelect=function(row) if not row.isFolder then editor.navigate(row.sourceName) end end,
+    onSelect=function(row) if not row.isFolder then openTask(row.sourceName) end end,
     actions={
       {icon="plus",label="Dodaj zadanie tutaj",when=function(row) return row.isFolder and contexts[row.name] ~= nil end,run=function(row) nativeTasks.add(contexts[row.name]) end},
-      {icon="file-text",label="Otwórz zadanie",when=function(row) return not row.isFolder end,run=function(row) editor.navigate(row.sourceName) end},
-      {icon="check",label="Oznacz jako DONE",when=function(row) return not row.isFolder and not row.completed and not row.conflicted end,run=function(row) editor.navigate(row.sourceName);nativeTasks.complete("complete",routes[kind]) end},
-      {icon="rotate-ccw",label="Cofnij DONE",when=function(row) return not row.isFolder and row.completed and not row.conflicted end,run=function(row) editor.navigate(row.sourceName);nativeTasks.complete("undo",routes[kind]) end},
+      {icon="file-text",label="Otwórz zadanie",when=function(row) return not row.isFolder end,run=function(row) openTask(row.sourceName) end},
+      {icon="check",label="Oznacz jako DONE",when=function(row) return not row.isFolder and not row.completed and not row.conflicted end,run=function(row) openTask(row.sourceName);nativeTasks.complete("complete",routes[kind]) end},
+      {icon="rotate-ccw",label="Cofnij DONE",when=function(row) return not row.isFolder and row.completed and not row.conflicted end,run=function(row) openTask(row.sourceName);nativeTasks.complete("undo",routes[kind]) end},
+      {icon="trash-2",label="Przenieś do DELETE",when=function(row) return not row.isFolder and not row.conflicted and row.category ~= "DELETE" end,run=function(row) openTask(row.sourceName);nativeTasks.trash(routes[kind]) end},
     },
   }
 end
@@ -580,13 +598,16 @@ view.define {
     for _,run in ipairs(array(context.runs)) do if run.task_id == meta.task_id and (run.state == "active" or run.state == "paused") then own=run;break end end
     local result={{name="state",title=own and (own.state == "active" and "Trwa pomiar" or "Pauza") or "Timer",description=own and core.duration(core.elapsed(js.tojs(own))) or "Brak otwartego pomiaru",icon="clock"}}
     if not context.busy then
-      if not own then table.insert(result,{name="start",title="Start",timer="start",icon="play"})
-      else
+      local deleted=js.tolua(api.metadataValues(source)).category == "delete"
+      if not own and not deleted then table.insert(result,{name="start",title="Start",timer="start",icon="play"})
+      elseif own then
         table.insert(result,{name="pause-resume",title=own.state == "active" and "Pauza" or "Wznów",timer=own.state == "active" and "pause" or "resume",icon=own.state == "active" and "pause" or "play"})
         table.insert(result,{name="stop",title="Stop",timer="stop",icon="square"})
       end
-      table.insert(result,{name="complete",title=info.done and "Cofnij DONE" or "Oznacz jako DONE",status=info.done and "undo" or "complete",icon=info.done and "rotate-ccw" or "check"})
+      if not deleted then table.insert(result,{name="complete",title=info.done and "Cofnij DONE" or "Oznacz jako DONE",status=info.done and "undo" or "complete",icon=info.done and "rotate-ccw" or "check"}) end
       table.insert(result,{name="metadata",title="Kategoria i termin",edit=true,icon="edit"})
+      local values=js.tolua(api.metadataValues(source))
+      if values.category ~= "delete" then table.insert(result,{name="trash",title="Przenieś do DELETE",trash=true,icon="trash-2"}) end
     end
     for _,run in ipairs(array(context.runs)) do
       if run.task_id == meta.task_id and (run.state == "stopped" or run.state == "conflict") and not run.receipt then table.insert(result,{name=run.id,title=run.review == 1 and "Rozstrzygnij czas" or "Otwórz szkic WEP",description=core.duration(core.elapsed(js.tojs(run))),run=run.id,icon="file-text"}) end
@@ -596,7 +617,7 @@ view.define {
   end,
   presentation={mode="list",row={primary="title",description="description",icon=function(row) return row.icon end}},
   onSelect=function(row)
-    if row.timer then nativeTasks.timer(row.timer) elseif row.status then nativeTasks.complete(row.status) elseif row.edit then nativeTasks.editMetadata() elseif row.run then nativeTasks.openDraft(row.run) end
+    if row.timer then nativeTasks.timer(row.timer) elseif row.status then nativeTasks.complete(row.status) elseif row.edit then nativeTasks.editMetadata() elseif row.trash then nativeTasks.trash() elseif row.run then nativeTasks.openDraft(row.run) end
   end,
 }
 
@@ -610,6 +631,7 @@ command.define {name="Zadania: Stop",run=function() nativeTasks.timer("stop") en
 command.define {name="Zadania: DONE",run=function() nativeTasks.complete("complete") end}
 command.define {name="Zadania: Cofnij DONE",run=function() nativeTasks.complete("undo") end}
 command.define {name="Zadania: Kategoria i termin",run=function() nativeTasks.editMetadata() end}
+command.define {name="Zadania: Przenieś do DELETE",run=function() nativeTasks.trash() end}
 command.define {name="Zadania: Szkice WEP",run=function() editor.navigate("views/tracker") end}
 core.connect(bridge(),js.tojs(function(reason) event.dispatch(reason == "clock" and "nativeTasks:clock" or "nativeTasks:state",{}) end))
 ```
@@ -629,6 +651,11 @@ html { --editor-width: 1200px; }
   flex-shrink: 0;
   white-space: nowrap;
 }
+#sb-main .sb-inline-view .sb-nav-row.native-task-row .sb-nav-chip {
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
 #sb-main .sb-inline-view:has(.native-task-row) {
   container-type: inline-size;
 }
@@ -639,7 +666,13 @@ html { --editor-width: 1200px; }
   }
   #sb-main .sb-inline-view .sb-nav-row.native-task-row .sb-nav-description {
     grid-column: 3 / -1;
+    grid-row: 2;
     white-space: normal;
+  }
+  #sb-main .sb-inline-view .sb-nav-row.native-task-row .sb-nav-chip {
+    grid-column: 3 / -1;
+    grid-row: 3;
+    justify-self: start;
   }
   #sb-main .sb-inline-view .native-task-row .sb-row-actions {
     grid-column: 4;

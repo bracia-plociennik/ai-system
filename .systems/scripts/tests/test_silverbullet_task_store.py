@@ -36,6 +36,21 @@ class StoreTests(unittest.TestCase):
   self.assertNotIn('task_id:',s.render(value));files,*_=s.write_candidates([value]);data=frontmatter(files[0].read_text())
   self.assertEqual(str(uuid.UUID(data['task_id'])),data['task_id']);self.assertIn('created_at',data)
   original=files[0].read_bytes();self.assertEqual(s.write_candidates([value])[1],1);self.assertEqual(files[0].read_bytes(),original)
+ def test_domain_title_creates_navigable_filename_without_changing_title(self):
+  s=TaskStore.load(self.w)
+  for n,title in enumerate(['Dodaj stronę example.eu','Przenieś example.pl na example.tech','Opis v2.12.1']):
+   value={**self.candidate(), 'title':title,'source_session_date':'2026-11-12','source_plan_item_id':str(n)}
+   files,*_=s.write_candidates([value]);p=files[0];meta=frontmatter(p.read_text())
+   self.assertNotRegex(p.name,r'\.[A-Za-z0-9]+\.md$');self.assertEqual(meta['title'],title);self.assertTrue(meta['task_id']);self.assertEqual(meta['author'],'ai')
+   before=p.read_bytes();self.assertEqual(s.write_candidates([value])[1],1);self.assertEqual(p.read_bytes(),before)
+ def test_prepared_domain_title_and_normalized_collision_preserve_existing_task(self):
+  s=TaskStore.load(self.w);value={**self.candidate(),'title':'strona example.eu','source_session_date':'2026-11-12','source_plan_item_id':'prepared'}
+  plan=s.prepare_candidates([value]);self.assertTrue(plan['entries'][0]['path'].endswith('/strona example-eu.md'))
+  files,reused=s.write_prepared(plan);self.assertEqual(reused,[]);before=files[0].read_bytes();self.assertEqual(frontmatter(before.decode())['title'],value['title'])
+  collision={**value,'title':'strona example-eu','source_plan_item_id':'collision'}
+  with self.assertRaisesRegex(ValueError,'task-title-path-collision'):s.prepare_candidates([collision])
+  with self.assertRaisesRegex(ValueError,'task-title-path-collision'):s.write_candidates([collision])
+  self.assertEqual(files[0].read_bytes(),before)
  def test_ai_creator_is_forced_and_dedup_preserves_human_creator(self):
   s=TaskStore.load(self.w);value=self.candidate(source_session_date='2026-11-01',source_plan_item_id='creator')
   files,*_=s.write_candidates([{**value,'author':'human'}]);path=files[0]
