@@ -25,7 +25,7 @@ Completed zero-exit evidence is required. Failures, interruption, timeout, dupli
 checks, tampering and wrong keys reject reuse. Changed identities execute again with a recorded
 invalidation reason. Unknown checks and runtime consumers with undeclared reference closure
 execute fresh. `git diff --check` always executes. HEAD is provenance, not an input by itself.
-Full, CI and updater validation execute fresh in V1; no cache can weaken publication/install gates.
+Full and CI validation execute fresh; no cache can weaken publication gates. Official updater executes fresh changed-file tests plus integrity/conflict/compatibility guards under validation-profiles.md; unknown coverage stops without an automatic full run.
 Fresh current-diff semantic review remains mandatory even when every eligible script is reused.
 
 ## Product Versus Runtime Artifacts

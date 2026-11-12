@@ -30,7 +30,8 @@ Green scripts do not equal `PASS`. A semantic mismatch, unresolved blocker, mate
 | Ordinary implementation quality review | findings-first diff/code review and product tests | only targeted checks for changed AI System contracts or runtime artifacts |
 | Distillation or capture quality | source, privacy, evidence, and state review | only applicable capture, privacy, or state checks |
 | Checkpoint | checkpoint completeness and resume-safety review first | explicit profile selected through `validation-profiles.md` when applicable |
-| CI, final system verification, upstream update, or high-impact system maintenance | full current-diff semantic review first | explicit `full` profile |
+| CI, final system verification, or high-impact system maintenance | full current-diff semantic review first | explicit `full` profile |
+| Official upstream update | reviewed source delta, integrity/conflicts/compatibility | changed-file tests; explicit full only on request; unknown coverage stops |
 
 Running an implementation tool or generating an artifact must not automatically trigger broad AI System validation. Broad validation belongs to an applicable quality or checkpoint route after semantic and product review.
 

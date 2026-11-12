@@ -552,6 +552,8 @@ def monthly_report(records: list[dict], target: date, config: dict[str, str]) ->
 
 
 def calorie_report(records: list[dict], target: date, config: dict[str, str]) -> dict:
+    if configured_weekday_targets(config) is not None:
+        return weekday_calorie_report(records, target, config)
     weekly = positive(decimal(config.get("weekly_calorie_budget"), "weekly_calorie_budget", True), "weekly_calorie_budget")
     training = positive(decimal(config.get("training_day_standard"), "training_day_standard", True), "training_day_standard")
     rest = positive(decimal(config.get("rest_day_standard"), "rest_day_standard", True), "rest_day_standard")
@@ -619,6 +621,113 @@ def calorie_report(records: list[dict], target: date, config: dict[str, str]) ->
     return result
 
 
+def configured_weekday_targets(config: dict[str, str]) -> list[Decimal] | None:
+    """Opt-in owner plan, Monday first; workout never changes these targets."""
+    raw = config.get("calorie_weekday_targets_json", "").strip()
+    if not raw:
+        return None
+    try:
+        values = json.loads(raw)
+    except (ValueError, TypeError):
+        stop("Invalid calorie_weekday_targets_json")
+    if not isinstance(values, list) or len(values) != 7:
+        stop("calorie_weekday_targets_json requires seven Monday-Sunday targets")
+    if any(isinstance(value, bool) or not isinstance(value, (int, float)) for value in values):
+        stop("Weekday calorie targets must be numeric")
+    targets = [decimal(value, "weekday calorie target", True) for value in values]
+    if any(not value.is_finite() or value <= 0 for value in targets):
+        stop("Weekday calorie targets must be finite and positive")
+    weekly = decimal(config.get("weekly_calorie_budget"), "weekly_calorie_budget", True)
+    if not weekly.is_finite() or sum(targets) != weekly:
+        stop("Weekday targets must sum to weekly_calorie_budget")
+    return targets
+
+
+def default_calorie_target(config: dict[str, str], target: date, profile: str | None) -> Decimal | None:
+    targets = configured_weekday_targets(config)
+    if targets is not None:
+        return targets[target.weekday()]
+    return decimal(config.get(f"{profile}_day_standard"), "day standard") if profile in MACRO_PROFILES else None
+
+
+def weekday_calorie_report(records: list[dict], target: date, config: dict[str, str]) -> dict:
+    """As-of morning projection: completed days actual, remaining days planned.
+
+    Missing intake is never zero. Equal observations deduplicate; conflicting or
+    unallocated aggregates cannot produce a complete balance. Explicit canonical
+    plans override defaults without rewriting any historical record.
+    """
+    from personal_ops_aggregates_v4 import budget_facts
+    targets = configured_weekday_targets(config)
+    monday = target - timedelta(days=target.weekday())
+    normalized = []
+    for row in records_available_as_of(records, target):
+        if "aggregate_observations" in row:
+            normalized.append(row)
+        elif row.get("closure_date") and str(row.get("previous_day_actual_calories_representative", "")).strip():
+            first = row.get("review_window_start") or row["closure_date"]
+            last = row.get("review_window_end") or row["closure_date"]
+            normalized.append({**row, "aggregate_observations": [{"metric": "calories", "period_start": first,
+                "period_end": last, "value": json_number(nonnegative(row["previous_day_actual_calories_representative"], "intake", True)),
+                "approximate": str(row.get("previous_day_actual_calories_approximate", "")).lower() == "true"}]})
+    facts, coverage = budget_facts(normalized, monday, target - timedelta(days=1), "calories")
+    amounts = [decimal(fact["value"], "intake", True) for fact in facts]
+    if any(not value.is_finite() or value < 0 for value in amounts):
+        stop("Calorie intake must be finite and non-negative")
+    actual = sum(amounts, Decimal("0"))
+    weekly = sum(targets)
+    available = records_available_as_of(records, target)
+    today = next((row for row in available if str(row.get("session_date")) == target.isoformat()), {})
+    planned_today = numeric_property(today, "planned_calories_representative")
+    if planned_today is None:
+        planned_today = targets[target.weekday()]
+    if not planned_today.is_finite() or planned_today <= 0:
+        stop("Today's planned calories must be finite and positive")
+    future_plan = planned_today + sum(targets[target.weekday()+1:])
+    projected = actual + future_plan
+    complete = coverage["status"] == "complete"
+    food_records = [row for row in available if str(row.get("session_date")) != target.isoformat()]
+    food_records.append({**today, "session_date": target.isoformat(), "planned_calories_representative": json_number(planned_today)})
+    return {
+        "calorie_plan_mode": "weekday-fixed-v1", "weekly_budget": json_number(weekly),
+        "week_start": monday.isoformat(), "week_end": (monday+timedelta(days=6)).isoformat(),
+        "weekday_targets": [json_number(value) for value in targets],
+        "coverage": coverage, "known_calorie_subtotal": json_number(actual) if facts or complete else None,
+        "actual_consumed": json_number(actual) if facts or complete else None,
+        "remaining_before_today": json_number(weekly-actual) if complete else None,
+        "planned_today": json_number(planned_today), "remaining_planned": json_number(future_plan),
+        "projected_week_total": json_number(projected) if complete else None,
+        "projected_overrun": json_number(max(Decimal("0"), projected-weekly)) if complete else None,
+        "plan_deviation_to_date": json_number(actual-sum(targets[:target.weekday()])) if complete else None,
+        "remaining_after_today": json_number(weekly-actual-planned_today) if complete else None,
+        "projected_after_today": json_number(actual+planned_today) if complete else None,
+        "remaining_days_inclusive": 7-target.weekday(), "remaining_days_after_today": 6-target.weekday(),
+        "mechanical_limit_inclusive": None, "mechanical_limit_after_today": None,
+        "common_sense_limit_after_today": None, "unbalanced_balance": None,
+        "training_day_standard": json_number(decimal(config.get("training_day_standard"), "training standard")),
+        "rest_day_standard": json_number(decimal(config.get("rest_day_standard"), "rest standard")),
+        "minimum_daily_calories": json_number(decimal(config.get("minimum_daily_calories"), "minimum")),
+        "approximate": any(fact.get("approximate", False) for fact in facts),
+        "food_schedule": food_schedule_report(food_records, target, config),
+    }
+
+
+def calorie_summary_lines(weekly: dict) -> list[str]:
+    """Shared exact labels for Daily, Weekly and other read-only consumers."""
+    def display(value):
+        if value is None:
+            return "nieznane"
+        raw = format_decimal(Decimal(str(value)))
+        integer, dot, fraction = raw.partition(".")
+        return f"{int(integer):,}".replace(",", " ") + ("," + fraction if dot else "")
+    overrun = weekly.get("projected_overrun")
+    return [f"Plan: {display(weekly.get('weekly_budget'))} kcal.",
+            f"Podjedzono: {format_decimal(Decimal(str(weekly['actual_consumed']))).replace('.', ',') if weekly.get('actual_consumed') is not None else 'nieznane'} kcal.",
+            f"Pozostało: {display(weekly.get('remaining_before_today'))} kcal.",
+            f"Prognoza: {display(weekly.get('projected_week_total'))} kcal.",
+            f"Przekroczenie: {'+' if overrun is not None and overrun > 0 else ''}{display(overrun)} kcal."]
+
+
 def calculate(workspace: Path, target: date) -> dict:
     config = parse_frontmatter(workspace / CONFIG_RELATIVE)
     records = records_available_as_of(load_official_records(workspace), target)
@@ -629,8 +738,10 @@ def calculate_from_records(records: list[dict], target: date, config: dict[str, 
     """Shared arithmetic for advisory callers; never writes a synthetic check-in."""
     records = records_available_as_of(records, target)
     if planned is not None:
-        records = [row for row in records if str(row.get("session_date")) != target.isoformat()]
-        records.append({**planned, "session_date": target.isoformat()})
+        matched = any(str(row.get("session_date")) == target.isoformat() for row in records)
+        records = [{**row, **planned} if str(row.get("session_date")) == target.isoformat() else row for row in records]
+        if not matched:
+            records.append({**planned, "session_date": target.isoformat()})
     return {
         "report_date": target.isoformat(),
         "privacy": "private-sensitive",

@@ -2,8 +2,8 @@
   "authority": "none",
   "contract": "task-efficiency-v1",
   "files": {
-    ".systems/ai/core/execution-efficiency.md": "e17929bed9eafc45541173f15839bf25d7a3a0d1468130b20537ca830a0c07df",
-    ".systems/ai/core/response-contract.md": "e61cb9b7b2287775c9b08af01058fad86bb527b796a76f12d8f98a420a48422c",
+    ".systems/ai/core/execution-efficiency.md": "564e7de08c7188c07293e9e1216cc034a9a213ca239c02eaf2353dfbc4ce84aa",
+    ".systems/ai/core/response-contract.md": "47b81137d8ba69483204c1d0a2851c9caed805ee81d8f5730ae011d4dc1ab76b",
     ".systems/ai/core/task-efficiency.md": "c3d518b2ac114f10485e6124c7a18c81cbdffbf93a0b6f5cb72b04d81b0dfc51",
     ".systems/scripts/task_efficiency.py": "1bd798206e9ad66b2e729ae5b5f6925776d88f1eb3231c0f0a18ca975907718d"
   },

@@ -3,6 +3,7 @@ set -euo pipefail
 
 dry_run=0
 skip_validation=0
+validation_mode="targeted"
 remote_arg=""
 branch_arg=""
 
@@ -15,6 +16,7 @@ Options:
   --remote <name>        remote to fetch from (default: upstream tracking remote or origin)
   --branch <name>        branch to merge (default: upstream tracking branch or main)
   --skip-validation      skip post-update validators; unsafe for final PASS
+  --validation <mode>    targeted (default) or explicitly requested full
   -h, --help             show this help
 EOF
 }
@@ -38,6 +40,11 @@ while [[ $# -gt 0 ]]; do
     --skip-validation)
       skip_validation=1
       shift
+      ;;
+    --validation)
+      validation_mode="${2:-}"
+      [[ "$validation_mode" == targeted || "$validation_mode" == full ]] || { echo "Expected targeted or full"; exit 2; }
+      shift 2
       ;;
     -h|--help)
       usage
@@ -248,6 +255,7 @@ if [[ "$dry_run" -eq 1 ]]; then
   exit 0
 fi
 
+update_base="$(git rev-parse HEAD)"
 git fetch "$remote" "$branch"
 if [[ "$(git rev-parse HEAD)" == "$(git rev-parse FETCH_HEAD)" ]]; then
   echo "Upstream relation: equal"
@@ -265,7 +273,11 @@ fi
 if [[ "$skip_validation" -eq 1 ]]; then
   echo "WARNING: validation skipped. This update result is not eligible for final PASS."
 else
-  .systems/scripts/validate-ai-system --profile full
+  if [[ "$validation_mode" == full ]]; then
+    .systems/scripts/validate-ai-system --profile full
+  else
+    python3 -B .systems/scripts/updater_validation.py --base "$update_base" --target HEAD
+  fi
 fi
 
 echo "update-from-upstream completed."

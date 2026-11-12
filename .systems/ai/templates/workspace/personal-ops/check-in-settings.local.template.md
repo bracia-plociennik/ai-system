@@ -11,6 +11,9 @@ monthly_buffer:
 daily_spending_pace:
 monthly_budget_currency: PLN
 weekly_calorie_budget:
+# Optional seven numeric targets, Monday-Sunday; sum equals weekly_calorie_budget.
+# Empty retains training/rest defaults. Explicit check-in targets take precedence.
+calorie_weekday_targets_json:
 training_day_standard:
 rest_day_standard:
 minimum_daily_calories:

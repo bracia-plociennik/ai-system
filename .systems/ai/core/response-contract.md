@@ -259,3 +259,7 @@ Use end-of-task-capture.md for the full uncaptured conversation interval and per
 ## AFK/ZW owner report
 
 Under execution-modes.md AFK/ZW owner absence, give short factual progress without live questions. Queue true unresolved matters in the existing task/work record while continuing proven independent approved work. The final handoff waits until no authorized runnable/running work or useful independent preparation remains; show delivered effect, checks/limits, actual agent decisions, blocked scope and one prioritized owner queue with recommendation, alternative, impact and unlocked next step. An empty queue is valid. Exhausted executable scope is not proof of complete DoD, and a stopped session is not background progress.
+
+## Weekday calorie reporting override
+
+When calorie_plan_mode is weekday-fixed-v1, replace the legacy calorie/mechanical-limit list with the calculator's five lines Plan, Podjedzono, Pozostało, Prognoza, Przekroczenie. Preserve coverage warnings, approximations, all six macro rows and subjective/Life Alignment fields. Defaults depend on weekdays, macro shares on training/rest. Do not redistribute later targets to erase overruns. This exception changes only calorie presentation, not spending or canonical facts.

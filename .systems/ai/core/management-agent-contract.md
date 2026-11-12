@@ -258,3 +258,7 @@ For actual task-local Sprint selection use `sprint-iteration.md` and the compati
 ## Independent judgment
 
 Use `.systems/ai/core/critical-judgment.md` for proportional, evidence-based assessment of the goal, proposed mechanism and the agent's own advice. State material objections directly with basis, consequence and a feasible recommendation; acknowledge sound ideas and uncertainty. Preserve existing authority and phase gates, short routine answers, informed permitted tradeoffs and applicable quiet handling of independent minor debt.
+
+## Official updater verification
+
+The updater defaults to reviewed changed-file test selection, fresh integrity/conflict/compatibility guards and failing on unmapped product changes. It does not automatically run full QA. Explicit --validation full remains available. Full source/release/CI gates and formal final-owner-yes remain separate.
