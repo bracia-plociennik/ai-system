@@ -45,7 +45,7 @@ for term in \
   'final validation evidence' \
   'check-validator-smoke-tests' \
   'Default `.systems/scripts/validate-ai-system` with no arguments is the `standard` profile' \
-  'CI and `.systems/scripts/update-from-upstream` must call `.systems/scripts/validate-ai-system --profile full` explicitly' \
+  'Official update-from-upstream defaults to source-bound changed-file test selection' \
   '--profile full' \
   '--profile standard' \
   '--profile scoped --checks' \
@@ -95,7 +95,7 @@ require_ref ".systems/ai/core/update-from-upstream.md" 'validation-profiles\.md'
 require_ref ".systems/ai/core/update-from-upstream.md" 'full' "upstream update full guidance"
 
 require_ref ".github/workflows/ai-system-validate.yml" '\.systems/scripts/validate-ai-system --profile full' "CI explicit full validation"
-require_ref ".systems/scripts/update-from-upstream" '\.systems/scripts/validate-ai-system --profile full' "upstream update explicit full validation"
+require_ref ".systems/scripts/update-from-upstream" 'updater_validation.py --base' "upstream update changed-source validation"
 require_ref ".systems/scripts/check-required-artifacts" 'validation-profiles\.md' "required core contract"
 require_ref ".systems/scripts/check-required-artifacts" 'check-validation-profiles' "required validator"
 require_ref ".systems/scripts/check-validator-smoke-tests" 'validation-profile' "smoke coverage"

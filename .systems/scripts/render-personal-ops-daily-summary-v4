@@ -459,7 +459,11 @@ def render(properties: dict, rows: list[dict], budget_report: dict, workspace: P
     monthly = budget_report["monthly_spending"]
     weekly = budget_report["weekly_calories"]
     lines.extend(["", *render_monthly_budget(properties, monthly)])
-    lines.extend([
+    if weekly.get("calorie_plan_mode") == "weekday-fixed-v1":
+        from personal_ops_aggregates_v4 import script_module
+        lines.extend(["", "### Budżet kalorii", *script_module("calculate-personal-ops-budgets").calorie_summary_lines(weekly)])
+    else:
+        lines.extend([
         "", "### Budżet kalorii",
         f"- Tygodniowy limit: `{number(weekly.get('weekly_budget'))} kcal`",
         f"- Zjedzone przed dzisiaj: `{number(weekly.get('actual_consumed'))} kcal`",
@@ -470,7 +474,7 @@ def render(properties: dict, rows: list[dict], budget_report: dict, workspace: P
         f"- Mechanicznie na pozostały dzień: `{number(weekly.get('mechanical_limit_after_today'))} kcal`",
         f"- Limit zdroworozsądkowy: `{number(weekly.get('common_sense_limit_after_today'))} kcal`",
         f"- Niewyrównane saldo: `{number(weekly.get('unbalanced_balance'))} kcal`",
-    ])
+        ])
     if weekly.get("approximate"):
         lines.append("- Status danych: `wartości przybliżone`")
     activity = []

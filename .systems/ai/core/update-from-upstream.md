@@ -23,7 +23,7 @@ It must not modify private runtime workspaces, `ai-system-workspaces.md`, client
 
 `update-workspace` may create only missing neutral workspace directories, routers, README files, and template files inside an existing selected workspace. It must not overwrite existing files.
 
-After a non-dry-run upstream merge, `update-from-upstream` runs `.systems/scripts/validate-ai-system --profile full`. See `.systems/ai/core/validation-profiles.md`; skipped validation is not final evidence.
+After a non-dry-run upstream merge, `update-from-upstream` defaults to reviewed changed-file tests through `updater_validation.py`, plus fresh integrity, conflict and installed-version compatibility checks. Unmapped product changes stop with an explicit coverage error; the updater never silently skips them or starts full QA automatically. `--validation full` is an explicit option. See `.systems/ai/core/validation-profiles.md`; skipped validation is not final evidence, and a successful targeted update is not full release/Phase8 QA.
 
 ## Recommended Update Flow
 

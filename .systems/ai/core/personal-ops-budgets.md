@@ -114,3 +114,11 @@ After a successful daily check-in write or update, the route must:
 ## Privacy
 
 Budget and calorie outputs are owner-only, `private-sensitive`, and chat-only unless separately approved. They must not enter sanitized trends, Dreaming Mode, memory, System Insights, External Memory, skills, or public/project artifacts.
+
+## Optional weekday calorie plan
+
+calorie_weekday_targets_json is an optional seven-number JSON array, Monday–Sunday. All targets must be finite, positive and sum exactly to weekly_calorie_budget. Empty preserves the legacy workout/rest defaults. Explicit canonical daily targets override the default; a training/rest profile selects schedule and macro shares independently. New defaults are proposals, never evidence of consumption.
+
+weekday-fixed-v1 uses elapsed dated calorie facts once, preserving missing/aggregate coverage and owner-selected values. Remaining pool = weekly budget minus actual before today. Projection = actual plus today's explicit/default target plus remaining weekday targets. Overrun = max(0, projection minus budget). No automated compensation or calorie redistribution; mechanical/common-sense remainder recommendations stay unavailable in this mode. Partial current-day intake is not treated as a completed day. Missing data prevents a complete balance/projection.
+
+The compact read-only view has exactly five labelled lines: Plan; Podjedzono; Pozostało; Prognoza; Przekroczenie. Dates/coverage, approximations and missingness remain available alongside. An empty elapsed period is complete, not an assertion of zero consumption today. Historical canonical check-ins are not rewritten by settings changes.

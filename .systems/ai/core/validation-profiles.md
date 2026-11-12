@@ -87,9 +87,9 @@ isolated full-smoke fixtures; it does not admit private runtime or change test m
 
 `standard` runs the complete AI System validator chain except embedded `check-validator-smoke-tests`. Use it only when validation routing marks the broad chain applicable.
 
-`full` runs the complete standard chain and `check-validator-smoke-tests`. Use it after semantic current-diff review for checkpoint validation, major distillation, final system verification, CI, release confidence, upstream updates, and high-impact system changes. Classify impact by changed behavior, risk, and cross-contract reach, not by a file path alone. A local typo in a core document is not automatically high-impact; a small-looking approval, privacy, schema, security, or routing change can be.
+`full` runs the complete standard chain and `check-validator-smoke-tests`. Use it after semantic current-diff review for checkpoint validation, major distillation, final system verification, CI, release confidence, explicitly requested full upstream verification, and high-impact system changes. Classify impact by changed behavior, risk, and cross-contract reach, not by a file path alone. A local typo in a core document is not automatically high-impact; a small-looking approval, privacy, schema, security, or routing change can be.
 
-CI and `.systems/scripts/update-from-upstream` must call `.systems/scripts/validate-ai-system --profile full` explicitly.
+CI retains explicit full validation. Official update-from-upstream defaults to source-bound changed-file test selection through updater_validation.py, retaining integrity, conflict and installed compatibility guards. Unknown coverage stops without an automatic full run. An explicit --validation full remains available; targeted updater success is not full release or Phase8 QA.
 
 If `AI_SYSTEM_SKIP_SMOKE_TESTS=1` is used with `--profile full`, the result is not eligible for final validation evidence unless the owner explicitly accepts the residual risk.
 
