@@ -97,6 +97,19 @@ def render(properties: dict, workspace: Path) -> str:
         for slice_item in block.get("work_slices", []) or [{}]:
             item = item_map.get(str(slice_item.get("item_id", "")), {})
             lines.append(f"| {block.get('date', '')} | {block.get('block_id', '')} | {item.get('title', slice_item.get('label', 'bufor'))} | {item.get('definition_of_done', '')} | {item.get('deadline', '—')} |")
+    settings = workspace / "personal-ops/check-ins/check-in-settings.local.md"
+    if settings.is_file():
+        from personal_ops_aggregates_v4 import script_module
+        calculator = script_module("calculate-personal-ops-budgets")
+        config = calculator.parse_frontmatter(settings)
+        targets = calculator.configured_weekday_targets(config)
+        if targets is not None:
+            monday = date.fromisoformat(str(properties["plan_week_start"]))
+            lines.extend(["", "## Plan kalorii — poniedziałek–niedziela", "", "| Data | Plan kcal |", "| --- | ---: |"])
+            for offset in range(7):
+                day = monday + timedelta(days=offset)
+                lines.append(f"| {day.isoformat()} | {calculator.format_decimal(targets[day.weekday()])} |")
+            lines.append(f"Plan tygodnia: {calculator.format_decimal(sum(targets))} kcal. Profil trening/rest nie zmienia tych celów.")
     lines.extend(["", "## Kandydaci z Working Dump"])
     candidates = working_dump_candidates(workspace, properties)
     if candidates:

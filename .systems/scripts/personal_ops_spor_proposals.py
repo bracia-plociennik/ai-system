@@ -383,6 +383,7 @@ def schedule_plan(config: dict, plan: dict | None, target: date, mode: str) -> d
                 warnings.append(f"Capacity conflict {day}:{block.get('block_id')}; OSNR is included in the block")
         day_items = [item for item in items if item.get("planned_date") == day.isoformat() or any(a.get("date") == day.isoformat() for a in item.get("planned_allocations", []))]
         output.append({"date": day.isoformat(), "profile": profile, "profile_label": LABELS[2],
+                       "proposed_calorie_target": budget_module().json_number(budget_module().default_calorie_target(config, day, profile)),
                        "profile_question": "Confirm training/rest and changes to availability", "local_schedule": rows,
                        "approved_work_blocks": capacity, "approved_items": day_items,
                        "work_minutes": sum(b.get("planned_minutes", 0) for b in blocks) if blocks else None,
@@ -529,7 +530,7 @@ def prepare(workspace: Path, target: date, scheduled: bool = False, seen_ids: tu
     schedule = schedule_plan(config, plan, target, mode)
     proposed_profile = schedule["days"][0]["profile"]
     # Explicitly labeled default proposal, not an assertion about today's training.
-    planned = {"planned_calories_representative": config.get(f"{proposed_profile}_day_standard"),
+    planned = {"planned_calories_representative": budget_module().json_number(budget_module().default_calorie_target(config, target, proposed_profile)),
                "planned_training_type": "full_body" if proposed_profile == "training" else "rest"}
     if proposed_profile == "training":
         planned.update(planned_training_start="13:00", planned_training_end="15:00")
